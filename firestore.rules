@@ -1,0 +1,82 @@
+rules_version = '2';
+
+// قواعد الأمان - الإصدار 1
+// الهوية تأتي من Custom Token تصدره دالة /api/login (المرحلة 2) وفيه:
+//   role : student | servant | admin
+//   code : كود المخدوم أو معرّف الخادم
+//   perm : full | attend (صلاحية الخادم)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function role()     { return signedIn() ? request.auth.token.get('role', '') : ''; }
+    function myCode()   { return signedIn() ? request.auth.token.get('code', '') : ''; }
+    function isAdmin()  { return role() == 'admin'; }
+    function isStaff()  { return role() == 'admin' || role() == 'servant'; }
+    function isFull()   { return isAdmin() || (role() == 'servant' && request.auth.token.get('perm', '') == 'full'); }
+    function isMe(code) { return role() == 'student' && myCode() == code; }
+
+    // ---- المخدومون وسجلاتهم ----
+    match /students/{code} {
+      allow read: if isStaff() || isMe(code);
+      allow create, update, delete: if isFull();
+
+      match /bibleReadings/{id} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /dailyLogs/{date} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /sheetSubmissions/{subjectId} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+    }
+
+    // ---- الحضور: سجل لكل شخص في كل يوم ----
+    match /attendance/{id} {
+      allow read: if isStaff() || (role() == 'student' && resource.data.code == myCode());
+      allow create, update: if isStaff();
+      allow delete: if isFull();
+    }
+
+    // ---- نوتة الخادم: صاحبها فقط، والأدمن يقرأ ----
+    match /servantLogs/{servantId}/{doc=**} {
+      allow read: if (role() == 'servant' && myCode() == servantId) || isAdmin();
+      allow write: if role() == 'servant' && myCode() == servantId;
+    }
+
+    // ---- المواد والخطة والإعدادات ----
+    match /subjects/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+    match /masterPlan/{id} {
+      allow read: if isStaff();
+      allow write: if isFull();
+    }
+    match /settings/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- الخدام: الأدمن فقط (الدخول يتم عبر الـ API بصلاحيات الخادم) ----
+    match /servants/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // ---- سجل العمليات: يُكتب فقط ولا يُعدَّل ----
+    match /audit/{id} {
+      allow create: if isStaff();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // أي مسار آخر مرفوض
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

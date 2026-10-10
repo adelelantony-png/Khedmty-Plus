@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e3799">
+<title>تسجيل الدخول | خدمتي برو - إعداد الخدام</title>
+<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1e3799;--primary-dark:#0c2461;--accent:#0984e3;--success:#00b894;--danger:#d63031;--gold:#fdcb6e;--dark:#2d3436}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;color:var(--dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:linear-gradient(145deg,#0c2461 0%,#1e3799 45%,#0984e3 100%);overflow:hidden;position:relative}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;animation:drift 18s ease-in-out infinite alternate}
+.b1{width:340px;height:340px;background:#74b9ff;top:-90px;left:-80px}
+.b2{width:300px;height:300px;background:var(--gold);bottom:-110px;right:-60px;opacity:.3;animation-duration:22s}
+.b3{width:220px;height:220px;background:#6c5ce7;top:55%;left:55%;opacity:.3;animation-duration:26s}
+@keyframes drift{to{transform:translate(40px,-30px) scale(1.15)}}
+.wrap{width:100%;max-width:410px;position:relative;z-index:1;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.card{background:rgba(255,255,255,.97);border-radius:28px;padding:34px 28px 26px;box-shadow:0 25px 60px rgba(7,20,70,.45);position:relative}
+.logo{width:84px;height:84px;margin:-76px auto 14px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--accent));border:5px solid #fff;box-shadow:0 10px 26px rgba(30,55,153,.5),0 0 0 8px rgba(253,203,110,.35)}
+.logo svg{width:40px;height:40px}
+h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary)}
+.sub{margin:4px 0 22px;text-align:center;font-size:13px;color:#636e72;font-weight:500}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#2f3b52}
+.input{display:flex;align-items:center;gap:8px;background:#f4f6fb;border:2px solid transparent;border-radius:14px;padding:0 14px;transition:.2s}
+.input:focus-within{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(9,132,227,.12)}
+.input svg{width:18px;height:18px;flex:none;color:#8a96ab}
+.input input{flex:1;min-width:0;border:0;background:transparent;outline:0;padding:14px 0;font:inherit;font-size:15px;font-weight:500;color:var(--dark)}
+.eye{border:0;background:none;cursor:pointer;padding:6px;color:#8a96ab;display:grid;place-items:center}
+.eye:hover{color:var(--primary)}
+.row{display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px;font-size:13px}
+.row label{display:flex;align-items:center;gap:7px;cursor:pointer;color:#4b5870;font-weight:500}
+.row input{accent-color:var(--primary);width:16px;height:16px}
+.btn{width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:16px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 10px 22px rgba(9,132,227,.35);transition:.2s}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 28px rgba(9,132,227,.45)}
+.btn:disabled{opacity:.7;cursor:wait}
+.err{display:none;margin-bottom:14px;padding:11px 14px;border-radius:12px;background:#ffeaea;border-right:4px solid var(--danger);color:#a82224;font-size:13px;font-weight:700}
+.err.show{display:block;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hint{margin:16px 0 0;text-align:center;font-size:12px;color:#8a96ab;line-height:1.7}
+.verse{margin-top:18px;text-align:center;color:rgba(255,255,255,.92);font-size:15px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.25)}
+.verse small{display:block;font-weight:500;font-size:12px;opacity:.8;margin-top:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<main class="wrap">
+  <div class="card" style="margin-top:42px">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M6 8h12"/></svg>
+    </div>
+    <h1>خدمتي برو</h1>
+    <p class="sub">خدمة إعداد الخدام &middot; بوابة الدخول الموحدة</p>
+
+    <div id="err" class="err" role="alert"></div>
+
+    <form id="form" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="u">اسم المستخدم أو الكود</label>
+        <div class="input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+          <input id="u" type="text" placeholder="اكتب اسمك أو كودك" autofocus>
+        </div>
+      </div>
+      <div class="field">
+        <label for="p">كلمة المرور / رقم الهاتف</label>
+        <div class="input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="p" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="eye" id="eye" aria-label="إظهار كلمة المرور">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
+      </div>
+      <button type="submit" id="btn" class="btn">تسجيل الدخول</button>
+    </form>
+    <p class="hint">نسيت بياناتك؟ تواصل مع أمين الخدمة.</p>
+  </div>
+  <div class="verse">اعبدوا الرب بفرح<small>مزمور ١٠٠: ٢</small></div>
+</main>
+
+<script>
+'use strict';
+// مفاتيح التخزين: مطابقة تماماً لما تستخدمه servant-dashboard.html
+const K = { servants:'my_church_servants', members:'my_church_class', adminPwd:'my_church_admin_pwd',
+            active:'my_church_active_user', fail:'khedmety_login_fail_count', lock:'khedmety_login_lock_until' };
+const DEFAULT_ADMIN_PWD = '1234567';          // تعمل فقط قبل أن يضبط الأدمن كلمة مرور خاصة
+const ADMIN_NAMES = ['admin', 'الأدمن', 'عادل جورج'];
+const $ = id => document.getElementById(id);
+
+const readList = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const norm = s => String(s ?? '').trim().toLowerCase();
+// تحويل الأرقام العربية والفارسية إلى إنجليزية ثم إبقاء الأرقام فقط
+const digits = s => String(s ?? '')
+  .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+  .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+  .replace(/\D/g, '');
+const isAdminRec = s => s && (s.role === 'admin' || s.permission === 'admin');
+
+async function sha(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ---------- قفل المحاولات (نفس مفاتيح اللوحة) ----------
+const lockLeft = () => Math.max(0, (parseInt(localStorage.getItem(K.lock) || '0') || 0) - Date.now());
+function recordFail() {
+  const n = (parseInt(localStorage.getItem(K.fail) || '0') || 0) + 1;
+  localStorage.setItem(K.fail, n);
+  if (n % 5 === 0) {
+    const mins = Math.min(2 * Math.pow(2, Math.floor(n / 5) - 1), 30);
+    localStorage.setItem(K.lock, Date.now() + mins * 60000);
+  }
+  return n;
+}
+const resetFails = () => { localStorage.removeItem(K.fail); localStorage.removeItem(K.lock); };
+
+// ---------- مقارنات متسامحة ----------
+// الكود: يتجاهل الحالة والمسافات والأرقام العربية والأصفار البادئة
+const sameCode = (a, b) => {
+  if (a == null || a === '' || b == null || b === '') return false;
+  if (norm(a) === norm(b)) return true;
+  const x = digits(a), y = digits(b);
+  return !!x && !!y && x.replace(/^0+/, '') === y.replace(/^0+/, '');
+};
+
+// الهاتف: يقبل أكثر من اسم حقل، ويقارن آخر 10 أرقام (يتجاوز +20 والصفر الأول)
+const getPhone = r => r.phone ?? r.mobile ?? r.tel ?? r.phoneNumber ?? r.fone ?? r.whatsapp ?? '';
+const samePhone = (rec, p) => {
+  const want = digits(getPhone(rec)), got = digits(p);
+  return want.length >= 6 && got.length >= 6 && want.slice(-10) === got.slice(-10);
+};
+
+// التحقق: الهاتف أولاً، ثم كلمة المرور المشفرة إن وُجدت
+async function checkMember(rec, p) {
+  if (samePhone(rec, p)) return true;
+  if (rec.passwordHash && (await sha(p)) === rec.passwordHash) return true;
+  return false;
+}
+
+// ---------- التحقق ----------
+async function authenticate(u, p) {
+  const un = norm(u);
+
+  // 1) الأدمن
+  if (ADMIN_NAMES.some(n => norm(n) === un)) {
+    const saved = localStorage.getItem(K.adminPwd) || '';
+    const ok = saved ? (await sha(p)) === saved : p === DEFAULT_ADMIN_PWD;
+    if (ok) return { kind: 'staff', role: 'admin',
+      user: { name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin' } };
+    return null;   // اسم الأدمن لا يمر عبر مسار الخدام إطلاقاً
+  }
+
+  // 2) الخدام (سجلات الأدمن مستبعدة حتى لا تتجاوز كلمة مرور الأدمن)
+  for (const s of readList(K.servants)) {
+    if (isAdminRec(s)) continue;
+    if ((norm(s.name) === un || sameCode(s.code, u)) && await checkMember(s, p))
+      return { kind: 'staff', role: 'servant', user: s };
+  }
+
+  // 3) المخدومون
+  for (const m of readList(K.members)) {
+    if ((sameCode(m.code, u) || sameCode(m.id, u) || norm(m.name) === un) && await checkMember(m, p))
+      return { kind: 'student', rec: m };
+  }
+
+  // 4) خادم خلفي (Vercel + Supabase). يُتجاهل بهدوء إن لم يكن موجوداً (مثل file://)
+  try {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000);
+    const r = await fetch('/api/login', { method: 'POST', signal: ctl.signal,
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+    clearTimeout(t);
+    if (r.ok && (r.headers.get('content-type') || '').includes('json')) {
+      const res = await r.json();
+      if (res && res.success && res.user) {
+        if (res.role === 'servant' || res.role === 'admin') return { kind: 'staff', role: res.role, user: res.user };
+        return { kind: 'student', rec: { code: res.user.id, name: res.user.name || u, stage: res.user.level } };
+      }
+    }
+  } catch (e) { /* لا خادم خلفي */ }
+  return null;
+}
+
+// ---------- بدء الجلسة ----------
+function startSession(r, remember) {
+  localStorage.removeItem(K.active); sessionStorage.removeItem(K.active);
+  ['student_code', 'student_name', 'student_level'].forEach(k => localStorage.removeItem(k));
+  if (r.kind === 'staff') {
+    const user = Object.assign({}, r.user, { loginTimestamp: Date.now() });
+    delete user.passwordHash;                                    // لا نكرر الهاش داخل الجلسة
+    (remember ? localStorage : sessionStorage).setItem(K.active, JSON.stringify(user));
+    localStorage.setItem('user_role', r.role);
+    location.href = 'servant-dashboard.html';
+  } else {
+    const m = r.rec;
+    localStorage.setItem('student_code', m.code ?? m.id ?? '');
+    localStorage.setItem('student_name', m.name || '');
+    localStorage.setItem('student_level', m.stage || 'الفرقة الأولى');
+    localStorage.setItem('user_role', 'student');
+    location.href = 'student.html';
+  }
+}
+
+// ---------- الواجهة ----------
+const err = $('err'), btn = $('btn');
+function showErr(msg) { err.textContent = msg; err.classList.remove('show'); void err.offsetWidth; err.classList.add('show'); }
+function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جاري التحقق…' : 'تسجيل الدخول'; }
+
+$('eye').addEventListener('click', () => { const i = $('p'); i.type = i.type === 'password' ? 'text' : 'password'; });
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  err.classList.remove('show');
+  const left = lockLeft();
+  if (left) return showErr(`تم إيقاف المحاولات مؤقتاً. حاول بعد ${Math.ceil(left / 60000)} دقيقة.`);
+  const u = $('u').value.trim(), p = $('p').value.trim();
+  if (!u || !p) return showErr('من فضلك أدخل اسم المستخدم وكلمة المرور.');
+
+  setBusy(true);
+  let redirecting = false;
+  try {
+    const r = await authenticate(u, p);
+    if (r) { resetFails(); redirecting = true; startSession(r, $('remember').checked); return; }
+    const n = recordFail();
+    showErr(lockLeft() ? 'تكررت المحاولات الخاطئة، تم إيقاف الدخول مؤقتاً.'
+                       : `بيانات الدخول غير صحيحة. المحاولات المتبقية قبل الإيقاف: ${5 - (n % 5)}`);
+  } catch (ex) {
+    console.error(ex);
+    showErr('حدث خطأ غير متوقع، حاول مرة أخرى.');
+  } finally {
+    if (!redirecting) setBusy(false);
+  }
+});
+</script>
+</body>
+</html>

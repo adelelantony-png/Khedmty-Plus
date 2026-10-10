@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قارئ الكتاب المقدس - الخطة السنوية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #2d3436; padding-bottom: 40px; }
+        .reader-card { max-width: 840px; margin: 20px auto; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 25px; border: 1px solid #edf2f7; }
+        .reader-header { border-bottom: 2px solid #edf2f7; padding-bottom: 15px; margin-bottom: 15px; }
+        .filter-box { background-color: #f1f5f9; border-radius: 14px; padding: 15px; margin-bottom: 15px; }
+        .plan-alert { background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706; border-radius: 12px; padding: 12px 16px; margin-bottom: 15px; }
+        .verse-box { font-size: 1.25rem; line-height: 2.3; color: #1a202c; text-align: justify; }
+        .verse-num { display: inline-block; font-size: 0.85rem; font-weight: 700; color: #1e3c72; background-color: #e0e7ff; border-radius: 6px; padding: 2px 7px; margin: 0 5px 0 3px; vertical-align: middle; user-select: none; }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5">
+    <div class="reader-card">
+        
+        <div class="d-flex justify-content-between align-items-center reader-header">
+            <a href="student.html" id="btn-home" class="btn btn-outline-secondary btn-sm fw-bold">
+                <i class="fa-solid fa-arrow-right me-1"></i> العودة للرئيسية
+            </a>
+            <h4 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-book-bible me-2"></i>الكتاب المقدس</h4>
+            <div class="d-flex gap-1">
+                <button class="btn btn-sm btn-outline-primary" onclick="changeFontSize(1)" title="تكبير الخط"><i class="fa-solid fa-plus"></i></button>
+                <button class="btn btn-sm btn-outline-primary" onclick="changeFontSize(-1)" title="تصغير الخط"><i class="fa-solid fa-minus"></i></button>
+            </div>
+        </div>
+
+        <!-- شريط توضيح قراءة الخطة السنوية لليوم -->
+        <div id="planBanner" class="plan-alert d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> قراءة اليوم المقررة</span>
+                <div class="fw-bold text-dark fs-6" id="planBannerTitle">جاري فحص الخطة...</div>
+            </div>
+            <button id="btnMarkRead" class="btn btn-success fw-bold px-3 py-2" onclick="markCurrentChapterRead()">
+                <i class="fa-solid fa-check me-1"></i> أتممت قراءة اليوم (+5 نقاط ⭐)
+            </button>
+        </div>
+
+        <div class="filter-box">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-muted">السفر:</label>
+                    <select id="bookSelect" class="form-select" onchange="onBookChanged()"></select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-muted">الإصحاح:</label>
+                    <select id="chapterSelect" class="form-select" onchange="renderVerses()"></select>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-outline-primary btn-sm fw-bold" onclick="prevChapter()"><i class="fa-solid fa-chevron-right me-1"></i> الإصحاح السابق</button>
+            <h5 id="chapterHeaderTitle" class="fw-bold text-secondary mb-0"></h5>
+            <button class="btn btn-outline-primary btn-sm fw-bold" onclick="nextChapter()">الإصحاح التالي <i class="fa-solid fa-chevron-left ms-1"></i></button>
+        </div>
+
+        <div id="versesArea" class="verse-box p-4 bg-white border rounded-4 shadow-sm min-vh-50">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <div>جاري تحميل نص الكتاب المقدس...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- استدعاء ملفات البيانات المحلية لتعمل محلياً دون أي حاجة لسيرفر -->
+<script src="bible-data.js"></script>
+
+<script>
+const studentCode = localStorage.getItem('student_code') || 'demo';
+(function(){ var r = localStorage.getItem('user_role'); var b = document.getElementById('btn-home'); if (b && (r === 'admin' || r === 'servant')) b.href = 'servant-dashboard.html'; })();
+// ترحيل قراءات قديمة كانت تُحفظ بدون كود الدارس (مرة واحدة)
+(function migrateLegacyBible(){
+  try{
+    var c = localStorage.getItem('student_code'); if(!c) return;
+    var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
+    Object.keys(r).forEach(function(k){
+      if(/^\d{1,2}-\d{1,2}$/.test(k)){
+        var nk = k + '_' + c;
+        if(!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
+        delete r[k]; changed = true;
+      }
+    });
+    if(changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
+  }catch(e){}
+})();
+let bibleData = [];
+let currentFontSize = 1.25;
+
+const urlParams = new URLSearchParams(window.location.search);
+let targetBookName = urlParams.get('book');
+let targetChapter = parseInt(urlParams.get('chapter')) || 1;
+let targetChapterEnd = parseInt(urlParams.get('chapter_end')) || targetChapter;
+
+const arabicBookNames = {
+    "Genesis": "التكوين", "Exodus": "الخروج", "Leviticus": "اللاويين", "Numbers": "العدد", "Deuteronomy": "التثنية",
+    "Joshua": "يشوع", "Judges": "القضاة", "Ruth": "راعوث", "1 Samuel": "صموئيل الأول", "2 Samuel": "صموئيل الثاني",
+    "1 Kings": "الملوك الأول", "2 Kings": "الملوك الثاني", "1 Chronicles": "أخبار الأيام الأول", "2 Chronicles": "أخبار الأيام الثاني",
+    "Ezra": "عزرا", "Nehemiah": "نحميا", "Esther": "أستير", "Job": "أيوب", "Psalms": "المزامير",
+    "Proverbs": "الأمثال", "Ecclesiastes": "الجامعة", "Song of Solomon": "نشيد الأنشاد", "Isaiah": "إشعياء",
+    "Jeremiah": "إرميا", "Lamentations": "مراثي إرميا", "Ezekiel": "حزقيال", "Daniel": "دانيال",
+    "Hosea": "هوشع", "Joel": "يوئيل", "Amos": "عاموس", "Obadiah": "عوبديا", "Jonah": "يونان",
+    "Micah": "ميخا", "Nahum": "ناحوم", "Habakkuk": "حبقوق", "Zephaniah": "صفنيا", "Haggai": "حجي",
+    "Zechariah": "زكريا", "Malachi": "ملاخي",
+    "Matthew": "إنجيل متى", "Mark": "إنجيل مرقس", "Luke": "إنجيل لوقا", "John": "إنجيل يوحنا",
+    "Acts": "سفر أعمال الرسل", "Romans": "رومية", "1 Corinthians": "كورنثوس الأولى", "2 Corinthians": "كورنثوس الثانية",
+    "Galatians": "غلاطية", "Ephesians": "أفسس", "Philippians": "فيلبي", "Colossians": "كولوسي",
+    "1 Thessalonians": "تسالونيكي الأولى", "2 Thessalonians": "تسالونيكي الثانية", "1 Timothy": "تيموثاوس الأولى",
+    "2 Timothy": "تيموثاوس الثانية", "Titus": "تيطس", "Philemon": "فليمون", "Hebrews": "العبرانيين",
+    "James": "يعقوب", "1 Peter": "بطرس الأولى", "2 Peter": "بطرس الثانية", "1 John": "يوحنا الأولى",
+    "2 John": "يوحنا الثانية", "3 John": "يوحنا الثالثة", "Jude": "يهوذا", "Revelation": "سفر الرؤيا"
+};
+
+// 1. فحص وتحديد قراءة اليوم تلقائياً من الخطة
+async function detectTodayPlan() {
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curDay = now.getDate();
+    const planKey = `${curMonth}-${curDay}`;
+
+    let planData = window.BIBLE_PLAN_DATA || null;
+
+    if (!planData) {
+        try {
+            const res = await fetch('bible_plan.json');
+            if (res.ok) planData = await res.json();
+        } catch(e) {}
+    }
+
+    const bannerTitle = document.getElementById('planBannerTitle');
+    const localLogs = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    const isCompleted = !!localLogs[`${planKey}_${studentCode}`];
+
+    if (planData && planData[planKey]) {
+        const item = planData[planKey];
+        bannerTitle.textContent = `${item.reading} (${item.book} من إصحاح ${item.chapter} إلى ${item.chapter_end || item.chapter})`;
+
+        // إذا لم يكن السفر محدداً من الرابط مسبقاً، نأخذه من قراءة اليوم تلقائياً
+        if (!targetBookName) {
+            targetBookName = item.book;
+            targetChapter = item.chapter;
+            targetChapterEnd = item.chapter_end || item.chapter;
+        }
+    } else {
+        bannerTitle.textContent = "قراءة وتأمل حر";
+    }
+
+    if (isCompleted) {
+        const btnMark = document.getElementById('btnMarkRead');
+        btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
+        btnMark.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> أتممت قراءة هذا اليوم بنجاح ✔️';
+    }
+}
+
+// 2. تحميل نصوص الكتاب المقدس
+async function loadBibleData() {
+    // التحقق المحلي أولاً (يعمل 100% بدون سيرفر)
+    if (window.BIBLE_STATIC_DATA && Array.isArray(window.BIBLE_STATIC_DATA) && window.BIBLE_STATIC_DATA.length > 0) {
+        bibleData = window.BIBLE_STATIC_DATA;
+        setupBooksDropdown();
+        return;
+    }
+
+    // التحقق عبر fetch في حالة العمل بسيرفر
+    try {
+        const response = await fetch('./bible.json');
+        if (!response.ok) throw new Error('HTTP Status ' + response.status);
+        bibleData = await response.json();
+        setupBooksDropdown();
+    } catch (err) {
+        document.getElementById('versesArea').innerHTML = `
+            <div class="alert alert-warning text-center" style="line-height: 1.8;">
+                <strong>تعذر قراءة نصوص الكتاب المقدس:</strong><br>
+                تأكد من وجود ملف <code>bible-data.js</code> في نفس المجلد إذا كنت تفتح الصفحة مباشرة بدون سيرفر،<br>
+                أو تأكد من وجود ملف <code>bible.json</code> إذا كنت تشغلها على سيرفر محلي (Live Server).
+            </div>`;
+    }
+}
+
+function setupBooksDropdown() {
+    const bookSelect = document.getElementById('bookSelect');
+    if (!bookSelect || !bibleData.length) return;
+    bookSelect.innerHTML = '';
+    let selectedIndex = 0;
+
+    bibleData.forEach((book, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        const arName = arabicBookNames[book.name] || book.name;
+        option.textContent = `${index + 1}. ${arName}`;
+
+        // مطابقة ذكية لتحديد سفر اليوم المخصص
+        if (targetBookName) {
+            const cleanTarget = targetBookName.replace('سفر ', '').replace('إنجيل ', '').trim();
+            const cleanAr = arName.replace('سفر ', '').replace('إنجيل ', '').trim();
+            if (cleanAr === cleanTarget || arName === targetBookName || book.name === targetBookName) {
+                selectedIndex = index;
+            }
+        }
+        bookSelect.appendChild(option);
+    });
+
+    bookSelect.selectedIndex = selectedIndex;
+    onBookChanged(true);
+}
+
+function onBookChanged(isInitial = false) {
+    const bookIndex = document.getElementById('bookSelect').value;
+    const book = bibleData[bookIndex];
+    if (!book) return;
+    const chapterSelect = document.getElementById('chapterSelect');
+    chapterSelect.innerHTML = '';
+
+    book.chapters.forEach((_, cIdx) => {
+        const option = document.createElement('option');
+        option.value = cIdx;
+        option.textContent = `الإصحاح ${cIdx + 1}`;
+        chapterSelect.appendChild(option);
+    });
+
+    if (isInitial && targetChapter > 0 && targetChapter <= book.chapters.length) {
+        chapterSelect.selectedIndex = targetChapter - 1;
+    } else {
+        chapterSelect.selectedIndex = 0;
+    }
+
+    renderVerses();
+}
+
+function renderVerses() {
+    const bookIndex = document.getElementById('bookSelect').value;
+    const chapIndex = document.getElementById('chapterSelect').value;
+    const book = bibleData[bookIndex];
+    if (!book) return;
+    const verses = book.chapters[chapIndex] || [];
+    const arName = arabicBookNames[book.name] || book.name;
+
+    let titleText = `${arName} — الإصحاح ${parseInt(chapIndex) + 1}`;
+    if (targetChapterEnd > targetChapter) {
+        titleText += ` (مقرر اليوم: الإصحاحات ${targetChapter} إلى ${targetChapterEnd})`;
+    }
+    document.getElementById('chapterHeaderTitle').textContent = titleText;
+
+    let html = '';
+    verses.forEach((vText, vIdx) => {
+        html += `<span class="verse-num">${vIdx + 1}</span>${vText} `;
+    });
+
+    document.getElementById('versesArea').innerHTML = html || '<div class="text-center text-muted py-4">لا توجد آيات متوفرة لهذا الإصحاح.</div>';
+    window.scrollTo({ top: 180, behavior: 'smooth' });
+}
+
+function nextChapter() {
+    const chapSelect = document.getElementById('chapterSelect');
+    if (chapSelect.selectedIndex < chapSelect.options.length - 1) {
+        chapSelect.selectedIndex++;
+        renderVerses();
+    } else {
+        const bookSelect = document.getElementById('bookSelect');
+        if (bookSelect.selectedIndex < bookSelect.options.length - 1) {
+            bookSelect.selectedIndex++;
+            onBookChanged();
+        }
+    }
+}
+
+function prevChapter() {
+    const chapSelect = document.getElementById('chapterSelect');
+    if (chapSelect.selectedIndex > 0) {
+        chapSelect.selectedIndex--;
+        renderVerses();
+    } else {
+        const bookSelect = document.getElementById('bookSelect');
+        if (bookSelect.selectedIndex > 0) {
+            bookSelect.selectedIndex--;
+            onBookChanged();
+            chapSelect.selectedIndex = chapSelect.options.length - 1;
+            renderVerses();
+        }
+    }
+}
+
+function changeFontSize(delta) {
+    currentFontSize = Math.max(1, Math.min(2.2, currentFontSize + (delta * 0.15)));
+    document.getElementById('versesArea').style.fontSize = `${currentFontSize}rem`;
+}
+
+// دالة توثيق قراءة اليوم وحساب النقاط
+async function markCurrentChapterRead() {
+    const btnMark = document.getElementById('btnMarkRead');
+    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التسجيل...';
+    btnMark.disabled = true;
+
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curDay = now.getDate();
+    const planKey = `${curMonth}-${curDay}`;
+
+    const bookIndex = document.getElementById('bookSelect').value;
+    const chapNum = parseInt(document.getElementById('chapterSelect').value) + 1;
+    const book = bibleData[bookIndex];
+    const bookTitle = arabicBookNames[book.name] || book.name;
+
+    // 1. حفظ القراءة محلياً في سجلات المتصفح فوراً
+    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    localReadings[`${planKey}_${studentCode}`] = {
+        code: String(studentCode),
+        book: bookTitle,
+        chapter: chapNum,
+        date: now.toISOString(),
+        completed: 1
+    };
+    localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
+
+    // إضافة 5 نقاط رصيد للمخدوم
+    let studentPoints = parseInt(localStorage.getItem('student_points')) || 0;
+    localStorage.setItem('student_points', studentPoints + 5);
+
+    // 2. محاولة الحفظ على خادم السيرفر السحابي
+    try {
+        await fetch('/api/mark_plan_read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: studentCode,
+                month: curMonth,
+                day: curDay,
+                reading: `${bookTitle} ${chapNum}`
+            })
+        });
+    } catch (e) {
+        console.warn("تم الحفظ محلياً لتعذر الاتصال بالسيرفر:", e);
+    }
+
+    btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
+    btnMark.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> أتممت قراءة اليوم بنجاح (+5 نقاط ⭐)';
+    btnMark.disabled = false;
+}
+
+window.onload = async function() {
+    await detectTodayPlan();
+    await loadBibleData();
+};
+</script>
+</body>
+</html>
