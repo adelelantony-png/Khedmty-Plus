@@ -1724,9 +1724,8 @@ function exportFollowupToExcel() {
 
         let currentRole = currentUser ? currentUser.role : 'servant';
         let currentPermission = currentUser ? (currentUser.permission || 'full') : 'view_only';
-        let currentRole = 'servant';
         let currentProfileId = null;
-             let currentPermission = 'view_only';
+
         let today = new Date().toLocaleDateString('en-CA');
         let activeSelectedDate = today;
         let calendarDisplayDate = new Date();
