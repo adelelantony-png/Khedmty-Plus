@@ -2737,10 +2737,9 @@ function exportFollowupToExcel() {
 
             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
-           let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
-if (isFirebaseActive && db) {
-    db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ time: formattedDisplayTime, isAbsentDueToDelay: rec.isAbsentDueToDelay });
-};
+            let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
+            if (isFirebaseActive && db) {
+                db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ time: formattedDisplayTime, isAbsentDueToDelay: rec.isAbsentDueToDelay });
             }
 
             logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
