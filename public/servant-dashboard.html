@@ -265,7 +265,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -2737,9 +2737,10 @@ function exportFollowupToExcel() {
 
             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
-            let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
-            if (isFirebaseActive && db) {
-                db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ time: formattedDisplayTime, isAbsentDueToDelay: rec.isAbsentDueToDelay });
+           let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
+if (isFirebaseActive && db) {
+    db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ time: formattedDisplayTime, isAbsentDueToDelay: rec.isAbsentDueToDelay });
+};
             }
 
             logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
@@ -3636,7 +3637,7 @@ function exportFollowupToExcel() {
 
                 if (isFirebaseActive && db) {
                     db.ref(`attendance/${activeSelectedDate}`).remove().catch(() => {});
-                    if (activeSelectedDate === today) db.ref(`servants_attendance/${today}`).remove().catch(() => {});
+                    if (activeSelectedDate === today) db.collection('audit_logs').doc(today).set({ list: auditLogs.slice(0, 300) });
                 }
 
                 logActivity("تصفير كشف يوم", activeSelectedDate, "حذف سجل الحضور لهذا التاريخ بالكامل");
@@ -4092,7 +4093,7 @@ function exportFollowupToExcel() {
             if (!savedConfig || !savedEmail || !savedPass) {
                 let statusText = document.getElementById('cloudStatusText');
                 if (statusText) statusText.innerText = "العمل محلياً";
-                // المرحلة 0/1: لا نعرض نافذة إعداد السحابة تلقائياً؛ الربط السحابي الجديد (Firestore) يأتي في المرحلة 2.
+                showCloudSetupModal();
                 return;
             }
 
@@ -4107,7 +4108,7 @@ function exportFollowupToExcel() {
                     if (!firebase.auth().currentUser) {
                         await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
                     }
-                    db = firebase.database();
+                    db = firebase.firestore();
                     isFirebaseActive = true;
 
                     let connectedRef = db.ref(".info/connected");
@@ -4134,22 +4135,25 @@ function exportFollowupToExcel() {
                         return !pending[path];
                     }
 
-                    db.ref('settings').on('value', snap => {
+                    // 1. إعدادات النظام
+                    db.collection('settings').doc('general').onSnapshot(doc => {
                         if (shouldAcceptCloudData('settings')) {
-                            settings = Object.assign({}, settings, snap.exists() ? snap.val() : {});
+                            settings = Object.assign({}, settings, doc.exists ? doc.data() : {});
                             localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
                             applyServiceBranding();
                         }
                     });
 
-                    db.ref('members').on('value', snap => {
+                    // 2. المخدومين
+                    db.collection('members').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('members')) {
-                            let val = snap.val();
-                            if (!val || (Array.isArray(val) && val.length === 0)) {
+                            if (snapshot.empty) {
                                 members = [];
                                 localStorage.removeItem(STORAGE_KEYS.MEMBERS);
                             } else {
-                                let rawList = Array.isArray(val) ? val : Object.values(val);
+                                let rawList = [];
+                                snapshot.forEach(doc => rawList.push(doc.data()));
+                                
                                 let mapByCodeOrId = new Map();
                                 rawList.filter(Boolean).forEach(m => {
                                     let uniqueKey = (m.code && m.code.toString().trim() !== "")
@@ -4188,19 +4192,14 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('attendance').on('value', snap => {
+                    // 3. الحضور اليومي للمخدومين
+                    db.collection('attendance').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('attendance')) {
-                            let cloudData = snap.exists() ? snap.val() : {};
                             let formattedRecord = {};
-                            Object.keys(cloudData).forEach(dateKey => {
-                                let dayNode = cloudData[dateKey];
-                                if (Array.isArray(dayNode)) {
-                                    formattedRecord[dateKey] = dayNode.filter(Boolean);
-                                } else if (dayNode && typeof dayNode === 'object') {
-                                    formattedRecord[dateKey] = Object.values(dayNode).filter(Boolean);
-                                } else {
-                                    formattedRecord[dateKey] = [];
-                                }
+                            snapshot.forEach(doc => {
+                                let dayData = doc.data();
+                                // قراءة البيانات سواء كانت في حقل list أو ككائن مباشر
+                                formattedRecord[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
                             });
                             attendanceRecord = formattedRecord;
                             if (!attendanceRecord[today]) attendanceRecord[today] = [];
@@ -4213,10 +4212,14 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('servants_attendance').on('value', snap => {
+                    // 4. الحضور اليومي للخدام
+                    db.collection('servants_attendance').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('servants_attendance')) {
-                            let val = snap.val();
-                            servantsAttendance = snap.exists() ? (Array.isArray(val) ? { [today]: val.filter(Boolean) } : val) : {};
+                            servantsAttendance = {};
+                            snapshot.forEach(doc => {
+                                let dayData = doc.data();
+                                servantsAttendance[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
+                            });
                             if (!servantsAttendance[today]) servantsAttendance[today] = [];
                             localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
                             renderServantsAttendanceTable();
@@ -4224,9 +4227,11 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('servants').on('value', snap => {
+                    // 5. الخدام
+                    db.collection('servants').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('servants')) {
-                            servants = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            servants = [];
+                            snapshot.forEach(doc => servants.push(doc.data()));
                             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
                             renderServantsTable();
                             renderServantsAttendanceTable();
@@ -4236,9 +4241,10 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('master_plan').on('value', snap => {
+                    // 6. خطة السنة
+                    db.collection('system').doc('master_plan').onSnapshot(doc => {
                         if (shouldAcceptCloudData('master_plan')) {
-                            masterPlan = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            masterPlan = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
                             renderMasterPlanTable();
                             renderServantsAttendanceTable();
@@ -4246,40 +4252,40 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('course_materials').on('value', snap => {
+                    // 7. مواد الكورس
+                    db.collection('system').doc('course_materials').onSnapshot(doc => {
                         if (shouldAcceptCloudData('course_materials')) {
-                            courseMaterials = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            courseMaterials = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem('khedmety_course_materials', JSON.stringify(courseMaterials));
                             renderMaterialsList();
                         }
                     });
 
-                    db.ref('self_reflections').on('value', snap => {
+                    // 8. التقييمات الذاتية
+                    db.collection('system').doc('self_reflections').onSnapshot(doc => {
                         if (shouldAcceptCloudData('self_reflections')) {
-                            selfReflections = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            selfReflections = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem('khedmety_self_reflections', JSON.stringify(selfReflections));
                             renderReflectionsTable();
                         }
                     });
 
-                    db.ref('courses_module').on('value', snap => {
-                        if (window.CoursesModule) CoursesModule.applyCloud(snap.val());
-                    }, err => { if (window.CoursesModule) CoursesModule.cloudError(err); });
+                    // 9. كتل المواد (الـ Module)
+                    db.collection('system').doc('courses_module').onSnapshot(doc => {
+                        if (window.CoursesModule && doc.exists) CoursesModule.applyCloud(doc.data());
+                    }, err => { 
+                        if (window.CoursesModule) CoursesModule.cloudError(err); 
+                    });
 
-                    db.ref(`audit_logs/${today}`).on('value', snap => {
-                        let val = snap.val();
-                        if (val) {
-                            auditLogs = Object.values(val).reverse();
+                    // 10. سجل العمليات (Audit Logs) لليوم الحالي
+                    db.collection('audit_logs').doc(today).onSnapshot(doc => {
+                        if (doc.exists) {
+                            let val = doc.data();
+                            auditLogs = val.list ? val.list.reverse() : Object.values(val).reverse();
                             localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(auditLogs.slice(0, 300)));
                             renderAuditLogTable();
                         }
                     });
-                }
-            } catch (e) {
-                let statusText = document.getElementById('cloudStatusText');
-                if (statusText) statusText.innerText = "خطأ في الاتصال بالسحابة";
-            }
-        }
 
         // ==========================================
         // 37. تبديل التبويبات
@@ -4552,23 +4558,6 @@ function saveServantSpiritualLog() {
             keys.forEach(path => {
                 let localData = null;
                 if (path === 'members') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS));
-                else if (path === 'attendance') {
-                    let fullAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
-                    let currentDayList = fullAtt[activeSelectedDate] || [];
-                    let partitionObj = {};
-                    currentDayList.forEach(item => {
-                        let p = (item.code || item.id || '').toString().replace(/\D/g, '');
-                        if (p) partitionObj[p] = item;
-                    });
-                    db.ref(`attendance/${activeSelectedDate}`).set(partitionObj).then(() => {
-                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
-                        delete currentPending['attendance'];
-                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
-                        updatePendingBadge();
-                        updateLastSyncTimestamp();
-                    }).catch(() => {});
-                    return;
-                }
                 else if (path === 'servants_attendance') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS_ATTENDANCE));
                 else if (path === 'servants') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS));
                 else if (path === 'master_plan') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MASTER_PLAN));
@@ -4576,16 +4565,48 @@ function saveServantSpiritualLog() {
                 else if (path === 'course_materials') localData = JSON.parse(localStorage.getItem('khedmety_course_materials'));
                 else if (path === 'self_reflections') localData = JSON.parse(localStorage.getItem('khedmety_self_reflections'));
 
-                if (localData !== null) {
-                    db.ref(path).set(localData).then(() => {
-                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
-                        delete currentPending[path];
-                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
-                        updatePendingBadge();
-                        updateLastSyncTimestamp();
-                        let cloudStatus = document.getElementById('cloudStatusText');
-                        if (cloudStatus) cloudStatus.innerText = "متصل وآمن 🟢";
-                    }).catch(() => {});
+                if (localData !== null || path === 'attendance') {
+                    let promise = null;
+
+                    if (path === 'settings') {
+                        promise = db.collection('settings').doc('general').set(localData);
+                    } 
+                    else if (path === 'attendance') {
+                        let fullAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
+                        let currentDayList = fullAtt[activeSelectedDate] || [];
+                        promise = db.collection('attendance').doc(activeSelectedDate).set({ list: currentDayList });
+                    }
+                    else if (path === 'servants_attendance') {
+                        let currentDayList = localData[today] || [];
+                        promise = db.collection('servants_attendance').doc(today).set({ list: currentDayList });
+                    }
+                    else if (['master_plan', 'course_materials', 'self_reflections'].includes(path)) {
+                        promise = db.collection('system').doc(path).set({ list: localData });
+                    }
+                    else if (Array.isArray(localData)) {
+                        // استخدام Batch لرفع مصفوفات البيانات الكبيرة (المخدومين، الخدام)
+                        let batch = db.batch();
+                        localData.forEach(item => {
+                            let docId = (item.id || item.code || Date.now()).toString();
+                            let docRef = db.collection(path).doc(docId);
+                            batch.set(docRef, item);
+                        });
+                        promise = batch.commit();
+                    }
+
+                    if (promise) {
+                        promise.then(() => {
+                            let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                            delete currentPending[path];
+                            localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                            updatePendingBadge();
+                            updateLastSyncTimestamp();
+                            let cloudStatus = document.getElementById('cloudStatusText');
+                            if (cloudStatus) cloudStatus.innerText = "متصل وآمن 🟢";
+                        }).catch(err => {
+                            console.error(`فشل رفع ${path}:`, err);
+                        });
+                    }
                 }
             });
         }
@@ -4608,7 +4629,7 @@ function saveServantSpiritualLog() {
         }
 
         // ==========================================
-        // 41. مراقبة استهلاك السحابة
+        // 41. مراقبة استهلاك السحابة (لم تتغير لأنها تعتمد على الـ LocalStorage)
         // ==========================================
         function getCloudUsageStats() {
             let totalChars = JSON.stringify(members).length +
@@ -4622,7 +4643,7 @@ function saveServantSpiritualLog() {
             Object.keys(attendanceRecord).forEach(d => {
                 if (d.startsWith(currentMonth)) monthlyAttCount += (attendanceRecord[d] || []).length;
             });
-            let maxStorageKB = 1024 * 1024;
+            let maxStorageKB = 1024 * 1024; // حد مجاني تقريبي (1GB)
             let percentUsed = ((estSizeKB / maxStorageKB) * 100).toFixed(2);
             return { estSizeKB, monthlyAttCount, percentUsed, isSafe: estSizeKB < (maxStorageKB * 0.7) };
         }
@@ -4673,7 +4694,6 @@ function saveServantSpiritualLog() {
             if (timeEl) timeEl.innerText = `آخر رفع: ${nowStr}`;
             updateCloudUsageUI();
         }
-
         // ==========================================
         // 42. تسجيل الدخول
         // ==========================================
@@ -4772,7 +4792,7 @@ function saveServantSpiritualLog() {
             }
             if (currentUser && isFirebaseActive && db) {
                 let servantKey = (currentUser.id || currentUser.phone || '').toString().replace(/\D/g, '') || '1001';
-                db.ref(`active_sessions/${servantKey}`).remove().catch(() => {});
+               b.collection('active_sessions').doc(servantKey).set(sessionData).remove().catch(() => {});
             }
             if (currentUser) logActivity("تسجيل خروج", currentUser.name, "خروج يدوي");
             localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
