@@ -4085,6 +4085,9 @@ if (isFirebaseActive && db) {
         // ==========================================
         // 36. Firebase Init
         // ==========================================
+        // ==========================================
+        // 36. Firebase Init
+        // ==========================================
         async function initFirebase() {
             let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
             let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
@@ -4111,24 +4114,17 @@ if (isFirebaseActive && db) {
                     db = firebase.firestore();
                     isFirebaseActive = true;
 
-                    let connectedRef = db.ref(".info/connected");
-                    connectedRef.on("value", snap => {
-                        const statusText = document.getElementById('cloudStatusText');
-                        const indicator = document.getElementById('cloudIndicator');
-                        if (snap.val() === true) {
-                            if (indicator) indicator.className = "cloud-status cloud-connected";
-                            let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
-                            if (Object.keys(pending).length > 0) {
-                                if (statusText) statusText.innerText = "جاري رفع المتأخرات... ⏳";
-                                pushPendingData();
-                            } else {
-                                if (statusText) statusText.innerText = "متصل سحابياً 🟢";
-                            }
-                        } else {
-                            if (indicator) indicator.className = "cloud-status cloud-offline";
-                            if (statusText) statusText.innerText = "يعمل بدون نت (أوفلاين) 🟠";
-                        }
-                    });
+                    // مؤشر الاتصال لـ Firestore
+                    let statusText = document.getElementById('cloudStatusText');
+                    let indicator = document.getElementById('cloudIndicator');
+                    if (indicator) indicator.className = "cloud-status cloud-connected";
+                    if (statusText) statusText.innerText = "متصل سحابياً 🟢";
+                    
+                    let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                    if (Object.keys(pending).length > 0) {
+                        if (statusText) statusText.innerText = "جاري رفع المتأخرات... ⏳";
+                        pushPendingData();
+                    }
 
                     function shouldAcceptCloudData(path) {
                         let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
@@ -4136,6 +4132,146 @@ if (isFirebaseActive && db) {
                     }
 
                     // 1. إعدادات النظام
+                    db.collection('settings').doc('general').onSnapshot(doc => {
+                        if (shouldAcceptCloudData('settings')) {
+                            settings = Object.assign({}, settings, doc.exists ? doc.data() : {});
+                            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+                            applyServiceBranding();
+                        }
+                    });
+
+                    // 2. المخدومين
+                    db.collection('members').onSnapshot(snapshot => {
+                        if (shouldAcceptCloudData('members')) {
+                            if (snapshot.empty) {
+                                members = [];
+                                localStorage.removeItem(STORAGE_KEYS.MEMBERS);
+                            } else {
+                                let rawList = [];
+                                snapshot.forEach(doc => rawList.push(doc.data()));
+                                
+                                let mapByCodeOrId = new Map();
+                                rawList.filter(Boolean).forEach(m => {
+                                    let uniqueKey = (m.code && m.code.toString().trim() !== "")
+                                        ? m.code.toString().trim()
+                                        : (m.id ? m.id.toString().trim() : m.name.trim());
+                                    let item = {
+                                        id: m.id || Date.now(),
+                                        code: m.code || m.exam_code || "",
+                                        name: m.name || "",
+                                        phone: m.phone || "",
+                                        stage: m.stage || "سنة أولى",
+                                        gender: m.gender || "بنين",
+                                        dob: m.dob || m.birth_date || "",
+                                        parent_phone: m.parent_phone || "",
+                                        address: m.address || "",
+                                        area: m.area || "",
+                                        confessor: m.confessor || "",
+                                        qrCode: m.qrCode || m.qr_code || `${m.name}/01`,
+                                        visitations: m.visitations || [],
+                                        fieldEvaluations: m.fieldEvaluations || []
+                                    };
+                                    if (mapByCodeOrId.has(uniqueKey)) {
+                                        let existing = mapByCodeOrId.get(uniqueKey);
+                                        item.visitations = [...(existing.visitations || []), ...(item.visitations || [])];
+                                        item.fieldEvaluations = [...(existing.fieldEvaluations || []), ...(item.fieldEvaluations || [])];
+                                    }
+                                    mapByCodeOrId.set(uniqueKey, item);
+                                });
+                                members = Array.from(mapByCodeOrId.values());
+                                localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+                            }
+                            renderMembersList();
+                            renderDashboard();
+                            checkUpcomingBirthdays();
+                            renderRolloverCandidateList();
+                        }
+                    });
+
+                    // 3. الحضور اليومي للمخدومين
+                    db.collection('attendance').onSnapshot(snapshot => {
+                        if (shouldAcceptCloudData('attendance')) {
+                            let formattedRecord = {};
+                            snapshot.forEach(doc => {
+                                let dayData = doc.data();
+                                formattedRecord[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
+                            });
+                            attendanceRecord = formattedRecord;
+                            if (!attendanceRecord[today]) attendanceRecord[today] = [];
+                            localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+                            renderAttendanceTable();
+                            renderLiveCardsFeed();
+                            renderMembersList();
+                            renderDashboard();
+                            renderAttendanceCalendar();
+                        }
+                    });
+
+                    // 4. الحضور اليومي للخدام
+                    db.collection('servants_attendance').onSnapshot(snapshot => {
+                        if (shouldAcceptCloudData('servants_attendance')) {
+                            servantsAttendance = {};
+                            snapshot.forEach(doc => {
+                                let dayData = doc.data();
+                                servantsAttendance[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
+                            });
+                            if (!servantsAttendance[today]) servantsAttendance[today] = [];
+                            localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
+                            renderServantsAttendanceTable();
+                            renderDashboard();
+                        }
+                    });
+
+                    // 5. الخدام
+                    db.collection('servants').onSnapshot(snapshot => {
+                        if (shouldAcceptCloudData('servants')) {
+                            servants = [];
+                            snapshot.forEach(doc => servants.push(doc.data()));
+                            localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+                            renderServantsTable();
+                            renderServantsAttendanceTable();
+                            populatePlanServantsDropdown();
+                            renderDashboard();
+                            checkUpcomingBirthdays();
+                        }
+                    });
+
+                    // 6. خطة السنة
+                    db.collection('system').doc('master_plan').onSnapshot(doc => {
+                        if (shouldAcceptCloudData('master_plan')) {
+                            masterPlan = doc.exists ? (doc.data().list || []) : [];
+                            localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
+                            renderMasterPlanTable();
+                            renderServantsAttendanceTable();
+                            checkUpcomingMasterPlanEvents();
+                        }
+                    });
+
+                    // 7. مواد الكورس
+                    db.collection('system').doc('course_materials').onSnapshot(doc => {
+                        if (shouldAcceptCloudData('course_materials')) {
+                            courseMaterials = doc.exists ? (doc.data().list || []) : [];
+                            localStorage.setItem('khedmety_course_materials', JSON.stringify(courseMaterials));
+                            renderMaterialsList();
+                        }
+                    });
+
+                    // 8. التقييمات الذاتية
+                    db.collection('system').doc('self_reflections').onSnapshot(doc => {
+                        if (shouldAcceptCloudData('self_reflections')) {
+                            selfReflections = doc.exists ? (doc.data().list || []) : [];
+                            localStorage.setItem('khedmety_self_reflections', JSON.stringify(selfReflections));
+                            renderReflectionsTable();
+                        }
+                    });
+
+                    // 9. كتل المواد (الـ Module)
+                    db.collection('system').doc('courses_module').onSnapshot(doc => {
+                        if (window.CoursesModule && doc.exists) CoursesModule.applyCloud(doc.data());
+                    }, err => { 
+                        if (window.CoursesModule) CoursesModule.cloudError(err); 
+                    });
+
                     // 10. سجل العمليات (Audit Logs) لليوم الحالي
                     db.collection('audit_logs').doc(today).onSnapshot(doc => {
                         if (doc.exists) {
