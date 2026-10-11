@@ -4136,13 +4136,26 @@ if (isFirebaseActive && db) {
                     }
 
                     // 1. إعدادات النظام
-                    db.collection('settings').doc('general').onSnapshot(doc => {
-                        if (shouldAcceptCloudData('settings')) {
-                            settings = Object.assign({}, settings, doc.exists ? doc.data() : {});
-                            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-                            applyServiceBranding();
+                    // 10. سجل العمليات (Audit Logs) لليوم الحالي
+                    db.collection('audit_logs').doc(today).onSnapshot(doc => {
+                        if (doc.exists) {
+                            let val = doc.data();
+                            auditLogs = val.list ? val.list.reverse() : Object.values(val).reverse();
+                            localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(auditLogs.slice(0, 300)));
+                            renderAuditLogTable();
                         }
                     });
+                }
+            } catch (e) {
+                let statusText = document.getElementById('cloudStatusText');
+                if (statusText) statusText.innerText = "خطأ في الاتصال بالسحابة";
+                console.error("Firebase Init Error:", e);
+            }
+        }
+
+        // ==========================================
+        // 37. تبديل التبويبات
+        // ==========================================
 
                     // 2. المخدومين
                     db.collection('members').onSnapshot(snapshot => {
