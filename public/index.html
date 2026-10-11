@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--primary:#1e3799;--primary-dark:#0c2461;--accent:#0984e3;--success:#00b894;--danger:#d63031;--gold:#fdcb6e;--dark:#2d3436}
 *{box-sizing:border-box}
@@ -104,8 +104,8 @@ const DEFAULT_ADMIN_PWD = '1234567';          // تعمل فقط قبل أن ي�
 const ADMIN_NAMES = ['admin', 'الأدمن', 'عادل جورج'];
 const $ = id => document.getElementById(id);
 
-// إعداد Firebase العام لهذه الخدمة. استبدل القيم التالية بإعدادات مشروعك (من لوحة Firebase أو من
-// نافذة "إعداد السحابة" داخل servant-dashboard.html). هذا الإعداد ليس سرياً وأمانه من Firebase Rules.
+// إعداد Firebase العام لهذه الخدمة (نفس Project config، يصلح لـ Firestore مباشرة بلا تغيير).
+// استبدل القيم التالية بإعدادات مشروعك. هذا الإعداد ليس سرياً وأمانه من Firestore Rules.
 // اتركه فارغاً (null) لتعطيل البحث السحابي والاكتفاء بالبيانات المحفوظة محلياً على هذا الجهاز.
 const PUBLIC_FIREBASE_CONFIG = null; /* مثال:
 const PUBLIC_FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", databaseURL: "...", projectId: "..." };
@@ -152,20 +152,21 @@ function initCloud() {
     try {
       if (!firebase.apps.length) firebase.initializeApp(cfg);
       if (!firebase.auth().currentUser) await firebase.auth().signInAnonymously();
-      return firebase.database();
+      return firebase.firestore();
     } catch (e) { console.warn('تعذر الاتصال بالسحابة، سيعمل الدخول محلياً فقط:', e.code || e.message); return null; }
   })();
   return fbReady;
 }
-function toList(val) { if (!val) return []; return Array.isArray(val) ? val.filter(Boolean) : Object.values(val).filter(Boolean); }
+// تحويل نتيجة مجموعة Firestore إلى مصفوفة عادية، مع ضمان وجود id لكل مستند
+function snapToList(qs) { return qs.docs.map(d => Object.assign({ id: d.id }, d.data())); }
 
-// تنزيل قوائم الخدام والمخدومين من السحابة (مرة واحدة) وتخزينها محلياً، ليعمل الجهاز أوفلاين بعدها
+// تنزيل قوائم الخدام والمخدومين من Collections الخاصة بهما في Firestore، وتخزينها محلياً ليعمل الجهاز أوفلاين بعدها
 async function cloudFetchDirectory() {
   const db = await initCloud();
   if (!db) return null;
   try {
-    const [sSnap, mSnap] = await Promise.all([db.ref('servants').once('value'), db.ref('members').once('value')]);
-    const servants = toList(sSnap.val()), members = toList(mSnap.val());
+    const [sSnap, mSnap] = await Promise.all([db.collection('servants').get(), db.collection('members').get()]);
+    const servants = snapToList(sSnap), members = snapToList(mSnap);
     try {
       localStorage.setItem(K.servants, JSON.stringify(servants));
       localStorage.setItem(K.members, JSON.stringify(members));
