@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#1e3799">
 <title>تسجيل الدخول | خدمتي برو - إعداد الخدام</title>
-<link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icon.png">
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{--primary:#1e3799;--primary-dark:#0c2461;--accent:#0984e3;--success:#00b894;--danger:#d63031;--gold:#fdcb6e;--dark:#2d3436}
 *{box-sizing:border-box}
@@ -88,7 +90,7 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
       </div>
       <button type="submit" id="btn" class="btn">تسجيل الدخول</button>
     </form>
-    <p class="hint">نسيت بياناتك؟ تواصل مع أمين الخدمة.</p>
+    <p class="hint" id="hint">نسيت بياناتك؟ تواصل مع أمين الخدمة.</p>
   </div>
   <div class="verse">اعبدوا الرب بفرح<small>مزمور ١٠٠: ٢</small></div>
 </main>
@@ -102,13 +104,16 @@ const DEFAULT_ADMIN_PWD = '1234567';          // تعمل فقط قبل أن ي�
 const ADMIN_NAMES = ['admin', 'الأدمن', 'عادل جورج'];
 const $ = id => document.getElementById(id);
 
+// إعداد Firebase العام لهذه الخدمة. استبدل القيم التالية بإعدادات مشروعك (من لوحة Firebase أو من
+// نافذة "إعداد السحابة" داخل servant-dashboard.html). هذا الإعداد ليس سرياً وأمانه من Firebase Rules.
+// اتركه فارغاً (null) لتعطيل البحث السحابي والاكتفاء بالبيانات المحفوظة محلياً على هذا الجهاز.
+const PUBLIC_FIREBASE_CONFIG = null; /* مثال:
+const PUBLIC_FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", databaseURL: "...", projectId: "..." };
+*/
+
 const readList = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
 const norm = s => String(s ?? '').trim().toLowerCase();
-// تحويل الأرقام العربية والفارسية إلى إنجليزية ثم إبقاء الأرقام فقط
-const digits = s => String(s ?? '')
-  .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-  .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
-  .replace(/\D/g, '');
+const digits = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, '');
 const isAdminRec = s => s && (s.role === 'admin' || s.permission === 'admin');
 
 async function sha(text) {
@@ -129,30 +134,46 @@ function recordFail() {
 }
 const resetFails = () => { localStorage.removeItem(K.fail); localStorage.removeItem(K.lock); };
 
-// ---------- مقارنات متسامحة ----------
-// الكود: يتجاهل الحالة والمسافات والأرقام العربية والأصفار البادئة
-const sameCode = (a, b) => {
-  if (a == null || a === '' || b == null || b === '') return false;
-  if (norm(a) === norm(b)) return true;
-  const x = digits(a), y = digits(b);
-  return !!x && !!y && x.replace(/^0+/, '') === y.replace(/^0+/, '');
-};
-
-// الهاتف: يقبل أكثر من اسم حقل، ويقارن آخر 10 أرقام (يتجاوز +20 والصفر الأول)
-const getPhone = r => r.phone ?? r.mobile ?? r.tel ?? r.phoneNumber ?? r.fone ?? r.whatsapp ?? '';
-const samePhone = (rec, p) => {
-  const want = digits(getPhone(rec)), got = digits(p);
-  return want.length >= 6 && got.length >= 6 && want.slice(-10) === got.slice(-10);
-};
-
-// التحقق: الهاتف أولاً، ثم كلمة المرور المشفرة إن وُجدت
-async function checkMember(rec, p) {
-  if (samePhone(rec, p)) return true;
-  if (rec.passwordHash && (await sha(p)) === rec.passwordHash) return true;
-  return false;
+// ---------- التحقق ----------
+async function checkPhoneOrHash(rec, p) {
+  if (rec.passwordHash) return (await sha(p)) === rec.passwordHash;   // كلمة مرور مستقلة إن وُجدت
+  const want = digits(rec.phone);
+  return want.length >= 6 && digits(p) === want;                      // الهاتف: لا يُقبل فارغاً أبداً
 }
 
-// ---------- التحقق ----------
+let fbReady = null;
+function initCloud() {
+  if (fbReady !== null) return fbReady;
+  let cfg = null;
+  try { cfg = JSON.parse(localStorage.getItem('my_firebase_config') || 'null'); } catch (e) {}
+  cfg = cfg || PUBLIC_FIREBASE_CONFIG;
+  if (!cfg || typeof firebase === 'undefined' || !navigator.onLine) { fbReady = Promise.resolve(null); return fbReady; }
+  fbReady = (async () => {
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      if (!firebase.auth().currentUser) await firebase.auth().signInAnonymously();
+      return firebase.database();
+    } catch (e) { console.warn('تعذر الاتصال بالسحابة، سيعمل الدخول محلياً فقط:', e.code || e.message); return null; }
+  })();
+  return fbReady;
+}
+function toList(val) { if (!val) return []; return Array.isArray(val) ? val.filter(Boolean) : Object.values(val).filter(Boolean); }
+
+// تنزيل قوائم الخدام والمخدومين من السحابة (مرة واحدة) وتخزينها محلياً، ليعمل الجهاز أوفلاين بعدها
+async function cloudFetchDirectory() {
+  const db = await initCloud();
+  if (!db) return null;
+  try {
+    const [sSnap, mSnap] = await Promise.all([db.ref('servants').once('value'), db.ref('members').once('value')]);
+    const servants = toList(sSnap.val()), members = toList(mSnap.val());
+    try {
+      localStorage.setItem(K.servants, JSON.stringify(servants));
+      localStorage.setItem(K.members, JSON.stringify(members));
+    } catch (e) { /* مساحة التخزين ممتلئة: نكمل بالبيانات في الذاكرة فقط لهذه المحاولة */ }
+    return { servants, members };
+  } catch (e) { console.warn('فشل تنزيل البيانات من السحابة:', e.code || e.message); return null; }
+}
+
 async function authenticate(u, p) {
   const un = norm(u);
 
@@ -161,26 +182,39 @@ async function authenticate(u, p) {
     const saved = localStorage.getItem(K.adminPwd) || '';
     const ok = saved ? (await sha(p)) === saved : p === DEFAULT_ADMIN_PWD;
     if (ok) return { kind: 'staff', role: 'admin',
-      user: { name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin' } };
+      user: { id: 1001, name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin' } };
     return null;   // اسم الأدمن لا يمر عبر مسار الخدام إطلاقاً
   }
 
   // 2) الخدام (سجلات الأدمن مستبعدة حتى لا تتجاوز كلمة مرور الأدمن)
   for (const s of readList(K.servants)) {
     if (isAdminRec(s)) continue;
-    if ((norm(s.name) === un || sameCode(s.code, u)) && await checkMember(s, p))
+    if ((norm(s.name) === un || (s.code != null && String(s.code) === u)) && await checkPhoneOrHash(s, p))
       return { kind: 'staff', role: 'servant', user: s };
   }
 
-  // 3) المخدومون
+  // 3) المخدومون: لا بد من هاتف مسجل ومطابق
   for (const m of readList(K.members)) {
-    if ((sameCode(m.code, u) || sameCode(m.id, u) || norm(m.name) === un) && await checkMember(m, p))
-      return { kind: 'student', rec: m };
+    if ((m.code != null && String(m.code) === u) || norm(m.name) === un) {
+      if (await checkPhoneOrHash(m, p)) return { kind: 'student', rec: m };
+    }
   }
 
-  // 4) خادم خلفي (Vercel + Supabase). يُتجاهل بهدوء إن لم يكن موجوداً (مثل file://)
+  // 4) لم يوجد محلياً: جرّب السحابة (أول دخول من جهاز جديد، أو بيانات حُدِّثت من جهاز آخر)
+  if (navigator.onLine) {
+    const cloud = await cloudFetchDirectory();
+    if (cloud) {
+      const s2 = cloud.servants.find(s => !isAdminRec(s) && (norm(s.name) === un || (s.code != null && String(s.code) === u)));
+      if (s2 && await checkPhoneOrHash(s2, p)) return { kind: 'staff', role: 'servant', user: s2 };
+
+      const m2 = cloud.members.find(m => (m.code != null && String(m.code) === u) || norm(m.name) === un);
+      if (m2 && await checkPhoneOrHash(m2, p)) return { kind: 'student', rec: m2 };
+    }
+  }
+
+  // 5) خادم خلفي اختياري (يُتجاهل بهدوء على الاستضافة الثابتة)
   try {
-    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 6000);
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
     const r = await fetch('/api/login', { method: 'POST', signal: ctl.signal,
       headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
     clearTimeout(t);
@@ -219,6 +253,9 @@ function startSession(r, remember) {
 const err = $('err'), btn = $('btn');
 function showErr(msg) { err.textContent = msg; err.classList.remove('show'); void err.offsetWidth; err.classList.add('show'); }
 function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جاري التحقق…' : 'تسجيل الدخول'; }
+let hintTimer = null;
+function showCloudHint() { hintTimer = setTimeout(() => { $('hint').textContent = 'جاري البحث في بيانات الخدمة السحابية...'; }, 600); }
+function hideCloudHint() { clearTimeout(hintTimer); $('hint').textContent = 'نسيت بياناتك؟ تواصل مع أمين الخدمة.'; }
 
 $('eye').addEventListener('click', () => { const i = $('p'); i.type = i.type === 'password' ? 'text' : 'password'; });
 
@@ -230,7 +267,7 @@ $('form').addEventListener('submit', async e => {
   const u = $('u').value.trim(), p = $('p').value.trim();
   if (!u || !p) return showErr('من فضلك أدخل اسم المستخدم وكلمة المرور.');
 
-  setBusy(true);
+  setBusy(true); showCloudHint();
   let redirecting = false;
   try {
     const r = await authenticate(u, p);
@@ -242,6 +279,7 @@ $('form').addEventListener('submit', async e => {
     console.error(ex);
     showErr('حدث خطأ غير متوقع، حاول مرة أخرى.');
   } finally {
+    hideCloudHint();
     if (!redirecting) setBusy(false);
   }
 });
