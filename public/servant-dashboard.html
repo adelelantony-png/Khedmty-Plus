@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="خدمتي برو">
     
-    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-    <link rel="shortcut icon" href="icons/favicon-48.png" type="image/png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+    <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+    <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
@@ -60,7 +60,7 @@
         // محاولة دورية لإرسال الأخطاء المرصودة لسجل الأخطاء المركزي في السحابة (كل 15 ثانية)
         setInterval(function() {
             try {
-                if (typeof isFirebaseActive === 'undefined' || !isFirebaseActive || typeof db === 'undefined' || !db) return;
+                if (typeof isFirebaseActive === 'undefined' || !isFirebaseActive || typeof fsdb === 'undefined' || !fsdb) return;
                 if (!window.pendingErrorReports || window.pendingErrorReports.length === 0) return;
                 let batch = window.pendingErrorReports.splice(0, window.pendingErrorReports.length);
                 let _n = new Date();
@@ -70,7 +70,7 @@
                     item.servant = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'غير مسجل دخول';
                     updates[item.id] = item;
                 });
-                db.collection('error_logs').doc(dateKey).set(fsClean(updates), { merge: true }).catch(() => {});
+                fsdb.collection('error_logs').doc(dateKey).set(updates, { merge: true }).catch(() => {});
             } catch (e) { /* تجاهل: لا نريد لصائد الأخطاء نفسه أن يسبب خطأ */ }
         }, 15000);
 
@@ -265,8 +265,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
 </head>
 <body>
 
@@ -387,7 +387,6 @@
 <a href="servant_spiritual_note.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل العمليات 🛡️</div>
             <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
             <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
-<div class="tab-btn admin-or-servant" data-group="people" onclick="switchTab('followupTab', this)">متابعة المخدومين 📈</div>
 <a href="servant_followup.html" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
         </div>
 
@@ -444,6 +443,27 @@
                 </table>
             </div>
         </div>
+        <!-- التقييم الروحي (أدمن فقط) -->
+        <!-- نوتة الخادم الروحية الخاصة بالخلوة ووسائط النعمة -->
+<!-- نوتة الخادم الروحية الشاملة (مطابقة لنوتة المخدومين) -->
+
+                <!-- 4. تعويض الفائت -->
+                <div class="mb-4 p-3 bg-light rounded-3 border">
+                    <h6 class="fw-bold text-warning-emphasis mb-2"><i class="fa-solid falaw-rotate-right me-1"></i> تعويض الفائت</h6>
+                    <label class="check-pill" style="display:flex; align-items:center; gap:10px; cursor:pointer; background:#fff; padding:10px; border-radius:6px; border:1px solid #ddd;">
+                        <input type="checkbox" id="s_makeup" style="width:20px; height:20px;">
+                        <span>تم تعويض ما فاتني من صلوات أو قراءات اليوم السابق</span>
+                    </label>
+                </div>
+
+                <button class="btn-primary w-100 py-2 fw-bold" onclick="saveServantDetailedLog()">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> حفظ نوتة الخادم الروحية
+                </button>
+            </div>
+        </div>
+    </div>
+</div></div>
+
         <!-- 1. الرئيسية -->
         <div id="dashTab" class="tab-content active">
             <div id="myNextEventBanner" style="display:none; background:#e8f4fd; border:1px solid #74b9ff; color:#0984e3; padding:12px; border-radius:8px; margin-bottom:12px;">
@@ -670,10 +690,6 @@
 
         <!-- 5. الدارسين والمخدومين -->
         <div id="membersTab" class="tab-content">
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-                <button type="button" class="btn-mini btn-primary admin-or-servant" style="flex:1; padding:10px;" onclick="switchTab('followupTab', document.querySelector('.tab-btn[onclick*=followupTab]'))">📈 تقرير المتابعة الروحية</button>
-                <a href="servant_followup.html" class="btn-mini btn-success admin-or-servant" style="flex:1; padding:10px; text-align:center; text-decoration:none;">🤝 الافتقاد الذكي (صفحة كاملة)</a>
-            </div>
             <div class="can-edit">
                 <h2>إضافة دارس جديد</h2>
                 <form id="addForm">
@@ -1235,7 +1251,8 @@
         const DEFAULT_ADMIN_PWD = '1234567';
         const MAX_LOCAL_STORAGE_BYTES = 5 * 1024 * 1024;
 
-        let db = null;
+        let db = null;      // Realtime Database — لمسارات لم تُرحَّل بعد (المرحلة 2-4)
+        let fsdb = null;    // Firestore — المصدر الرسمي الآن لـ members / servants / roles (المرحلة 1)
         let isFirebaseActive = false;
         let firebaseConfigLoaded = null;
 
@@ -1613,13 +1630,13 @@ function exportFollowupToExcel() {
         // محاولة تسجيل دخول Firebase Auth بحساب فردي - إضافية ولا توقف تسجيل الدخول المحلي أبداً لو فشلت.
         // لو نجحت، ترجع الدور (role) المسجل فعلياً في Firebase (roles/{uid}) ليكون هو المصدر الرسمي للصلاحية.
         async function tryIndividualCloudLogin(code, phone) {
-            if (!isFirebaseActive || typeof firebase === 'undefined') return null;
+            if (!isFirebaseActive || typeof firebase === 'undefined' || !fsdb) return null;
             try {
                 let email = deriveServantAuthEmail(code);
                 let cred = await firebase.auth().signInWithEmailAndPassword(email, phone);
                 let uid = cred.user.uid;
-                let snap = await db.collection('roles').doc(uid).get();
-                let role = snap.exists ? (snap.data() || {}).role : null;
+                let doc = await fsdb.collection('roles').doc(uid).get();
+                let role = doc.exists ? doc.data().role : null;
                 return role || null;
             } catch (err) {
                 // طبيعي جداً لو الخادم لسه معندوش حساب فردي مربوط - يفضل يشتغل بالنظام المحلي
@@ -1631,7 +1648,7 @@ function exportFollowupToExcel() {
         // ربط خادم موجود بحساب Firebase Auth فردي (أدمن فقط) - ينشئ الحساب ويحدد دوره في roles/{uid}
         async function linkServantToCloudAuth(servantId) {
             if (currentPermission !== 'admin') return alert("ربط الحسابات السحابية متاح لأمين الخدمة فقط!");
-            if (!isFirebaseActive || typeof firebase === 'undefined' || !db) {
+            if (!isFirebaseActive || typeof firebase === 'undefined' || !fsdb) {
                 return alert("❌ لازم تفعّل الربط السحابي أولاً (من نافذة إعداد السحابة) قبل ربط حسابات الخدام الفردية.");
             }
             let s = servants.find(x => x.id === servantId);
@@ -1650,7 +1667,7 @@ function exportFollowupToExcel() {
                 let cred = await firebase.auth().createUserWithEmailAndPassword(email, s.phone);
                 let newUid = cred.user.uid;
 
-                await db.collection('roles').doc(newUid).set({ role: s.permission || s.role || 'full' });
+                await fsdb.collection('roles').doc(newUid).set({ role: s.permission || s.role || 'full' });
 
                 // إعادة تسجيل الدخول بحساب السحابة المشترك لأن إنشاء المستخدم الجديد يبدّل الجلسة الحالية تلقائياً
                 if (savedEmail && savedPass) {
@@ -1659,7 +1676,7 @@ function exportFollowupToExcel() {
 
                 s.cloudUid = newUid;
                 localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
-                if (isFirebaseActive && db) db.collection('servants').doc(String(s.id)).set(fsClean(s)).catch(() => syncToCloud('servants', servants));
+                if (isFirebaseActive && fsdb) fsdb.collection('servants').doc(String(s.id)).set(s).catch(() => syncToCloud('servants', servants));
 
                 logActivity("ربط حساب سحابي فردي", s.name, `UID: ${newUid}`);
                 renderServantsTable();
@@ -1850,7 +1867,7 @@ function exportFollowupToExcel() {
             let tbody = document.getElementById('errorLogsTbody');
             if (!tbody) return;
             if (currentPermission !== 'admin') return;
-            if (!isFirebaseActive || !db) {
+            if (!isFirebaseActive || !fsdb) {
                 tbody.innerHTML = '<tr><td colspan="3" style="color:#888;">السحابة غير مفعّلة على هذا الجهاز.</td></tr>';
                 return;
             }
@@ -1861,7 +1878,7 @@ function exportFollowupToExcel() {
                     let d = new Date();
                     d.setDate(d.getDate() - i);
                     let dateKey = localDateKey(d);
-                    let snap = await db.collection('error_logs').doc(dateKey).get();
+                    let snap = await fsdb.collection('error_logs').doc(dateKey).get();
                     let val = snap.exists ? snap.data() : null;
                     if (val) Object.values(val).forEach(e => allErrors.push(e));
                 }
@@ -1882,7 +1899,7 @@ function exportFollowupToExcel() {
         }
 
         function flushAuditLogBatch() {
-            if (!isFirebaseActive || !db || auditLogBatch.length === 0) {
+            if (!isFirebaseActive || !fsdb || auditLogBatch.length === 0) {
                 auditLogBatch = [];
                 return;
             }
@@ -1892,7 +1909,7 @@ function exportFollowupToExcel() {
             batch.forEach(item => {
                 updates[item.id] = item;
             });
-            db.collection('audit_logs').doc(today).set(fsClean(updates), { merge: true }).catch(() => {});
+            fsdb.collection('audit_logs').doc(today).set(updates, { merge: true }).catch(() => {});
         }
 
         function renderAuditLogTable() {
@@ -1935,7 +1952,7 @@ function exportFollowupToExcel() {
             if (isAdminPasswordValid(pwdHash, pwd)) {
                 auditLogs = [];
                 localStorage.removeItem(STORAGE_KEYS.AUDIT_LOGS);
-                if (isFirebaseActive && db) db.collection('audit_logs').doc(today).delete().catch(() => {});
+                if (isFirebaseActive && fsdb) fsdb.collection('audit_logs').doc(today).delete().catch(() => {});
                 renderAuditLogTable();
                 showToast("✅ تم تفريغ سجل العمليات بنجاح!");
             } else {
@@ -1978,8 +1995,9 @@ function exportFollowupToExcel() {
 
                 localStorage.setItem(VERSION_HISTORY_KEY, JSON.stringify(all));
 
-                if (isFirebaseActive && db) {
-                    db.collection('version_history').doc(`${entityType}__${entityId}`).collection('versions').doc(String(versionEntry.id)).set(fsClean(versionEntry)).catch(() => {});
+                if (isFirebaseActive && fsdb) {
+                    let vhDocId = `${entityType}__${entityId}__${versionEntry.id}`;
+                    fsdb.collection('version_history').doc(vhDocId).set(versionEntry).catch(() => {});
                 }
             } catch (e) { console.warn("فشل حفظ نسخة سجل التعديلات:", e); }
         }
@@ -2064,8 +2082,8 @@ function exportFollowupToExcel() {
             members[mIndex] = Object.assign({}, members[mIndex], updatedFields, { id: members[mIndex].id });
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
 
-            if (isFirebaseActive && db) {
-                db.collection('members').doc(String(members[mIndex].id)).set(fsClean(updatedFields), { merge: true })
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('members').doc(String(members[mIndex].id)).update(updatedFields)
                     .then(() => updateLastSyncTimestamp())
                     .catch(() => syncToCloud('members', members));
             } else {
@@ -2135,7 +2153,7 @@ function exportFollowupToExcel() {
             renderAttendanceCalendar();
             showKioskWelcome(member, isAbsent, 'member');
 
-            if (!isFirebaseActive || !db) {
+            if (!isFirebaseActive || !fsdb) {
                 syncToCloud('attendance', attendanceRecord);
                 if (isAbsent) {
                     playBeepSound('error');
@@ -2148,19 +2166,18 @@ function exportFollowupToExcel() {
                 return;
             }
 
-            const dayRef = db.collection('attendance').doc(activeSelectedDate);
-            db.runTransaction(async (tx) => {
-                const snap = await tx.get(dayRef);
-                const list = (snap.exists && Array.isArray(snap.data().list)) ? snap.data().list.filter(Boolean) : [];
-                const dup = list.find(r => (r.code || r.id || '').toString().replace(/\D/g, '') === pKey);
-                if (dup) return { committed: false, recordedBy: dup.scannedBy };
-                list.push(fsClean(newRecord));
-                tx.set(dayRef, { list: list });
-                return { committed: true };
-            }).then(res => {
-                if (!res.committed) {
+            // Firestore: معاملة (transaction) تقرأ وتكتب بشكل ذري لمنع تسجيل نفس المخدوم مرتين في نفس اللحظة
+            let attDayRef = fsdb.collection('attendance').doc(activeSelectedDate);
+            fsdb.runTransaction(tx => tx.get(attDayRef).then(snap => {
+                let data = snap.exists ? (snap.data() || {}) : {};
+                if (data[pKey]) return { conflict: true, existing: data[pKey] };
+                tx.set(attDayRef, { [pKey]: newRecord }, { merge: true });
+                return { conflict: false };
+            })).then(result => {
+                if (result.conflict) {
                     playBeepSound('error');
-                    showToast(`⚠️ مسجل مسبقاً في (${activeSelectedDate}) بواسطة: ${res.recordedBy || 'خادم آخر'}`, true);
+                    let recordedBy = result.existing ? result.existing.scannedBy : 'خادم آخر';
+                    showToast(`⚠️ مسجل مسبقاً في (${activeSelectedDate}) بواسطة: ${recordedBy}`, true);
                 } else {
                     playBeepSound('success');
                     showToast(`✅ تم توثيق حضور: ${member.name} سحابياً`);
@@ -2169,9 +2186,7 @@ function exportFollowupToExcel() {
                 updateLastSyncTimestamp();
                 renderAttendanceCalendar();
             }).catch(() => {
-                // لا اتصال أو صلاحيات: السجل محفوظ محلياً وسيُرفع تلقائياً عند عودة الاتصال
-                syncToCloud('attendance', attendanceRecord);
-                showToast("📱 حُفظ الحضور على الجهاز وسيُرفع عند عودة الاتصال", true);
+                showToast("❌ خطأ أثناء المزامنة السحابية", true);
             });
         }
 
@@ -2604,7 +2619,7 @@ function exportFollowupToExcel() {
         // 17. الجلسات الحية
         // ==========================================
         function registerActiveSession() {
-            if (!currentUser || !isFirebaseActive || !db) return;
+            if (!currentUser || !isFirebaseActive || !fsdb) return;
             let deviceType = /Mobi|Android/i.test(navigator.userAgent) ? "هاتف محمول 📱" : "كمبيوتر / لابتوب 💻";
             let servantKey = (currentUser.id || currentUser.phone || '').toString().replace(/\D/g, '') || '1001';
             let sessionData = {
@@ -2616,10 +2631,10 @@ function exportFollowupToExcel() {
                 device: deviceType,
                 status: "active"
             };
-            const sessRef = db.collection('active_sessions').doc(servantKey);
+            let sessRef = fsdb.collection('active_sessions').doc(servantKey);
             sessRef.set(sessionData).catch(() => {});
-            sessRef.onSnapshot(doc => {
-                let val = doc.exists ? doc.data() : null;
+            sessRef.onSnapshot(snap => {
+                let val = snap.exists ? snap.data() : null;
                 if (val && val.status === "terminated") {
                     sessRef.delete().catch(() => {});
                     localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
@@ -2628,22 +2643,21 @@ function exportFollowupToExcel() {
                     alert("⚠️ تم إنهاء جلستك وتسجيل خروجك من قِبل أمين الخدمة العام!");
                     location.reload();
                 }
-            });
+            }, err => console.warn('تعذر متابعة حالة الجلسة:', err.code || err.message));
         }
 
         function listenToActiveSessions() {
-            if (!isFirebaseActive || !db) return;
-            db.collection('active_sessions').onSnapshot(snap => {
+            if (!isFirebaseActive || !fsdb) return;
+            fsdb.collection('active_sessions').onSnapshot(snap => {
                 const tbody = document.getElementById('activeSessionsTbody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
-                let sessions = {}; snap.forEach(d => { sessions[d.id] = d.data(); });
-                if (!sessions || Object.keys(sessions).length === 0) {
+                if (snap.empty) {
                     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">لا توجد أي جلسات نشطة حالياً.</td></tr>';
                     return;
                 }
-                Object.keys(sessions).forEach(key => {
-                    let sess = sessions[key];
+                snap.forEach(doc => {
+                    let key = doc.id, sess = doc.data();
                     let isMe = (sess.sessionId === myCurrentSessionId);
                     let tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -2655,15 +2669,15 @@ function exportFollowupToExcel() {
                     `;
                     tbody.appendChild(tr);
                 });
-            });
+            }, err => console.warn('تعذر متابعة الجلسات النشطة:', err.code || err.message));
         }
 
         function terminateSession(servantKey, servantName) {
             if (confirm(`هل أنت متأكد من رغبتك في طرد جهاز (${servantName}) وإخراجه فوراً؟`)) {
-                db.collection('active_sessions').doc(String(servantKey)).update({ status: 'terminated' }).then(() => {
+                fsdb.collection('active_sessions').doc(servantKey).update({ status: "terminated" }).then(() => {
                     logActivity("طرد جلسة خادم", servantName, "إنهاء اتصال عن بُعد");
                     showToast(`✅ تم إرسال أمر الطرد لـ ${servantName}`);
-                });
+                }).catch(() => showToast("❌ تعذر إرسال أمر الطرد", true));
             }
         }
 
@@ -2672,16 +2686,15 @@ function exportFollowupToExcel() {
             if (!pwd) return;
             let pwdHash = await hashPassword(pwd);
             if (isAdminPasswordValid(pwdHash, pwd)) {
-                db.collection('active_sessions').get().then(snap => {
-                    let sessions = {}; snap.forEach(d => { sessions[d.id] = d.data(); });
-                    Object.keys(sessions).forEach(key => {
-                        if (sessions[key].sessionId !== myCurrentSessionId) {
-                            db.collection('active_sessions').doc(String(key)).update({ status: 'terminated' });
+                fsdb.collection('active_sessions').get().then(snap => {
+                    snap.forEach(doc => {
+                        if (doc.data().sessionId !== myCurrentSessionId) {
+                            fsdb.collection('active_sessions').doc(doc.id).update({ status: "terminated" }).catch(() => {});
                         }
                     });
                     logActivity("طرد شامل", "جميع الجلسات", "طرد جميع الأجهزة المتصلة");
                     alert("✅ تم طرد جميع الأجهزة المتصلة بالمنظومة فوراً!");
-                });
+                }).catch(() => alert("❌ تعذر الوصول لقائمة الجلسات!"));
             } else {
                 alert("❌ كلمة المرور غير صحيحة!");
             }
@@ -2746,8 +2759,11 @@ function exportFollowupToExcel() {
             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
             let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
-            if (isFirebaseActive && db) {
-                syncToCloud('attendance', attendanceRecord);
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('attendance').doc(activeSelectedDate).update({
+                    [`${pKey}.time`]: formattedDisplayTime,
+                    [`${pKey}.isAbsentDueToDelay`]: rec.isAbsentDueToDelay
+                }).catch(() => {});
             }
 
             logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
@@ -3066,7 +3082,7 @@ function exportFollowupToExcel() {
         function saveMasterPlan() {
             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
             if (isFirebaseActive && db) {
-                db.collection('system').doc('master_plan').set(fsClean({ list: masterPlan })).then(() => {
+                db.ref('master_plan').set(masterPlan).then(() => {
                     updateLastSyncTimestamp();
                     showToast("✅ تم تحديث خطة السنة على السحابة فوراً!");
                 }).catch(() => syncToCloud('master_plan', masterPlan));
@@ -3564,7 +3580,7 @@ function exportFollowupToExcel() {
                     let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
                     delete pending['members'];
                     localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
-                    if (isFirebaseActive && db) fsClearCollection('members').catch(() => {});
+                    if (isFirebaseActive && fsdb) clearFirestoreCollection('members');
                     logActivity("حذف المخدومين", "تصفية كاملة", "حذف كافة سجلات المخدومين");
                     renderMembersList();
                     renderDashboard();
@@ -3586,23 +3602,16 @@ function exportFollowupToExcel() {
                 attendanceRecord[activeSelectedDate] = (attendanceRecord[activeSelectedDate] || []).filter(item => item.id.toString() !== memberId.toString());
                 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
-                if (isFirebaseActive && db) {
-                    let possibleKeys = new Set();
-                    if (rec) {
-                        if (rec.code) possibleKeys.add(rec.code.toString().replace(/\D/g, ''));
-                        if (rec.id) possibleKeys.add(rec.id.toString().replace(/\D/g, ''));
-                        if (rec.phone) possibleKeys.add(rec.phone.toString().replace(/\D/g, ''));
-                    }
-                    if (m) {
-                        if (m.code) possibleKeys.add(m.code.toString().replace(/\D/g, ''));
-                        if (m.id) possibleKeys.add(m.id.toString().replace(/\D/g, ''));
-                        if (m.phone) possibleKeys.add(m.phone.toString().replace(/\D/g, ''));
-                    }
-                    possibleKeys.add(memberId.toString().replace(/\D/g, ''));
-                    possibleKeys.add(memberId.toString());
-
-                    syncToCloud('attendance', attendanceRecord);
-                    updateLastSyncTimestamp();
+                if (isFirebaseActive && fsdb) {
+                    // استبدال مستند اليوم بالكامل بالقائمة المحدَّثة يحذف ضمنياً أي مفتاح لم يعد موجوداً
+                    let partitionObj = {};
+                    (attendanceRecord[activeSelectedDate] || []).forEach(item => {
+                        let p = (item.code || item.id || '').toString().replace(/\D/g, '');
+                        if (p) partitionObj[p] = item;
+                    });
+                    fsdb.collection('attendance').doc(activeSelectedDate).set(partitionObj)
+                        .then(() => updateLastSyncTimestamp())
+                        .catch(() => syncToCloud('attendance', attendanceRecord));
                 } else {
                     syncToCloud('attendance', attendanceRecord);
                 }
@@ -3632,9 +3641,11 @@ function exportFollowupToExcel() {
                 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
                 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
 
-                if (isFirebaseActive && db) {
-                    syncToCloud('attendance', attendanceRecord);
-                    if (activeSelectedDate === today) db.collection('audit_logs').doc(today).set(fsAuditMap(auditLogs.slice(0, 300)));
+                if (isFirebaseActive && fsdb) {
+                    fsdb.collection('attendance').doc(activeSelectedDate).delete().catch(() => {});
+                }
+                if (isFirebaseActive && fsdb && activeSelectedDate === today) {
+                    fsdb.collection('servants_attendance').doc(today).delete().catch(() => {});
                 }
 
                 logActivity("تصفير كشف يوم", activeSelectedDate, "حذف سجل الحضور لهذا التاريخ بالكامل");
@@ -3665,8 +3676,11 @@ function exportFollowupToExcel() {
             }
             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
             let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
-            if (isFirebaseActive && db) {
-                syncToCloud('attendance', attendanceRecord);
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('attendance').doc(activeSelectedDate).update({
+                    [`${pKey}.${field}`]: isChecked,
+                    [`${pKey}.points`]: rec.points
+                }).catch(() => {});
             }
             logActivity(`تحديث سر ${field === ' communion' ? 'التناول' : 'المشاركة'}`.replace(' communion', ' communion').replace(' communion', 'التناول'), rec.name, `${activeSelectedDate} - ${isChecked ? "تم الرصد" : "إلغاء"}`);
             renderAttendanceTable();
@@ -4008,7 +4022,7 @@ function exportFollowupToExcel() {
                     let deletedName = m.name;
                     members = members.filter(x => x.id.toString() !== m.id.toString());
                     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
-                    if (isFirebaseActive && db) db.collection('members').doc(String(m.id)).delete().catch(() => {});
+                    if (isFirebaseActive && fsdb) fsdb.collection('members').doc(String(m.id)).delete().catch(() => {});
                     if (typeof logActivity === 'function') logActivity("حذف مخدوم", deletedName, "حذف نهائي للملف");
                     closeProfile();
                     renderMembersList();
@@ -4082,80 +4096,72 @@ function exportFollowupToExcel() {
         // ==========================================
         // 36. Firebase Init
         // ==========================================
-        // ==========================================
-        // 36. Firebase Init
-        // ==========================================
         async function initFirebase() {
-                // إعدادات المشروع من ملف المشروع (js/firebase-config.js)، أو من الإعداد اليدوي القديم إن وُجد
-                let configObj = window.FIREBASE_CONFIG || null;
-                let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
-                if (!configObj && savedConfig) { try { configObj = JSON.parse(savedConfig); } catch (e) { configObj = null; } }
-                let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
-                let savedPass = localStorage.getItem(STORAGE_KEYS.CLOUD_PASS);
-                // تصريح الدخول الذي تُصدره دالة /api/login (المرحلة 2)
-                let customToken = sessionStorage.getItem('khedmety_fb_token') || localStorage.getItem('khedmety_fb_token');
-            
-                if (!configObj || (!customToken && (!savedEmail || !savedPass))) {
-                    let statusText = document.getElementById('cloudStatusText');
-                    if (statusText) statusText.innerText = "العمل محلياً";
-                    // لا نعرض نافذة إعداد السحابة تلقائياً؛ الربط يتم بتسجيل الدخول (المرحلة 2).
-                    return;
+            let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
+            let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
+            let savedPass = localStorage.getItem(STORAGE_KEYS.CLOUD_PASS);
+
+            if (!savedConfig || !savedEmail || !savedPass) {
+                let statusText = document.getElementById('cloudStatusText');
+                if (statusText) statusText.innerText = "العمل محلياً";
+                showCloudSetupModal();
+                return;
+            }
+
+            try {
+                let configObj = JSON.parse(savedConfig);
+                if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                    firebase.initializeApp(configObj);
                 }
-            
-                try {
-                    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-                        firebase.initializeApp(configObj);
+                firebaseConfigLoaded = configObj;
+
+                if (typeof firebase !== 'undefined') {
+                    if (!firebase.auth().currentUser) {
+                        await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
                     }
-                    firebaseConfigLoaded = configObj;
-            
-                    if (typeof firebase !== 'undefined') {
-                        if (!firebase.auth().currentUser) {
-                            if (customToken) await firebase.auth().signInWithCustomToken(customToken);
-                            else await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
-                        }
-                        db = firebase.firestore();
-                        // العمل أوفلاين: تخزين Firestore محلياً ومزامنته تلقائياً عند عودة الاتصال
-                        try { await db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* أكثر من تبويب أو متصفح لا يدعم */ }
+                    db = firebase.database();
+                    fsdb = firebase.firestore();
                     isFirebaseActive = true;
 
-                    // مؤشر الاتصال لـ Firestore
-                    let statusText = document.getElementById('cloudStatusText');
-                    let indicator = document.getElementById('cloudIndicator');
-                    if (indicator) indicator.className = "cloud-status cloud-connected";
-                    if (statusText) statusText.innerText = "متصل سحابياً 🟢";
-                    
-                    let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
-                    if (Object.keys(pending).length > 0) {
-                        if (statusText) statusText.innerText = "جاري رفع المتأخرات... ⏳";
-                        pushPendingData();
-                    }
+                    let connectedRef = db.ref(".info/connected");
+                    connectedRef.on("value", snap => {
+                        const statusText = document.getElementById('cloudStatusText');
+                        const indicator = document.getElementById('cloudIndicator');
+                        if (snap.val() === true) {
+                            if (indicator) indicator.className = "cloud-status cloud-connected";
+                            let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                            if (Object.keys(pending).length > 0) {
+                                if (statusText) statusText.innerText = "جاري رفع المتأخرات... ⏳";
+                                pushPendingData();
+                            } else {
+                                if (statusText) statusText.innerText = "متصل سحابياً 🟢";
+                            }
+                        } else {
+                            if (indicator) indicator.className = "cloud-status cloud-offline";
+                            if (statusText) statusText.innerText = "يعمل بدون نت (أوفلاين) 🟠";
+                        }
+                    });
 
                     function shouldAcceptCloudData(path) {
                         let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
                         return !pending[path];
                     }
 
-                    // 1. إعدادات النظام
-                    db.collection('settings').doc('general').onSnapshot(doc => {
+                    db.ref('settings').on('value', snap => {
                         if (shouldAcceptCloudData('settings')) {
-                            settings = Object.assign({}, settings, doc.exists ? doc.data() : {});
+                            settings = Object.assign({}, settings, snap.exists() ? snap.val() : {});
                             localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
                             applyServiceBranding();
                         }
                     });
 
-                    // 2. المخدومين
-                    db.collection('members').onSnapshot(snapshot => {
+                    fsdb.collection('members').onSnapshot(snap => {
                         if (shouldAcceptCloudData('members')) {
-                            if (snapshot.empty) {
-                                if (snapshot.metadata.fromCache) return;
-                                if (members.length > 0) { syncToCloud('members', members); return; }
+                            if (snap.empty) {
                                 members = [];
                                 localStorage.removeItem(STORAGE_KEYS.MEMBERS);
                             } else {
-                                let rawList = [];
-                                snapshot.forEach(doc => rawList.push(doc.data()));
-                                
+                                let rawList = snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
                                 let mapByCodeOrId = new Map();
                                 rawList.filter(Boolean).forEach(m => {
                                     let uniqueKey = (m.code && m.code.toString().trim() !== "")
@@ -4194,17 +4200,12 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    // 3. الحضور اليومي للمخدومين
-                    db.collection('attendance').onSnapshot(snapshot => {
+                    fsdb.collection('attendance').onSnapshot(snap => {
                         if (shouldAcceptCloudData('attendance')) {
-                            if (snapshot.empty) {
-                                if (snapshot.metadata.fromCache) return;
-                                if (Object.values(attendanceRecord).some(l => l && l.length)) { fsSeedDays('attendance', attendanceRecord); return; }
-                            }
                             let formattedRecord = {};
-                            snapshot.forEach(doc => {
-                                let dayData = doc.data();
-                                formattedRecord[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
+                            snap.forEach(doc => {
+                                let dayData = doc.data() || {};
+                                formattedRecord[doc.id] = Object.values(dayData).filter(Boolean);
                             });
                             attendanceRecord = formattedRecord;
                             if (!attendanceRecord[today]) attendanceRecord[today] = [];
@@ -4215,36 +4216,23 @@ function exportFollowupToExcel() {
                             renderDashboard();
                             renderAttendanceCalendar();
                         }
-                    });
+                    }, err => console.warn('تعذر الاستماع لتحديثات الحضور:', err.code || err.message));
 
-                    // 4. الحضور اليومي للخدام
-                    db.collection('servants_attendance').onSnapshot(snapshot => {
+                    fsdb.collection('servants_attendance').onSnapshot(snap => {
                         if (shouldAcceptCloudData('servants_attendance')) {
-                            if (snapshot.empty) {
-                                if (snapshot.metadata.fromCache) return;
-                                if (Object.values(servantsAttendance).some(l => l && l.length)) { fsSeedDays('servants_attendance', servantsAttendance); return; }
-                            }
-                            servantsAttendance = {};
-                            snapshot.forEach(doc => {
-                                let dayData = doc.data();
-                                servantsAttendance[doc.id] = dayData.list ? dayData.list.filter(Boolean) : Object.values(dayData).filter(Boolean);
-                            });
+                            let formatted = {};
+                            snap.forEach(doc => { formatted[doc.id] = (doc.data() || {}).list || []; });
+                            servantsAttendance = formatted;
                             if (!servantsAttendance[today]) servantsAttendance[today] = [];
                             localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
                             renderServantsAttendanceTable();
                             renderDashboard();
                         }
-                    });
+                    }, err => console.warn('تعذر الاستماع لسجل حضور الخدام:', err.code || err.message));
 
-                    // 5. الخدام
-                    db.collection('servants').onSnapshot(snapshot => {
+                    fsdb.collection('servants').onSnapshot(snap => {
                         if (shouldAcceptCloudData('servants')) {
-                            if (snapshot.empty) {
-                                if (snapshot.metadata.fromCache) return;
-                                if (servants.length > 0) { syncToCloud('servants', servants); return; }
-                            }
-                            servants = [];
-                            snapshot.forEach(doc => servants.push(doc.data()));
+                            servants = snap.empty ? [] : snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
                             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
                             renderServantsTable();
                             renderServantsAttendanceTable();
@@ -4254,14 +4242,9 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    // 6. خطة السنة
-                    db.collection('system').doc('master_plan').onSnapshot(doc => {
+                    db.ref('master_plan').on('value', snap => {
                         if (shouldAcceptCloudData('master_plan')) {
-                            if (!doc.exists) {
-                                if (doc.metadata.fromCache) return;
-                                if (masterPlan.length > 0) { syncToCloud('master_plan', masterPlan); return; }
-                            }
-                            masterPlan = doc.exists ? (doc.data().list || []) : [];
+                            masterPlan = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
                             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
                             renderMasterPlanTable();
                             renderServantsAttendanceTable();
@@ -4269,53 +4252,38 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    // 7. مواد الكورس
-                    db.collection('system').doc('course_materials').onSnapshot(doc => {
+                    db.ref('course_materials').on('value', snap => {
                         if (shouldAcceptCloudData('course_materials')) {
-                            if (!doc.exists) {
-                                if (doc.metadata.fromCache) return;
-                                if (courseMaterials.length > 0) { syncToCloud('course_materials', courseMaterials); return; }
-                            }
-                            courseMaterials = doc.exists ? (doc.data().list || []) : [];
+                            courseMaterials = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
                             localStorage.setItem('khedmety_course_materials', JSON.stringify(courseMaterials));
                             renderMaterialsList();
                         }
                     });
 
-                    // 8. التقييمات الذاتية
-                    db.collection('system').doc('self_reflections').onSnapshot(doc => {
+                    db.ref('self_reflections').on('value', snap => {
                         if (shouldAcceptCloudData('self_reflections')) {
-                            if (!doc.exists) {
-                                if (doc.metadata.fromCache) return;
-                                if (selfReflections.length > 0) { syncToCloud('self_reflections', selfReflections); return; }
-                            }
-                            selfReflections = doc.exists ? (doc.data().list || []) : [];
+                            selfReflections = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
                             localStorage.setItem('khedmety_self_reflections', JSON.stringify(selfReflections));
                             renderReflectionsTable();
                         }
                     });
 
-                    // 9. كتل المواد (الـ Module)
-                    db.collection('system').doc('courses_module').onSnapshot(doc => {
-                        if (window.CoursesModule && doc.exists) CoursesModule.applyCloud(doc.data());
-                    }, err => { 
-                        if (window.CoursesModule) CoursesModule.cloudError(err); 
-                    });
+                    db.ref('courses_module').on('value', snap => {
+                        if (window.CoursesModule) CoursesModule.applyCloud(snap.val());
+                    }, err => { if (window.CoursesModule) CoursesModule.cloudError(err); });
 
-                    // 10. سجل العمليات (Audit Logs) لليوم الحالي
-                    db.collection('audit_logs').doc(today).onSnapshot(doc => {
-                        if (doc.exists) {
-                            let val = doc.data();
-                            auditLogs = val.list ? val.list.reverse() : Object.values(val).reverse();
+                    fsdb.collection('audit_logs').doc(today).onSnapshot(snap => {
+                        let val = snap.exists ? snap.data() : null;
+                        if (val) {
+                            auditLogs = Object.values(val).reverse();
                             localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(auditLogs.slice(0, 300)));
                             renderAuditLogTable();
                         }
-                    });
+                    }, err => console.warn('تعذر متابعة سجل العمليات:', err.code || err.message));
                 }
             } catch (e) {
                 let statusText = document.getElementById('cloudStatusText');
                 if (statusText) statusText.innerText = "خطأ في الاتصال بالسحابة";
-                console.error("Firebase Init Error:", e);
             }
         }
 
@@ -4581,64 +4549,105 @@ function saveServantSpiritualLog() {
             }
         }
 
+
+        // تستخدم لعمليات "استبدال القائمة بالكامل" (حذف جماعي، أو مزامنة متأخرات بلا كتابة فردية لكل عنصر).
+        // تُطبَّق فقط على members/servants بعد ترحيلهما لـ Firestore (المرحلة 1). الحد الأقصى لعملية Batch في
+        // Firestore هو 500 عملية؛ نقسّم القائمة إلى دفعات عند تجاوزها.
+        async function clearFirestoreCollection(name) {
+            if (!fsdb) return;
+            try {
+                const snap = await fsdb.collection(name).get();
+                let batch = fsdb.batch(), n = 0;
+                for (const doc of snap.docs) {
+                    batch.delete(doc.ref); n++;
+                    if (n === 450) { await batch.commit(); batch = fsdb.batch(); n = 0; }
+                }
+                if (n > 0) await batch.commit();
+            } catch (e) { console.warn('تعذر تفريغ Collection:', name, e.code || e.message); }
+        }
+
+        async function replaceFirestoreCollection(name, list) {
+            if (!fsdb) return;
+            await clearFirestoreCollection(name);
+            try {
+                const items = (list || []).filter(Boolean);
+                let batch = fsdb.batch(), n = 0;
+                for (const item of items) {
+                    const id = String(item.id || item.code || Date.now() + Math.random());
+                    batch.set(fsdb.collection(name).doc(id), item); n++;
+                    if (n === 450) { await batch.commit(); batch = fsdb.batch(); n = 0; }
+                }
+                if (n > 0) await batch.commit();
+            } catch (e) { console.warn('تعذر مزامنة Collection كاملة:', name, e.code || e.message); }
+        }
+
         function pushPendingData() {
             if (!isFirebaseActive || !db || !navigator.onLine) return;
             let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
             let keys = Object.keys(pending);
             if (keys.length === 0) { updatePendingBadge(); return; }
 
-            keys.forEach(path => {
+            keys.forEach(async path => {
+                if (path === 'members' || path === 'servants') {
+                    const key = path === 'members' ? STORAGE_KEYS.MEMBERS : STORAGE_KEYS.SERVANTS;
+                    const list = JSON.parse(localStorage.getItem(key)) || [];
+                    await replaceFirestoreCollection(path, list);
+                    let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                    delete currentPending[path];
+                    localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                    updatePendingBadge();
+                    updateLastSyncTimestamp();
+                    return;
+                }
                 let localData = null;
-                if (path === 'members') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS));
-                else if (path === 'servants_attendance') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS_ATTENDANCE));
-                else if (path === 'servants') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS));
+                if (path === 'attendance') {
+                    if (!fsdb) return;
+                    let fullAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
+                    let currentDayList = fullAtt[activeSelectedDate] || [];
+                    let partitionObj = {};
+                    currentDayList.forEach(item => {
+                        let p = (item.code || item.id || '').toString().replace(/\D/g, '');
+                        if (p) partitionObj[p] = item;
+                    });
+                    fsdb.collection('attendance').doc(activeSelectedDate).set(partitionObj).then(() => {
+                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                        delete currentPending['attendance'];
+                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                        updatePendingBadge();
+                        updateLastSyncTimestamp();
+                    }).catch(() => {});
+                    return;
+                }
+                if (path === 'servants_attendance') {
+                    if (!fsdb) return;
+                    let fullServAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS_ATTENDANCE)) || {};
+                    let dates = Object.keys(fullServAtt);
+                    let batch = fsdb.batch();
+                    dates.forEach(d => batch.set(fsdb.collection('servants_attendance').doc(d), { list: fullServAtt[d] || [] }));
+                    batch.commit().then(() => {
+                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                        delete currentPending['servants_attendance'];
+                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                        updatePendingBadge();
+                        updateLastSyncTimestamp();
+                    }).catch(() => {});
+                    return;
+                }
                 else if (path === 'master_plan') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MASTER_PLAN));
                 else if (path === 'settings') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
                 else if (path === 'course_materials') localData = JSON.parse(localStorage.getItem('khedmety_course_materials'));
                 else if (path === 'self_reflections') localData = JSON.parse(localStorage.getItem('khedmety_self_reflections'));
 
-                if (localData !== null || path === 'attendance') {
-                    let promise = null;
-
-                    if (path === 'settings') {
-                        promise = db.collection('settings').doc('general').set(localData);
-                    } 
-                    else if (path === 'attendance') {
-                        let fullAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
-                        let currentDayList = fullAtt[activeSelectedDate] || [];
-                        promise = db.collection('attendance').doc(activeSelectedDate).set({ list: currentDayList });
-                    }
-                    else if (path === 'servants_attendance') {
-                        let currentDayList = localData[today] || [];
-                        promise = db.collection('servants_attendance').doc(today).set({ list: currentDayList });
-                    }
-                    else if (['master_plan', 'course_materials', 'self_reflections'].includes(path)) {
-                        promise = db.collection('system').doc(path).set({ list: localData });
-                    }
-                    else if (Array.isArray(localData)) {
-                        // استخدام Batch لرفع مصفوفات البيانات الكبيرة (المخدومين، الخدام)
-                        const chunks = [];
-                        for (let i = 0; i < localData.length; i += 400) chunks.push(localData.slice(i, i + 400));
-                        promise = chunks.reduce((pr, chunk) => pr.then(() => {
-                            const b = db.batch();
-                            chunk.forEach(item => { b.set(db.collection(path).doc((item.id || item.code || Date.now()).toString()), fsClean(item)); });
-                            return b.commit();
-                        }), Promise.resolve());
-                    }
-
-                    if (promise) {
-                        promise.then(() => {
-                            let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
-                            delete currentPending[path];
-                            localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
-                            updatePendingBadge();
-                            updateLastSyncTimestamp();
-                            let cloudStatus = document.getElementById('cloudStatusText');
-                            if (cloudStatus) cloudStatus.innerText = "متصل وآمن 🟢";
-                        }).catch(err => {
-                            console.error(`فشل رفع ${path}:`, err);
-                        });
-                    }
+                if (localData !== null) {
+                    db.ref(path).set(localData).then(() => {
+                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                        delete currentPending[path];
+                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                        updatePendingBadge();
+                        updateLastSyncTimestamp();
+                        let cloudStatus = document.getElementById('cloudStatusText');
+                        if (cloudStatus) cloudStatus.innerText = "متصل وآمن 🟢";
+                    }).catch(() => {});
                 }
             });
         }
@@ -4649,39 +4658,6 @@ function saveServantSpiritualLog() {
         }, 5000);
 
         window.addEventListener('online', pushPendingData);
-
-        // ==========================================
-        // دوال Firestore المساعدة (تحل محل واجهة Realtime Database القديمة)
-        // ==========================================
-        function fsClean(o) { return JSON.parse(JSON.stringify(o)); }   // يزيل القيم undefined التي يرفضها Firestore
-        function fsAuditMap(arr) {
-            const m = {};
-            (arr || []).filter(Boolean).forEach((e, i) => { m[String(e.id !== undefined ? e.id : i)] = e; });
-            return fsClean(m);
-        }
-        async function fsClearCollection(name) {
-            const snap = await db.collection(name).get();
-            for (let i = 0; i < snap.docs.length; i += 400) {
-                const b = db.batch();
-                snap.docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
-                await b.commit();
-            }
-        }
-        async function fsSeedDays(colName, rec) {          // رفع أولي لأيام الحضور المحلية إلى سحابة فارغة
-            const days = Object.keys(rec).filter(d => (rec[d] || []).length);
-            for (let i = 0; i < days.length; i += 400) {
-                const b = db.batch();
-                days.slice(i, i + 400).forEach(d => b.set(db.collection(colName).doc(d), fsClean({ list: rec[d] })));
-                await b.commit();
-            }
-        }
-        async function fsSaveBigJson(colRef, name, obj) {  // مستند Firestore لا يتجاوز 1MB، فنقسّم البيانات الكبيرة
-            const s = JSON.stringify(obj), CH = 250000, n = Math.max(1, Math.ceil(s.length / CH));
-            for (let i = 0; i < n; i++) {
-                await colRef.doc(name + '_' + String(i).padStart(3, '0')).set({ name: name, index: i, total: n, json: s.slice(i * CH, (i + 1) * CH) });
-            }
-        }
-
 
         function syncToCloud(path, data) {
             let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
@@ -4694,7 +4670,7 @@ function saveServantSpiritualLog() {
         }
 
         // ==========================================
-        // 41. مراقبة استهلاك السحابة (لم تتغير لأنها تعتمد على الـ LocalStorage)
+        // 41. مراقبة استهلاك السحابة
         // ==========================================
         function getCloudUsageStats() {
             let totalChars = JSON.stringify(members).length +
@@ -4708,7 +4684,7 @@ function saveServantSpiritualLog() {
             Object.keys(attendanceRecord).forEach(d => {
                 if (d.startsWith(currentMonth)) monthlyAttCount += (attendanceRecord[d] || []).length;
             });
-            let maxStorageKB = 1024 * 1024; // حد مجاني تقريبي (1GB)
+            let maxStorageKB = 1024 * 1024;
             let percentUsed = ((estSizeKB / maxStorageKB) * 100).toFixed(2);
             return { estSizeKB, monthlyAttCount, percentUsed, isSafe: estSizeKB < (maxStorageKB * 0.7) };
         }
@@ -4759,6 +4735,7 @@ function saveServantSpiritualLog() {
             if (timeEl) timeEl.innerText = `آخر رفع: ${nowStr}`;
             updateCloudUsageUI();
         }
+
         // ==========================================
         // 42. تسجيل الدخول
         // ==========================================
@@ -4855,9 +4832,9 @@ function saveServantSpiritualLog() {
             if (Object.keys(pending).length > 0) {
                 if (!confirm("⚠️ تنبيه: توجد بيانات لم يتم رفعها للسحابة بعد! هل تريد حقاً تسجيل الخروج الآن؟")) return;
             }
-            if (currentUser && isFirebaseActive && db) {
+            if (currentUser && isFirebaseActive && fsdb) {
                 let servantKey = (currentUser.id || currentUser.phone || '').toString().replace(/\D/g, '') || '1001';
-               b.collection('active_sessions').doc(servantKey).set(sessionData).remove().catch(() => {});
+                fsdb.collection('active_sessions').doc(servantKey).delete().catch(() => {});
             }
             if (currentUser) logActivity("تسجيل خروج", currentUser.name, "خروج يدوي");
             localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
@@ -5158,8 +5135,7 @@ function checkSession() {
             };
 
             if (isFirebaseActive && db) {
-                await db.collection('archive').doc(String(yearLabel)).set({ archiveLabel: yearLabel, archivedBy: archivePayload.archivedBy, graduatedCount: archivePayload.graduatedCount, createdAt: Date.now() });
-                await fsSaveBigJson(db.collection('archive').doc(String(yearLabel)).collection('parts'), 'payload', archivePayload);
+                await db.ref(`archive/${yearLabel}`).set(archivePayload);
             }
 
             members.forEach(m => {
@@ -5175,9 +5151,27 @@ function checkSession() {
                 if (!servantsAttendance[today]) servantsAttendance[today] = [];
                 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
                 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
-                if (isFirebaseActive && db) {
-                    await fsClearCollection('attendance');
-                    await fsClearCollection('servants_attendance');
+                if (isFirebaseActive && fsdb) {
+                    try {
+                        const attSnap = await fsdb.collection('attendance').get();
+                        let batch = fsdb.batch(), n = 0;
+                        for (const doc of attSnap.docs) {
+                            batch.delete(doc.ref); n++;
+                            if (n === 450) { await batch.commit(); batch = fsdb.batch(); n = 0; }
+                        }
+                        if (n > 0) await batch.commit();
+                    } catch (e) { console.warn('تعذر حذف سجل الحضور بالكامل من Firestore:', e.code || e.message); }
+                }
+                if (isFirebaseActive && fsdb) {
+                    try {
+                        const saSnap = await fsdb.collection('servants_attendance').get();
+                        let batch = fsdb.batch(), n = 0;
+                        for (const doc of saSnap.docs) {
+                            batch.delete(doc.ref); n++;
+                            if (n === 450) { await batch.commit(); batch = fsdb.batch(); n = 0; }
+                        }
+                        if (n > 0) await batch.commit();
+                    } catch (e) { console.warn('تعذر حذف سجل حضور الخدام بالكامل من Firestore:', e.code || e.message); }
                 }
             }
 
@@ -5323,8 +5317,8 @@ function checkSession() {
             members.push(newMember);
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
 
-            if (isFirebaseActive && db) {
-                db.collection('members').doc(String(newMember.id)).set(fsClean(newMember)).catch(() => syncToCloud('members', members));
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('members').doc(String(newMember.id)).set(newMember).catch(() => syncToCloud('members', members));
             }
 
             logActivity("إضافة دارس جديد", name, `كود: ${examCode} - مرحلة: ${newMember.stage}`);
@@ -5440,7 +5434,7 @@ function checkSession() {
 
                 // 2) نسخة سحابية إضافية (أدمن فقط) كحماية إضافية لو الجهاز نفسه ضاع أو اتمسح
                 if (isFirebaseActive && db && currentPermission === 'admin') {
-                    fsSaveBigJson(db.collection('auto_backups').doc(todayKey).collection('parts'), 'snapshot', snapshot).then(() => db.collection('auto_backups').doc(todayKey).set({ date: todayKey, createdAt: Date.now() })).catch(() => {});
+                    db.ref(`auto_backups/${todayKey}`).set(snapshot).catch(() => {});
                 }
             } catch (e) { console.warn("فشل تشغيل النسخ الاحتياطي التلقائي:", e); }
         }
@@ -5542,7 +5536,7 @@ function checkSession() {
   function cloudPush() {
     try {
       if (!(isFirebaseActive && db)) { cloudOk = false; cloudMsg = 'العمل محلياً — لا يوجد اتصال بالسحابة بعد.'; paintCloud(); return; }
-      db.collection('system').doc('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
+      db.ref('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
         dirty = false; cloudOk = true; cloudMsg = 'محفوظ على السحابة ✅'; paintCloud();
       }).catch(function (e) { cloudFail(e); });
     } catch (e) { cloudFail(e); }
