@@ -70,7 +70,7 @@
                     item.servant = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'غير مسجل دخول';
                     updates[item.id] = item;
                 });
-                db.ref(`error_logs/${dateKey}`).update(updates).catch(() => {});
+                db.collection('error_logs').doc(dateKey).set(fsClean(updates), { merge: true }).catch(() => {});
             } catch (e) { /* تجاهل: لا نريد لصائد الأخطاء نفسه أن يسبب خطأ */ }
         }, 15000);
 
@@ -266,6 +266,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
 </head>
 <body>
 
@@ -1617,8 +1618,8 @@ function exportFollowupToExcel() {
                 let email = deriveServantAuthEmail(code);
                 let cred = await firebase.auth().signInWithEmailAndPassword(email, phone);
                 let uid = cred.user.uid;
-                let snap = await db.ref(`roles/${uid}`).once('value');
-                let role = snap.val();
+                let snap = await db.collection('roles').doc(uid).get();
+                let role = snap.exists ? (snap.data() || {}).role : null;
                 return role || null;
             } catch (err) {
                 // طبيعي جداً لو الخادم لسه معندوش حساب فردي مربوط - يفضل يشتغل بالنظام المحلي
@@ -1649,7 +1650,7 @@ function exportFollowupToExcel() {
                 let cred = await firebase.auth().createUserWithEmailAndPassword(email, s.phone);
                 let newUid = cred.user.uid;
 
-                await db.ref(`roles/${newUid}`).set(s.permission || s.role || 'full');
+                await db.collection('roles').doc(newUid).set({ role: s.permission || s.role || 'full' });
 
                 // إعادة تسجيل الدخول بحساب السحابة المشترك لأن إنشاء المستخدم الجديد يبدّل الجلسة الحالية تلقائياً
                 if (savedEmail && savedPass) {
@@ -1658,7 +1659,7 @@ function exportFollowupToExcel() {
 
                 s.cloudUid = newUid;
                 localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
-                if (isFirebaseActive && db) db.ref(`servants/${s.id}`).set(s).catch(() => syncToCloud('servants', servants));
+                if (isFirebaseActive && db) db.collection('servants').doc(String(s.id)).set(fsClean(s)).catch(() => syncToCloud('servants', servants));
 
                 logActivity("ربط حساب سحابي فردي", s.name, `UID: ${newUid}`);
                 renderServantsTable();
@@ -1860,8 +1861,8 @@ function exportFollowupToExcel() {
                     let d = new Date();
                     d.setDate(d.getDate() - i);
                     let dateKey = localDateKey(d);
-                    let snap = await db.ref(`error_logs/${dateKey}`).once('value');
-                    let val = snap.val();
+                    let snap = await db.collection('error_logs').doc(dateKey).get();
+                    let val = snap.exists ? snap.data() : null;
                     if (val) Object.values(val).forEach(e => allErrors.push(e));
                 }
                 allErrors.sort((a, b) => new Date(b.time) - new Date(a.time));
@@ -1891,7 +1892,7 @@ function exportFollowupToExcel() {
             batch.forEach(item => {
                 updates[item.id] = item;
             });
-            db.ref(`audit_logs/${today}`).update(updates).catch(() => {});
+            db.collection('audit_logs').doc(today).set(fsClean(updates), { merge: true }).catch(() => {});
         }
 
         function renderAuditLogTable() {
@@ -1934,7 +1935,7 @@ function exportFollowupToExcel() {
             if (isAdminPasswordValid(pwdHash, pwd)) {
                 auditLogs = [];
                 localStorage.removeItem(STORAGE_KEYS.AUDIT_LOGS);
-                if (isFirebaseActive && db) db.ref(`audit_logs/${today}`).remove().catch(() => {});
+                if (isFirebaseActive && db) db.collection('audit_logs').doc(today).delete().catch(() => {});
                 renderAuditLogTable();
                 showToast("✅ تم تفريغ سجل العمليات بنجاح!");
             } else {
@@ -1978,7 +1979,7 @@ function exportFollowupToExcel() {
                 localStorage.setItem(VERSION_HISTORY_KEY, JSON.stringify(all));
 
                 if (isFirebaseActive && db) {
-                    db.ref(`version_history/${entityType}/${entityId}/${versionEntry.id}`).set(versionEntry).catch(() => {});
+                    db.collection('version_history').doc(`${entityType}__${entityId}`).collection('versions').doc(String(versionEntry.id)).set(fsClean(versionEntry)).catch(() => {});
                 }
             } catch (e) { console.warn("فشل حفظ نسخة سجل التعديلات:", e); }
         }
@@ -2064,7 +2065,7 @@ function exportFollowupToExcel() {
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
 
             if (isFirebaseActive && db) {
-                db.ref(`members/${members[mIndex].id}`).update(updatedFields)
+                db.collection('members').doc(String(members[mIndex].id)).set(fsClean(updatedFields), { merge: true })
                     .then(() => updateLastSyncTimestamp())
                     .catch(() => syncToCloud('members', members));
             } else {
@@ -2147,17 +2148,19 @@ function exportFollowupToExcel() {
                 return;
             }
 
-            let attNodeRef = db.ref(`attendance/${activeSelectedDate}/${pKey}`);
-            attNodeRef.transaction(currentVal => {
-                if (currentVal === null) return newRecord;
-                return;
-            }, (error, committed, snapshot) => {
-                if (error) {
-                    showToast("❌ خطأ أثناء المزامنة السحابية", true);
-                } else if (!committed) {
+            const dayRef = db.collection('attendance').doc(activeSelectedDate);
+            db.runTransaction(async (tx) => {
+                const snap = await tx.get(dayRef);
+                const list = (snap.exists && Array.isArray(snap.data().list)) ? snap.data().list.filter(Boolean) : [];
+                const dup = list.find(r => (r.code || r.id || '').toString().replace(/\D/g, '') === pKey);
+                if (dup) return { committed: false, recordedBy: dup.scannedBy };
+                list.push(fsClean(newRecord));
+                tx.set(dayRef, { list: list });
+                return { committed: true };
+            }).then(res => {
+                if (!res.committed) {
                     playBeepSound('error');
-                    let recordedBy = snapshot.val() ? snapshot.val().scannedBy : 'خادم آخر';
-                    showToast(`⚠️ مسجل مسبقاً في (${activeSelectedDate}) بواسطة: ${recordedBy}`, true);
+                    showToast(`⚠️ مسجل مسبقاً في (${activeSelectedDate}) بواسطة: ${res.recordedBy || 'خادم آخر'}`, true);
                 } else {
                     playBeepSound('success');
                     showToast(`✅ تم توثيق حضور: ${member.name} سحابياً`);
@@ -2165,6 +2168,10 @@ function exportFollowupToExcel() {
                 }
                 updateLastSyncTimestamp();
                 renderAttendanceCalendar();
+            }).catch(() => {
+                // لا اتصال أو صلاحيات: السجل محفوظ محلياً وسيُرفع تلقائياً عند عودة الاتصال
+                syncToCloud('attendance', attendanceRecord);
+                showToast("📱 حُفظ الحضور على الجهاز وسيُرفع عند عودة الاتصال", true);
             });
         }
 
@@ -2609,11 +2616,12 @@ function exportFollowupToExcel() {
                 device: deviceType,
                 status: "active"
             };
-            db.ref(`active_sessions/${servantKey}`).set(sessionData).catch(() => {});
-            db.ref(`active_sessions/${servantKey}`).on('value', snap => {
-                let val = snap.val();
+            const sessRef = db.collection('active_sessions').doc(servantKey);
+            sessRef.set(sessionData).catch(() => {});
+            sessRef.onSnapshot(doc => {
+                let val = doc.exists ? doc.data() : null;
                 if (val && val.status === "terminated") {
-                    db.ref(`active_sessions/${servantKey}`).remove().catch(() => {});
+                    sessRef.delete().catch(() => {});
                     localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
                     sessionStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
                     currentUser = null;
@@ -2625,11 +2633,11 @@ function exportFollowupToExcel() {
 
         function listenToActiveSessions() {
             if (!isFirebaseActive || !db) return;
-            db.ref('active_sessions').on('value', snap => {
+            db.collection('active_sessions').onSnapshot(snap => {
                 const tbody = document.getElementById('activeSessionsTbody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
-                let sessions = snap.val();
+                let sessions = {}; snap.forEach(d => { sessions[d.id] = d.data(); });
                 if (!sessions || Object.keys(sessions).length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" class="empty-state">لا توجد أي جلسات نشطة حالياً.</td></tr>';
                     return;
@@ -2652,7 +2660,7 @@ function exportFollowupToExcel() {
 
         function terminateSession(servantKey, servantName) {
             if (confirm(`هل أنت متأكد من رغبتك في طرد جهاز (${servantName}) وإخراجه فوراً؟`)) {
-                db.ref(`active_sessions/${servantKey}/status`).set("terminated").then(() => {
+                db.collection('active_sessions').doc(String(servantKey)).update({ status: 'terminated' }).then(() => {
                     logActivity("طرد جلسة خادم", servantName, "إنهاء اتصال عن بُعد");
                     showToast(`✅ تم إرسال أمر الطرد لـ ${servantName}`);
                 });
@@ -2664,11 +2672,11 @@ function exportFollowupToExcel() {
             if (!pwd) return;
             let pwdHash = await hashPassword(pwd);
             if (isAdminPasswordValid(pwdHash, pwd)) {
-                db.ref('active_sessions').once('value', snap => {
-                    let sessions = snap.val() || {};
+                db.collection('active_sessions').get().then(snap => {
+                    let sessions = {}; snap.forEach(d => { sessions[d.id] = d.data(); });
                     Object.keys(sessions).forEach(key => {
                         if (sessions[key].sessionId !== myCurrentSessionId) {
-                            db.ref(`active_sessions/${key}/status`).set("terminated");
+                            db.collection('active_sessions').doc(String(key)).update({ status: 'terminated' });
                         }
                     });
                     logActivity("طرد شامل", "جميع الجلسات", "طرد جميع الأجهزة المتصلة");
@@ -2739,7 +2747,7 @@ function exportFollowupToExcel() {
 
             let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
             if (isFirebaseActive && db) {
-                db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ time: formattedDisplayTime, isAbsentDueToDelay: rec.isAbsentDueToDelay });
+                syncToCloud('attendance', attendanceRecord);
             }
 
             logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
@@ -3058,7 +3066,7 @@ function exportFollowupToExcel() {
         function saveMasterPlan() {
             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
             if (isFirebaseActive && db) {
-                db.ref('master_plan').set(masterPlan).then(() => {
+                db.collection('system').doc('master_plan').set(fsClean({ list: masterPlan })).then(() => {
                     updateLastSyncTimestamp();
                     showToast("✅ تم تحديث خطة السنة على السحابة فوراً!");
                 }).catch(() => syncToCloud('master_plan', masterPlan));
@@ -3556,7 +3564,7 @@ function exportFollowupToExcel() {
                     let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
                     delete pending['members'];
                     localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(pending));
-                    if (isFirebaseActive && db) db.ref('members').set([]);
+                    if (isFirebaseActive && db) fsClearCollection('members').catch(() => {});
                     logActivity("حذف المخدومين", "تصفية كاملة", "حذف كافة سجلات المخدومين");
                     renderMembersList();
                     renderDashboard();
@@ -3593,18 +3601,8 @@ function exportFollowupToExcel() {
                     possibleKeys.add(memberId.toString().replace(/\D/g, ''));
                     possibleKeys.add(memberId.toString());
 
-                    possibleKeys.forEach(k => {
-                        if (k) db.ref(`attendance/${activeSelectedDate}/${k}`).remove().catch(() => {});
-                    });
-
-                    let partitionObj = {};
-                    (attendanceRecord[activeSelectedDate] || []).forEach(item => {
-                        let p = (item.code || item.id || '').toString().replace(/\D/g, '');
-                        if (p) partitionObj[p] = item;
-                    });
-                    db.ref(`attendance/${activeSelectedDate}`).set(partitionObj)
-                        .then(() => updateLastSyncTimestamp())
-                        .catch(() => syncToCloud('attendance', attendanceRecord));
+                    syncToCloud('attendance', attendanceRecord);
+                    updateLastSyncTimestamp();
                 } else {
                     syncToCloud('attendance', attendanceRecord);
                 }
@@ -3635,8 +3633,8 @@ function exportFollowupToExcel() {
                 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
 
                 if (isFirebaseActive && db) {
-                    db.ref(`attendance/${activeSelectedDate}`).remove().catch(() => {});
-                    if (activeSelectedDate === today) db.collection('audit_logs').doc(today).set({ list: auditLogs.slice(0, 300) });
+                    syncToCloud('attendance', attendanceRecord);
+                    if (activeSelectedDate === today) db.collection('audit_logs').doc(today).set(fsAuditMap(auditLogs.slice(0, 300)));
                 }
 
                 logActivity("تصفير كشف يوم", activeSelectedDate, "حذف سجل الحضور لهذا التاريخ بالكامل");
@@ -3668,7 +3666,7 @@ function exportFollowupToExcel() {
             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
             let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
             if (isFirebaseActive && db) {
-                db.ref(`attendance/${activeSelectedDate}/${pKey}`).update({ [field]: isChecked, points: rec.points });
+                syncToCloud('attendance', attendanceRecord);
             }
             logActivity(`تحديث سر ${field === ' communion' ? 'التناول' : 'المشاركة'}`.replace(' communion', ' communion').replace(' communion', 'التناول'), rec.name, `${activeSelectedDate} - ${isChecked ? "تم الرصد" : "إلغاء"}`);
             renderAttendanceTable();
@@ -4010,7 +4008,7 @@ function exportFollowupToExcel() {
                     let deletedName = m.name;
                     members = members.filter(x => x.id.toString() !== m.id.toString());
                     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
-                    if (isFirebaseActive && db) db.ref(`members/${m.id}`).remove().catch(() => {});
+                    if (isFirebaseActive && db) db.collection('members').doc(String(m.id)).delete().catch(() => {});
                     if (typeof logActivity === 'function') logActivity("حذف مخدوم", deletedName, "حذف نهائي للملف");
                     closeProfile();
                     renderMembersList();
@@ -4088,29 +4086,36 @@ function exportFollowupToExcel() {
         // 36. Firebase Init
         // ==========================================
         async function initFirebase() {
-            let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
-            let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
-            let savedPass = localStorage.getItem(STORAGE_KEYS.CLOUD_PASS);
-
-            if (!savedConfig || !savedEmail || !savedPass) {
-                let statusText = document.getElementById('cloudStatusText');
-                if (statusText) statusText.innerText = "العمل محلياً";
-                // المرحلة 0/1: لا نعرض نافذة إعداد السحابة تلقائياً؛ الربط السحابي الجديد (Firestore) يأتي في المرحلة 2.
-                return;
-            }
-
-            try {
-                let configObj = JSON.parse(savedConfig);
-                if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-                    firebase.initializeApp(configObj);
+                // إعدادات المشروع من ملف المشروع (js/firebase-config.js)، أو من الإعداد اليدوي القديم إن وُجد
+                let configObj = window.FIREBASE_CONFIG || null;
+                let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
+                if (!configObj && savedConfig) { try { configObj = JSON.parse(savedConfig); } catch (e) { configObj = null; } }
+                let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
+                let savedPass = localStorage.getItem(STORAGE_KEYS.CLOUD_PASS);
+                // تصريح الدخول الذي تُصدره دالة /api/login (المرحلة 2)
+                let customToken = sessionStorage.getItem('khedmety_fb_token') || localStorage.getItem('khedmety_fb_token');
+            
+                if (!configObj || (!customToken && (!savedEmail || !savedPass))) {
+                    let statusText = document.getElementById('cloudStatusText');
+                    if (statusText) statusText.innerText = "العمل محلياً";
+                    // لا نعرض نافذة إعداد السحابة تلقائياً؛ الربط يتم بتسجيل الدخول (المرحلة 2).
+                    return;
                 }
-                firebaseConfigLoaded = configObj;
-
-                if (typeof firebase !== 'undefined') {
-                    if (!firebase.auth().currentUser) {
-                        await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
+            
+                try {
+                    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+                        firebase.initializeApp(configObj);
                     }
-                    db = firebase.firestore();
+                    firebaseConfigLoaded = configObj;
+            
+                    if (typeof firebase !== 'undefined') {
+                        if (!firebase.auth().currentUser) {
+                            if (customToken) await firebase.auth().signInWithCustomToken(customToken);
+                            else await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
+                        }
+                        db = firebase.firestore();
+                        // العمل أوفلاين: تخزين Firestore محلياً ومزامنته تلقائياً عند عودة الاتصال
+                        try { await db.enablePersistence({ synchronizeTabs: true }); } catch (e) { /* أكثر من تبويب أو متصفح لا يدعم */ }
                     isFirebaseActive = true;
 
                     // مؤشر الاتصال لـ Firestore
@@ -4143,6 +4148,8 @@ function exportFollowupToExcel() {
                     db.collection('members').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('members')) {
                             if (snapshot.empty) {
+                                if (snapshot.metadata.fromCache) return;
+                                if (members.length > 0) { syncToCloud('members', members); return; }
                                 members = [];
                                 localStorage.removeItem(STORAGE_KEYS.MEMBERS);
                             } else {
@@ -4190,6 +4197,10 @@ function exportFollowupToExcel() {
                     // 3. الحضور اليومي للمخدومين
                     db.collection('attendance').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('attendance')) {
+                            if (snapshot.empty) {
+                                if (snapshot.metadata.fromCache) return;
+                                if (Object.values(attendanceRecord).some(l => l && l.length)) { fsSeedDays('attendance', attendanceRecord); return; }
+                            }
                             let formattedRecord = {};
                             snapshot.forEach(doc => {
                                 let dayData = doc.data();
@@ -4209,6 +4220,10 @@ function exportFollowupToExcel() {
                     // 4. الحضور اليومي للخدام
                     db.collection('servants_attendance').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('servants_attendance')) {
+                            if (snapshot.empty) {
+                                if (snapshot.metadata.fromCache) return;
+                                if (Object.values(servantsAttendance).some(l => l && l.length)) { fsSeedDays('servants_attendance', servantsAttendance); return; }
+                            }
                             servantsAttendance = {};
                             snapshot.forEach(doc => {
                                 let dayData = doc.data();
@@ -4224,6 +4239,10 @@ function exportFollowupToExcel() {
                     // 5. الخدام
                     db.collection('servants').onSnapshot(snapshot => {
                         if (shouldAcceptCloudData('servants')) {
+                            if (snapshot.empty) {
+                                if (snapshot.metadata.fromCache) return;
+                                if (servants.length > 0) { syncToCloud('servants', servants); return; }
+                            }
                             servants = [];
                             snapshot.forEach(doc => servants.push(doc.data()));
                             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
@@ -4238,6 +4257,10 @@ function exportFollowupToExcel() {
                     // 6. خطة السنة
                     db.collection('system').doc('master_plan').onSnapshot(doc => {
                         if (shouldAcceptCloudData('master_plan')) {
+                            if (!doc.exists) {
+                                if (doc.metadata.fromCache) return;
+                                if (masterPlan.length > 0) { syncToCloud('master_plan', masterPlan); return; }
+                            }
                             masterPlan = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
                             renderMasterPlanTable();
@@ -4249,6 +4272,10 @@ function exportFollowupToExcel() {
                     // 7. مواد الكورس
                     db.collection('system').doc('course_materials').onSnapshot(doc => {
                         if (shouldAcceptCloudData('course_materials')) {
+                            if (!doc.exists) {
+                                if (doc.metadata.fromCache) return;
+                                if (courseMaterials.length > 0) { syncToCloud('course_materials', courseMaterials); return; }
+                            }
                             courseMaterials = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem('khedmety_course_materials', JSON.stringify(courseMaterials));
                             renderMaterialsList();
@@ -4258,6 +4285,10 @@ function exportFollowupToExcel() {
                     // 8. التقييمات الذاتية
                     db.collection('system').doc('self_reflections').onSnapshot(doc => {
                         if (shouldAcceptCloudData('self_reflections')) {
+                            if (!doc.exists) {
+                                if (doc.metadata.fromCache) return;
+                                if (selfReflections.length > 0) { syncToCloud('self_reflections', selfReflections); return; }
+                            }
                             selfReflections = doc.exists ? (doc.data().list || []) : [];
                             localStorage.setItem('khedmety_self_reflections', JSON.stringify(selfReflections));
                             renderReflectionsTable();
@@ -4586,13 +4617,13 @@ function saveServantSpiritualLog() {
                     }
                     else if (Array.isArray(localData)) {
                         // استخدام Batch لرفع مصفوفات البيانات الكبيرة (المخدومين، الخدام)
-                        let batch = db.batch();
-                        localData.forEach(item => {
-                            let docId = (item.id || item.code || Date.now()).toString();
-                            let docRef = db.collection(path).doc(docId);
-                            batch.set(docRef, item);
-                        });
-                        promise = batch.commit();
+                        const chunks = [];
+                        for (let i = 0; i < localData.length; i += 400) chunks.push(localData.slice(i, i + 400));
+                        promise = chunks.reduce((pr, chunk) => pr.then(() => {
+                            const b = db.batch();
+                            chunk.forEach(item => { b.set(db.collection(path).doc((item.id || item.code || Date.now()).toString()), fsClean(item)); });
+                            return b.commit();
+                        }), Promise.resolve());
                     }
 
                     if (promise) {
@@ -4618,6 +4649,39 @@ function saveServantSpiritualLog() {
         }, 5000);
 
         window.addEventListener('online', pushPendingData);
+
+        // ==========================================
+        // دوال Firestore المساعدة (تحل محل واجهة Realtime Database القديمة)
+        // ==========================================
+        function fsClean(o) { return JSON.parse(JSON.stringify(o)); }   // يزيل القيم undefined التي يرفضها Firestore
+        function fsAuditMap(arr) {
+            const m = {};
+            (arr || []).filter(Boolean).forEach((e, i) => { m[String(e.id !== undefined ? e.id : i)] = e; });
+            return fsClean(m);
+        }
+        async function fsClearCollection(name) {
+            const snap = await db.collection(name).get();
+            for (let i = 0; i < snap.docs.length; i += 400) {
+                const b = db.batch();
+                snap.docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
+                await b.commit();
+            }
+        }
+        async function fsSeedDays(colName, rec) {          // رفع أولي لأيام الحضور المحلية إلى سحابة فارغة
+            const days = Object.keys(rec).filter(d => (rec[d] || []).length);
+            for (let i = 0; i < days.length; i += 400) {
+                const b = db.batch();
+                days.slice(i, i + 400).forEach(d => b.set(db.collection(colName).doc(d), fsClean({ list: rec[d] })));
+                await b.commit();
+            }
+        }
+        async function fsSaveBigJson(colRef, name, obj) {  // مستند Firestore لا يتجاوز 1MB، فنقسّم البيانات الكبيرة
+            const s = JSON.stringify(obj), CH = 250000, n = Math.max(1, Math.ceil(s.length / CH));
+            for (let i = 0; i < n; i++) {
+                await colRef.doc(name + '_' + String(i).padStart(3, '0')).set({ name: name, index: i, total: n, json: s.slice(i * CH, (i + 1) * CH) });
+            }
+        }
+
 
         function syncToCloud(path, data) {
             let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
@@ -5094,7 +5158,8 @@ function checkSession() {
             };
 
             if (isFirebaseActive && db) {
-                await db.ref(`archive/${yearLabel}`).set(archivePayload);
+                await db.collection('archive').doc(String(yearLabel)).set({ archiveLabel: yearLabel, archivedBy: archivePayload.archivedBy, graduatedCount: archivePayload.graduatedCount, createdAt: Date.now() });
+                await fsSaveBigJson(db.collection('archive').doc(String(yearLabel)).collection('parts'), 'payload', archivePayload);
             }
 
             members.forEach(m => {
@@ -5111,8 +5176,8 @@ function checkSession() {
                 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
                 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
                 if (isFirebaseActive && db) {
-                    await db.ref('attendance').remove();
-                    await db.ref('servants_attendance').remove();
+                    await fsClearCollection('attendance');
+                    await fsClearCollection('servants_attendance');
                 }
             }
 
@@ -5259,7 +5324,7 @@ function checkSession() {
             localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
 
             if (isFirebaseActive && db) {
-                db.ref(`members/${newMember.id}`).set(newMember).catch(() => syncToCloud('members', members));
+                db.collection('members').doc(String(newMember.id)).set(fsClean(newMember)).catch(() => syncToCloud('members', members));
             }
 
             logActivity("إضافة دارس جديد", name, `كود: ${examCode} - مرحلة: ${newMember.stage}`);
@@ -5375,7 +5440,7 @@ function checkSession() {
 
                 // 2) نسخة سحابية إضافية (أدمن فقط) كحماية إضافية لو الجهاز نفسه ضاع أو اتمسح
                 if (isFirebaseActive && db && currentPermission === 'admin') {
-                    db.ref(`auto_backups/${todayKey}`).set(snapshot).catch(() => {});
+                    fsSaveBigJson(db.collection('auto_backups').doc(todayKey).collection('parts'), 'snapshot', snapshot).then(() => db.collection('auto_backups').doc(todayKey).set({ date: todayKey, createdAt: Date.now() })).catch(() => {});
                 }
             } catch (e) { console.warn("فشل تشغيل النسخ الاحتياطي التلقائي:", e); }
         }
@@ -5477,7 +5542,7 @@ function checkSession() {
   function cloudPush() {
     try {
       if (!(isFirebaseActive && db)) { cloudOk = false; cloudMsg = 'العمل محلياً — لا يوجد اتصال بالسحابة بعد.'; paintCloud(); return; }
-      db.ref('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
+      db.collection('system').doc('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
         dirty = false; cloudOk = true; cloudMsg = 'محفوظ على السحابة ✅'; paintCloud();
       }).catch(function (e) { cloudFail(e); });
     } catch (e) { cloudFail(e); }
