@@ -3081,8 +3081,8 @@ function exportFollowupToExcel() {
 
         function saveMasterPlan() {
             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
-            if (isFirebaseActive && db) {
-                db.ref('master_plan').set(masterPlan).then(() => {
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('config').doc('master_plan').set({ list: masterPlan }).then(() => {
                     updateLastSyncTimestamp();
                     showToast("✅ تم تحديث خطة السنة على السحابة فوراً!");
                 }).catch(() => syncToCloud('master_plan', masterPlan));
@@ -4147,13 +4147,13 @@ function exportFollowupToExcel() {
                         return !pending[path];
                     }
 
-                    db.ref('settings').on('value', snap => {
+                    fsdb.collection('config').doc('settings').onSnapshot(snap => {
                         if (shouldAcceptCloudData('settings')) {
-                            settings = Object.assign({}, settings, snap.exists() ? snap.val() : {});
+                            settings = Object.assign({}, settings, snap.exists ? (snap.data() || {}) : {});
                             localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
                             applyServiceBranding();
                         }
-                    });
+                    }, err => console.warn('تعذر متابعة الإعدادات:', err.code || err.message));
 
                     fsdb.collection('members').onSnapshot(snap => {
                         if (shouldAcceptCloudData('members')) {
@@ -4242,31 +4242,34 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    db.ref('master_plan').on('value', snap => {
+                    fsdb.collection('config').doc('master_plan').onSnapshot(snap => {
                         if (shouldAcceptCloudData('master_plan')) {
-                            masterPlan = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            let d = snap.exists ? snap.data() : null;
+                            masterPlan = (d && Array.isArray(d.list)) ? d.list : [];
                             localStorage.setItem(STORAGE_KEYS.MASTER_PLAN, JSON.stringify(masterPlan));
                             renderMasterPlanTable();
                             renderServantsAttendanceTable();
                             checkUpcomingMasterPlanEvents();
                         }
-                    });
+                    }, err => console.warn('تعذر متابعة خطة السنة:', err.code || err.message));
 
-                    db.ref('course_materials').on('value', snap => {
+                    fsdb.collection('config').doc('course_materials').onSnapshot(snap => {
                         if (shouldAcceptCloudData('course_materials')) {
-                            courseMaterials = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            let d = snap.exists ? snap.data() : null;
+                            courseMaterials = (d && Array.isArray(d.list)) ? d.list : [];
                             localStorage.setItem('khedmety_course_materials', JSON.stringify(courseMaterials));
                             renderMaterialsList();
                         }
-                    });
+                    }, err => console.warn('تعذر متابعة مكتبة المواد:', err.code || err.message));
 
-                    db.ref('self_reflections').on('value', snap => {
+                    fsdb.collection('config').doc('self_reflections').onSnapshot(snap => {
                         if (shouldAcceptCloudData('self_reflections')) {
-                            selfReflections = snap.exists() ? (Array.isArray(snap.val()) ? snap.val() : Object.values(snap.val())) : [];
+                            let d = snap.exists ? snap.data() : null;
+                            selfReflections = (d && Array.isArray(d.list)) ? d.list : [];
                             localStorage.setItem('khedmety_self_reflections', JSON.stringify(selfReflections));
                             renderReflectionsTable();
                         }
-                    });
+                    }, err => console.warn('تعذر متابعة النوتة الروحية:', err.code || err.message));
 
                     db.ref('courses_module').on('value', snap => {
                         if (window.CoursesModule) CoursesModule.applyCloud(snap.val());
@@ -4599,7 +4602,6 @@ function saveServantSpiritualLog() {
                     updateLastSyncTimestamp();
                     return;
                 }
-                let localData = null;
                 if (path === 'attendance') {
                     if (!fsdb) return;
                     let fullAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
@@ -4633,13 +4635,29 @@ function saveServantSpiritualLog() {
                     }).catch(() => {});
                     return;
                 }
-                else if (path === 'master_plan') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.MASTER_PLAN));
-                else if (path === 'settings') localData = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS));
-                else if (path === 'course_materials') localData = JSON.parse(localStorage.getItem('khedmety_course_materials'));
-                else if (path === 'self_reflections') localData = JSON.parse(localStorage.getItem('khedmety_self_reflections'));
-
-                if (localData !== null) {
-                    db.ref(path).set(localData).then(() => {
+                else if (path === 'master_plan' || path === 'settings') {
+                    if (!fsdb) return;
+                    let key = path === 'master_plan' ? STORAGE_KEYS.MASTER_PLAN : STORAGE_KEYS.SETTINGS;
+                    let raw = JSON.parse(localStorage.getItem(key));
+                    if (raw === null) return;
+                    let payload = path === 'master_plan' ? { list: raw } : raw;
+                    fsdb.collection('config').doc(path).set(payload).then(() => {
+                        let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
+                        delete currentPending[path];
+                        localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
+                        updatePendingBadge();
+                        updateLastSyncTimestamp();
+                        let cloudStatus = document.getElementById('cloudStatusText');
+                        if (cloudStatus) cloudStatus.innerText = "متصل وآمن 🟢";
+                    }).catch(() => {});
+                    return;
+                }
+                else if (path === 'course_materials' || path === 'self_reflections') {
+                    if (!fsdb) return;
+                    let key = path === 'course_materials' ? 'khedmety_course_materials' : 'khedmety_self_reflections';
+                    let raw = JSON.parse(localStorage.getItem(key));
+                    if (raw === null) return;
+                    fsdb.collection('config').doc(path).set({ list: raw }).then(() => {
                         let currentPending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
                         delete currentPending[path];
                         localStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(currentPending));
@@ -5134,8 +5152,8 @@ function checkSession() {
                 settingsSnapshot: settings
             };
 
-            if (isFirebaseActive && db) {
-                await db.ref(`archive/${yearLabel}`).set(archivePayload);
+            if (isFirebaseActive && fsdb) {
+                await fsdb.collection('archive').doc(yearLabel).set(archivePayload);
             }
 
             members.forEach(m => {
@@ -5433,8 +5451,8 @@ function checkSession() {
                 localStorage.setItem(AUTO_BACKUP_LAST_DATE_KEY, todayKey);
 
                 // 2) نسخة سحابية إضافية (أدمن فقط) كحماية إضافية لو الجهاز نفسه ضاع أو اتمسح
-                if (isFirebaseActive && db && currentPermission === 'admin') {
-                    db.ref(`auto_backups/${todayKey}`).set(snapshot).catch(() => {});
+                if (isFirebaseActive && fsdb && currentPermission === 'admin') {
+                    fsdb.collection('auto_backups').doc(todayKey).set(snapshot).catch(() => {});
                 }
             } catch (e) { console.warn("فشل تشغيل النسخ الاحتياطي التلقائي:", e); }
         }
