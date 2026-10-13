@@ -386,8 +386,10 @@
            <!-- استبدال التقييم الروحي بنوتة الخادم الروحية -->
 <a href="servant_spiritual_note.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل العمليات 🛡️</div>
             <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
+<a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">ترحيل الحضور لـFirestore 🔄</a>
             <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
 <a href="servant_followup.html" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
+<a href="servant_spiritual_report.html" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">متابعة السلوك الروحي 📈</a>
         </div>
 
         <!-- مكتبة المواد -->
@@ -4271,8 +4273,8 @@ function exportFollowupToExcel() {
                         }
                     }, err => console.warn('تعذر متابعة النوتة الروحية:', err.code || err.message));
 
-                    db.ref('courses_module').on('value', snap => {
-                        if (window.CoursesModule) CoursesModule.applyCloud(snap.val());
+                    fsdb.collection('config').doc('courses_module').onSnapshot(snap => {
+                        if (window.CoursesModule) CoursesModule.applyCloud(snap.exists ? snap.data() : null);
                     }, err => { if (window.CoursesModule) CoursesModule.cloudError(err); });
 
                     fsdb.collection('audit_logs').doc(today).onSnapshot(snap => {
@@ -5553,8 +5555,8 @@ function checkSession() {
   var dirty = false, cloudMsg = '', cloudOk = false;
   function cloudPush() {
     try {
-      if (!(isFirebaseActive && db)) { cloudOk = false; cloudMsg = 'العمل محلياً — لا يوجد اتصال بالسحابة بعد.'; paintCloud(); return; }
-      db.ref('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
+      if (!(isFirebaseActive && fsdb)) { cloudOk = false; cloudMsg = 'العمل محلياً — لا يوجد اتصال بالسحابة بعد.'; paintCloud(); return; }
+      fsdb.collection('config').doc('courses_module').set(JSON.parse(JSON.stringify(state))).then(function () {
         dirty = false; cloudOk = true; cloudMsg = 'محفوظ على السحابة ✅'; paintCloud();
       }).catch(function (e) { cloudFail(e); });
     } catch (e) { cloudFail(e); }
@@ -5563,7 +5565,7 @@ function checkSession() {
     cloudOk = false;
     var code = (e && (e.code || e.message)) || 'خطأ غير معروف';
     cloudMsg = /permission/i.test(code)
-      ? 'لم يُرفع: الصلاحيات في Firebase ترفض الكتابة على المسار courses_module. أضف له قاعدة مثل master_plan في تبويب Rules.'
+      ? 'لم يُرفع: الصلاحيات في Firestore ترفض الكتابة على config/courses_module. تأكد من وجود قاعدة match /config/{docId} في Firestore Rules.'
       : 'لم يُرفع للسحابة (' + code + '). سيُعاد المحاولة تلقائياً.';
     paintCloud();
   }
