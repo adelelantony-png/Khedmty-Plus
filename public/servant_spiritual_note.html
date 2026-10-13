@@ -16,7 +16,6 @@
         .check-pill:hover { background: #f1f5f9; border-color: #cbd5e1; }
         .check-pill input { width: 22px; height: 22px; margin-left: 12px; cursor: pointer; flex: none; }
         .check-pill:has(input:checked) { background: #fef2f2; border-color: #fca5a5; }
-        .catchup-card { background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 16px; padding: 14px; margin-bottom: 15px; }
         .group-label { font-size: .85rem; font-weight: 700; color: #1e3799; margin-bottom: 8px; display: block; }
     </style>
 </head>
@@ -53,30 +52,6 @@
             <div class="mb-3">
                 <label class="form-label small fw-bold text-muted">اختر اليوم للمتابعة أو التسجيل:</label>
                 <input type="date" id="target_date" class="form-control text-center fw-bold" required onchange="onDateChanged(this.value)">
-            </div>
-
-            <!-- تعويض قراءات هذا التاريخ -->
-            <div id="catchup-section" class="catchup-card">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="small fw-bold text-dark"><i class="fa-solid fa-clock-rotate-left text-warning me-1"></i> قراءات هذا التاريخ:</span>
-                    <span id="catchup-date-badge" class="badge bg-warning text-dark"></span>
-                </div>
-                <div class="d-flex flex-column gap-2">
-                    <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded-3 border">
-                        <div>
-                            <span class="small fw-bold d-block"><i class="fa-solid fa-book-bible text-primary me-1"></i> قراءة إنجيل اليوم:</span>
-                            <small class="text-muted" id="catchup-reading-name">جاري الفحص...</small>
-                        </div>
-                        <a id="btn-catchup-bible" href="bible.html" class="btn btn-sm btn-outline-primary fw-bold">اقرأ الآن 📖</a>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center bg-white p-2 rounded-3 border">
-                        <div>
-                            <span class="small fw-bold d-block"><i class="fa-solid fa-church text-danger me-1"></i> سنكسار وقديس اليوم:</span>
-                            <small class="text-muted">تذكارات وسير قديسي هذا اليوم</small>
-                        </div>
-                        <a href="synaxarium.html" class="btn btn-sm btn-outline-secondary fw-bold">عرض السنكسار ⛪</a>
-                    </div>
-                </div>
             </div>
 
             <!-- الكلمة المقدسة -->
@@ -123,11 +98,6 @@
                 <input type="checkbox" id="s_confession">
                 <div><strong class="d-block text-dark"><i class="fa-solid fa-dove text-primary me-1"></i> جلسة الاعتراف</strong><small class="text-muted">الاعتراف الشهري مع أب الاعتراف</small></div>
             </label>
-            <label class="check-pill mb-4">
-                <input type="checkbox" id="s_makeup">
-                <div><strong class="d-block text-dark"><i class="fa-solid fa-arrow-rotate-right text-warning me-1"></i> تعويض الفائت</strong><small class="text-muted">عوّضت ما فاتني من صلوات أو قراءات سابقة</small></div>
-            </label>
-
             <button type="submit" id="save-btn" class="btn btn-danger w-100 py-2 fw-bold">
                 <i class="fa-solid fa-floppy-disk me-1"></i> حفظ تسجيل هذا اليوم
             </button>
@@ -135,6 +105,7 @@
     </div>
 </div>
 
+<script src="bible_plan.js"></script>
 <script>
 (function () {
     'use strict';
@@ -184,28 +155,11 @@
         return planCache || {};
     }
 
-    async function checkDayCatchup(selectedDate) {
+    // فحص صامت (بلا واجهة) لمعرفة هل قراءة إنجيل اليوم مُنجزة مسبقاً، ليُعلَّم مربع الاختيار تلقائياً
+    function isBibleAlreadyRead(selectedDate) {
         const d = new Date(selectedDate + 'T00:00:00');
         const planKey = `${d.getMonth() + 1}-${d.getDate()}`;
-        $('catchup-date-badge').textContent = `${d.getDate()}/${d.getMonth() + 1}`;
-
-        const isRead = !!readJSON('khedmety_bible_readings')[planKey];
-        const btn = $('btn-catchup-bible'), name = $('catchup-reading-name');
-
-        const plan = await getPlan();
-        const item = plan[planKey] || FALLBACK[planKey];
-        if (item) {
-            const end = item.chapter_end || item.chapter;
-            name.textContent = item.reading || `سفر ${item.book} (${item.chapter}${end > item.chapter ? '-' + end : ''})`;
-            btn.href = `bible.html?book=${encodeURIComponent(item.book)}&chapter=${item.chapter}&chapter_end=${end}`;
-        } else {
-            name.textContent = 'قراءة وتأمل حر';
-            btn.href = 'bible.html';
-        }
-
-        if (isRead) { btn.className = 'btn btn-sm btn-success fw-bold'; btn.textContent = 'مُنجز ✔️'; }
-        else { btn.className = 'btn btn-sm btn-outline-primary fw-bold'; btn.textContent = 'اقرأ الآن 📖'; }
-        return isRead;
+        return !!readJSON('khedmety_bible_readings')[planKey];
     }
 
     // ---------- استرجاع السجل المحفوظ (مع دعم الأسماء القديمة) ----------
@@ -224,13 +178,11 @@
         set('attended_mass', s && (s.mass || s.attended_mass));
         set('fasting', s && (s.fasting || s.fast));
         set('s_confession', s && s.confession);
-        set('s_makeup', s && s.makeup);
     }
 
-    window.onDateChanged = async function (val) {
+    window.onDateChanged = function (val) {
         if (!val) return;
-        const read = await checkDayCatchup(val);
-        loadSavedLog(val, read);
+        loadSavedLog(val, isBibleAlreadyRead(val));
     };
 
     // ---------- الحفظ ----------
@@ -253,7 +205,6 @@
             mass: $('attended_mass').checked,
             fasting: $('fasting').checked,
             confession: $('s_confession').checked,
-            makeup: $('s_makeup').checked,
             updatedAt: Date.now()
         };
 
