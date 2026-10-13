@@ -265,7 +265,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
@@ -1253,8 +1252,7 @@
         const DEFAULT_ADMIN_PWD = '1234567';
         const MAX_LOCAL_STORAGE_BYTES = 5 * 1024 * 1024;
 
-        let db = null;      // Realtime Database — لمسارات لم تُرحَّل بعد (المرحلة 2-4)
-        let fsdb = null;    // Firestore — المصدر الرسمي الآن لـ members / servants / roles (المرحلة 1)
+        let fsdb = null;    // Firestore — المصدر الوحيد للبيانات الآن، بعد اكتمال ترحيل كل المسارات من Realtime Database
         let isFirebaseActive = false;
         let firebaseConfigLoaded = null;
 
@@ -4121,15 +4119,15 @@ function exportFollowupToExcel() {
                     if (!firebase.auth().currentUser) {
                         await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
                     }
-                    db = firebase.database();
                     fsdb = firebase.firestore();
                     isFirebaseActive = true;
 
-                    let connectedRef = db.ref(".info/connected");
-                    connectedRef.on("value", snap => {
+                    // استبدال .info/connected (خاصة بـRealtime Database) بمراقبة اتصال المتصفح،
+                    // لأن كل البيانات التشغيلية صارت على Firestore وليس لها حاجة لاتصال RTDB حي.
+                    function updateConnectionStatus(isOnline) {
                         const statusText = document.getElementById('cloudStatusText');
                         const indicator = document.getElementById('cloudIndicator');
-                        if (snap.val() === true) {
+                        if (isOnline) {
                             if (indicator) indicator.className = "cloud-status cloud-connected";
                             let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
                             if (Object.keys(pending).length > 0) {
@@ -4142,7 +4140,10 @@ function exportFollowupToExcel() {
                             if (indicator) indicator.className = "cloud-status cloud-offline";
                             if (statusText) statusText.innerText = "يعمل بدون نت (أوفلاين) 🟠";
                         }
-                    });
+                    }
+                    updateConnectionStatus(navigator.onLine);
+                    window.addEventListener('online', () => updateConnectionStatus(true));
+                    window.addEventListener('offline', () => updateConnectionStatus(false));
 
                     function shouldAcceptCloudData(path) {
                         let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
@@ -4587,7 +4588,7 @@ function saveServantSpiritualLog() {
         }
 
         function pushPendingData() {
-            if (!isFirebaseActive || !db || !navigator.onLine) return;
+            if (!isFirebaseActive || !fsdb || !navigator.onLine) return;
             let pending = JSON.parse(localStorage.getItem(STORAGE_KEYS.PENDING_SYNC)) || {};
             let keys = Object.keys(pending);
             if (keys.length === 0) { updatePendingBadge(); return; }
@@ -4686,7 +4687,7 @@ function saveServantSpiritualLog() {
             updatePendingBadge();
             let cloudStatus = document.getElementById('cloudStatusText');
             if (cloudStatus) cloudStatus.innerText = "محفوظ بالجهاز (ينتظر النت) 📱";
-            if (isFirebaseActive && db && navigator.onLine) pushPendingData();
+            if (isFirebaseActive && fsdb && navigator.onLine) pushPendingData();
         }
 
         // ==========================================
