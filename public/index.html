@@ -79,7 +79,7 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
         <label for="p">كلمة المرور / رقم الهاتف</label>
         <div class="input">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <input id="p" type="password" placeholder="••••••••" autocomplete="current-password">
+          <input id="p" type="password" placeholder="الرقم السري (أو اتركه فارغاً للطلبة)" autocomplete="current-password">
           <button type="button" class="eye" id="eye" aria-label="إظهار كلمة المرور">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -104,12 +104,7 @@ const DEFAULT_ADMIN_PWD = '1234567';          // تعمل فقط قبل أن ي�
 const ADMIN_NAMES = ['admin', 'الأدمن', 'عادل جورج'];
 const $ = id => document.getElementById(id);
 
-// إعداد Firebase العام لهذه الخدمة (نفس Project config، يصلح لـ Firestore مباشرة بلا تغيير).
-// استبدل القيم التالية بإعدادات مشروعك. هذا الإعداد ليس سرياً وأمانه من Firestore Rules.
-// اتركه فارغاً (null) لتعطيل البحث السحابي والاكتفاء بالبيانات المحفوظة محلياً على هذا الجهاز.
-const PUBLIC_FIREBASE_CONFIG = null; /* مثال:
-const PUBLIC_FIREBASE_CONFIG = { apiKey: "...", authDomain: "...", databaseURL: "...", projectId: "..." };
-*/
+const PUBLIC_FIREBASE_CONFIG = null;
 
 const readList = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
 const norm = s => String(s ?? '').trim().toLowerCase();
@@ -121,7 +116,7 @@ async function sha(text) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// ---------- قفل المحاولات (نفس مفاتيح اللوحة) ----------
+// ---------- قفل المحاولات ----------
 const lockLeft = () => Math.max(0, (parseInt(localStorage.getItem(K.lock) || '0') || 0) - Date.now());
 function recordFail() {
   const n = (parseInt(localStorage.getItem(K.fail) || '0') || 0) + 1;
@@ -136,31 +131,65 @@ const resetFails = () => { localStorage.removeItem(K.fail); localStorage.removeI
 
 // ---------- التحقق ----------
 async function checkPhoneOrHash(rec, p) {
-  if (rec.passwordHash) return (await sha(p)) === rec.passwordHash;   // كلمة مرور مستقلة إن وُجدت
+  if (rec.passwordHash) return (await sha(p)) === rec.passwordHash;
   const want = digits(rec.phone);
-  return want.length >= 6 && digits(p) === want;                      // الهاتف: لا يُقبل فارغاً أبداً
+  return want.length >= 6 && digits(p) === want;
 }
 
+// ---------- تهيئة السحابة ديناميكياً ----------
 let fbReady = null;
 function initCloud() {
   if (fbReady !== null) return fbReady;
-  let cfg = null;
-  try { cfg = JSON.parse(localStorage.getItem('my_firebase_config') || 'null'); } catch (e) {}
-  cfg = cfg || PUBLIC_FIREBASE_CONFIG;
-  if (!cfg || typeof firebase === 'undefined' || !navigator.onLine) { fbReady = Promise.resolve(null); return fbReady; }
+
   fbReady = (async () => {
     try {
+      let cfg = null;
+      
+      // 1. محاولة الجلب من التخزين المحلي
+      try { cfg = JSON.parse(localStorage.getItem('my_firebase_config')); } catch (e) {}
+      
+      // 2. الجلب التلقائي من Vercel إذا كان الجهاز جديداً
+      if (!cfg || !cfg.apiKey) {
+        try {
+            let response = await fetch('/api/public-config');
+            if (response.ok) {
+                cfg = await response.json();
+                if (cfg && cfg.apiKey) {
+                    localStorage.setItem('my_firebase_config', JSON.stringify(cfg));
+                }
+            }
+        } catch (fetchErr) {
+            console.warn("تخطى جلب الإعدادات من Vercel");
+        }
+      }
+      
+      // 3. كاحتياطي أخير
+      cfg = cfg || PUBLIC_FIREBASE_CONFIG;
+      
+      if (!cfg || typeof firebase === 'undefined' || !navigator.onLine) { 
+          return null; 
+      }
+
       if (!firebase.apps.length) firebase.initializeApp(cfg);
-      if (!firebase.auth().currentUser) await firebase.auth().signInAnonymously();
+      if (!firebase.auth().currentUser) {
+          try {
+              await firebase.auth().signInAnonymously();
+          } catch(err) {
+              console.warn("تسجيل الدخول المجهول غير مفعل أو فشل.");
+          }
+      }
       return firebase.firestore();
-    } catch (e) { console.warn('تعذر الاتصال بالسحابة، سيعمل الدخول محلياً فقط:', e.code || e.message); return null; }
+    } catch (e) { 
+      console.warn('تعذر الاتصال بالسحابة، سيعمل الدخول محلياً فقط:', e.code || e.message); 
+      return null; 
+    }
   })();
+  
   return fbReady;
 }
-// تحويل نتيجة مجموعة Firestore إلى مصفوفة عادية، مع ضمان وجود id لكل مستند
+
 function snapToList(qs) { return qs.docs.map(d => Object.assign({ id: d.id }, d.data())); }
 
-// تنزيل قوائم الخدام والمخدومين من Collections الخاصة بهما في Firestore، وتخزينها محلياً ليعمل الجهاز أوفلاين بعدها
 async function cloudFetchDirectory() {
   const db = await initCloud();
   if (!db) return null;
@@ -170,7 +199,7 @@ async function cloudFetchDirectory() {
     try {
       localStorage.setItem(K.servants, JSON.stringify(servants));
       localStorage.setItem(K.members, JSON.stringify(members));
-    } catch (e) { /* مساحة التخزين ممتلئة: نكمل بالبيانات في الذاكرة فقط لهذه المحاولة */ }
+    } catch (e) { }
     return { servants, members };
   } catch (e) { console.warn('فشل تنزيل البيانات من السحابة:', e.code || e.message); return null; }
 }
@@ -184,36 +213,46 @@ async function authenticate(u, p) {
     const ok = saved ? (await sha(p)) === saved : p === DEFAULT_ADMIN_PWD;
     if (ok) return { kind: 'staff', role: 'admin',
       user: { id: 1001, name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin' } };
-    return null;   // اسم الأدمن لا يمر عبر مسار الخدام إطلاقاً
+    return null;
   }
 
-  // 2) الخدام (سجلات الأدمن مستبعدة حتى لا تتجاوز كلمة مرور الأدمن)
+  // 2) الخدام
   for (const s of readList(K.servants)) {
     if (isAdminRec(s)) continue;
     if ((norm(s.name) === un || (s.code != null && String(s.code) === u)) && await checkPhoneOrHash(s, p))
       return { kind: 'staff', role: 'servant', user: s };
   }
 
-  // 3) المخدومون: لا بد من هاتف مسجل ومطابق
+  // 3) المخدومون (محلياً): يكتفي بالكود أو الهاتف (الباسورد اختياري للطلبة)
   for (const m of readList(K.members)) {
-    if ((m.code != null && String(m.code) === u) || norm(m.name) === un) {
-      if (await checkPhoneOrHash(m, p)) return { kind: 'student', rec: m };
+    if ((m.code != null && String(m.code) === u) || (m.id != null && String(m.id) === u) || norm(m.name) === un) {
+      let isStudentValid = false;
+      if (!p || p === "" || (m.phone && m.phone.includes(p)) || (m.parent_phone && m.parent_phone.includes(p))) {
+          isStudentValid = true;
+      }
+      if (isStudentValid) return { kind: 'student', rec: m };
     }
   }
 
-  // 4) لم يوجد محلياً: جرّب السحابة (أول دخول من جهاز جديد، أو بيانات حُدِّثت من جهاز آخر)
+  // 4) البحث في السحابة
   if (navigator.onLine) {
     const cloud = await cloudFetchDirectory();
     if (cloud) {
       const s2 = cloud.servants.find(s => !isAdminRec(s) && (norm(s.name) === un || (s.code != null && String(s.code) === u)));
       if (s2 && await checkPhoneOrHash(s2, p)) return { kind: 'staff', role: 'servant', user: s2 };
 
-      const m2 = cloud.members.find(m => (m.code != null && String(m.code) === u) || norm(m.name) === un);
-      if (m2 && await checkPhoneOrHash(m2, p)) return { kind: 'student', rec: m2 };
+      const m2 = cloud.members.find(m => (m.code != null && String(m.code) === u) || (m.id != null && String(m.id) === u) || norm(m.name) === un);
+      if (m2) {
+          let isStudentValid = false;
+          if (!p || p === "" || (m2.phone && m2.phone.includes(p)) || (m2.parent_phone && m2.parent_phone.includes(p))) {
+              isStudentValid = true;
+          }
+          if (isStudentValid) return { kind: 'student', rec: m2 };
+      }
     }
   }
 
-  // 5) خادم خلفي اختياري (يُتجاهل بهدوء على الاستضافة الثابتة)
+  // 5) خادم خلفي API (إن وُجد)
   try {
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 4000);
     const r = await fetch('/api/login', { method: 'POST', signal: ctl.signal,
@@ -226,7 +265,7 @@ async function authenticate(u, p) {
         return { kind: 'student', rec: { code: res.user.id, name: res.user.name || u, stage: res.user.level } };
       }
     }
-  } catch (e) { /* لا خادم خلفي */ }
+  } catch (e) { }
   return null;
 }
 
@@ -236,7 +275,7 @@ function startSession(r, remember) {
   ['student_code', 'student_name', 'student_level'].forEach(k => localStorage.removeItem(k));
   if (r.kind === 'staff') {
     const user = Object.assign({}, r.user, { loginTimestamp: Date.now() });
-    delete user.passwordHash;                                    // لا نكرر الهاش داخل الجلسة
+    delete user.passwordHash;
     (remember ? localStorage : sessionStorage).setItem(K.active, JSON.stringify(user));
     localStorage.setItem('user_role', r.role);
     location.href = 'servant-dashboard.html';
@@ -251,22 +290,24 @@ function startSession(r, remember) {
 }
 
 // ---------- الواجهة ----------
-const err = $('err'), btn = $('btn');
+const err = $('err'), btn =$('btn');
 function showErr(msg) { err.textContent = msg; err.classList.remove('show'); void err.offsetWidth; err.classList.add('show'); }
 function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جاري التحقق…' : 'تسجيل الدخول'; }
 let hintTimer = null;
 function showCloudHint() { hintTimer = setTimeout(() => { $('hint').textContent = 'جاري البحث في بيانات الخدمة السحابية...'; }, 600); }
 function hideCloudHint() { clearTimeout(hintTimer); $('hint').textContent = 'نسيت بياناتك؟ تواصل مع أمين الخدمة.'; }
 
-$('eye').addEventListener('click', () => { const i = $('p'); i.type = i.type === 'password' ? 'text' : 'password'; });
+$('eye').addEventListener('click', () => { const i =$('p'); i.type = i.type === 'password' ? 'text' : 'password'; });
 
 $('form').addEventListener('submit', async e => {
   e.preventDefault();
   err.classList.remove('show');
   const left = lockLeft();
   if (left) return showErr(`تم إيقاف المحاولات مؤقتاً. حاول بعد ${Math.ceil(left / 60000)} دقيقة.`);
-  const u = $('u').value.trim(), p = $('p').value.trim();
-  if (!u || !p) return showErr('من فضلك أدخل اسم المستخدم وكلمة المرور.');
+  
+  const u = $('u').value.trim(), p =$('p').value.trim();
+  // تم تعديل الشرط ليسمح بالدخول لو الباسورد فارغ (للطلبة فقط)
+  if (!u) return showErr('من فضلك أدخل اسم المستخدم (أو الكود).');
 
   setBusy(true); showCloudHint();
   let redirecting = false;
@@ -283,6 +324,11 @@ $('form').addEventListener('submit', async e => {
     hideCloudHint();
     if (!redirecting) setBusy(false);
   }
+});
+
+// تهيئة الاتصال بالسحابة في الخلفية بمجرد فتح الصفحة لتسريع الدخول
+document.addEventListener('DOMContentLoaded', () => {
+    initCloud();
 });
 </script>
 </body>
