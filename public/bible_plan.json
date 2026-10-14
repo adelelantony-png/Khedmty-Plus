@@ -230,5 +230,13 @@
   "8-21": { "reading": "1 مكابيين من 1 إلى 5", "book": "المكابيين الأول", "chapter": 1, "chapter_end": 5 },
   "8-22": { "reading": "1 مكابيين من 6 إلى 10", "book": "المكابيين الأول", "chapter": 6, "chapter_end": 10 },
   "8-23": { "reading": "1 مكابيين من 11 إلى 13", "book": "المكابيين الأول", "chapter": 11, "chapter_end": 13 },
-  "8-24": { "reading": "1 مكابيين من 14 إلى 16", "book": "المكابيين الأول", "chapter": 14, "chapter_end": 16 }
+  "8-24": { "reading": "1 مكابيين من 14 إلى 16", "book": "المكابيين الأول", "chapter": 14, "chapter_end": 16 },
+  "9-26": { "reading": "دانيال 12:9", "book": "دانيال", "chapter": 9, "chapter_end": 9 },
+  "10-1": { "reading": "سفر يونان (الإصحاحات 1 إلى 4)", "book": "يونان", "chapter": 1, "chapter_end": 4 },
+  "10-2": { "reading": "سفر ميخا (الإصحاحات 1 إلى 3)", "book": "ميخا", "chapter": 1, "chapter_end": 3 },
+  "10-3": { "reading": "سفر ميخا (الإصحاحات 4 إلى 7)", "book": "ميخا", "chapter": 4, "chapter_end": 7 },
+  "10-4": { "reading": "سفر ناحوم (الإصحاحات 1 إلى 3)", "book": "ناحوم", "chapter": 1, "chapter_end": 3 },
+  "10-5": { "reading": "سفر حبقوق (الإصحاحات 1 إلى 3)", "book": "حبقوق", "chapter": 1, "chapter_end": 3 },
+  "10-6": { "reading": "سفر صفنيا (الإصحاحات 1 إلى 3)", "book": "صفنيا", "chapter": 1, "chapter_end": 3 },
+  "10-7": { "reading": "سفر حجي (الإصحاحات 1 إلى 2)", "book": "حجي", "chapter": 1, "chapter_end": 2 }
 }
