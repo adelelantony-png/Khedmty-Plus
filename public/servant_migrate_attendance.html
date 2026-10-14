@@ -48,7 +48,7 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
 
     <div class="hero">
         <h1>🚀 الترحيل الشامل لقاعدة البيانات إلى Firestore</h1>
-        <p>أداة إتمام الانتقال النهائي: تنقل كافة البيانات والجداول من التخزين القديم (أو Realtime DB) إلى Firestore دفعة واحدة لتفادي طلب القاعدة القديمة نهائياً.</p>
+        <p>أداة إتمام الانتقال النهائي: تنقل كافة البيانات والجداول من التخزين المحلي أو القديم إلى Firestore دفعة واحدة لتفادي طلب القاعدة القديمة نهائياً.</p>
     </div>
 
     <div class="card">
@@ -78,7 +78,7 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
         <div class="log" id="log"></div>
     </div>
 
-    <div class="tip">💡 بعد اكتمال الترحيل بنجاح، سيتم الاعتماد كلياً على Firestore ولن يطلب النظام أي بيانات قديمة مرة أخرى. يمكنك غلق الأداة والعودة للوحة التحكم.</div>
+    <div class="tip">💡 بعد اكتمال الترحيل بنجاح، سيتم الاعتماد كلياً على Firestore. يمكنك غلق الأداة والعودة لوحة التحكم واستخدام النظام بكل أمان.</div>
 </div>
 
 <div id="locked" class="locked" style="display:none">🔒 هذه الأداة لأمين الخدمة فقط.</div>
@@ -110,14 +110,11 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
     const setDot = (id, state, text) => { $('dot' + id).className = 'dot ' + state; $('txt' + id).textContent = text; };
 
     async function initCloud() {
-        let cfg, email, pass;
+        let cfg;
         try {
             cfg = JSON.parse(localStorage.getItem('my_firebase_config') || 'null');
-            email = localStorage.getItem('cloud_auth_email');
-            pass = localStorage.getItem('cloud_auth_pass');
         } catch (e) {}
         
-        // جلب من Vercel إن لم تقم بحفظه محلياً
         if (!cfg) {
             try {
                 let res = await fetch('/api/public-config');
@@ -131,11 +128,12 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
         }
         try {
             if (!firebase.apps.length) firebase.initializeApp(cfg);
-            if (email && pass && !firebase.auth().currentUser) {
-                await firebase.auth().signInWithEmailAndPassword(email, pass);
-            } else if (!firebase.auth().currentUser) {
+            
+            // استخدام المصادقة المجهولة حصرياً لتجاوز أي قيود إيميل قديم أثناء الترحيل
+            if (!firebase.auth().currentUser) {
                 await firebase.auth().signInAnonymously();
             }
+            
             fsdb = firebase.firestore();
             setDot('FS', 'ok', 'متصل بنجاح بقاعدة بيانات Firestore');
             return true;
