@@ -148,7 +148,6 @@
     </a>
 </div>
 
-
 <script>
     const studentCode = localStorage.getItem('student_code');
     const studentName = localStorage.getItem('student_name');
@@ -164,11 +163,16 @@
     function checkStudentPerformanceAlert() {
         try {
             const attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+            const dateKeys = Object.keys(attendanceRecord);
+            if (dateKeys.length === 0) return;
+
             let attendedCount = 0;
-            Object.keys(attendanceRecord).forEach(dateKey => {
+            dateKeys.forEach(dateKey => {
                 const list = attendanceRecord[dateKey] || [];
-                const me = list.find(a => a.code && a.code.toString() === studentCode);
-                if (me && !me.isAbsentDueToDelay && new Date(dateKey).getDay() === 5) attendedCount++;
+                const me = list.find(a => (a.code && a.code.toString() === studentCode) || (a.id && a.id.toString() === studentCode));
+                const parts = dateKey.split('-');
+                const d = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(dateKey);
+                if (me && !me.isAbsentDueToDelay && d.getDay() === 5) attendedCount++;
             });
 
             if (attendedCount < 2) {
@@ -180,7 +184,8 @@
 
     // 1. فحص وسحب حضور وغياب المخدوم مباشرة من كشف khedmety-pro
     function checkAttendanceFromServantDB() {
-        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const localAttendance = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
         const todayList = localAttendance[today] || [];
         
@@ -191,11 +196,28 @@
             if (myRecord.isAbsentDueToDelay) {
                 statusBox.innerHTML = '<span class="text-warning">⚠ تم الرصد: تأخير شديد عن الموعد</span>';
             } else {
-                statusBox.innerHTML = `<span class="text-white">✔️ حاضر ومسجل في الكشف (${myRecord.time})</span>`;
+                statusBox.innerHTML = `<span class="text-white">✔️ حاضر ومسجل في الكشف (${myRecord.time || ''})</span>`;
             }
         } else {
             statusBox.innerHTML = '<span class="text-light opacity-75">⭕ لم يتم تسجيل حضورك بعد اليوم</span>';
         }
+    }
+
+    function getPlanItemForDate(planData, month, day) {
+        if (!planData) return null;
+        const directKey = `${month}-${day}`;
+        if (planData[directKey]) return planData[directKey];
+
+        const serviceMonth = ((month - 10 + 12) % 12) + 1;
+        const serviceKey = `${serviceMonth}-${day}`;
+        if (planData[serviceKey]) return planData[serviceKey];
+
+        const keys = Object.keys(planData);
+        if (keys.length > 0) {
+            const dayOfYear = Math.floor((new Date(new Date().getFullYear(), month - 1, day) - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+            return planData[keys[dayOfYear % keys.length]];
+        }
+        return null;
     }
 
     // 2. قراءة اليوم مع وجود احتياطي مدمج محلياً
@@ -203,7 +225,6 @@
         const today = new Date();
         const month = today.getMonth() + 1;
         const day = today.getDate();
-        const planKey = `${month}-${day}`;
 
         document.getElementById('ui-today-date-text').textContent = `تاريخ اليوم: ${day}/${month}`;
 
@@ -216,30 +237,16 @@
             } catch (e) {}
         }
 
-        if (!planData || !planData[planKey]) {
-            const fallbackQuickMap = {
-                "10-1": { reading: "سفر يونان (الإصحاحات 1 إلى 4)", book: "يونان", chapter: 1, chapter_end: 4 },
-                "10-2": { reading: "سفر ميخا (الإصحاحات 1 إلى 3)", book: "ميخا", chapter: 1, chapter_end: 3 },
-                "10-3": { reading: "سفر ميخا (الإصحاحات 4 إلى 7)", book: "ميخا", chapter: 4, chapter_end: 7 },
-                "10-4": { reading: "سفر ناحوم (الإصحاحات 1 إلى 3)", book: "ناحوم", chapter: 1, chapter_end: 3 },
-                "10-5": { reading: "سفر حبقوق (الإصحاحات 1 إلى 3)", book: "حبقوق", chapter: 1, chapter_end: 3 },
-                "10-6": { reading: "سفر صفنيا (الإصحاحات 1 إلى 3)", book: "صفنيا", chapter: 1, chapter_end: 3 },
-                "10-7": { reading: "سفر حجي (الإصحاحات 1 إلى 2)", book: "حجي", chapter: 1, chapter_end: 2 }
-            };
-            if (fallbackQuickMap[planKey]) {
-                if (!planData) planData = {};
-                planData[planKey] = fallbackQuickMap[planKey];
-            }
-        }
+        const todayItem = getPlanItemForDate(planData, month, day);
 
-        if (planData && planData[planKey]) {
-            const todayItem = planData[planKey];
+        if (todayItem) {
             const endChap = todayItem.chapter_end || todayItem.chapter;
+            const cleanBook = todayItem.book.replace(/^سفر\s+/, '').trim();
             let displayTitle = todayItem.reading;
             if (todayItem.chapter && endChap && endChap > todayItem.chapter) {
-                displayTitle = `سفر ${todayItem.book} (الإصحاحات ${todayItem.chapter} إلى ${endChap})`;
+                displayTitle = `سفر ${cleanBook} (الإصحاحات ${todayItem.chapter} إلى ${endChap})`;
             } else if (todayItem.chapter) {
-                displayTitle = `سفر ${todayItem.book} (الإصحاح ${todayItem.chapter})`;
+                displayTitle = `سفر ${cleanBook} (الإصحاح ${todayItem.chapter})`;
             }
 
             document.getElementById('ui-today-reading-title').textContent = displayTitle;
