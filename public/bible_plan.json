@@ -1,5 +1,586 @@
-{
-  "1-1": { "reading": "التكوين 1", "book": "التكوين", "chapter": 1 },
-  "1-2": { "reading": "التكوين 2", "book": "التكوين", "chapter": 2 },
-  "9-26": { "reading": "دانيال 12:9", "book": "دانيال", "chapter": 9 }
+
+Gemini
+
+New chat
+Library
+Images
+Scheduled
+Students
+
+More
+New notebook
+The Servant's Scriptural Study Notebook Design Template
+Creative Resources for Branding and Bible Study
+Sacred Rituals and Spiritual Focus in Coptic Orthodox Worship
+All notebooks
+تحليل الأخطاء البرمجية والتعارضات النظامية
+تحسين وتجميل صفحة نتائج الخدام
+شرح خطوات تفعيل التطبيق البنكي
+تحذير لوحة المفاتيح غير الموثوقة
+صيغة رسالة دعوة لشراء شقة والدة
+تنسيق زيارة الوالدة للجروب
+Project Impact Template Request
+تفنيد ادعاءات باطلة حول العقيدة الإسلامية
+Sedona Solo Wellness and Creativity Itinerary
+Inaccessible API Endpoint Assistance
+إضافة نص أسفل الصليب
+تقييد العمر في جوجل فورم
+استخراج كلمة المرور من الصورة
+تعريفات ويندوز 7 للمعالج i3
+Fix Vercel Manifest CORS Error
+استعادة كلمة سر الـ BIOS
+جدول إعداد خادم الكنيسة 2026-2027
+إعداد امتحان مقابلة شخصية
+أفضل أحياء العبور الجديدة
+دليل استخدام قالب استنساخ المواقع
+Weekly Habit Scheduling Blueprint
+تحليل شامل لتطبيق "خدمتي" الكنسي
+مراجعة نموذج Gemma 4 المُعدّل
+فحص أمني لملف مضغوط
+دمج وتأمين مشروع خادمتي برو
+استفسار عن هوية الزجاجة
+Conversation with Gemini
+فين المشكله هنا
+
+يوجد عدد من التعارضات البرمجية والمنطقية بين الملفات المرفقة التي ستؤدي إلى أخطاء عند تشغيل النظام، وتتركز المشاكل في النقاط التالية:
+
+تعارض في طريقة حساب النقاط: توجد مشكلة واضحة في كيفية منح النقاط للمخدوم. في ملف bible.html، عند النقر على زر إتمام القراءة، يقوم الكود بإضافة 5 نقاط إلى متغير ثابت يُسمى student_points داخل localStorage. لكن بالرجوع إلى صفحة الحصاد harvest.html، نجد أن النظام يتجاهل هذا المتغير تماماً، ويقوم بحساب النقاط برمجياً من الصفر بإعطاء نقطتين فقط (2) عن كل يوم قراءة للإنجيل (bibleCount * 2). هذا يعني أن المستخدم سيرى رسالة "أتممت قراءة اليوم (+5 نقاط ⭐)"، لكن رصيده الفعلي سيزيد نقطتين فقط في صفحة الحصاد.   
+HTML
++ 3
+
+نقص في قاعدة بيانات الكتاب المقدس: ملف التوجيه student.html يحتوي على خطة احتياطية تطلب قراءة أسفار مثل "يونان"، "ميخا"، و"ناحوم"، وملف bible_plan.json يحدد قراءة في سفر "دانيال". المشكلة هنا أن قاعدة البيانات المصغرة bible-data.js تحتوي فقط على ثلاثة أسفار (التكوين، الخروج، اللاويين). عندما يتم تحويل المستخدم لقراءة سفر غير موجود بالقاعدة، سيفشل كود التحديد التلقائي في bible.html وسيعرض دائماً الإصحاح الأول من السفر الأول (التكوين) كخيار افتراضي.   
+HTML
++ 3
+
+عدم تطابق الخطة اليومية الاحتياطية (Fallback): في ملف student.html، تم وضع قائمة احتياطية fallbackQuickMap لتواريخ شهر أكتوبر (من 10-1 إلى 10-7) لضمان ظهور قراءة يومية للمخدوم حتى لو فشل الاتصال بملف الخطة. هذه القائمة مفقودة تماماً في دالة detectTodayPlan() داخل ملف bible.html. النتيجة هي أن الصفحة الرئيسية قد تعرض قراءة معينة، ولكن عند انتقال المستخدم لصفحة القارئ، ستعرض الصفحة رسالة "قراءة وتأمل حر" ولن تتعرف على الخطة.   
+HTML
++ 2
+
+ثغرة في التحقق من تسجيل الدخول: في كل من student.html و harvest.html، يمنع النظام المستخدم من التصفح إذا لم يكن مسجلاً (studentCode) ويقوم بتحويله فوراً إلى index.html. لكن في ملف bible.html، تم وضع قيمة افتراضية 'demo' في حال عدم وجود كود للمستخدم localStorage.getItem('student_code') || 'demo'. هذا يعني أنه إذا فتح أي شخص صفحة الكتاب المقدس مباشرة دون تسجيل دخول، سيعمل النظام بشكل طبيعي وسيحفظ قراءاته تحت كود وهمي (demo).   
+HTML
++ 3
+
+طيب أعطني التصحيح
+
+إليك التعديلات البرمجية اللازمة لحل جميع التعارضات وربط عمل الملفات ببعضها بشكل سليم:
+
+1. تعديلات ملف bible.html
+
+زر تأكيد القراءة: في بداية الملف، قم بتعديل نص الزر ليصبح "+2 نقطة" ليتطابق مع ما يتم احتسابه فعلياً في صفحة الحصاد.   
+HTML
++ 1
+
+HTML
+<button id="btnMarkRead" class="btn btn-success fw-bold px-3 py-2" onclick="markCurrentChapterRead()">
+    <i class="fa-solid fa-check me-1"></i> أتممت قراءة اليوم (+2 نقطة ⭐)
+</button>
+سكربت الصفحة (<script>): استبدل الدوال المتضررة وأغلق ثغرة الدخول في نهاية الملف لتصبح كالتالي:   
+HTML
+
+JavaScript
+// 1. سد الثغرة الأمنية بمنع الدخول بدون كود حقيقي
+const studentCode = localStorage.getItem('student_code');
+if (!studentCode) window.location.href = 'index.html';
+
+/* ... اترك الأكواد الخاصة بالترحيل والمتغيرات العامة كما هي ... */
+
+// 2. دمج الخطة الاحتياطية لتتطابق مع الصفحة الرئيسية
+async function detectTodayPlan() {
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curDay = now.getDate();
+    const planKey = `${curMonth}-${curDay}`;
+
+    let planData = window.BIBLE_PLAN_DATA || null;
+
+    if (!planData) {
+        try {
+            const res = await fetch('bible_plan.json');
+            if (res.ok) planData = await res.json();
+        } catch(e) {}
+    }
+
+    // إضافة الخطة المفقودة
+    if (!planData || !planData[planKey]) {
+        const fallbackQuickMap = {
+            "10-1": { reading: "سفر يونان (الإصحاحات 1 إلى 4)", book: "يونان", chapter: 1, chapter_end: 4 },
+            "10-2": { reading: "سفر ميخا (الإصحاحات 1 إلى 3)", book: "ميخا", chapter: 1, chapter_end: 3 },
+            "10-3": { reading: "سفر ميخا (الإصحاحات 4 إلى 7)", book: "ميخا", chapter: 4, chapter_end: 7 },
+            "10-4": { reading: "سفر ناحوم (الإصحاحات 1 إلى 3)", book: "ناحوم", chapter: 1, chapter_end: 3 },
+            "10-5": { reading: "سفر حبقوق (الإصحاحات 1 إلى 3)", book: "حبقوق", chapter: 1, chapter_end: 3 },
+            "10-6": { reading: "سفر صفنيا (الإصحاحات 1 إلى 3)", book: "صفنيا", chapter: 1, chapter_end: 3 },
+            "10-7": { reading: "سفر حجي (الإصحاحات 1 إلى 2)", book: "حجي", chapter: 1, chapter_end: 2 }
+        };
+        if (fallbackQuickMap[planKey]) {
+            if (!planData) planData = {};
+            planData[planKey] = fallbackQuickMap[planKey];
+        }
+    }
+
+    const bannerTitle = document.getElementById('planBannerTitle');
+    const localLogs = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    const isCompleted = !!localLogs[`${planKey}_${studentCode}`];
+
+    if (planData && planData[planKey]) {
+        const item = planData[planKey];
+        bannerTitle.textContent = `${item.reading} (${item.book} من إصحاح ${item.chapter} إلى ${item.chapter_end || item.chapter})`;
+
+        if (!targetBookName) {
+            targetBookName = item.book;
+            targetChapter = item.chapter;
+            targetChapterEnd = item.chapter_end || item.chapter;
+        }
+    } else {
+        bannerTitle.textContent = "قراءة وتأمل حر";
+    }
+
+    if (isCompleted) {
+        const btnMark = document.getElementById('btnMarkRead');
+        btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
+        btnMark.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> أتممت قراءة هذا اليوم بنجاح ✔️';
+    }
 }
+
+// 3. توحيد نظام حساب النقاط
+async function markCurrentChapterRead() {
+    const btnMark = document.getElementById('btnMarkRead');
+    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التسجيل...';
+    btnMark.disabled = true;
+
+    const now = new Date();
+    const curMonth = now.getMonth() + 1;
+    const curDay = now.getDate();
+    const planKey = `${curMonth}-${curDay}`;
+
+    const bookIndex = document.getElementById('bookSelect').value;
+    const chapNum = parseInt(document.getElementById('chapterSelect').value) + 1;
+    const book = bibleData[bookIndex];
+    const bookTitle = arabicBookNames[book.name] || book.name;
+
+    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    localReadings[`${planKey}_${studentCode}`] = {
+        code: String(studentCode),
+        book: bookTitle,
+        chapter: chapNum,
+        date: now.toISOString(),
+        completed: 1
+    };
+    localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
+
+    // تم حذف السطر الذي كان يضيف 5 نقاط لمتغير student_points بشكل مستقل
+
+    try {
+        await fetch('/api/mark_plan_read', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: studentCode,
+                month: curMonth,
+                day: curDay,
+                reading: `${bookTitle} ${chapNum}`
+            })
+        });
+    } catch (e) {
+        console.warn("تم الحفظ محلياً لتعذر الاتصال بالسيرفر:", e);
+    }
+
+    btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
+    btnMark.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> أتممت قراءة اليوم بنجاح (+2 نقطة ⭐)';
+    btnMark.disabled = false;
+}
+2. استكمال ملف bible-data.js
+يجب إدراج نصوص الأسفار المشار إليها في الخطة الاحتياطية (يونان، ميخا، ناحوم، حبقوق، صفنيا، حجي) ومخطط bible_plan.json (سفر دانيال) داخل مصفوفة window.BIBLE_STATIC_DATA لتجنب أخطاء الواجهة عند محاولة استدعائها. قم بإضافتها في نهاية المصفوفة بهذا النسق:   
+HTML
++ 2
+
+JavaScript
+{
+  "abbrev": "dan",
+  "name": "Daniel",
+  "chapters": [
+    ["في السنة الثالثة من ملك يهوياقيم ملك يهوذا ذهب نبوخذنصر ملك بابل الى اورشليم وحاصرها.", /* بقية الآيات مفصولة بفواصل */],
+    /* بقية الإصحاحات كمصفوفات فرعية */
+  ]
+}
+Bible_plan.json
+
+هل يمكن أن تستكمله أنت
+
+لقد قمت بالبحث ولم أتمكن من العثور على ملف bible_plan.json.
+
+بناءً على طلبك، سأقوم بإنشاء واستكمال بيانات الخطة كما طلبت. هل تريد مني إنشاء الخطة لشهر أكتوبر أم لجميع شهور السنة؟
+
+ها هو
+
+لقد قمت بإنشاء الملف بناءً على المثال الذي أرسلته:
+bible_plan.json
+
+JSON icon
+bible_plan
+ JSON 
+إذا كان لديك خطة قراءة كاملة تريدني أن أدمجها في هذا الملف، فيمكنك تزويدي بها (أو بملف Excel يحتوي عليها) وسأقوم بتوليد ملف JSON الكامل لك.
+
+ها هي كاملة
+
+لقد قمت بإنشاء ملف bible_plan_complete.json الذي يحتوي على خطة القراءة المجمعة بناءً على البيانات التي أرسلتها:
+bible_plan_complete.json
+
+JSON icon
+bible_plan_complete
+ JSON 
+ملاحظات حول بناء الملف:
+
+تم تحويل مفاتيح التواريخ إلى صيغة "{الشهر}-{اليوم}" لتتطابق مع الدالة detectTodayPlan() التي قمنا بتصحيحها سابقاً (مثال: 1-10 تعني اليوم العاشر من الشهر الأول في الخطة).
+
+تم استخدام الحقول book، و chapter، و chapter_end بشكل دقيق بناءً على الأسماء القياسية للأسفار لضمان عمل خوارزميات التحديد التلقائي بسلاسة.
+
+يمكنك الآن استبدال محتوى ملف bible_plan.json القديم بهذا المحتوى لتعمل الخطة بشكل كامل مع صفحات التطبيق. هل تحتاج لمساعدتي في تضمين هذه البيانات مباشرة في كود الجافاسكربت الخاص بك لتعمل بدون خادم (Serverless)؟
+
+هل ملف bible-data.js كامل
+
+لا، ملف bible-data.js المرفق مسبقاً غير كامل على الإطلاق.
+
+الملف الحالي يحتوي فقط على نصوص ثلاثة أسفار (التكوين، الخروج، اللاويين).   
+JS
+
+بناءً على خطة القراءة الشاملة (التي تمتد لـ 8 أشهر) التي أرسلتها في ملف الإكسيل، فإنك تحتاج إلى إدراج نصوص باقي أسفار العهد القديم بالكامل (مثل: العدد، التثنية، يشوع، المزامير، الأنبياء الكبار والصغار، والأسفار القانونية الثانية كطوبيا ويهوديت والمكابيين... إلخ).
+
+نظراً لأن حجم نص الكتاب المقدس كاملاً ضخم جداً (عدة ميجابايت)، لا يمكن تضمينه في رسالة واحدة هنا.
+
+لإكمال هذا الملف أمامك خياران:
+
+البحث عن ملف جاهز: البحث في الإنترنت عن قاعدة بيانات الكتاب المقدس باللغة العربية (Arabic Bible JSON) وتضمينها في مشروعك.
+
+استخدام كود تحويل (Script): إذا كان لديك نص الكتاب المقدس بصيغة أخرى (مثل XML أو SQL أو CSV)، يمكنك تحويله إلى نفس الهيكلة التي يتعرف عليها نظامك، وهي كالتالي:
+
+JavaScript
+window.BIBLE_STATIC_DATA = [
+  {
+    "abbrev": "gn",
+    "name": "التكوين",
+    "chapters": [
+      ["آية 1", "آية 2", "آية 3"], // الإصحاح الأول
+      ["آية 1", "آية 2"] // الإصحاح الثاني
+    ]
+  },
+  // ... باقي الأسفار
+];
+هل تمتلك قاعدة بيانات نصوص الكتاب المقدس بصيغة أخرى وتريدني أن أكتب لك كوداً (بـ Node.js أو Python) ليقوم بتحويلها تلقائياً إلى صيغة bible-data.js المتوافقة مع تطبيقك؟
+
+هل هذا يساعد
+
+أقدر لك مجهودك. لقد فهمت أنك أرفقت محتوى أرشيف يحتوي على ملفات وورد (Word Documents) لجميع أسفار الكتاب المقدس من موقع الأنبا تكلا.   
+ZIP
+
+هذه الملفات تحتوي بالفعل على النص المطلوب، ولكن هناك مشكلتان تقنيتان تمنعني من تحويلها لك مباشرة هنا:
+
+صيغة الملفات: البيانات التي أرسلتها ظهرت كرموز مشفرة (Binary Data) لأنها ملفات وورد مضغوطة، ولا يمكنني استخراج النص العربي المقروء منها برمجياً داخل بيئة المحادثة هذه.   
+ZIP
+
+حجم المخرجات: الكتاب المقدس كاملاً يحتوي على أكثر من 31,000 آية. توليد وتخريج ملف JSON بهذا الحجم الهائل سيتجاوز الحد الأقصى للكلمات المسموح بها في رسالة واحدة هنا بكثير (حجم الملف سيكون عدة ميجابايت).
+
+الحل العملي الأفضل لمشروعك:
+
+الخيار الأول (الأسهل والأسرع): استخدام ملف JSON جاهز
+أفضل وأسرع طريقة هي تحميل قاعدة بيانات الكتاب المقدس باللغة العربية (ترجمة سميث وڤاندايك) الجاهزة ومفتوحة المصدر. يمكنك البحث في منصة GitHub عن "Arabic Bible JSON". ستجد ملفات جاهزة ومجانية بنفس الهيكلة المطلوبة تماماً، وكل ما عليك فعله هو تحميل الملف ولصق محتواه داخل ملف bible-data.js الخاص بك مع إسناده للمتغير window.BIBLE_STATIC_DATA = [ ... ];.
+
+الخيار الثاني: تحويل الملفات بنفسك برمجياً
+إذا كنت مصمماً على استخدام هذه الملفات المرفقة تحديداً، ستحتاج إلى تشغيل كود (Script) صغير على جهازك الشخصي يقوم بالمرور على مجلد ملفات الوورد هذه، واستخراج النص منها، ثم تحويله تلقائياً إلى صيغة JSON المتوافقة مع كودك.
+
+إذا كنت تفضل الخيار الثاني وتعرف كيف تشغل أكواد بايثون (Python) أو جافاسكربت (Node.js) على حاسوبك، أخبرني وسأكتب لك الكود الذي يقوم ببرمجة هذه الملفات وتحويلها في ثوانٍ! أي الخيارين تفضل؟
+
+قم بذلك مع إنشاء ملف ،bat بوجهه انجليزي يقوم بتشغيل السكربت وتثبيت أي مكتبه يحتاجه بايثوت ويكون بايثون بوجهه رسوميه بسيطة علئ الأقل
+
+أهلاً بك. لقد قمت بإنشاء ملف مضغوط يحتوي على الكود المطلوب (بايثون بواجهة رسومية، وملف تشغيل .bat لتثبيت المكتبات وتشغيله مباشرة).
+
+إليك الملف:
+
+ZIP icon
+converter
+ ZIP 
+محتويات الملف وطريقة الاستخدام:
+فك الضغط: قم بفك ضغط الملف في أي مجلد على جهازك.
+
+التشغيل: انقر نقراً مزدوجاً على الملف run.bat (يجب أن يكون بايثون مثبتاً على جهازك).
+
+ماذا يفعل run.bat؟
+
+يتحقق من وجود بايثون.
+
+يقوم بتثبيت المكتبة اللازمة لقراءة ملفات الوورد (pip install python-docx).
+
+يشغل الواجهة الرسومية.
+
+استخدام الواجهة:
+
+ستظهر لك نافذة بسيطة.
+
+انقر على Browse في الحقل الأول لاختيار المجلد الذي يحتوي على ملفات الوورد الخاصة بالكتاب المقدس (التي تم فك ضغطها من www.St-Takla.org___Arabic-Bible-with-Diacritics.zip).
+
+انقر على Browse في الحقل الثاني لاختيار مكان حفظ الملف الناتج، واسمه (الافتراضي bible-data.js).
+
+انقر على زر Start Conversion.
+
+سترى شريط تقدم وحالة للملف الذي يتم العمل عليه حالياً.
+
+ملاحظة هامة جداً حول ملفات موقع الأنبا تكلا:
+السكربت يستخدم مكتبة python-docx والتي تدعم فقط ملفات الوورد الحديثة (.docx). إذا كانت الملفات التي قمت بتنزيلها بصيغة .doc القديمة (كما يظهر في أسماء الملفات التي أرفقتها سابقاً مثل 01-Genesis.doc)، فلن تتمكن مكتبة python-docx من قراءتها مباشرة وستظهر رسالة خطأ.
+
+حل مشكلة صيغة .doc:
+إذا كانت الملفات بالفعل .doc القديمة، أسهل حل هو استخدام برنامج Word نفسه لتحويلها دفعة واحدة إلى .docx (يمكنك البحث عن سكربتات VBA بسيطة للوورد تقوم بذلك، أو استخدام برامج تحويل الصيغ المجانية) قبل استخدام أداة بايثون هذه.
+
+السكربت مبرمج لتقسيم الإصحاحات بناءً على كلمة "إصحاح" أو ما شابهها، وكل فقرة تُعتبر آية. قد تحتاج إلى تعديل بسيط في ملف app.py إذا كانت هيكلة ملفات الوورد دقيقة ومختلفة قليلاً.
+
+جرب الأداة وأخبرني إن واجهت أي مشكلة!
+
+تمام حاضر
+
+بالتوفيق! خذ وقتك في تجهيز الملفات وتجربة الأداة.
+
+تذكر فقط خطوة حفظ الملفات بصيغة .docx (من خلال برنامج Word) قبل تشغيل السكربت إذا كانت بالصيغة القديمة.
+
+وإذا واجهتك أي رسائل خطأ أثناء التشغيل، أو إذا لاحظت أن السكربت يحتاج إلى تعديل في طريقة قراءة وتقسيم "الإصحاحات" من داخل النصوص لتتناسب تماماً مع تنسيق ملفات موقع "الأنبا تكلا"، فلا تتردد أبداً في نسخ رسالة الخطأ أو شكل النص هنا؛ وسأقوم بضبط الكود فوراً ليتعامل معها باحترافية.
+
+أنا هنا وجاهز لمساعدتك في أي وقت لإتمام مشروعك بنجاح!
+
+
+
+
+Gemini is AI and can make mistakes.
+
+{
+  "1-1": { "reading": "تكوين من 1 إلى 5", "book": "التكوين", "chapter": 1, "chapter_end": 5 },
+  "1-2": { "reading": "تكوين من 6 إلى 10", "book": "التكوين", "chapter": 6, "chapter_end": 10 },
+  "1-3": { "reading": "تكوين من 11 إلى 15", "book": "التكوين", "chapter": 11, "chapter_end": 15 },
+  "1-4": { "reading": "تكوين من 16 إلى 20", "book": "التكوين", "chapter": 16, "chapter_end": 20 },
+  "1-5": { "reading": "تكوين من 21 إلى 25", "book": "التكوين", "chapter": 21, "chapter_end": 25 },
+  "1-6": { "reading": "تكوين من 26 إلى 30", "book": "التكوين", "chapter": 26, "chapter_end": 30 },
+  "1-7": { "reading": "تكوين من 31 إلى 35", "book": "التكوين", "chapter": 31, "chapter_end": 35 },
+  "1-8": { "reading": "تكوين من 36 إلى 40", "book": "التكوين", "chapter": 36, "chapter_end": 40 },
+  "1-9": { "reading": "تكوين من 41 إلى 45", "book": "التكوين", "chapter": 41, "chapter_end": 45 },
+  "1-10": { "reading": "تكوين من 46 إلى 50", "book": "التكوين", "chapter": 46, "chapter_end": 50 },
+  "1-11": { "reading": "الخروج من 1 إلى 5", "book": "الخروج", "chapter": 1, "chapter_end": 5 },
+  "1-12": { "reading": "الخروج من 6 إلى 10", "book": "الخروج", "chapter": 6, "chapter_end": 10 },
+  "1-13": { "reading": "الخروج من 11 إلى 15", "book": "الخروج", "chapter": 11, "chapter_end": 15 },
+  "1-14": { "reading": "الخروج من 16 إلى 20", "book": "الخروج", "chapter": 16, "chapter_end": 20 },
+  "1-15": { "reading": "الخروج من 21 إلى 25", "book": "الخروج", "chapter": 21, "chapter_end": 25 },
+  "1-16": { "reading": "الخروج من 26 إلى 30", "book": "الخروج", "chapter": 26, "chapter_end": 30 },
+  "1-17": { "reading": "الخروج من 31 إلى 35", "book": "الخروج", "chapter": 31, "chapter_end": 35 },
+  "1-18": { "reading": "الخروج من 36 إلى 40", "book": "الخروج", "chapter": 36, "chapter_end": 40 },
+  "1-19": { "reading": "لاويين من 1 إلى 5", "book": "اللاويين", "chapter": 1, "chapter_end": 5 },
+  "1-20": { "reading": "لاويين من 6 إلى 10", "book": "اللاويين", "chapter": 6, "chapter_end": 10 },
+  "1-21": { "reading": "لاويين من 11 إلى 15", "book": "اللاويين", "chapter": 11, "chapter_end": 15 },
+  "1-22": { "reading": "لاويين من 16 إلى 20", "book": "اللاويين", "chapter": 16, "chapter_end": 20 },
+  "1-23": { "reading": "لاويين من 21 إلى 25", "book": "اللاويين", "chapter": 21, "chapter_end": 25 },
+  "1-24": { "reading": "لاويين من 26 إلى 27", "book": "اللاويين", "chapter": 26, "chapter_end": 27 },
+  "1-25": { "reading": "العدد من 1 إلى 5", "book": "العدد", "chapter": 1, "chapter_end": 5 },
+  "1-26": { "reading": "العدد من 6 إلى 10", "book": "العدد", "chapter": 6, "chapter_end": 10 },
+  "1-27": { "reading": "العدد من 11 إلى 15", "book": "العدد", "chapter": 11, "chapter_end": 15 },
+  "1-28": { "reading": "العدد من 16 إلى 20", "book": "العدد", "chapter": 16, "chapter_end": 20 },
+  "1-29": { "reading": "العدد من 21 إلى 25", "book": "العدد", "chapter": 21, "chapter_end": 25 },
+  "1-30": { "reading": "العدد من 26 إلى 30", "book": "العدد", "chapter": 26, "chapter_end": 30 },
+  "2-1": { "reading": "العدد من 31 إلى 33", "book": "العدد", "chapter": 31, "chapter_end": 33 },
+  "2-2": { "reading": "العدد من 34 إلى 36", "book": "العدد", "chapter": 34, "chapter_end": 36 },
+  "2-3": { "reading": "تثنية من 1 إلى 5", "book": "التثنية", "chapter": 1, "chapter_end": 5 },
+  "2-4": { "reading": "تثنية من 6 إلى 10", "book": "التثنية", "chapter": 6, "chapter_end": 10 },
+  "2-5": { "reading": "تثنية من 11 إلى 15", "book": "التثنية", "chapter": 11, "chapter_end": 15 },
+  "2-6": { "reading": "تثنية من 16 إلى 20", "book": "التثنية", "chapter": 16, "chapter_end": 20 },
+  "2-7": { "reading": "تثنية من 21 إلى 25", "book": "التثنية", "chapter": 21, "chapter_end": 25 },
+  "2-8": { "reading": "تثنية من 26 إلى 30", "book": "التثنية", "chapter": 26, "chapter_end": 30 },
+  "2-9": { "reading": "تثنية من 31 إلى 34", "book": "التثنية", "chapter": 31, "chapter_end": 34 },
+  "2-10": { "reading": "يشوع من 1 إلى 5", "book": "يشوع", "chapter": 1, "chapter_end": 5 },
+  "2-11": { "reading": "يشوع من 6 إلى 10", "book": "يشوع", "chapter": 6, "chapter_end": 10 },
+  "2-12": { "reading": "يشوع من 11 إلى 15", "book": "يشوع", "chapter": 11, "chapter_end": 15 },
+  "2-13": { "reading": "يشوع من 16 إلى 20", "book": "يشوع", "chapter": 16, "chapter_end": 20 },
+  "2-14": { "reading": "يشوع من 21 إلى 24", "book": "يشوع", "chapter": 21, "chapter_end": 24 },
+  "2-15": { "reading": "قضاة من 1 إلى 5", "book": "القضاة", "chapter": 1, "chapter_end": 5 },
+  "2-16": { "reading": "قضاة من 6 إلى 10", "book": "القضاة", "chapter": 6, "chapter_end": 10 },
+  "2-17": { "reading": "قضاة من 11 إلى 15", "book": "القضاة", "chapter": 11, "chapter_end": 15 },
+  "2-18": { "reading": "قضاة من 16 إلى 18", "book": "القضاة", "chapter": 16, "chapter_end": 18 },
+  "2-19": { "reading": "قضاة من 19 إلى 21", "book": "القضاة", "chapter": 19, "chapter_end": 21 },
+  "2-20": { "reading": "راعوث من 1 إلى 4", "book": "راعوث", "chapter": 1, "chapter_end": 4 },
+  "2-21": { "reading": "1 صموئيل من 1 إلى 5", "book": "صموئيل الأول", "chapter": 1, "chapter_end": 5 },
+  "2-22": { "reading": "1 صموئيل من 6 إلى 10", "book": "صموئيل الأول", "chapter": 6, "chapter_end": 10 },
+  "2-23": { "reading": "1 صموئيل من 11 إلى 15", "book": "صموئيل الأول", "chapter": 11, "chapter_end": 15 },
+  "2-24": { "reading": "1 صموئيل من 16 إلى 20", "book": "صموئيل الأول", "chapter": 16, "chapter_end": 20 },
+  "2-25": { "reading": "1 صموئيل من 21 إلى 25", "book": "صموئيل الأول", "chapter": 21, "chapter_end": 25 },
+  "2-26": { "reading": "1 صموئيل من 26 إلى 28", "book": "صموئيل الأول", "chapter": 26, "chapter_end": 28 },
+  "2-27": { "reading": "1 صموئيل من 29 إلى 31", "book": "صموئيل الأول", "chapter": 29, "chapter_end": 31 },
+  "2-28": { "reading": "2 صموئيل من 1 إلى 5", "book": "صموئيل الثاني", "chapter": 1, "chapter_end": 5 },
+  "3-1": { "reading": "2 صموئيل من 6 إلى 10", "book": "صموئيل الثاني", "chapter": 6, "chapter_end": 10 },
+  "3-2": { "reading": "2 صموئيل من 11 إلى 15", "book": "صموئيل الثاني", "chapter": 11, "chapter_end": 15 },
+  "3-3": { "reading": "2 صموئيل من 16 إلى 20", "book": "صموئيل الثاني", "chapter": 16, "chapter_end": 20 },
+  "3-4": { "reading": "2 صموئيل من 21 إلى 24", "book": "صموئيل الثاني", "chapter": 21, "chapter_end": 24 },
+  "3-5": { "reading": "1 ملوك من 1 إلى 5", "book": "الملوك الأول", "chapter": 1, "chapter_end": 5 },
+  "3-6": { "reading": "1 ملوك من 6 إلى 10", "book": "الملوك الأول", "chapter": 6, "chapter_end": 10 },
+  "3-7": { "reading": "1 ملوك من 11 إلى 15", "book": "الملوك الأول", "chapter": 11, "chapter_end": 15 },
+  "3-8": { "reading": "1 ملوك من 16 إلى 20", "book": "الملوك الأول", "chapter": 16, "chapter_end": 20 },
+  "3-9": { "reading": "1 ملوك من 21 إلى 22", "book": "الملوك الأول", "chapter": 21, "chapter_end": 22 },
+  "3-10": { "reading": "2 ملوك من 1 إلى 5", "book": "الملوك الثاني", "chapter": 1, "chapter_end": 5 },
+  "3-11": { "reading": "2 ملوك من 6 إلى 10", "book": "الملوك الثاني", "chapter": 6, "chapter_end": 10 },
+  "3-12": { "reading": "2 ملوك من 11 إلى 15", "book": "الملوك الثاني", "chapter": 11, "chapter_end": 15 },
+  "3-13": { "reading": "2 ملوك من 16 إلى 20", "book": "الملوك الثاني", "chapter": 16, "chapter_end": 20 },
+  "3-14": { "reading": "2 ملوك من 21 إلى 25", "book": "الملوك الثاني", "chapter": 21, "chapter_end": 25 },
+  "3-15": { "reading": "1 أخبار أيام من 1 إلى 5", "book": "أخبار الأيام الأول", "chapter": 1, "chapter_end": 5 },
+  "3-16": { "reading": "1 أخبار أيام من 6 إلى 10", "book": "أخبار الأيام الأول", "chapter": 6, "chapter_end": 10 },
+  "3-17": { "reading": "1 أخبار أيام من 11 إلى 15", "book": "أخبار الأيام الأول", "chapter": 11, "chapter_end": 15 },
+  "3-18": { "reading": "1 أخبار أيام من 16 إلى 20", "book": "أخبار الأيام الأول", "chapter": 16, "chapter_end": 20 },
+  "3-19": { "reading": "1 أخبار أيام من 21 إلى 25", "book": "أخبار الأيام الأول", "chapter": 21, "chapter_end": 25 },
+  "3-20": { "reading": "1 أخبار أيام من 26 إلى 29", "book": "أخبار الأيام الأول", "chapter": 26, "chapter_end": 29 },
+  "3-21": { "reading": "2 أخبار أيام من 1 إلى 5", "book": "أخبار الأيام الثاني", "chapter": 1, "chapter_end": 5 },
+  "3-22": { "reading": "2 أخبار أيام من 6 إلى 10", "book": "أخبار الأيام الثاني", "chapter": 6, "chapter_end": 10 },
+  "3-23": { "reading": "2 أخبار أيام من 11 إلى 15", "book": "أخبار الأيام الثاني", "chapter": 11, "chapter_end": 15 },
+  "3-24": { "reading": "2 أخبار أيام من 16 إلى 20", "book": "أخبار الأيام الثاني", "chapter": 16, "chapter_end": 20 },
+  "3-25": { "reading": "2 أخبار أيام من 21 إلى 25", "book": "أخبار الأيام الثاني", "chapter": 21, "chapter_end": 25 },
+  "3-26": { "reading": "2 أخبار أيام من 26 إلى 30", "book": "أخبار الأيام الثاني", "chapter": 26, "chapter_end": 30 },
+  "3-27": { "reading": "2 أخبار أيام من 31 إلى 33", "book": "أخبار الأيام الثاني", "chapter": 31, "chapter_end": 33 },
+  "3-28": { "reading": "2 أخبار أيام من 34 إلى 36", "book": "أخبار الأيام الثاني", "chapter": 34, "chapter_end": 36 },
+  "3-29": { "reading": "عزرا من 1 إلى 5", "book": "عزرا", "chapter": 1, "chapter_end": 5 },
+  "3-30": { "reading": "عزرا من 6 إلى 10", "book": "عزرا", "chapter": 6, "chapter_end": 10 },
+  "4-1": { "reading": "نحميا من 1 إلى 5", "book": "نحميا", "chapter": 1, "chapter_end": 5 },
+  "4-2": { "reading": "نحميا من 6 إلى 10", "book": "نحميا", "chapter": 6, "chapter_end": 10 },
+  "4-3": { "reading": "نحميا من 11 إلى 13", "book": "نحميا", "chapter": 11, "chapter_end": 13 },
+  "4-4": { "reading": "طوبيا من 1 إلى 5", "book": "طوبيا", "chapter": 1, "chapter_end": 5 },
+  "4-5": { "reading": "طوبيا من 6 إلى 10", "book": "طوبيا", "chapter": 6, "chapter_end": 10 },
+  "4-6": { "reading": "طوبيا من 11 إلى 14", "book": "طوبيا", "chapter": 11, "chapter_end": 14 },
+  "4-7": { "reading": "يهوديت من 1 إلى 5", "book": "يهوديت", "chapter": 1, "chapter_end": 5 },
+  "4-8": { "reading": "يهوديت من 6 إلى 10", "book": "يهوديت", "chapter": 6, "chapter_end": 10 },
+  "4-9": { "reading": "يهوديت من 11 إلى 13", "book": "يهوديت", "chapter": 11, "chapter_end": 13 },
+  "4-10": { "reading": "يهوديت من 14 إلى 16", "book": "يهوديت", "chapter": 14, "chapter_end": 16 },
+  "4-11": { "reading": "أستير من 1 إلى 5", "book": "أستير", "chapter": 1, "chapter_end": 5 },
+  "4-12": { "reading": "أستير من 6 إلى 10", "book": "أستير", "chapter": 6, "chapter_end": 10 },
+  "4-13": { "reading": "تتمة أستير من 1 إلى 3", "book": "تتمة أستير", "chapter": 1, "chapter_end": 3 },
+  "4-14": { "reading": "تتمة أستير من 4 إلى 6", "book": "تتمة أستير", "chapter": 4, "chapter_end": 6 },
+  "4-15": { "reading": "أيوب من 1 إلى 5", "book": "أيوب", "chapter": 1, "chapter_end": 5 },
+  "4-16": { "reading": "أيوب من 6 إلى 10", "book": "أيوب", "chapter": 6, "chapter_end": 10 },
+  "4-17": { "reading": "أيوب من 11 إلى 15", "book": "أيوب", "chapter": 11, "chapter_end": 15 },
+  "4-18": { "reading": "أيوب من 16 إلى 20", "book": "أيوب", "chapter": 16, "chapter_end": 20 },
+  "4-19": { "reading": "أيوب من 21 إلى 25", "book": "أيوب", "chapter": 21, "chapter_end": 25 },
+  "4-20": { "reading": "أيوب من 26 إلى 30", "book": "أيوب", "chapter": 26, "chapter_end": 30 },
+  "4-21": { "reading": "أيوب من 31 إلى 35", "book": "أيوب", "chapter": 31, "chapter_end": 35 },
+  "4-22": { "reading": "أيوب من 36 إلى 40", "book": "أيوب", "chapter": 36, "chapter_end": 40 },
+  "4-23": { "reading": "أيوب من 41 إلى 42", "book": "أيوب", "chapter": 41, "chapter_end": 42 },
+  "4-24": { "reading": "مزامير من 1 إلى 5", "book": "المزامير", "chapter": 1, "chapter_end": 5 },
+  "4-25": { "reading": "مزامير من 6 إلى 10", "book": "المزامير", "chapter": 6, "chapter_end": 10 },
+  "4-26": { "reading": "مزامير من 11 إلى 15", "book": "المزامير", "chapter": 11, "chapter_end": 15 },
+  "4-27": { "reading": "مزامير من 16 إلى 20", "book": "المزامير", "chapter": 16, "chapter_end": 20 },
+  "4-28": { "reading": "مزامير من 21 إلى 25", "book": "المزامير", "chapter": 21, "chapter_end": 25 },
+  "4-29": { "reading": "مزامير من 26 إلى 30", "book": "المزامير", "chapter": 26, "chapter_end": 30 },
+  "4-30": { "reading": "مزامير من 31 إلى 35", "book": "المزامير", "chapter": 31, "chapter_end": 35 },
+  "5-1": { "reading": "مزامير من 36 إلى 40", "book": "المزامير", "chapter": 36, "chapter_end": 40 },
+  "5-2": { "reading": "مزامير من 41 إلى 45", "book": "المزامير", "chapter": 41, "chapter_end": 45 },
+  "5-3": { "reading": "مزامير من 46 إلى 50", "book": "المزامير", "chapter": 46, "chapter_end": 50 },
+  "5-4": { "reading": "مزامير من 51 إلى 55", "book": "المزامير", "chapter": 51, "chapter_end": 55 },
+  "5-5": { "reading": "مزامير من 56 إلى 60", "book": "المزامير", "chapter": 56, "chapter_end": 60 },
+  "5-6": { "reading": "مزامير من 61 إلى 65", "book": "المزامير", "chapter": 61, "chapter_end": 65 },
+  "5-7": { "reading": "مزامير من 66 إلى 70", "book": "المزامير", "chapter": 66, "chapter_end": 70 },
+  "5-8": { "reading": "مزامير من 71 إلى 75", "book": "المزامير", "chapter": 71, "chapter_end": 75 },
+  "5-9": { "reading": "مزامير من 76 إلى 80", "book": "المزامير", "chapter": 76, "chapter_end": 80 },
+  "5-10": { "reading": "مزامير من 81 إلى 85", "book": "المزامير", "chapter": 81, "chapter_end": 85 },
+  "5-11": { "reading": "مزامير من 86 إلى 90", "book": "المزامير", "chapter": 86, "chapter_end": 90 },
+  "5-12": { "reading": "مزامير من 91 إلى 95", "book": "المزامير", "chapter": 91, "chapter_end": 95 },
+  "5-13": { "reading": "مزامير من 96 إلى 100", "book": "المزامير", "chapter": 96, "chapter_end": 100 },
+  "5-14": { "reading": "مزامير من 101 إلى 105", "book": "المزامير", "chapter": 101, "chapter_end": 105 },
+  "5-15": { "reading": "مزامير من 106 إلى 110", "book": "المزامير", "chapter": 106, "chapter_end": 110 },
+  "5-16": { "reading": "مزامير من 111 إلى 115", "book": "المزامير", "chapter": 111, "chapter_end": 115 },
+  "5-17": { "reading": "مزامير من 116 إلى 120", "book": "المزامير", "chapter": 116, "chapter_end": 120 },
+  "5-18": { "reading": "مزامير من 121 إلى 125", "book": "المزامير", "chapter": 121, "chapter_end": 125 },
+  "5-19": { "reading": "مزامير من 126 إلى 130", "book": "المزامير", "chapter": 126, "chapter_end": 130 },
+  "5-20": { "reading": "مزامير من 131 إلى 135", "book": "المزامير", "chapter": 131, "chapter_end": 135 },
+  "5-21": { "reading": "مزامير من 136 إلى 140", "book": "المزامير", "chapter": 136, "chapter_end": 140 },
+  "5-22": { "reading": "مزامير من 141 إلى 145", "book": "المزامير", "chapter": 141, "chapter_end": 145 },
+  "5-23": { "reading": "مزامير من 146 إلى 150", "book": "المزامير", "chapter": 146, "chapter_end": 150 },
+  "5-24": { "reading": "أمثال من 1 إلى 5", "book": "الأمثال", "chapter": 1, "chapter_end": 5 },
+  "5-25": { "reading": "أمثال من 6 إلى 10", "book": "الأمثال", "chapter": 6, "chapter_end": 10 },
+  "5-26": { "reading": "أمثال من 11 إلى 15", "book": "الأمثال", "chapter": 11, "chapter_end": 15 },
+  "5-27": { "reading": "أمثال من 16 إلى 20", "book": "الأمثال", "chapter": 16, "chapter_end": 20 },
+  "5-28": { "reading": "أمثال من 21 إلى 25", "book": "الأمثال", "chapter": 21, "chapter_end": 25 },
+  "5-29": { "reading": "أمثال من 26 إلى 28", "book": "الأمثال", "chapter": 26, "chapter_end": 28 },
+  "5-30": { "reading": "أمثال من 29 إلى 31", "book": "الأمثال", "chapter": 29, "chapter_end": 31 },
+  "6-1": { "reading": "جامعة من 1 إلى 5", "book": "الجامعة", "chapter": 1, "chapter_end": 5 },
+  "6-2": { "reading": "جامعة من 6 إلى 10", "book": "الجامعة", "chapter": 6, "chapter_end": 10 },
+  "6-3": { "reading": "جامعة من 11 إلى 12", "book": "الجامعة", "chapter": 11, "chapter_end": 12 },
+  "6-4": { "reading": "نشيد الأنشاد من 1 إلى 5", "book": "نشيد الأنشاد", "chapter": 1, "chapter_end": 5 },
+  "6-5": { "reading": "نشيد الأنشاد من 6 إلى 8", "book": "نشيد الأنشاد", "chapter": 6, "chapter_end": 8 },
+  "6-6": { "reading": "حكمة من 1 إلى 5", "book": "حكمة", "chapter": 1, "chapter_end": 5 },
+  "6-7": { "reading": "حكمة من 6 إلى 10", "book": "حكمة", "chapter": 6, "chapter_end": 10 },
+  "6-8": { "reading": "حكمة من 11 إلى 15", "book": "حكمة", "chapter": 11, "chapter_end": 15 },
+  "6-9": { "reading": "حكمة من 16 إلى 19", "book": "حكمة", "chapter": 16, "chapter_end": 19 },
+  "6-10": { "reading": "يشوع بن سيراخ من 1 إلى 5", "book": "يشوع بن سيراخ", "chapter": 1, "chapter_end": 5 },
+  "6-11": { "reading": "يشوع بن سيراخ من 6 إلى 10", "book": "يشوع بن سيراخ", "chapter": 6, "chapter_end": 10 },
+  "6-12": { "reading": "يشوع بن سيراخ من 11 إلى 15", "book": "يشوع بن سيراخ", "chapter": 11, "chapter_end": 15 },
+  "6-13": { "reading": "يشوع بن سيراخ من 16 إلى 20", "book": "يشوع بن سيراخ", "chapter": 16, "chapter_end": 20 },
+  "6-14": { "reading": "يشوع بن سيراخ من 21 إلى 25", "book": "يشوع بن سيراخ", "chapter": 21, "chapter_end": 25 },
+  "6-15": { "reading": "يشوع بن سيراخ من 26 إلى 30", "book": "يشوع بن سيراخ", "chapter": 26, "chapter_end": 30 },
+  "6-16": { "reading": "يشوع بن سيراخ من 31 إلى 35", "book": "يشوع بن سيراخ", "chapter": 31, "chapter_end": 35 },
+  "6-17": { "reading": "يشوع بن سيراخ من 36 إلى 40", "book": "يشوع بن سيراخ", "chapter": 36, "chapter_end": 40 },
+  "6-18": { "reading": "يشوع بن سيراخ من 41 إلى 45", "book": "يشوع بن سيراخ", "chapter": 41, "chapter_end": 45 },
+  "6-19": { "reading": "يشوع بن سيراخ من 46 إلى 48", "book": "يشوع بن سيراخ", "chapter": 46, "chapter_end": 48 },
+  "6-20": { "reading": "يشوع بن سيراخ من 49 إلى 51", "book": "يشوع بن سيراخ", "chapter": 49, "chapter_end": 51 },
+  "6-21": { "reading": "إشعياء من 1 إلى 5", "book": "إشعياء", "chapter": 1, "chapter_end": 5 },
+  "6-22": { "reading": "إشعياء من 6 إلى 10", "book": "إشعياء", "chapter": 6, "chapter_end": 10 },
+  "6-23": { "reading": "إشعياء من 11 إلى 15", "book": "إشعياء", "chapter": 11, "chapter_end": 15 },
+  "6-24": { "reading": "إشعياء من 16 إلى 20", "book": "إشعياء", "chapter": 16, "chapter_end": 20 },
+  "6-25": { "reading": "إشعياء من 21 إلى 25", "book": "إشعياء", "chapter": 21, "chapter_end": 25 },
+  "6-26": { "reading": "إشعياء من 26 إلى 30", "book": "إشعياء", "chapter": 26, "chapter_end": 30 },
+  "6-27": { "reading": "إشعياء من 31 إلى 35", "book": "إشعياء", "chapter": 31, "chapter_end": 35 },
+  "6-28": { "reading": "إشعياء من 36 إلى 40", "book": "إشعياء", "chapter": 36, "chapter_end": 40 },
+  "6-29": { "reading": "إشعياء من 41 إلى 45", "book": "إشعياء", "chapter": 41, "chapter_end": 45 },
+  "6-30": { "reading": "إشعياء من 46 إلى 50", "book": "إشعياء", "chapter": 46, "chapter_end": 50 },
+  "7-1": { "reading": "إشعياء من 51 إلى 55", "book": "إشعياء", "chapter": 51, "chapter_end": 55 },
+  "7-2": { "reading": "إشعياء من 56 إلى 60", "book": "إشعياء", "chapter": 56, "chapter_end": 60 },
+  "7-3": { "reading": "إشعياء من 61 إلى 63", "book": "إشعياء", "chapter": 61, "chapter_end": 63 },
+  "7-4": { "reading": "إشعياء من 64 إلى 66", "book": "إشعياء", "chapter": 64, "chapter_end": 66 },
+  "7-5": { "reading": "إرميا من 1 إلى 5", "book": "إرميا", "chapter": 1, "chapter_end": 5 },
+  "7-6": { "reading": "إرميا من 6 إلى 10", "book": "إرميا", "chapter": 6, "chapter_end": 10 },
+  "7-7": { "reading": "إرميا من 11 إلى 15", "book": "إرميا", "chapter": 11, "chapter_end": 15 },
+  "7-8": { "reading": "إرميا من 16 إلى 20", "book": "إرميا", "chapter": 16, "chapter_end": 20 },
+  "7-9": { "reading": "إرميا من 21 إلى 25", "book": "إرميا", "chapter": 21, "chapter_end": 25 },
+  "7-10": { "reading": "إرميا من 26 إلى 30", "book": "إرميا", "chapter": 26, "chapter_end": 30 },
+  "7-11": { "reading": "إرميا من 31 إلى 35", "book": "إرميا", "chapter": 31, "chapter_end": 35 },
+  "7-12": { "reading": "إرميا من 36 إلى 40", "book": "إرميا", "chapter": 36, "chapter_end": 40 },
+  "7-13": { "reading": "إرميا من 41 إلى 45", "book": "إرميا", "chapter": 41, "chapter_end": 45 },
+  "7-14": { "reading": "إرميا من 46 إلى 50", "book": "إرميا", "chapter": 46, "chapter_end": 50 },
+  "7-15": { "reading": "إرميا من 51 إلى 52", "book": "إرميا", "chapter": 51, "chapter_end": 52 },
+  "7-16": { "reading": "مراثي إرميا من 1 إلى 5", "book": "مراثي إرميا", "chapter": 1, "chapter_end": 5 },
+  "7-17": { "reading": "باروخ من 1 إلى 3", "book": "باروخ", "chapter": 1, "chapter_end": 3 },
+  "7-18": { "reading": "باروخ من 4 إلى 6", "book": "باروخ", "chapter": 4, "chapter_end": 6 },
+  "7-19": { "reading": "حزقيال من 1 إلى 5", "book": "حزقيال", "chapter": 1, "chapter_end": 5 },
+  "7-20": { "reading": "حزقيال من 6 إلى 10", "book": "حزقيال", "chapter": 6, "chapter_end": 10 },
+  "7-21": { "reading": "حزقيال من 11 إلى 15", "book": "حزقيال", "chapter": 11, "chapter_end": 15 },
+  "7-22": { "reading": "حزقيال من 16 إلى 20", "book": "حزقيال", "chapter": 16, "chapter_end": 20 },
+  "7-23": { "reading": "حزقيال من 21 إلى 25", "book": "حزقيال", "chapter": 21, "chapter_end": 25 },
+  "7-24": { "reading": "حزقيال من 26 إلى 30", "book": "حزقيال", "chapter": 26, "chapter_end": 30 },
+  "7-25": { "reading": "حزقيال من 31 إلى 35", "book": "حزقيال", "chapter": 31, "chapter_end": 35 },
+  "7-26": { "reading": "حزقيال من 36 إلى 40", "book": "حزقيال", "chapter": 36, "chapter_end": 40 },
+  "7-27": { "reading": "حزقيال من 41 إلى 45", "book": "حزقيال", "chapter": 41, "chapter_end": 45 },
+  "7-28": { "reading": "حزقيال من 46 إلى 48", "book": "حزقيال", "chapter": 46, "chapter_end": 48 },
+  "7-29": { "reading": "دانيال من 1 إلى 5", "book": "دانيال", "chapter": 1, "chapter_end": 5 },
+  "7-30": { "reading": "دانيال من 6 إلى 10", "book": "دانيال", "chapter": 6, "chapter_end": 10 },
+  "8-1": { "reading": "دانيال من 11 إلى 12", "book": "دانيال", "chapter": 11, "chapter_end": 12 },
+  "8-2": { "reading": "تتمة دانيال من 1 إلى 2", "book": "تتمة دانيال", "chapter": 1, "chapter_end": 2 },
+  "8-3": { "reading": "هوشع من 1 إلى 5", "book": "هوشع", "chapter": 1, "chapter_end": 5 },
+  "8-4": { "reading": "هوشع من 6 إلى 10", "book": "هوشع", "chapter": 6, "chapter_end": 10 },
+  "8-5": { "reading": "هوشع من 11 إلى 14", "book": "هوشع", "chapter": 11, "chapter_end": 14 },
+  "8-6": { "reading": "يوئيل من 1 إلى 3", "book": "يوئيل", "chapter": 1, "chapter_end": 3 },
+  "8-7": { "reading": "عاموس من 1 إلى 5", "book": "عاموس", "chapter": 1, "chapter_end": 5 },
+  "8-8": { "reading": "عاموس من 6 إلى 9", "book": "عاموس", "chapter": 6, "chapter_end": 9 },
+  "8-9": { "reading": "عوبديا من 1 إلى 1", "book": "عوبديا", "chapter": 1, "chapter_end": 1 },
+  "8-10": { "reading": "يونان من 1 إلى 4", "book": "يونان", "chapter": 1, "chapter_end": 4 },
+  "8-11": { "reading": "ميخا من 1 إلى 5", "book": "ميخا", "chapter": 1, "chapter_end": 5 },
+  "8-12": { "reading": "ميخا من 6 إلى 7", "book": "ميخا", "chapter": 6, "chapter_end": 7 },
+  "8-13": { "reading": "ناحوم من 1 إلى 3", "book": "ناحوم", "chapter": 1, "chapter_end": 3 },
+  "8-14": { "reading": "حبقوق من 1 إلى 3", "book": "حبقوق", "chapter": 1, "chapter_end": 3 },
+  "8-15": { "reading": "صفنيا من 1 إلى 3", "book": "صفنيا", "chapter": 1, "chapter_end": 3 },
+  "8-16": { "reading": "حجي من 1 إلى 2", "book": "حجي", "chapter": 1, "chapter_end": 2 },
+  "8-17": { "reading": "زكريا من 1 إلى 5", "book": "زكريا", "chapter": 1, "chapter_end": 5 },
+  "8-18": { "reading": "زكريا من 6 إلى 10", "book": "زكريا", "chapter": 6, "chapter_end": 10 },
+  "8-19": { "reading": "زكريا من 11 إلى 14", "book": "زكريا", "chapter": 11, "chapter_end": 14 },
+  "8-20": { "reading": "ملاخي من 1 إلى 4", "book": "ملاخي", "chapter": 1, "chapter_end": 4 },
+  "8-21": { "reading": "1 مكابيين من 1 إلى 5", "book": "المكابيين الأول", "chapter": 1, "chapter_end": 5 },
+  "8-22": { "reading": "1 مكابيين من 6 إلى 10", "book": "المكابيين الأول", "chapter": 6, "chapter_end": 10 },
+  "8-23": { "reading": "1 مكابيين من 11 إلى 13", "book": "المكابيين الأول", "chapter": 11, "chapter_end": 13 },
+  "8-24": { "reading": "1 مكابيين من 14 إلى 16", "book": "المكابيين الأول", "chapter": 14, "chapter_end": 16 }
+}
+bible_plan_complete.json
+Displaying bible_plan_complete.json.
