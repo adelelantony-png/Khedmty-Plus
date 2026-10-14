@@ -4096,34 +4096,62 @@ function exportFollowupToExcel() {
         // ==========================================
         // 36. Firebase Init
         // ==========================================
+        a// ==========================================
+        // 36. Firebase Init
+        // ==========================================
         async function initFirebase() {
-            let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
-            let savedEmail = localStorage.getItem(STORAGE_KEYS.CLOUD_EMAIL);
-            let savedPass = localStorage.getItem(STORAGE_KEYS.CLOUD_PASS);
-
-            if (!savedConfig || !savedEmail || !savedPass) {
-                let statusText = document.getElementById('cloudStatusText');
-                if (statusText) statusText.innerText = "العمل محلياً";
-                showCloudSetupModal();
-                return;
-            }
-
             try {
-                let configObj = JSON.parse(savedConfig);
+                // 1. محاولة جلب الإعدادات التلقائية من Vercel (المسار /api/public-config)
+                let configObj = null;
+                try {
+                    let response = await fetch('/api/public-config');
+                    if (response.ok) {
+                        configObj = await response.json();
+                        // حفظ الـ Config محلياً لاستخدامه أوفلاين في المرات القادمة
+                        if (configObj && configObj.apiKey) {
+                            localStorage.setItem(STORAGE_KEYS.FB_CONFIG, JSON.stringify(configObj));
+                        }
+                    }
+                } catch (fetchErr) {
+                    console.warn("تعذر جلب الإعدادات من Vercel، محاولة الاعتماد على التخزين المحلي:", fetchErr);
+                }
+
+                // 2. إذا فشل الجلب، نعتمد على ما هو محفوظ مسبقاً
+                if (!configObj || !configObj.apiKey) {
+                    let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
+                    if (savedConfig) {
+                        configObj = JSON.parse(savedConfig);
+                    }
+                }
+
+                // 3. إذا لم يوجد أي Config متاح، نعرض شاشة الإعداد اليدوية كحل أخير
+                if (!configObj || !configObj.apiKey) {
+                    let statusText = document.getElementById('cloudStatusText');
+                    if (statusText) statusText.innerText = "العمل محلياً";
+                    showCloudSetupModal();
+                    return;
+                }
+
+                // تفعيل Firebase
                 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
                     firebase.initializeApp(configObj);
                 }
                 firebaseConfigLoaded = configObj;
 
                 if (typeof firebase !== 'undefined') {
+                    // الدخول المجهول (Anonymous) كخيار افتراضي للاتصال بالقاعدة قبل تسجيل دخول الخادم
                     if (!firebase.auth().currentUser) {
-                        await firebase.auth().signInWithEmailAndPassword(savedEmail, savedPass);
+                        try {
+                            // ملاحظة: تأكد أنك مفعل "Anonymous" في Authentication بداخل Firebase Console
+                            await firebase.auth().signInAnonymously();
+                        } catch (authErr) {
+                            console.warn("تخطى الدخول المجهول:", authErr);
+                        }
                     }
+
                     fsdb = firebase.firestore();
                     isFirebaseActive = true;
 
-                    // استبدال .info/connected (خاصة بـRealtime Database) بمراقبة اتصال المتصفح،
-                    // لأن كل البيانات التشغيلية صارت على Firestore وليس لها حاجة لاتصال RTDB حي.
                     function updateConnectionStatus(isOnline) {
                         const statusText = document.getElementById('cloudStatusText');
                         const indicator = document.getElementById('cloudIndicator');
@@ -4141,6 +4169,7 @@ function exportFollowupToExcel() {
                             if (statusText) statusText.innerText = "يعمل بدون نت (أوفلاين) 🟠";
                         }
                     }
+                    
                     updateConnectionStatus(navigator.onLine);
                     window.addEventListener('online', () => updateConnectionStatus(true));
                     window.addEventListener('offline', () => updateConnectionStatus(false));
@@ -4150,6 +4179,7 @@ function exportFollowupToExcel() {
                         return !pending[path];
                     }
 
+                    // --- الاستماع لتحديثات قاعدة البيانات (onSnapshot) ---
                     fsdb.collection('config').doc('settings').onSnapshot(snap => {
                         if (shouldAcceptCloudData('settings')) {
                             settings = Object.assign({}, settings, snap.exists ? (snap.data() || {}) : {});
@@ -4290,6 +4320,7 @@ function exportFollowupToExcel() {
             } catch (e) {
                 let statusText = document.getElementById('cloudStatusText');
                 if (statusText) statusText.innerText = "خطأ في الاتصال بالسحابة";
+                console.error("Firebase init error:", e);
             }
         }
 
