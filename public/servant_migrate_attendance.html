@@ -7,7 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--primary:#1e3799;--accent:#0984e3;--ok:#00b894;--warn:#f59e0b;--bad:#d63031}
@@ -48,12 +47,12 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
 
     <div class="hero">
         <h1>🚀 الترحيل الشامل لقاعدة البيانات إلى Firestore</h1>
-        <p>أداة إتمام الانتقال النهائي: تنقل كافة البيانات والجداول من التخزين المحلي أو القديم إلى Firestore دفعة واحدة لتفادي طلب القاعدة القديمة نهائياً.</p>
+        <p>أداة إتمام الانتقال النهائي: تنقل كافة البيانات والجداول من التخزين المحلي إلى Firestore دفعة واحدة بأمان تام.</p>
     </div>
 
     <div class="card">
         <h2>حالة الاتصال بالسحابة</h2>
-        <div class="status"><span class="dot" id="dotFS"></span> Firestore: <span id="txtFS">جاري الفحص...</span></div>
+        <div class="status"><span class="dot" id="dotFS"></span> Firestore: <span id="txtFS">جاري الاتصال والتحقق...</span></div>
     </div>
 
     <div class="card">
@@ -69,7 +68,7 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
             <label class="table-opt"><input type="checkbox" name="col" value="settings" checked> <b>إعدادات الخدمة</b> (config/settings)</label>
         </div>
         <div class="row">
-            <button class="btn primary" id="btnMigrateAll">🚀 بدء الترحيل الشامل الآن</button>
+            <button class="btn primary" id="btnMigrateAll" disabled>⏳ جاري تهيئة الاتصال...</button>
         </div>
     </div>
 
@@ -78,7 +77,7 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
         <div class="log" id="log"></div>
     </div>
 
-    <div class="tip">💡 بعد اكتمال الترحيل بنجاح، سيتم الاعتماد كلياً على Firestore. يمكنك غلق الأداة والعودة لوحة التحكم واستخدام النظام بكل أمان.</div>
+    <div class="tip">💡 تأكد من فتح الأداة من نفس المتصفح والجهاز الذي يحتوي على بياناتك الحالية (LocalStorage) لكي يتمكن من رفعها لقاعدة البيانات الجديدة.</div>
 </div>
 
 <div id="locked" class="locked" style="display:none">🔒 هذه الأداة لأمين الخدمة فقط.</div>
@@ -129,13 +128,14 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
         try {
             if (!firebase.apps.length) firebase.initializeApp(cfg);
             
-            // استخدام المصادقة المجهولة حصرياً لتجاوز أي قيود إيميل قديم أثناء الترحيل
             if (!firebase.auth().currentUser) {
                 await firebase.auth().signInAnonymously();
             }
             
             fsdb = firebase.firestore();
             setDot('FS', 'ok', 'متصل بنجاح بقاعدة بيانات Firestore');
+            $('btnMigrateAll').disabled = false;
+            $('btnMigrateAll').textContent = '🚀 بدء الترحيل الشامل الآن';
             return true;
         } catch (e) {
             setDot('FS', 'bad', 'فشل الاتصال: ' + (e.code || e.message));
@@ -144,6 +144,10 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
     }
 
     async function migrateCollection(name) {
+        if (!fsdb) {
+            log(`❌ خطأ: قاعدة البيانات (Firestore) غير متصلة بعد!`, 'bad');
+            return;
+        }
         log(`جاري تجهيز ترحيل الجدول: [${name}]...`);
         try {
             if (name === 'members') {
@@ -221,6 +225,11 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
     }
 
     $('btnMigrateAll').addEventListener('click', async () => {
+        if (!fsdb) {
+            alert("يرجى الانتظار حتى يتم الاتصال بقاعدة البيانات بنجاح!");
+            return;
+        }
+
         let checkboxes = document.querySelectorAll('input[name="col"]:checked');
         if (!checkboxes.length) return alert("اختر جدولاً واحداً على الأقل للترحيل!");
         
@@ -238,6 +247,7 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
         alert('🎉 تم إتمام ترحيل كافة البيانات المطلوبة إلى Firestore بنجاح!');
     });
 
+    // بدء الاتصال فوراً عند فتح الصفحة
     (async () => { await initCloud(); })();
 })();
 </script>
