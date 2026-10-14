@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ترحيل الحضور وجلسات الخدام إلى Firestore | خدمتي برو</title>
+<title>الترحيل الشامل لقاعدة البيانات إلى Firestore | خدمتي برو</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -13,12 +13,11 @@
 :root{--primary:#1e3799;--accent:#0984e3;--ok:#00b894;--warn:#f59e0b;--bad:#d63031}
 *{box-sizing:border-box}
 body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f5f9;color:#1e293b;padding:16px 16px 50px}
-.wrap{max-width:720px;margin:auto}
+.wrap{max-width:780px;margin:auto}
 .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:9px 16px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
 .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(9,132,227,.3)}
 .btn.primary:hover{color:#fff;filter:brightness(1.08)}
-.btn.danger{border-color:var(--bad);color:var(--bad)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .hero{background:linear-gradient(145deg,#0c2461,#1e3799 55%,#0984e3);color:#fff;border-radius:22px;padding:22px 20px;margin-bottom:16px}
@@ -29,78 +28,57 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
 .status{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;margin-bottom:10px}
 .dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;flex:none}
 .dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
-.stat{background:#f8fafc;border-radius:12px;padding:10px;text-align:center}
-.stat b{display:block;font-size:1.3rem;color:var(--primary)}
-.stat small{color:#64748b;font-size:.75rem}
-.bar{height:10px;background:#e2e8f0;border-radius:6px;overflow:hidden;margin:10px 0}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));width:0%;transition:.3s}
-.log{background:#0f172a;color:#cbd5e1;border-radius:12px;padding:12px;font-family:monospace;font-size:.78rem;max-height:260px;overflow:auto;white-space:pre-wrap;line-height:1.7}
+.log{background:#0f172a;color:#cbd5e1;border-radius:12px;padding:12px;font-family:monospace;font-size:.78rem;max-height:280px;overflow:auto;white-space:pre-wrap;line-height:1.7}
 .log .ok{color:#4ade80}.log .bad{color:#f87171}.log .warn{color:#fbbf24}
 .tip{background:#fffbeb;border-right:4px solid var(--warn);border-radius:10px;padding:10px 14px;font-size:.85rem;margin-top:10px}
-.danger-box{background:#fef2f2;border-right:4px solid var(--bad);border-radius:10px;padding:10px 14px;font-size:.85rem;margin-top:10px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .locked{text-align:center;padding:60px 20px;color:#64748b}
+.grid-tables{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;margin-bottom:15px}
+.table-opt{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:12px;cursor:pointer;transition:.2s}
+.table-opt:hover{border-color:var(--accent)}
+.table-opt input{margin-left:6px;accent-color:var(--primary)}
 </style>
 </head>
 <body>
 <div class="wrap" id="app" style="display:none">
 
     <div class="topbar">
-        <a href="servant-dashboard.html" class="btn">← العودة للوحة</a>
+        <a href="servant-dashboard.html" class="btn">← العودة لوحة التحكم</a>
     </div>
 
     <div class="hero">
-        <h1>🔄 ترحيل البيانات إلى Firestore</h1>
-        <p>أداة إدارية لمرة واحدة: تنسخ البيانات من Realtime Database إلى Firestore، دون حذف أي بيانات قديمة. اختر المسار ثم افحص ورحّل.</p>
+        <h1>🚀 الترحيل الشامل لقاعدة البيانات إلى Firestore</h1>
+        <p>أداة إتمام الانتقال النهائي: تنقل كافة البيانات والجداول من التخزين القديم (أو Realtime DB) إلى Firestore دفعة واحدة لتفادي طلب القاعدة القديمة نهائياً.</p>
     </div>
 
     <div class="card">
-        <h2>المسار</h2>
-        <div class="row">
-            <label style="display:flex;align-items:center;gap:6px;font-weight:700;cursor:pointer"><input type="radio" name="target" value="attendance" checked> حضور المخدومين</label>
-            <label style="display:flex;align-items:center;gap:6px;font-weight:700;cursor:pointer"><input type="radio" name="target" value="servants_attendance"> حضور الخدام</label>
-        </div>
-    </div>
-
-    <div class="card">
-        <h2>حالة الاتصال</h2>
-        <div class="status"><span class="dot" id="dotRTDB"></span> Realtime Database: <span id="txtRTDB">جاري الفحص...</span></div>
+        <h2>حالة الاتصال بالسحابة</h2>
         <div class="status"><span class="dot" id="dotFS"></span> Firestore: <span id="txtFS">جاري الفحص...</span></div>
     </div>
 
-    <div class="card" id="scanCard">
-        <h2>1) افحص البيانات أولاً</h2>
-        <p id="targetLabel" style="font-size:.85rem;color:#1e3799;font-weight:700;margin:0 0 6px">المسار المختار: حضور المخدومين</p>
-        <p style="font-size:.88rem;color:#475569;margin:0 0 10px">يقرأ فقط، لا يُعدّل أي شيء. يعطيك صورة واضحة قبل الترحيل.</p>
-        <button class="btn primary" id="btnScan">🔍 فحص سجل الحضور</button>
-        <div class="stats" id="stats" style="display:none">
-            <div class="stat"><b id="statDates">0</b><small>تاريخ في Realtime DB</small></div>
-            <div class="stat"><b id="statRecords">0</b><small id="recLabel">سجل حضور إجمالي</small></div>
-            <div class="stat"><b id="statExisting">0</b><small>تاريخ موجود بالفعل في Firestore</small></div>
+    <div class="card">
+        <h2>اختر الجداول (Collections) المراد ترحيلها</h2>
+        <div class="grid-tables">
+            <label class="table-opt"><input type="checkbox" name="col" value="members" checked> <b>المخدومين والدارسين</b> (members)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="servants" checked> <b>حسابات الخدام</b> (servants)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="attendance" checked> <b>سجل حضور المخدومين</b> (attendance)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="servants_attendance" checked> <b>سجل حضور الخدام</b> (servants_attendance)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="master_plan" checked> <b>خطة السنة والأجندة</b> (config/master_plan)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="course_materials" checked> <b>مكتبة المواد</b> (config/course_materials)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="self_reflections" checked> <b>النوتة والتقييمات</b> (config/self_reflections)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="settings" checked> <b>إعدادات الخدمة</b> (config/settings)</label>
         </div>
-    </div>
-
-    <div class="card" id="migrateCard" style="display:none">
-        <h2>2) ابدأ الترحيل</h2>
-        <p style="font-size:.88rem;color:#475569;margin:0 0 10px">
-            سيُكتب كل تاريخ كمستند في Firestore. التواريخ الموجودة فيه بالفعل <b>سيُعاد استبدالها</b> ببيانات Realtime Database (تنفيذها أكثر من مرة آمن).
-        </p>
         <div class="row">
-            <button class="btn primary" id="btnMigrate">🚀 بدء الترحيل الكامل</button>
-            <button class="btn" id="btnRetry" style="display:none">↻ إعادة محاولة التواريخ الفاشلة فقط</button>
+            <button class="btn primary" id="btnMigrateAll">🚀 بدء الترحيل الشامل الآن</button>
         </div>
-        <div class="bar" id="barWrap" style="display:none"><i id="bar"></i></div>
-        <div id="progressTxt" style="font-size:.85rem;color:#64748b;margin-top:4px"></div>
     </div>
 
     <div class="card" id="logCard" style="display:none">
-        <h2>السجل</h2>
+        <h2>سجل العمليات والتقدم</h2>
         <div class="log" id="log"></div>
     </div>
 
-    <div class="tip">💡 بعد التأكد أن كل التواريخ ظهرت صحيحة في Firestore Console، يمكنك حذف عقدة <code>attendance</code> من Realtime Database يدوياً لتوفير المساحة. هذه الأداة لا تحذفها تلقائياً أبداً.</div>
-    <div class="danger-box">⚠️ لا تغلق الصفحة أثناء الترحيل. إن انقطع الاتصال، اضغط «إعادة محاولة التواريخ الفاشلة فقط» بعد عودته بدل البدء من جديد.</div>
+    <div class="tip">💡 بعد اكتمال الترحيل بنجاح، سيتم الاعتماد كلياً على Firestore ولن يطلب النظام أي بيانات قديمة مرة أخرى. يمكنك غلق الأداة والعودة للوحة التحكم.</div>
 </div>
 
 <div id="locked" class="locked" style="display:none">🔒 هذه الأداة لأمين الخدمة فقط.</div>
@@ -120,14 +98,14 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
     }
     $('app').style.display = '';
 
-    let db = null, fsdb = null;
+    let fsdb = null;
     const log = (msg, cls) => {
         $('logCard').style.display = '';
         const line = document.createElement('div');
         if (cls) line.className = cls;
         line.textContent = `[${new Date().toLocaleTimeString('ar-EG')}] ${msg}`;
         $('log').appendChild(line);
-        $('log').scrollTop = $('log').scrollHeight;
+        $('log').scrollTop =$('log').scrollHeight;
     };
     const setDot = (id, state, text) => { $('dot' + id).className = 'dot ' + state; $('txt' + id).textContent = text; };
 
@@ -138,142 +116,128 @@ body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f
             email = localStorage.getItem('cloud_auth_email');
             pass = localStorage.getItem('cloud_auth_pass');
         } catch (e) {}
-        if (!cfg || !email || !pass) {
-            setDot('RTDB', 'bad', 'لا يوجد إعداد سحابي محفوظ على هذا الجهاز');
-            setDot('FS', 'bad', 'افتح لوحة الخدمة أولاً واضبط الربط السحابي من هناك');
+        
+        // جلب من Vercel إن لم تقم بحفظه محلياً
+        if (!cfg) {
+            try {
+                let res = await fetch('/api/public-config');
+                if (res.ok) cfg = await res.json();
+            } catch(e) {}
+        }
+
+        if (!cfg) {
+            setDot('FS', 'bad', 'لم يتم العثور على إعدادات Firebase');
             return false;
         }
         try {
             if (!firebase.apps.length) firebase.initializeApp(cfg);
-            if (!firebase.auth().currentUser) await firebase.auth().signInWithEmailAndPassword(email, pass);
-            db = firebase.database();
+            if (email && pass && !firebase.auth().currentUser) {
+                await firebase.auth().signInWithEmailAndPassword(email, pass);
+            } else if (!firebase.auth().currentUser) {
+                await firebase.auth().signInAnonymously();
+            }
             fsdb = firebase.firestore();
-            setDot('RTDB', 'ok', 'متصل');
-            setDot('FS', 'ok', 'متصل');
+            setDot('FS', 'ok', 'متصل بنجاح بقاعدة بيانات Firestore');
             return true;
         } catch (e) {
-            setDot('RTDB', 'bad', 'فشل الاتصال: ' + (e.code || e.message));
-            setDot('FS', 'bad', 'فشل الاتصال');
+            setDot('FS', 'bad', 'فشل الاتصال: ' + (e.code || e.message));
             return false;
         }
     }
 
-    let rtdbTree = null;
-    let allDates = [];
-    let failedDates = [];
-    let target = 'attendance';
-
-    const TARGETS = {
-        attendance: { label: 'حضور المخدومين', recLabel: 'سجل حضور إجمالي' },
-        servants_attendance: { label: 'حضور الخدام', recLabel: 'سجل خادم إجمالي' }
-    };
-    document.querySelectorAll('input[name="target"]').forEach(r => r.addEventListener('change', () => {
-        target = document.querySelector('input[name="target"]:checked').value;
-        $('targetLabel').textContent = 'المسار المختار: ' + TARGETS[target].label;
-        $('recLabel').textContent = TARGETS[target].recLabel;
-        $('stats').style.display = 'none';
-        $('migrateCard').style.display = 'none';
-        rtdbTree = null; allDates = []; failedDates = [];
-    }));
-
-    $('btnScan').addEventListener('click', async () => {
-        $('btnScan').disabled = true;
-        log('جاري قراءة سجل الحضور من Realtime Database...');
+    async function migrateCollection(name) {
+        log(`جاري تجهيز ترحيل الجدول: [${name}]...`);
         try {
-            const snap = await db.ref(target).once('value');
-            rtdbTree = snap.exists() ? (snap.val() || {}) : {};
-            allDates = Object.keys(rtdbTree).sort();
-            let totalRecords = 0;
-            allDates.forEach(d => {
-                const node = rtdbTree[d];
-                if (target === 'servants_attendance') {
-                    totalRecords += Array.isArray(node) ? node.filter(Boolean).length : ((node && node.list) || []).length;
-                } else {
-                    totalRecords += Array.isArray(node) ? node.filter(Boolean).length : Object.keys(node || {}).length;
-                }
-            });
-
-            log(`تم العثور على ${allDates.length} تاريخاً، بإجمالي ${totalRecords} سجل حضور.`, 'ok');
-
-            const fsSnap = await fsdb.collection(target).get();
-            const existingDates = new Set(fsSnap.docs.map(d => d.id));
-            const overlap = allDates.filter(d => existingDates.has(d)).length;
-            log(`يوجد بالفعل ${fsSnap.size} تاريخاً في Firestore (منها ${overlap} سيُستبدل ببيانات أحدث من Realtime Database).`);
-
-            $('statDates').textContent = allDates.length;
-            $('statRecords').textContent = totalRecords;
-            $('statExisting').textContent = fsSnap.size;
-            $('stats').style.display = '';
-            $('migrateCard').style.display = allDates.length ? '' : 'none';
-            if (!allDates.length) log('لا يوجد سجل حضور لترحيله. كل شيء منتهٍ بالفعل.', 'ok');
-        } catch (e) {
-            log('فشل الفحص: ' + (e.code || e.message), 'bad');
-        } finally {
-            $('btnScan').disabled = false;
-        }
-    });
-
-    function dayToObject(node) {
-        if (target === 'servants_attendance') {
-            const list = Array.isArray(node) ? node.filter(Boolean) : ((node && node.list) || []);
-            return { list };
-        }
-        if (!node) return {};
-        if (!Array.isArray(node)) return node; // بالفعل بالشكل {pKey: record}
-        const obj = {};
-        node.filter(Boolean).forEach(item => {
-            const p = (item.code || item.id || '').toString().replace(/\D/g, '');
-            if (p) obj[p] = item;
-        });
-        return obj;
-    }
-
-    async function migrateDates(dates) {
-        $('barWrap').style.display = '';
-        $('btnMigrate').disabled = true;
-        $('btnRetry').disabled = true;
-        failedDates = [];
-        let done = 0;
-
-        for (let i = 0; i < dates.length; i += 400) {
-            const chunk = dates.slice(i, i + 400);
-            const batch = fsdb.batch();
-            chunk.forEach(date => {
-                const ref = fsdb.collection(target).doc(date);
-                batch.set(ref, dayToObject(rtdbTree[date]));
-            });
-            try {
+            if (name === 'members') {
+                let list = JSON.parse(localStorage.getItem('my_church_class')) || [];
+                if (!list.length) { log(`ℹ️ الجدول [members] فارغ محلياً.`, 'warn'); return; }
+                let batch = fsdb.batch(), count = 0;
+                list.forEach(m => {
+                    let docRef = fsdb.collection('members').doc(String(m.id || m.code));
+                    batch.set(docRef, m, { merge: true });
+                    count++;
+                });
                 await batch.commit();
-                done += chunk.length;
-                log(`✔️ تم ترحيل دفعة من ${chunk.length} تاريخاً (${chunk[0]} ← ${chunk[chunk.length - 1]})`, 'ok');
-            } catch (e) {
-                log(`❌ فشلت دفعة (${chunk[0]} ← ${chunk[chunk.length - 1]}): ${e.code || e.message}`, 'bad');
-                failedDates.push(...chunk);
+                log(`✔️ تم ترحيل ${count} سجل في [members] بنجاح.`, 'ok');
             }
-            const pct = Math.round(((i + chunk.length) / dates.length) * 100);
-            $('bar').style.width = pct + '%';
-            $('progressTxt').textContent = `${Math.min(i + chunk.length, dates.length)} / ${dates.length} تاريخاً`;
-        }
-
-        $('btnMigrate').disabled = false;
-        if (failedDates.length) {
-            log(`⚠️ انتهى الترحيل مع فشل ${failedDates.length} تاريخاً. اضغط "إعادة المحاولة".`, 'warn');
-            $('btnRetry').style.display = '';
-            $('btnRetry').disabled = false;
-        } else {
-            log(`🎉 تم ترحيل كل التواريخ (${done}) بنجاح إلى Firestore.`, 'ok');
-            $('btnRetry').style.display = 'none';
+            else if (name === 'servants') {
+                let list = JSON.parse(localStorage.getItem('my_church_servants')) || [];
+                if (!list.length) { log(`ℹ️ الجدول [servants] فارغ محلياً.`, 'warn'); return; }
+                let batch = fsdb.batch(), count = 0;
+                list.forEach(s => {
+                    let docRef = fsdb.collection('servants').doc(String(s.id || s.code));
+                    batch.set(docRef, s, { merge: true });
+                    count++;
+                });
+                await batch.commit();
+                log(`✔️ تم ترحيل ${count} سجل في [servants] بنجاح.`, 'ok');
+            }
+            else if (name === 'attendance') {
+                let fullAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+                let dates = Object.keys(fullAtt);
+                if (!dates.length) { log(`ℹ️ لا توجد تواريخ حضور مسجلة محلياً.`, 'warn'); return; }
+                for (let d of dates) {
+                    let dayList = fullAtt[d] || [];
+                    let partitionObj = {};
+                    dayList.forEach(item => {
+                        let p = (item.code || item.id || '').toString().replace(/\D/g, '');
+                        if (p) partitionObj[p] = item;
+                    });
+                    await fsdb.collection('attendance').doc(d).set(partitionObj, { merge: true });
+                }
+                log(`✔️ تم ترحيل سجلات حضور المخدومين لـ (${dates.length}) يوماً بنجاح.`, 'ok');
+            }
+            else if (name === 'servants_attendance') {
+                let fullServAtt = JSON.parse(localStorage.getItem('my_church_servants_attendance')) || {};
+                let dates = Object.keys(fullServAtt);
+                if (!dates.length) { log(`ℹ️ لا توجد سجلات حضور خدام محلياً.`, 'warn'); return; }
+                for (let d of dates) {
+                    let list = fullServAtt[d] || [];
+                    await fsdb.collection('servants_attendance').doc(d).set({ list: list }, { merge: true });
+                }
+                log(`✔️ تم ترحيل سجلات حضور الخدام لـ (${dates.length}) يوماً بنجاح.`, 'ok');
+            }
+            else if (name === 'master_plan') {
+                let plan = JSON.parse(localStorage.getItem('my_church_master_plan')) || [];
+                await fsdb.collection('config').doc('master_plan').set({ list: plan }, { merge: true });
+                log(`✔️ تم ترحيل خطة السنة والأجندة بنجاح.`, 'ok');
+            }
+            else if (name === 'course_materials') {
+                let mats = JSON.parse(localStorage.getItem('khedmety_course_materials')) || [];
+                await fsdb.collection('config').doc('course_materials').set({ list: mats }, { merge: true });
+                log(`✔️ تم ترحيل مكتبة المواد بنجاح.`, 'ok');
+            }
+            else if (name === 'self_reflections') {
+                let refs = JSON.parse(localStorage.getItem('khedmety_self_reflections')) || [];
+                await fsdb.collection('config').doc('self_reflections').set({ list: refs }, { merge: true });
+                log(`✔️ تم ترحيل التقييمات والنوتة بنجاح.`, 'ok');
+            }
+            else if (name === 'settings') {
+                let sets = JSON.parse(localStorage.getItem('my_church_settings')) || {};
+                await fsdb.collection('config').doc('settings').set(sets, { merge: true });
+                log(`✔️ تم ترحيل إعدادات الخدمة بنجاح.`, 'ok');
+            }
+        } catch (e) {
+            log(`❌ خطأ أثناء ترحيل [${name}]: ${e.code || e.message}`, 'bad');
         }
     }
 
-    $('btnMigrate').addEventListener('click', () => {
-        if (!allDates.length) return;
-        if (!confirm(`سيتم نسخ ${allDates.length} تاريخاً من "${TARGETS[target].label}" إلى Firestore (استبدال أي تاريخ موجود هناك). لن يُحذف شيء من Realtime Database. متابعة؟`)) return;
-        migrateDates(allDates);
-    });
-    $('btnRetry').addEventListener('click', () => {
-        if (!failedDates.length) return;
-        migrateDates(failedDates.slice());
+    $('btnMigrateAll').addEventListener('click', async () => {
+        let checkboxes = document.querySelectorAll('input[name="col"]:checked');
+        if (!checkboxes.length) return alert("اختر جدولاً واحداً على الأقل للترحيل!");
+        
+        if (!confirm("هل أنت متأكد من بدء عملية الترحيل الشامل إلى Firestore؟")) return;
+
+        $('btnMigrateAll').disabled = true;
+        log('=== بدء عملية الترحيل الشامل إلى Firestore ===');
+
+        for (let chk of checkboxes) {
+            await migrateCollection(chk.value);
+        }
+
+        log('🎉 انتهت عملية الترحيل الشامل بنجاح تام!', 'ok');
+        $('btnMigrateAll').disabled = false;
+        alert('🎉 تم إتمام ترحيل كافة البيانات المطلوبة إلى Firestore بنجاح!');
     });
 
     (async () => { await initCloud(); })();
