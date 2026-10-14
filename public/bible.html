@@ -48,7 +48,7 @@
             <div class="row g-2 align-items-center">
                 <div class="col-md-6">
                     <label class="form-label small fw-bold text-muted">السفر:</label>
-                    <select id="bookSelect" class="form-select" onchange="onBookChanged()"></select>
+                    <select id="bookSelect" class="form-select" onchange="onBookChanged(false)"></select>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label small fw-bold text-muted">الإصحاح:</label>
@@ -73,27 +73,42 @@
     </div>
 </div>
 
-<!-- استدعاء ملفات البيانات المحلية لتعمل محلياً دون أي حاجة لسيرفر -->
+<!-- استدعاء ملفات البيانات المحلية -->
 <script src="bible-data.js"></script>
 
 <script>
-const studentCode = localStorage.getItem('student_code') || 'demo';
-(function(){ var r = localStorage.getItem('user_role'); var b = document.getElementById('btn-home'); if (b && (r === 'admin' || r === 'servant')) b.href = 'servant-dashboard.html'; })();
+const studentCode = localStorage.getItem('student_code');
+const userRole = localStorage.getItem('user_role');
+
+if (!studentCode && userRole !== 'admin' && userRole !== 'servant') {
+    window.location.href = 'index.html';
+}
+
+(function(){
+    var b = document.getElementById('btn-home');
+    if (b && (userRole === 'admin' || userRole === 'servant')) {
+        b.href = 'servant-dashboard.html';
+    }
+})();
+
 // ترحيل قراءات قديمة كانت تُحفظ بدون كود الدارس (مرة واحدة)
 (function migrateLegacyBible(){
-  try{
-    var c = localStorage.getItem('student_code'); if(!c) return;
-    var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
-    Object.keys(r).forEach(function(k){
-      if(/^\d{1,2}-\d{1,2}$/.test(k)){
-        var nk = k + '_' + c;
-        if(!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
-        delete r[k]; changed = true;
-      }
-    });
-    if(changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
-  }catch(e){}
+    try {
+        var c = localStorage.getItem('student_code');
+        if (!c) return;
+        var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
+        Object.keys(r).forEach(function(k){
+            if (/^\d{1,2}-\d{1,2}$/.test(k)) {
+                var nk = k + '_' + c;
+                if (!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
+                delete r[k];
+                changed = true;
+            }
+        });
+        if (changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
+    } catch(e) {}
 })();
+
 let bibleData = [];
 let currentFontSize = 1.25;
 
@@ -101,25 +116,94 @@ const urlParams = new URLSearchParams(window.location.search);
 let targetBookName = urlParams.get('book');
 let targetChapter = parseInt(urlParams.get('chapter')) || 1;
 let targetChapterEnd = parseInt(urlParams.get('chapter_end')) || targetChapter;
+let todayPlanBookAr = null;
 
+// قاموس شامل يربط الأسماء الإنجليزية القياسية وأسماء ملفات الأنبا تكلا بالاسم العربي
 const arabicBookNames = {
     "Genesis": "التكوين", "Exodus": "الخروج", "Leviticus": "اللاويين", "Numbers": "العدد", "Deuteronomy": "التثنية",
-    "Joshua": "يشوع", "Judges": "القضاة", "Ruth": "راعوث", "1 Samuel": "صموئيل الأول", "2 Samuel": "صموئيل الثاني",
-    "1 Kings": "الملوك الأول", "2 Kings": "الملوك الثاني", "1 Chronicles": "أخبار الأيام الأول", "2 Chronicles": "أخبار الأيام الثاني",
-    "Ezra": "عزرا", "Nehemiah": "نحميا", "Esther": "أستير", "Job": "أيوب", "Psalms": "المزامير",
-    "Proverbs": "الأمثال", "Ecclesiastes": "الجامعة", "Song of Solomon": "نشيد الأنشاد", "Isaiah": "إشعياء",
-    "Jeremiah": "إرميا", "Lamentations": "مراثي إرميا", "Ezekiel": "حزقيال", "Daniel": "دانيال",
+    "Joshua": "يشوع", "Judges": "القضاة", "Ruth": "راعوث",
+    "1 Samuel": "صموئيل الأول", "1-Samuel": "صموئيل الأول",
+    "2 Samuel": "صموئيل الثاني", "2-Samuel": "صموئيل الثاني",
+    "1 Kings": "الملوك الأول", "1-Kings": "الملوك الأول",
+    "2 Kings": "الملوك الثاني", "2-Kings": "الملوك الثاني",
+    "1 Chronicles": "أخبار الأيام الأول", "1-Chronicles": "أخبار الأيام الأول",
+    "2 Chronicles": "أخبار الأيام الثاني", "2-Chronicles": "أخبار الأيام الثاني",
+    "Ezra": "عزرا", "Nehemiah": "نحميا", "Nehmiah": "نحميا",
+    "Tobit": "طوبيا", "Tobit__Deu": "طوبيا",
+    "Judith": "يهوديت", "Judith__Deu": "يهوديت",
+    "Esther": "أستير", "1-Esther": "أستير",
+    "2-Esther-the-rest__Deu": "تتمة أستير", "Esther Rest": "تتمة أستير",
+    "Job": "أيوب",
+    "Psalms": "المزامير", "1-Psalms": "المزامير",
+    "2-Psalm-151__Deu": "المزمور 151", "Psalm 151": "المزمور 151",
+    "Proverbs": "الأمثال", "Ecclesiastes": "الجامعة",
+    "Song of Solomon": "نشيد الأنشاد", "Song-of-Songs": "نشيد الأنشاد",
+    "Wisdom": "حكمة سليمان", "Wisdom__Deu": "حكمة سليمان", "حكمة": "حكمة سليمان",
+    "Sirach": "يشوع بن سيراخ", "Sirach__Deu": "يشوع بن سيراخ",
+    "Isaiah": "إشعياء", "Isiah": "إشعياء",
+    "Jeremiah": "إرميا", "Lamentations": "مراثي إرميا",
+    "Baruch": "باروخ", "Baruch__Deu": "باروخ",
+    "Ezekiel": "حزقيال",
+    "Daniel": "دانيال", "1-Daniel": "دانيال",
+    "2-Daniel-the-rest__Deu": "تتمة دانيال", "Daniel Rest": "تتمة دانيال",
     "Hosea": "هوشع", "Joel": "يوئيل", "Amos": "عاموس", "Obadiah": "عوبديا", "Jonah": "يونان",
-    "Micah": "ميخا", "Nahum": "ناحوم", "Habakkuk": "حبقوق", "Zephaniah": "صفنيا", "Haggai": "حجي",
-    "Zechariah": "زكريا", "Malachi": "ملاخي",
+    "Micah": "ميخا", "Nahum": "ناحوم",
+    "Habakkuk": "حبقوق", "Habakuk": "حبقوق",
+    "Zephaniah": "صفنيا", "Haggai": "حجي", "Zechariah": "زكريا", "Malachi": "ملاخي",
+    "1 Maccabees": "المكابيين الأول", "First-Maccabees__Deu": "المكابيين الأول",
+    "2 Maccabees": "المكابيين الثاني", "Second-Maccabees__Deu": "المكابيين الثاني",
     "Matthew": "إنجيل متى", "Mark": "إنجيل مرقس", "Luke": "إنجيل لوقا", "John": "إنجيل يوحنا",
-    "Acts": "سفر أعمال الرسل", "Romans": "رومية", "1 Corinthians": "كورنثوس الأولى", "2 Corinthians": "كورنثوس الثانية",
-    "Galatians": "غلاطية", "Ephesians": "أفسس", "Philippians": "فيلبي", "Colossians": "كولوسي",
-    "1 Thessalonians": "تسالونيكي الأولى", "2 Thessalonians": "تسالونيكي الثانية", "1 Timothy": "تيموثاوس الأولى",
-    "2 Timothy": "تيموثاوس الثانية", "Titus": "تيطس", "Philemon": "فليمون", "Hebrews": "العبرانيين",
-    "James": "يعقوب", "1 Peter": "بطرس الأولى", "2 Peter": "بطرس الثانية", "1 John": "يوحنا الأولى",
-    "2 John": "يوحنا الثانية", "3 John": "يوحنا الثالثة", "Jude": "يهوذا", "Revelation": "سفر الرؤيا"
+    "Acts": "سفر أعمال الرسل", "Romans": "رومية",
+    "1 Corinthians": "كورنثوس الأولى", "1-Corinthians": "كورنثوس الأولى",
+    "2 Corinthians": "كورنثوس الثانية", "2-Corinthians": "كورنثوس الثانية",
+    "Galatians": "غلاطية", "Ephesians": "أفسس",
+    "Philippians": "فيلبي", "Philipians": "فيلبي",
+    "Colossians": "كولوسي",
+    "1 Thessalonians": "تسالونيكي الأولى", "1-thessalonians": "تسالونيكي الأولى",
+    "2 Thessalonians": "تسالونيكي الثانية", "2-thessalonians": "تسالونيكي الثانية",
+    "1 Timothy": "تيموثاوس الأولى", "1-Timothy": "تيموثاوس الأولى",
+    "2 Timothy": "تيموثاوس الثانية", "2-Timothy": "تيموثاوس الثانية",
+    "Titus": "تيطس",
+    "Philemon": "فليمون", "Phillemon": "فليمون",
+    "Hebrews": "العبرانيين", "James": "يعقوب",
+    "1 Peter": "بطرس الأولى", "1-Peter": "بطرس الأولى",
+    "2 Peter": "بطرس الثانية", "2-Peter": "بطرس الثانية",
+    "1 John": "يوحنا الأولى", "1-John": "يوحنا الأولى",
+    "2 John": "يوحنا الثانية", "2-John": "يوحنا الثانية",
+    "3 John": "يوحنا الثالثة", "3-John": "يوحنا الثالثة",
+    "Jude": "يهوذا", "Revelation": "سفر الرؤيا"
 };
+
+function normalizeBookName(name) {
+    if (!name) return '';
+    const mapped = arabicBookNames[name] || name;
+    return mapped
+        .replace(/^سفر\s+/, '')
+        .replace(/^إنجيل\s+/, '')
+        .replace(/^رسالة\s+/, '')
+        .replace(/حكمة سليمان/, 'حكمة')
+        .trim();
+}
+
+// دالة ذكية لاستخراج قراءة لأي يوم في السنة حتى لو لم يكن المفتاح موجوداً مباشرة
+function getPlanItemForDate(planData, month, day) {
+    if (!planData) return null;
+    const directKey = `${month}-${day}`;
+    if (planData[directKey]) return planData[directKey];
+
+    // إذا كانت الخطة تغطي 8 أشهر (بداية من أكتوبر مثلاً كعام دراسي خدمي: شهر 10 هو الشهر 1 في الخطة)
+    const serviceMonth = ((month - 10 + 12) % 12) + 1;
+    const serviceKey = `${serviceMonth}-${day}`;
+    if (planData[serviceKey]) return planData[serviceKey];
+
+    // احتياطي: توزيع دوري على مفاتيح الخطة المتاحة لضمان عدم ظهور "قراءة حرة" أبداً
+    const keys = Object.keys(planData);
+    if (keys.length > 0) {
+        const dayOfYear = Math.floor((new Date(new Date().getFullYear(), month - 1, day) - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+        return planData[keys[dayOfYear % keys.length]];
+    }
+    return null;
+}
 
 // 1. فحص وتحديد قراءة اليوم تلقائياً من الخطة
 async function detectTodayPlan() {
@@ -141,15 +225,17 @@ async function detectTodayPlan() {
     const localLogs = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
     const isCompleted = !!localLogs[`${planKey}_${studentCode}`];
 
-    if (planData && planData[planKey]) {
-        const item = planData[planKey];
-        bannerTitle.textContent = `${item.reading} (${item.book} من إصحاح ${item.chapter} إلى ${item.chapter_end || item.chapter})`;
+    const todayItem = getPlanItemForDate(planData, curMonth, curDay);
 
-        // إذا لم يكن السفر محدداً من الرابط مسبقاً، نأخذه من قراءة اليوم تلقائياً
+    if (todayItem) {
+        const endChap = todayItem.chapter_end || todayItem.chapter;
+        todayPlanBookAr = normalizeBookName(todayItem.book);
+        bannerTitle.textContent = `${todayItem.reading} (${todayItem.book} من إصحاح ${todayItem.chapter} إلى ${endChap})`;
+
         if (!targetBookName) {
-            targetBookName = item.book;
-            targetChapter = item.chapter;
-            targetChapterEnd = item.chapter_end || item.chapter;
+            targetBookName = todayItem.book;
+            targetChapter = todayItem.chapter;
+            targetChapterEnd = endChap;
         }
     } else {
         bannerTitle.textContent = "قراءة وتأمل حر";
@@ -164,14 +250,12 @@ async function detectTodayPlan() {
 
 // 2. تحميل نصوص الكتاب المقدس
 async function loadBibleData() {
-    // التحقق المحلي أولاً (يعمل 100% بدون سيرفر)
     if (window.BIBLE_STATIC_DATA && Array.isArray(window.BIBLE_STATIC_DATA) && window.BIBLE_STATIC_DATA.length > 0) {
         bibleData = window.BIBLE_STATIC_DATA;
         setupBooksDropdown();
         return;
     }
 
-    // التحقق عبر fetch في حالة العمل بسيرفر
     try {
         const response = await fetch('./bible.json');
         if (!response.ok) throw new Error('HTTP Status ' + response.status);
@@ -192,6 +276,7 @@ function setupBooksDropdown() {
     if (!bookSelect || !bibleData.length) return;
     bookSelect.innerHTML = '';
     let selectedIndex = 0;
+    const cleanTarget = normalizeBookName(targetBookName);
 
     bibleData.forEach((book, index) => {
         const option = document.createElement('option');
@@ -199,10 +284,8 @@ function setupBooksDropdown() {
         const arName = arabicBookNames[book.name] || book.name;
         option.textContent = `${index + 1}. ${arName}`;
 
-        // مطابقة ذكية لتحديد سفر اليوم المخصص
-        if (targetBookName) {
-            const cleanTarget = targetBookName.replace('سفر ', '').replace('إنجيل ', '').trim();
-            const cleanAr = arName.replace('سفر ', '').replace('إنجيل ', '').trim();
+        if (cleanTarget) {
+            const cleanAr = normalizeBookName(arName);
             if (cleanAr === cleanTarget || arName === targetBookName || book.name === targetBookName) {
                 selectedIndex = index;
             }
@@ -246,7 +329,8 @@ function renderVerses() {
     const arName = arabicBookNames[book.name] || book.name;
 
     let titleText = `${arName} — الإصحاح ${parseInt(chapIndex) + 1}`;
-    if (targetChapterEnd > targetChapter) {
+    // إظهار تنويه مقرر اليوم فقط إذا كان السفر المفتوح حالياً هو نفسه سفر الخطة
+    if (targetChapterEnd > targetChapter && normalizeBookName(arName) === normalizeBookName(targetBookName)) {
         titleText += ` (مقرر اليوم: الإصحاحات ${targetChapter} إلى ${targetChapterEnd})`;
     }
     document.getElementById('chapterHeaderTitle').textContent = titleText;
@@ -269,7 +353,7 @@ function nextChapter() {
         const bookSelect = document.getElementById('bookSelect');
         if (bookSelect.selectedIndex < bookSelect.options.length - 1) {
             bookSelect.selectedIndex++;
-            onBookChanged();
+            onBookChanged(false);
         }
     }
 }
@@ -283,7 +367,7 @@ function prevChapter() {
         const bookSelect = document.getElementById('bookSelect');
         if (bookSelect.selectedIndex > 0) {
             bookSelect.selectedIndex--;
-            onBookChanged();
+            onBookChanged(false);
             chapSelect.selectedIndex = chapSelect.options.length - 1;
             renderVerses();
         }
@@ -309,24 +393,19 @@ async function markCurrentChapterRead() {
     const bookIndex = document.getElementById('bookSelect').value;
     const chapNum = parseInt(document.getElementById('chapterSelect').value) + 1;
     const book = bibleData[bookIndex];
-    const bookTitle = arabicBookNames[book.name] || book.name;
+    const bookTitle = book ? (arabicBookNames[book.name] || book.name) : (targetBookName || 'قراءة يومية');
 
-    // 1. حفظ القراءة محلياً في سجلات المتصفح فوراً
     let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
     localReadings[`${planKey}_${studentCode}`] = {
         code: String(studentCode),
         book: bookTitle,
         chapter: chapNum,
         date: now.toISOString(),
-        completed: 1
+        completed: 1,
+        points: 5
     };
     localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
 
-    // إضافة 5 نقاط رصيد للمخدوم
-    let studentPoints = parseInt(localStorage.getItem('student_points')) || 0;
-    localStorage.setItem('student_points', studentPoints + 5);
-
-    // 2. محاولة الحفظ على خادم السيرفر السحابي
     try {
         await fetch('/api/mark_plan_read', {
             method: 'POST',
