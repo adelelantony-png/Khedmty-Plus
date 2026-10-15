@@ -5001,19 +5001,21 @@ function checkSession() {
 
             const isAdmin = (currentPermission === 'admin' || currentPermission === 'developer');
             const isScannerOnly = (currentPermission === 'scanner_only');
-            const canAttend = (isAdmin || currentPermission === 'attend_only' || currentPermission === 'full' || isScannerOnly);
+            const isAttendOnly = (currentPermission === 'attend_only'); // 👈 صلاحية تسجيل حضور فقط
+            const canAttend = (isAdmin || isAttendOnly || currentPermission === 'full' || isScannerOnly);
             const canEdit = (isAdmin || currentPermission === 'full');
 
-            if (isScannerOnly) {
+            // إذا كان المستخدم بصلاحية "تسجيل حضور فقط"، نخفي عنه التبويبات الزائدة ونترك له صفحة الحضور والريئيسية فقط
+            if (isAttendOnly) {
                 let tabsEl = document.querySelector('.tabs');
-                if (tabsEl) tabsEl.style.display = 'none';
-                document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-                let attTab = document.getElementById('attendanceTab');
-                if (attTab) { attTab.style.display = 'block'; attTab.classList.add('active'); }
-                return;
-            } else {
-                let tabsEl = document.querySelector('.tabs');
-                if (tabsEl) tabsEl.style.display = 'flex';
+                if (tabsEl) {
+                    // إخفاء كل التبويبات ما عدا الرئيسية وتسجيل الحضور
+                    tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+                        if (!btn.textContent.includes('الرئيسية') && !btn.textContent.includes('تسجيل الحضور')) {
+                            btn.style.display = 'none';
+                        }
+                    });
+                }
             }
 
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
