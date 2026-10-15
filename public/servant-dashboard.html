@@ -2790,30 +2790,46 @@ function exportFollowupToExcel() {
         }
 
         function addServantManual() {
+            // حماية: لا يسمح بإضافة خادم أو أدمن إلا إذا كان المستخدم الحالي أدمن حقيقي
+            if (currentPermission !== 'admin') {
+                return alert("⛔ غير مصرح لك بإضافة خدام أو تعديل الصلاحيات!");
+            }
+
             let name = document.getElementById('newServantName').value.trim();
             let phone = document.getElementById('newServantPhone').value.trim();
             let code = document.getElementById('newServantCode').value.trim();
             let dob = document.getElementById('newServantDob').value;
             let perm = document.getElementById('newServantPermission').value;
-            if (!name || !phone) return alert("يرجى إدخال اسم ورقم هاتف الخادم!");
+            if (!name || !phone) return alert("يرجى إدخال اسم ورقم هاتف الخادم (أو كلمة المرور)!");
 
+            let newId = Date.now();
             let newS = {
-                id: Date.now(),
+                id: newId,
                 name: name,
                 phone: phone,
                 code: code || (servants.length + 101).toString(),
-                dob: dob,
+                dob: dob || "",
                 role: perm === 'admin' ? 'admin' : 'servant',
-                permission: perm
+                permission: perm,
+                roleType: perm === 'admin' ? 'أمين خدمة' : 'خادم'
             };
+
             servants.push(newS);
             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
-            syncToCloud('servants', servants);
-            logActivity("إضافة خادم", name, `صلاحية: ${perm}`);
+
+            // حفظ مباشر وفوري كوثيقة مستقلة في Firestore داخل جدول servants
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('servants').doc(String(newId)).set(newS)
+                    .then(() => showToast("✅ تم حفظ الحساب في قاعدة البيانات السحابية فوراً!"))
+                    .catch(() => syncToCloud('servants', servants));
+            } else {
+                syncToCloud('servants', servants);
+            }
+
+            logActivity("إضافة خادم/أدمن", name, `صلاحية: ${perm}`);
             renderServantsTable();
             renderServantsAttendanceTable();
             populatePlanServantsDropdown();
-            showToast("✅ تم حفظ الخادم بنجاح!");
             document.getElementById('newServantName').value = '';
             document.getElementById('newServantPhone').value = '';
             document.getElementById('newServantCode').value = '';
