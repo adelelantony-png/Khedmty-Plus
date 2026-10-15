@@ -4234,6 +4234,37 @@ function exportFollowupToExcel() {
                         if (shouldAcceptCloudData('servants')) {
                             servants = snap.empty ? [] : snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
                             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+
+                            // 🛡️ الحارس الأمني: منع أي تلاعب بالصلاحيات عبر الـ Console ومطابقتها بقاعدة البيانات
+                            if (currentUser && currentUser.code !== 'admin' && !currentUser.isSuperAdmin && (currentUser.name || '').trim() !== 'عادل جورج') {
+                                let cloudRecord = servants.find(s =>
+                                    String(s.id) === String(currentUser.id) ||
+                                    (s.code && String(s.code) === String(currentUser.code)) ||
+                                    (s.name && s.name.trim() === (currentUser.name || '').trim())
+                                );
+
+                                if (!cloudRecord) {
+                                    // إذا لم يكن مسجلاً في جدول الخدام بالسحابة -> طرد فوري!
+                                    localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
+                                    sessionStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
+                                    alert("⛔ جلسة غير مصرح بها في قاعدة البيانات! سيتم تسجيل الخروج فوراً.");
+                                    window.location.href = 'index.html';
+                                    return;
+                                } else {
+                                    // فرض الصلاحية الحقيقية المسجلة في Firestore فوراً
+                                    let realPerm = cloudRecord.permission || cloudRecord.role || 'view_only';
+                                    let realRole = (realPerm === 'admin') ? 'admin' : 'servant';
+                                    if (currentPermission !== realPerm || currentRole !== realRole) {
+                                        currentPermission = realPerm;
+                                        currentRole = realRole;
+                                        currentUser.permission = realPerm;
+                                        currentUser.role = realRole;
+                                        localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(currentUser));
+                                        updateRoleUI();
+                                    }
+                                }
+                            }
+
                             renderServantsTable();
                             renderServantsAttendanceTable();
                             populatePlanServantsDropdown();
