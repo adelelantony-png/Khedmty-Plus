@@ -6159,6 +6159,43 @@ function checkSession() {
     }
     // الصلاحيات تُطبَّق لاحقاً بـ style.display، فنعيد حساب المجموعات الظاهرة
     new MutationObserver(refresh).observe(tabs, { attributes: true, attributeFilter: ['style'], subtree: true });
+    // ==========================================
+    // تخصيص وتبويب الأزرار ديناميكياً لكل الصلاحيات
+    // ==========================================
+    if (typeof currentPermission !== 'undefined') {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            let text = (btn.innerText || btn.textContent || '').trim();
+            
+            // 1. صلاحية "تسجيل حضور فقط" أو "مسح بالكاميرا فقط" (لا يظهر لهم سوى تبويب تسجيل الحضور)
+            if (currentPermission === 'attend_only' || currentPermission === 'scanner_only') {
+                if (!text.includes('تسجيل الحضور')) {
+                    btn.style.display = 'none';
+                }
+            } 
+            // 2. صلاحية "مشاهدة فقط" (يظهر لهم التقارير، السجل، والرئيسية فقط بدون أزرار تعديل أو حذف)
+            else if (currentPermission === 'view_only') {
+                if (!text.includes('الرئيسية') && !text.includes('التقارير') && !text.includes('سجل الخدام')) {
+                    btn.style.display = 'none';
+                }
+            } 
+            // 3. الخادم المتكامل (يظهر له الحضور، المخدومين، النوتة، والتقارير، وتخفى عنه الإعدادات والأدمن الصارم)
+            else if (currentPermission === 'full') {
+                if (text.includes('الإعدادات') || text.includes('سجل العمليات') || text.includes('إدارة الخدام') || text.includes('ترحيل')) {
+                    btn.style.display = 'none';
+                }
+            }
+            // ملاحظة: الأدمن (admin) والمطور (developer) تظهر لهم كل الأزرار دون استثناء.
+        });
+
+        // التوجيه التلقائي المناسب حسب الصلاحية عند فتح التطبيق
+        setTimeout(() => {
+            if (typeof switchTab === 'function') {
+                if (currentPermission === 'attend_only' || currentPermission === 'scanner_only') {
+                    switchTab('attendanceTab', document.querySelector('.tab-btn:not([style*="display: none"])'));
+                }
+            }
+        }, 200);
+    }
     showGroup('home');
 
     // فتح تبويب مباشرة من رابط مثل servant-dashboard.html?tab=attendanceTab (يأتي من مركز المساعدة)
