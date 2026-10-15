@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #2d3436; padding-bottom: 40px; }
         .reader-card { max-width: 840px; margin: 20px auto; background: #ffffff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 25px; border: 1px solid #edf2f7; }
@@ -33,7 +35,6 @@
             </div>
         </div>
 
-        <!-- شريط توضيح قراءة الخطة السنوية لليوم -->
         <div id="planBanner" class="plan-alert d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> قراءة اليوم المقررة</span>
@@ -73,11 +74,23 @@
     </div>
 </div>
 
-<!-- استدعاء ملفات البيانات المحلية -->
 <script src="bible-data.js"></script>
 
 <script>
-const studentCode = localStorage.getItem('student_code');
+const FB_CONFIG = {
+    "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+    "authDomain": "khedmety-plus.firebaseapp.com",
+    "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+    "projectId": "khedmety-plus",
+    "storageBucket": "khedmety-plus.firebasestorage.app",
+    "messagingSenderId": "3510220845",
+    "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+};
+if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+const fsdb = firebase.firestore();
+
+const studentCode = String(localStorage.getItem('student_code') || '').trim();
+const studentName = localStorage.getItem('student_name') || 'المخدوم';
 const userRole = localStorage.getItem('user_role');
 
 if (!studentCode && userRole !== 'admin' && userRole !== 'servant') {
@@ -91,24 +104,6 @@ if (!studentCode && userRole !== 'admin' && userRole !== 'servant') {
     }
 })();
 
-// ترحيل قراءات قديمة كانت تُحفظ بدون كود الدارس (مرة واحدة)
-(function migrateLegacyBible(){
-    try {
-        var c = localStorage.getItem('student_code');
-        if (!c) return;
-        var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
-        Object.keys(r).forEach(function(k){
-            if (/^\d{1,2}-\d{1,2}$/.test(k)) {
-                var nk = k + '_' + c;
-                if (!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
-                delete r[k];
-                changed = true;
-            }
-        });
-        if (changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
-    } catch(e) {}
-})();
-
 let bibleData = [];
 let currentFontSize = 1.25;
 
@@ -118,7 +113,6 @@ let targetChapter = parseInt(urlParams.get('chapter')) || 1;
 let targetChapterEnd = parseInt(urlParams.get('chapter_end')) || targetChapter;
 let todayPlanBookAr = null;
 
-// قاموس شامل يربط الأسماء الإنجليزية القياسية وأسماء ملفات الأنبا تكلا بالاسم العربي
 const arabicBookNames = {
     "Genesis": "التكوين", "Exodus": "الخروج", "Leviticus": "اللاويين", "Numbers": "العدد", "Deuteronomy": "التثنية",
     "Joshua": "يشوع", "Judges": "القضاة", "Ruth": "راعوث",
@@ -185,18 +179,11 @@ function normalizeBookName(name) {
         .trim();
 }
 
-// دالة ذكية لاستخراج قراءة لأي يوم في السنة حتى لو لم يكن المفتاح موجوداً مباشرة
 function getPlanItemForDate(planData, month, day) {
     if (!planData) return null;
-    const directKey = `${month}-${day}`;
-    if (planData[directKey]) return planData[directKey];
-
-    // إذا كانت الخطة تغطي 8 أشهر (بداية من أكتوبر مثلاً كعام دراسي خدمي: شهر 10 هو الشهر 1 في الخطة)
+    if (planData[`${month}-${day}`]) return planData[`${month}-${day}`];
     const serviceMonth = ((month - 10 + 12) % 12) + 1;
-    const serviceKey = `${serviceMonth}-${day}`;
-    if (planData[serviceKey]) return planData[serviceKey];
-
-    // احتياطي: توزيع دوري على مفاتيح الخطة المتاحة لضمان عدم ظهور "قراءة حرة" أبداً
+    if (planData[`${serviceMonth}-${day}`]) return planData[`${serviceMonth}-${day}`];
     const keys = Object.keys(planData);
     if (keys.length > 0) {
         const dayOfYear = Math.floor((new Date(new Date().getFullYear(), month - 1, day) - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
@@ -205,7 +192,6 @@ function getPlanItemForDate(planData, month, day) {
     return null;
 }
 
-// 1. فحص وتحديد قراءة اليوم تلقائياً من الخطة
 async function detectTodayPlan() {
     const now = new Date();
     const curMonth = now.getMonth() + 1;
@@ -213,7 +199,6 @@ async function detectTodayPlan() {
     const planKey = `${curMonth}-${curDay}`;
 
     let planData = window.BIBLE_PLAN_DATA || null;
-
     if (!planData) {
         try {
             const res = await fetch('bible_plan.json');
@@ -248,7 +233,6 @@ async function detectTodayPlan() {
     }
 }
 
-// 2. تحميل نصوص الكتاب المقدس
 async function loadBibleData() {
     if (window.BIBLE_STATIC_DATA && Array.isArray(window.BIBLE_STATIC_DATA) && window.BIBLE_STATIC_DATA.length > 0) {
         bibleData = window.BIBLE_STATIC_DATA;
@@ -265,8 +249,7 @@ async function loadBibleData() {
         document.getElementById('versesArea').innerHTML = `
             <div class="alert alert-warning text-center" style="line-height: 1.8;">
                 <strong>تعذر قراءة نصوص الكتاب المقدس:</strong><br>
-                تأكد من وجود ملف <code>bible-data.js</code> في نفس المجلد إذا كنت تفتح الصفحة مباشرة بدون سيرفر،<br>
-                أو تأكد من وجود ملف <code>bible.json</code> إذا كنت تشغلها على سيرفر محلي (Live Server).
+                تأكد من وجود ملف <code>bible-data.js</code> أو <code>bible.json</code> في نفس المجلد.
             </div>`;
     }
 }
@@ -329,7 +312,6 @@ function renderVerses() {
     const arName = arabicBookNames[book.name] || book.name;
 
     let titleText = `${arName} — الإصحاح ${parseInt(chapIndex) + 1}`;
-    // إظهار تنويه مقرر اليوم فقط إذا كان السفر المفتوح حالياً هو نفسه سفر الخطة
     if (targetChapterEnd > targetChapter && normalizeBookName(arName) === normalizeBookName(targetBookName)) {
         titleText += ` (مقرر اليوم: الإصحاحات ${targetChapter} إلى ${targetChapterEnd})`;
     }
@@ -379,10 +361,10 @@ function changeFontSize(delta) {
     document.getElementById('versesArea').style.fontSize = `${currentFontSize}rem`;
 }
 
-// دالة توثيق قراءة اليوم وحساب النقاط
 async function markCurrentChapterRead() {
+    if (!studentCode) return;
     const btnMark = document.getElementById('btnMarkRead');
-    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التسجيل...';
+    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التسجيل السحابي...';
     btnMark.disabled = true;
 
     const now = new Date();
@@ -395,30 +377,27 @@ async function markCurrentChapterRead() {
     const book = bibleData[bookIndex];
     const bookTitle = book ? (arabicBookNames[book.name] || book.name) : (targetBookName || 'قراءة يومية');
 
-    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-    localReadings[`${planKey}_${studentCode}`] = {
+    const recordData = {
         code: String(studentCode),
+        name: studentName,
         book: bookTitle,
         chapter: chapNum,
+        planKey: planKey,
         date: now.toISOString(),
         completed: 1,
         points: 5
     };
+
+    // 1. حفظ محلي
+    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    localReadings[`${planKey}_${studentCode}`] = recordData;
     localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
 
+    // 2. حفظ مباشر في Firestore (students/{code}/reading_logs/{planKey})
     try {
-        await fetch('/api/mark_plan_read', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                code: studentCode,
-                month: curMonth,
-                day: curDay,
-                reading: `${bookTitle} ${chapNum}`
-            })
-        });
+        await fsdb.collection('students').doc(studentCode).collection('reading_logs').doc(planKey).set(recordData, { merge: true });
     } catch (e) {
-        console.warn("تم الحفظ محلياً لتعذر الاتصال بالسيرفر:", e);
+        console.warn("Cloud reading log warning:", e);
     }
 
     btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
