@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
         .main-container { max-width: 950px; margin: 20px auto; padding: 0 15px; }
@@ -29,8 +31,8 @@
     </div>
 
     <div class="header-card text-center">
-        <h4 class="fw-bold mb-1"><i class="fa-solid fa-chart-line me-2"></i>متابعة السلوك الروحي والأكاديمي للمخدومين</h4>
-        <small class="opacity-75">كشف شامل لحضور الاجتماع، قراءة الإنجيل، وسجلات النوتة الروحية</small>
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-chart-line me-2"></i>متابعة السلوك الروحي والأكاديمي للمخدومين (مباشر)</h4>
+        <small class="opacity-75">كشف شامل متزامن سحابياً لحضور الاجتماع، قراءة الإنجيل، وسجلات النوتة الروحية</small>
     </div>
 
     <div class="table-card">
@@ -43,13 +45,15 @@
                         <th>الفرقة / المرحلة</th>
                         <th>حضور الجمعة</th>
                         <th>أيام النوتة المسجلة</th>
-                        <th>إقراءات الإنجيل</th>
+                        <th>قراءات الإنجيل</th>
                         <th>إجمالي النقاط ⭐</th>
                     </tr>
                 </thead>
                 <tbody id="followupTbody">
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">جاري تحميل بيانات المخدومين...</td>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i> جاري سحب إحصائيات المخدومين من السحابة...
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -58,68 +62,115 @@
 </div>
 
 <script>
-    function loadFollowupData() {
-        // سحب قائمة المخدومين المسجلين في الكلاس
-        const students = JSON.parse(localStorage.getItem('my_church_class')) || [
-            { code: "1000", name: "عادل جورج", stage: "سنة أولى" }
-        ];
+    const FB_CONFIG = {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    const fsdb = firebase.firestore();
 
-        const attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-        const spiritualLogs = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
-        const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-
+    async function loadFollowupData() {
         const tbody = document.getElementById('followupTbody');
-        tbody.innerHTML = '';
+        try {
+            // 1. جلب المخدومين والحضور من Firestore مباشرة
+            const [membersSnap, attSnap] = await Promise.all([
+                fsdb.collection('members').get(),
+                fsdb.collection('attendance').get()
+            ]);
 
-        if (students.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">لا يوجد مخدومين مسجلين في النظام حالياً.</td></tr>';
-            return;
+            let students = membersSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+            if (students.length === 0) {
+                students = JSON.parse(localStorage.getItem('my_church_class')) || [];
+            }
+
+            let attendanceRecord = {};
+            attSnap.forEach(doc => {
+                attendanceRecord[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+            });
+            if (Object.keys(attendanceRecord).length === 0) {
+                attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+            }
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">لا يوجد مخدومين مسجلين في النظام حالياً.</td></tr>';
+                return;
+            }
+
+            const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+            const localBible = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+
+            // 2. جلب سجلات النوتة والإنجيل لكل مخدوم من السحابة بالتوازي
+            const rowsData = await Promise.all(students.map(async st => {
+                const sCode = String(st.code || st.id || '').trim();
+                const sName = st.name || 'مخدوم';
+                const sLevel = st.stage || st.level || 'الفرقة الأولى';
+
+                // حساب حضور الجمعة ونقاط الحضور
+                let fridayCount = 0;
+                let attPoints = 0;
+                Object.keys(attendanceRecord).forEach(dateKey => {
+                    const list = attendanceRecord[dateKey] || [];
+                    const found = list.find(a => String(a.code || a.id || '') === sCode);
+                    if (found && !found.isAbsentDueToDelay) {
+                        const isFri = new Date(dateKey).getDay() === 5;
+                        if (isFri) fridayCount++;
+                        attPoints += (found.points || (isFri ? 5 : 15));
+                    }
+                });
+
+                // حساب النوتة والإنجيل من السحابة + المحلي
+                let cloudSpiritualCount = 0;
+                let cloudBibleCount = 0;
+                try {
+                    const [spSnap, rdSnap] = await Promise.all([
+                        fsdb.collection('students').doc(sCode).collection('daily_logs').get(),
+                        fsdb.collection('students').doc(sCode).collection('reading_logs').get()
+                    ]);
+                    cloudSpiritualCount = spSnap.size;
+                    cloudBibleCount = rdSnap.size;
+                } catch (e) {}
+
+                const localSpCount = Object.keys(localSpiritual).filter(k => k.endsWith(`_${sCode}`)).length;
+                const localBiCount = Object.keys(localBible).filter(k => k.endsWith(`_${sCode}`) || String((localBible[k] || {}).code || '') === sCode).length;
+
+                const spiritualDaysCount = Math.max(cloudSpiritualCount, localSpCount);
+                const bibleCount = Math.max(cloudBibleCount, localBiCount);
+
+                // معادلة النقاط الموحدة (حضور + 5 لكل يوم نوتة + 5 لكل قراءة إنجيل)
+                const totalPoints = attPoints + (spiritualDaysCount * 5) + (bibleCount * 5);
+
+                return { sCode, sName, sLevel, fridayCount, spiritualDaysCount, bibleCount, totalPoints };
+            }));
+
+            tbody.innerHTML = '';
+            rowsData.forEach(r => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-primary">${r.sCode}</td>
+                        <td class="fw-bold text-dark">${r.sName}</td>
+                        <td><span class="badge bg-light text-dark border">${r.sLevel}</span></td>
+                        <td><span class="text-success fw-bold">${r.fridayCount} اجتماع</span></td>
+                        <td><span class="text-danger fw-bold">${r.spiritualDaysCount} يوم</span></td>
+                        <td><span class="text-warning text-dark fw-bold">${r.bibleCount} قراءة</span></td>
+                        <td><strong class="text-primary fs-6">${r.totalPoints} ⭐</strong></td>
+                    </tr>
+                `;
+            });
+
+        } catch (err) {
+            console.error("Followup load error:", err);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">تعذر الاتصال بالسحابة، يرجى التحقق من الإنترنت.</td></tr>';
         }
-
-        students.forEach(st => {
-            const sCode = (st.code || st.id || '').toString();
-            const sName = st.name || 'مخدوم';
-            const sLevel = st.stage || st.level || 'الفرقة الأولى';
-
-            // 1. حساب حضور الجمعة
-            let fridayCount = 0;
-            Object.keys(attendanceRecord).forEach(dateKey => {
-                const list = attendanceRecord[dateKey] || [];
-                const found = list.find(a => (a.code && a.code.toString() === sCode) && !a.isAbsentDueToDelay && new Date(dateKey).getDay() === 5);
-                if (found) fridayCount++;
-            });
-
-            // 2. حساب أيام النوتة الروحية المسجلة
-            let spiritualDaysCount = 0;
-            Object.keys(spiritualLogs).forEach(key => {
-                if (key.endsWith(`_${sCode}`)) spiritualDaysCount++;
-            });
-
-            // 3. حساب أيام قراءة الكتاب المقدس
-            let bibleCount = Object.keys(bibleReadings).filter(k => k.endsWith(`_${sCode}`) || String((bibleReadings[k] || {}).code || '') === sCode).length;
-
-            // 4. إجمالي النقاط
-            const totalPoints = (fridayCount * 5) + (spiritualDaysCount * 5) + (bibleCount * 2);
-
-            tbody.innerHTML += `
-                <tr>
-                    <td class="fw-bold text-primary">${sCode}</td>
-                    <td class="fw-bold text-dark">${sName}</td>
-                    <td><span class="badge bg-light text-dark border">${sLevel}</span></td>
-                    <td><span class="text-success fw-bold">${fridayCount} اجتماع</span></td>
-                    <td><span class="text-danger fw-bold">${spiritualDaysCount} يوم</span></td>
-                    <td><span class="text-warning text-dark fw-bold">${bibleCount} إصحاح</span></td>
-                    <td><strong class="text-primary fs-6">${totalPoints} ⭐</strong></td>
-                </tr>
-            `;
-        });
     }
 
-    // دالة تصدير البيانات إلى شيت إكسيل (CSV / Excel format)
     function exportToExcel() {
         const table = document.getElementById("followupTable");
-        let csvContent = "\uFEFF"; // لدعم الحروف العربية في الإكسيل
-        
+        let csvContent = "\uFEFF";
         const rows = table.querySelectorAll("tr");
         rows.forEach(row => {
             const cols = row.querySelectorAll("th, td");
