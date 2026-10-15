@@ -4093,26 +4093,25 @@ function exportFollowupToExcel() {
             showToast("✅ تم تحديث بيانات الدارس بنجاح!");
         }
         // ==========================================
-        // 36. Firebase Init
+        // 36. Firebase Init (المصححة والآمنة)
         // ==========================================
         async function initFirebase() {
             try {
-                // 1. محاولة جلب الإعدادات التلقائية من Vercel (المسار /api/public-config)
+                // 1. محاولة جلب إعدادات الاتصال العامة تلقائياً من Vercel (بدون الحاجة لإيميل أو باسورد أدمن)
                 let configObj = null;
                 try {
                     let response = await fetch('/api/public-config');
                     if (response.ok) {
                         configObj = await response.json();
-                        // حفظ الـ Config محلياً لاستخدامه أوفلاين في المرات القادمة
                         if (configObj && configObj.apiKey) {
                             localStorage.setItem(STORAGE_KEYS.FB_CONFIG, JSON.stringify(configObj));
                         }
                     }
                 } catch (fetchErr) {
-                    console.warn("تعذر جلب الإعدادات من Vercel، محاولة الاعتماد على التخزين المحلي:", fetchErr);
+                    console.warn("تعذر جلب الإعدادات من Vercel، الاعتماد على التخزين المحلي:", fetchErr);
                 }
 
-                // 2. إذا فشل الجلب، نعتمد على ما هو محفوظ مسبقاً
+                // 2. إذا فشل الجلب من الخادم، نعتمد على الإعدادات المحفوظة محلياً إن وجدت
                 if (!configObj || !configObj.apiKey) {
                     let savedConfig = localStorage.getItem(STORAGE_KEYS.FB_CONFIG);
                     if (savedConfig) {
@@ -4120,25 +4119,23 @@ function exportFollowupToExcel() {
                     }
                 }
 
-                // 3. إذا لم يوجد أي Config متاح، نعرض شاشة الإعداد اليدوية كحل أخير
+                // 3. إذا لم تتوفر أي إعدادات اتصال، نكتفي بالعمل محلياً دون إجبار المستخدم على إدخال بيانات سرية
                 if (!configObj || !configObj.apiKey) {
                     let statusText = document.getElementById('cloudStatusText');
-                    if (statusText) statusText.innerText = "العمل محلياً";
-                    showCloudSetupModal();
+                    if (statusText) statusText.innerText = "العمل محلياً (لا توجد إعدادات سحابية)";
                     return;
                 }
 
-                // تفعيل Firebase
+                // تفعيل Firebase للأجهزة الجديدة بشكل صامت تماماً
                 if (typeof firebase !== 'undefined' && !firebase.apps.length) {
                     firebase.initializeApp(configObj);
                 }
                 firebaseConfigLoaded = configObj;
 
                 if (typeof firebase !== 'undefined') {
-                    // الدخول المجهول (Anonymous) كخيار افتراضي للاتصال بالقاعدة قبل تسجيل دخول الخادم
+                    // المصادقة المجهولة (Anonymous) للسماح لأي جهاز جديد بقراءة جداول المخدومين والخدام دون إدخال إيميل أدمن
                     if (!firebase.auth().currentUser) {
                         try {
-                            // ملاحظة: تأكد أنك مفعل "Anonymous" في Authentication بداخل Firebase Console
                             await firebase.auth().signInAnonymously();
                         } catch (authErr) {
                             console.warn("تخطى الدخول المجهول:", authErr);
@@ -4175,7 +4172,7 @@ function exportFollowupToExcel() {
                         return !pending[path];
                     }
 
-                    // --- الاستماع لتحديثات قاعدة البيانات (onSnapshot) ---
+                    // --- الاستماع التلقائي لتحديثات الجداول (onSnapshot) ---
                     fsdb.collection('config').doc('settings').onSnapshot(snap => {
                         if (shouldAcceptCloudData('settings')) {
                             settings = Object.assign({}, settings, snap.exists ? (snap.data() || {}) : {});
@@ -4196,28 +4193,7 @@ function exportFollowupToExcel() {
                                     let uniqueKey = (m.code && m.code.toString().trim() !== "")
                                         ? m.code.toString().trim()
                                         : (m.id ? m.id.toString().trim() : m.name.trim());
-                                    let item = {
-                                        id: m.id || Date.now(),
-                                        code: m.code || m.exam_code || "",
-                                        name: m.name || "",
-                                        phone: m.phone || "",
-                                        stage: m.stage || "سنة أولى",
-                                        gender: m.gender || "بنين",
-                                        dob: m.dob || m.birth_date || "",
-                                        parent_phone: m.parent_phone || "",
-                                        address: m.address || "",
-                                        area: m.area || "",
-                                        confessor: m.confessor || "",
-                                        qrCode: m.qrCode || m.qr_code || `${m.name}/01`,
-                                        visitations: m.visitations || [],
-                                        fieldEvaluations: m.fieldEvaluations || []
-                                    };
-                                    if (mapByCodeOrId.has(uniqueKey)) {
-                                        let existing = mapByCodeOrId.get(uniqueKey);
-                                        item.visitations = [...(existing.visitations || []), ...(item.visitations || [])];
-                                        item.fieldEvaluations = [...(existing.fieldEvaluations || []), ...(item.fieldEvaluations || [])];
-                                    }
-                                    mapByCodeOrId.set(uniqueKey, item);
+                                    mapByCodeOrId.set(uniqueKey, m);
                                 });
                                 members = Array.from(mapByCodeOrId.values());
                                 localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
