@@ -3094,7 +3094,7 @@ function exportFollowupToExcel() {
         }
 
         function downloadMasterPlanTemplate() {
-            let headers = ["النوع", "التاريخ (YYYY-MM-DD)", "عنوان الفعالية", "المكان", "المرحلة", "المسؤول / المحاضر"];
+            let headers = ["النوع", "التاريخ", "عنوان الفعالية", "المكان", "المرحلة", "المسؤول / المحاضر"];
             let sampleRow = ["محاضرة", today, "مقدمة في العهد الجديد", "قاعة الكنيسة الكبرى", "سنة أولى", "عادل جورج"];
             let ws = XLSX.utils.aoa_to_sheet([headers, sampleRow]);
             ws['!cols'] = headers.map(() => ({ wch: 22 }));
