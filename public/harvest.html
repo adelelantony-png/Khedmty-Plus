@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
         body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         .main-container { max-width: 650px; margin: 20px auto; padding: 0 15px; }
@@ -34,16 +36,14 @@
     <div id="loading-spinner" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-success fs-3"></i></div>
 
     <div id="stats-container" class="d-none">
-        <!-- النقاط -->
         <div class="stat-card d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
                 <div class="stat-icon bg-warning bg-opacity-25 text-warning me-3"><i class="fa-solid fa-trophy"></i></div>
-                <div><h6 class="fw-bold mb-0 text-dark">نقاط النشاط والتفاعل</h6><small class="text-muted">مجموع درجات الحضور والتفاعل</small></div>
+                <div><h6 class="fw-bold mb-0 text-dark">نقاط النشاط والتفاعل</h6><small class="text-muted">مجموع درجات الحضور والإنجيل والنوتة</small></div>
             </div>
             <div><span id="stat-points" class="fs-4 fw-bold text-primary">0</span> <small class="text-muted">نقطة</small></div>
         </div>
 
-        <!-- الكتاب المقدس -->
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="d-flex align-items-center">
@@ -57,7 +57,6 @@
             </div>
         </div>
 
-        <!-- الشيتات -->
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="d-flex align-items-center">
@@ -71,7 +70,6 @@
             </div>
         </div>
 
-        <!-- النوتة الروحية -->
         <div class="stat-card">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
@@ -89,146 +87,93 @@
 </div>
 
 <script>
-    const studentCode = localStorage.getItem('student_code');
+    const FB_CONFIG = {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    const fsdb = firebase.firestore();
+
+    const studentCode = String(localStorage.getItem('student_code') || '').trim();
     const studentName = localStorage.getItem('student_name') || 'المخدوم';
     const studentLevel = localStorage.getItem('student_level') || 'الفرقة الأولى';
 
     if (!studentCode) window.location.href = 'index.html';
 
-    // 1. ترحيل وتحديث قراءات الكتاب المقدس القديمة لتتطابق مع النظام الجديد (مرة واحدة)
-    (function migrateLegacyBible(){
-        try {
-            var c = localStorage.getItem('student_code');
-            if (!c) return;
-            var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-            var changed = false;
-            
-            // قاموس التصحيح للأسماء القديمة
-            var nameCorrections = {
-                "1 مكابيين": "المكابيين الأول",
-                "مكابيين 1": "المكابيين الأول",
-                "2 مكابيين": "المكابيين الثاني",
-                "مكابيين 2": "المكابيين الثاني",
-                "1 صموئيل": "صموئيل الأول",
-                "2 صموئيل": "صموئيل الثاني",
-                "1 ملوك": "الملوك الأول",
-                "2 ملوك": "الملوك الثاني",
-                "1 أخبار أيام": "أخبار الأيام الأول",
-                "2 أخبار أيام": "أخبار الأيام الثاني"
-            };
-
-            Object.keys(r).forEach(function(k){
-                var item = r[k];
-                var nk = k;
-
-                if (/^\d{1,2}-\d{1,2}$/.test(k)) {
-                    nk = k + '_' + c;
-                    if (!r[nk]) r[nk] = Object.assign({code: String(c)}, item);
-                    delete r[k];
-                    changed = true;
-                    item = r[nk];
-                }
-
-                if (item && item.book) {
-                    var cleanBook = item.book.replace(/^سفر\s+/, '').replace(/^إنجيل\s+/, '').trim();
-                    
-                    if (nameCorrections[cleanBook]) {
-                        item.book = nameCorrections[cleanBook];
-                        changed = true;
-                    } 
-                    else if (cleanBook === "مكابيين الأول" || cleanBook === "مكابيين الثاني") {
-                        item.book = cleanBook.replace("مكابيين", "المكابيين");
-                        changed = true;
-                    }
-                }
-            });
-
-            if (changed) {
-                localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
-            }
-        } catch(e) {}
-    })();
-
     document.getElementById('ui-level').textContent = studentLevel;
     document.getElementById('ui-student-info').textContent = `${studentName} (كود: ${studentCode})`;
 
-    async function loadHarvest() {
-        // 2. حساب الحصاد محلياً دائماً
-        function calculateLocalHarvest() {
-            const attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-            let attendancePoints = 0;
-            Object.keys(attendanceRecord).forEach(dateKey => {
-                const list = attendanceRecord[dateKey] || [];
-                const myRecord = list.find(a => (a.code && a.code.toString() === studentCode) || (a.id && a.id.toString() === studentCode));
-                if (myRecord && !myRecord.isAbsentDueToDelay) {
-                    attendancePoints += (myRecord.points || 5);
-                }
-            });
-
-            const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
-            let spiritualCount = 0;
-            Object.keys(localSpiritual).forEach(key => {
-                if (key.endsWith(`_${studentCode}`)) spiritualCount++;
-            });
-
-            const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-            let bibleCount = 0;
-            Object.keys(bibleReadings).forEach(k => {
-                const item = bibleReadings[k];
-                if (k.endsWith(`_${studentCode}`) || String(item.code || '') === String(studentCode)) {
-                    bibleCount++;
-                }
-            });
-
-            const submittedSheetsMap = JSON.parse(localStorage.getItem('khedmety_submitted_sheets')) || {};
-            const submittedSheetsList = submittedSheetsMap[studentCode] || [];
-            const submittedSheets = submittedSheetsList.length;
-
-            return {
-                attendancePoints: attendancePoints,
-                spiritualCount: spiritualCount,
-                bibleCount: bibleCount,
-                submittedSheets: submittedSheets,
-                totalPlanDays: 366, // الخطة السنوية
-                totalSubjects: 7
-            };
-        }
-
-        const localData = calculateLocalHarvest();
-
-        try {
-            const response = await fetch(`/api/harvest?code=${encodeURIComponent(studentCode)}&level=${encodeURIComponent(studentLevel)}`);
-            if (!response.ok) throw new Error('Server not available');
-            const result = await response.json();
-
-            if (result.success) {
-                const sData = result.data || {};
-                
-                // 3. الدمج الذكي: أخذ القيمة الأكبر بين السيرفر والبيانات المحلية
-                const mergedBibleCount = Math.max(sData.bibleCount || 0, localData.bibleCount);
-                const mergedSpiritualCount = Math.max(sData.spiritualCount || 0, localData.spiritualCount);
-                const mergedSheets = Math.max(sData.submittedSheets || 0, localData.submittedSheets);
-                const mergedAttendancePoints = Math.max(sData.attendancePoints || 0, localData.attendancePoints);
-
-                // إعادة حساب النقاط الإجمالية بدقة بعد الدمج (كل قراءة بـ 5 نقاط)
-                const mergedPoints = mergedAttendancePoints + (mergedSpiritualCount * 5) + (mergedBibleCount * 5);
-
-                const finalData = {
-                    points: Math.max(sData.points || 0, mergedPoints),
-                    bibleCount: mergedBibleCount,
-                    totalPlanDays: sData.totalPlanDays || 366,
-                    submittedSheets: mergedSheets,
-                    totalSubjects: sData.totalSubjects || 7,
-                    spiritualCount: mergedSpiritualCount
-                };
-                
-                renderHarvestUI(finalData);
-            } else {
-                throw new Error(result.message);
+    function calculateLocalHarvest() {
+        const attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+        let attendancePoints = 0;
+        Object.keys(attendanceRecord).forEach(dateKey => {
+            const list = attendanceRecord[dateKey] || [];
+            const myRecord = list.find(a => String(a.code || a.id || '') === studentCode);
+            if (myRecord && !myRecord.isAbsentDueToDelay) {
+                const isFri = new Date(dateKey).getDay() === 5;
+                attendancePoints += (myRecord.points || (isFri ? 5 : 15));
             }
+        });
+
+        const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        let spiritualCount = Object.keys(localSpiritual).filter(key => key.endsWith(`_${studentCode}`)).length;
+
+        const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+        let bibleCount = Object.keys(bibleReadings).filter(k => k.endsWith(`_${studentCode}`) || String((bibleReadings[k] || {}).code || '') === studentCode).length;
+
+        const submittedSheetsMap = JSON.parse(localStorage.getItem('khedmety_submitted_sheets')) || {};
+        const submittedSheets = (submittedSheetsMap[studentCode] || []).length;
+
+        return {
+            attendancePoints,
+            spiritualCount,
+            bibleCount,
+            submittedSheets,
+            totalPlanDays: 366,
+            totalSubjects: 7
+        };
+    }
+
+    async function loadHarvest() {
+        try {
+            // سحب مباشر ومتزامن من Firestore
+            const [attSnap, bibleSnap, spirSnap, sheetsSnap] = await Promise.all([
+                fsdb.collection('attendance').get(),
+                fsdb.collection('students').doc(studentCode).collection('reading_logs').get(),
+                fsdb.collection('students').doc(studentCode).collection('daily_logs').get(),
+                fsdb.collection('students').doc(studentCode).collection('sheet_submissions').get()
+            ]);
+
+            // تحديث الحضور المحلي من السحابة
+            const cloudAtt = {};
+            attSnap.forEach(doc => { cloudAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
+            if (Object.keys(cloudAtt).length > 0) {
+                localStorage.setItem('my_church_attendance', JSON.stringify(cloudAtt));
+            }
+
+            const localData = calculateLocalHarvest();
+
+            const mergedBibleCount = Math.max(bibleSnap.size, localData.bibleCount);
+            const mergedSpiritualCount = Math.max(spirSnap.size, localData.spiritualCount);
+            const mergedSheets = Math.max(sheetsSnap.size, localData.submittedSheets);
+            const mergedPoints = localData.attendancePoints + (mergedSpiritualCount * 5) + (mergedBibleCount * 5);
+
+            renderHarvestUI({
+                points: mergedPoints,
+                bibleCount: mergedBibleCount,
+                totalPlanDays: 366,
+                submittedSheets: mergedSheets,
+                totalSubjects: 7,
+                spiritualCount: mergedSpiritualCount
+            });
         } catch (error) {
-            console.warn("تعذر الاتصال بالخادم، تم الاعتماد على الحساب المحلي:", error);
-            // حساب النقاط الكلية للمحلي في حالة فشل السيرفر تماماً
+            console.warn("تم الاعتماد على الحساب المحلي:", error);
+            const localData = calculateLocalHarvest();
             localData.points = localData.attendancePoints + (localData.spiritualCount * 5) + (localData.bibleCount * 5);
             renderHarvestUI(localData);
         }
