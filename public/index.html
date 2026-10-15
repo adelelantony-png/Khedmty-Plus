@@ -180,43 +180,44 @@ async function authenticate(u, p) {
   const un = norm(u);
 
   // 1) الأدمن
+  async function authenticate(u, p) {
+  const un = norm(u);
+
+  // 1) الأدمن الرئيسي الافتراضي (عادل جورج / admin)
   if (ADMIN_NAMES.some(n => norm(n) === un)) {
     const saved = localStorage.getItem(K.adminPwd) || '';
     const ok = saved ? (await sha(p)) === saved : p === DEFAULT_ADMIN_PWD;
     if (ok) return { kind: 'staff', role: 'admin',
-      user: { id: 1001, name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin' } };
-    return null;
+      user: { id: 1001, name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin', isSuperAdmin: true } };
   }
 
-  // 2) الخدام محلياً
-  for (const s of readList(K.servants)) {
-    if (isAdminRec(s)) continue;
-    if ((norm(s.name) === un || (s.code != null && String(s.code) === u)) && await checkPhoneOrHash(s, p))
-      return { kind: 'staff', role: 'servant', user: s };
+  // 2) جلب أحدث قائمة خدام ومخدومين من Firestore مباشرة أولاً (لمنع أي تلاعب محلي بالـ Console)
+  let servantsList = readList(K.servants);
+  let membersList = readList(K.members);
+  if (navigator.onLine) {
+    const cloud = await cloudFetchDirectory();
+    if (cloud) {
+      servantsList = cloud.servants;
+      membersList = cloud.members;
+    }
   }
 
-  // 3) المخدومون محلياً
-  for (const m of readList(K.members)) {
+  // 3) فحص جدول الخدام (ويشمل أي أدمن جديد تمت إضافته في قاعدة البيانات!)
+  for (const s of servantsList) {
+    if ((norm(s.name) === un || (s.code != null && String(s.code) === u)) && await checkPhoneOrHash(s, p)) {
+      const realRole = (s.role === 'admin' || s.permission === 'admin') ? 'admin' : 'servant';
+      return { kind: 'staff', role: realRole, user: Object.assign({}, s, { role: realRole, permission: s.permission || realRole }) };
+    }
+  }
+
+  // 4) فحص المخدومين
+  for (const m of membersList) {
     if ((m.code != null && String(m.code) === u) || (m.id != null && String(m.id) === u) || norm(m.name) === un) {
       let isStudentValid = (!p || p === "" || (m.phone && m.phone.includes(p)) || (m.parent_phone && m.parent_phone.includes(p)));
       if (isStudentValid) return { kind: 'student', rec: m };
     }
   }
 
-  // 4) البحث في السحابة (لأول مرة من أي جهاز جديد)
-  if (navigator.onLine) {
-    const cloud = await cloudFetchDirectory();
-    if (cloud) {
-      const s2 = cloud.servants.find(s => !isAdminRec(s) && (norm(s.name) === un || (s.code != null && String(s.code) === u)));
-      if (s2 && await checkPhoneOrHash(s2, p)) return { kind: 'staff', role: 'servant', user: s2 };
-
-      const m2 = cloud.members.find(m => (m.code != null && String(m.code) === u) || (m.id != null && String(m.id) === u) || norm(m.name) === un);
-      if (m2) {
-        let isStudentValid = (!p || p === "" || (m2.phone && m2.phone.includes(p)) || (m2.parent_phone && m2.parent_phone.includes(p)));
-        if (isStudentValid) return { kind: 'student', rec: m2 };
-      }
-    }
-  }
   return null;
 }
 
