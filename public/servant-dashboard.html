@@ -5001,27 +5001,31 @@ function checkSession() {
 
             const isAdmin = (currentPermission === 'admin' || currentPermission === 'developer');
             const isScannerOnly = (currentPermission === 'scanner_only');
-            const isAttendOnly = (currentPermission === 'attend_only'); // 👈 صلاحية تسجيل حضور فقط
+            const isAttendOnly = (currentPermission === 'attend_only'); // مستخدم تسجيل حضور فقط
             const canAttend = (isAdmin || isAttendOnly || currentPermission === 'full' || isScannerOnly);
             const canEdit = (isAdmin || currentPermission === 'full');
 
-            // إذا كان المستخدم بصلاحية "تسجيل حضور فقط"، نخفي عنه التبويبات الزائدة ونترك له صفحة الحضور والريئيسية فقط
-            if (isAttendOnly) {
+            // 🌟 إخفاء كل التبويبات والأزرار تماماً عن مستخدم "تسجيل حضور فقط" وإبقاء الضروري فقط
+            if (isAttendOnly || isScannerOnly) {
                 let tabsEl = document.querySelector('.tabs');
                 if (tabsEl) {
-                    // إخفاء كل التبويبات ما عدا الرئيسية وتسجيل الحضور
-                    tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
-                        if (!btn.textContent.includes('الرئيسية') && !btn.textContent.includes('تسجيل الحضور')) {
+                    tabsEl.querySelectorAll('.tab-btn, a.tab-btn').forEach(btn => {
+                        let text = btn.innerText || btn.textContent;
+                        // السماح فقط بتبويب الرئيسية وتسجيل الحضور
+                        if (!text.includes('الرئيسية') && !text.includes('تسجيل الحضور')) {
                             btn.style.display = 'none';
                         }
                     });
                 }
+                // إخفاء زر المساعدة العائم تماماً لهذا المستخدم
+                let fab = document.querySelector('.help-fab');
+                if (fab) fab.style.display = 'none';
             }
 
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? '' : 'none');
             document.querySelectorAll('.can-attend').forEach(el => el.style.display = canAttend ? '' : 'none');
             document.querySelectorAll('.can-edit').forEach(el => el.style.display = canEdit ? '' : 'none');
-            document.querySelectorAll('.admin-or-servant').forEach(el => el.style.display = (isAdmin || currentPermission === 'full') ? '' : 'none');
+            document.querySelectorAll('.admin-or-servant').forEach, el => el.style.display = (isAdmin || currentPermission === 'full') ? '' : 'none';
         }
 
         // ==========================================
