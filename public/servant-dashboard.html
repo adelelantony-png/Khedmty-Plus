@@ -3119,17 +3119,53 @@ function exportFollowupToExcel() {
             let reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    let wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    let wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: true });
                     let data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
                     let added = 0;
+
+                    // دالة ذكية لتوحيد وقراءة أي صيغة تاريخ في الإكسيل إلى YYYY-MM-DD
+                    function parseExcelDate(val) {
+                        if (!val) return "";
+                        if (val instanceof Date && !isNaN(val)) {
+                            let y = val.getFullYear();
+                            let m = String(val.getMonth() + 1).padStart(2, '0');
+                            let d = String(val.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${d}`;
+                        }
+                        let str = String(val).trim();
+                        // التعامل مع التاريخ المكتوب بصيغة DD-MM-YYYY أو DD/MM/YYYY
+                        let parts = str.split(/[-/]/);
+                        if (parts.length === 3) {
+                            if (parts[0].length === 4) { // YYYY-MM-DD
+                                return `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+                            } else if (parts[2].length === 4) { // DD-MM-YYYY
+                                return `${parts[2]}-${String(parts[1]).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+                            }
+                        }
+                        // لو رقم تسلسلي من إكسيل (Excel Serial Number)
+                        let num = parseFloat(str);
+                        if (!isNaN(num) && num > 20000 && num < 60000) {
+                            let d = new Date(Math.round((num - 25569) * 86400 * 1000));
+                            let y = d.getFullYear();
+                            let m = String(d.getMonth() + 1).padStart(2, '0');
+                            let day = String(d.getDate()).padStart(2, '0');
+                            return `${y}-${m}-${day}`;
+                        }
+                        return str;
+                    }
+
                     data.forEach(r => {
                         let title = r['عنوان الفعالية'] || r['Title'] || "";
-                        let date = r['التاريخ'] || r['Date'] || "";
+                        // قراءة التاريخ بكل التسميات الممكنة
+                        let rawDate = r['التاريخ (YYYY-MM-DD)'] || r['التاريخ'] || r['Date'] || "";
+                        let date = parseExcelDate(rawDate);
+
                         if (title && date) {
                             masterPlan.push({
-                                id: generateUniqueId(members),
+                                id: generateUniqueId(masterPlan),
                                 type: r['النوع'] || r['Type'] || "محاضرة",
-                                date: date, title: title,
+                                date: date,
+                                title: title,
                                 location: r['المكان'] || r['Location'] || "الكنيسة",
                                 stage: r['المرحلة'] || r['Stage'] || "عام لكل الخدمة",
                                 responsible: r['المسؤول / المحاضر'] || r['Responsible'] || "غير محدد"
@@ -3137,8 +3173,9 @@ function exportFollowupToExcel() {
                             added++;
                         }
                     });
+
                     saveMasterPlan();
-                    logActivity("استيراد خطة سنة", "Excel", `تم استيراد ${added} فعالية`);
+                    if (typeof logActivity === "function") logActivity("استيراد خطة سنة", "Excel", `تم استيراد ${added} فعالية`);
                     renderMasterPlanTable();
                     checkUpcomingMasterPlanEvents();
                     alert(`✅ تم استيراد (${added}) فعالية في خطة السنة بنجاح!`);
