@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0c2461">
+<title>معاينة شاشات الدرجات | خدمتي برو</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0c2461; --blue:#1e3799; --sky:#0984e3; --gold:#fdcb6e;
+  --pass:#1f9d6b; --fail:#d63031; --review:#000; --pending:#94a3b8;
+  --ink:#1b2437; --muted:#5f6b80; --line:#dde4ef; --bg:#eef2f8; --card:#fff;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;line-height:1.55;padding-bottom:90px}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* شريط المعاينة (ليس جزءاً من التطبيق) */
+.pv{position:sticky;top:0;z-index:20;background:#101a3d;color:#fff;padding:10px 12px}
+.pv-in{max-width:560px;margin:auto;display:flex;flex-direction:column;gap:8px}
+.pv-note{font-size:12px;opacity:.8;text-align:center}
+.seg{display:flex;background:rgba(255,255,255,.12);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;color:#fff;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px}
+.seg button[aria-selected="true"]{background:#fff;color:var(--navy)}
+.pv-role{display:flex;align-items:center;gap:8px;font-size:13px;justify-content:center}
+.pv-role select{background:#fff;color:var(--navy);border:0;border-radius:8px;padding:5px 8px;font-weight:700}
+
+main{max-width:560px;margin:0 auto;padding:14px 12px}
+
+/* ===== شاشة المخدوم ===== */
+.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 12px;font-weight:700;font-size:13px;color:var(--muted);text-decoration:none}
+.lvl{background:var(--blue);color:#fff;border-radius:20px;padding:5px 14px;font-weight:700;font-size:13px}
+.hero{background:linear-gradient(150deg,var(--navy),var(--blue) 60%,#1d6fd1);color:#fff;border-radius:22px;padding:20px 18px 16px;box-shadow:0 14px 30px rgba(12,36,97,.28)}
+.hero h1{margin:0;font-size:15px;font-weight:500;opacity:.85}
+.hero .big{margin:2px 0 14px;font-size:30px;font-weight:800;line-height:1.25}
+.strip{display:flex;gap:5px}
+.strip a{flex:1;height:22px;border-radius:7px;display:block;position:relative}
+.strip a.pass{background:var(--pass)} .strip a.resit,.strip a.fail{background:var(--fail)}
+.strip a.review{background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)} .strip a.pending{background:var(--pending)}
+.strip a:focus-visible{outline-color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12.5px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.sub-note{margin:12px 0 0;font-size:13px;opacity:.92}
+.sync{display:flex;align-items:center;gap:8px;margin:10px 2px;color:var(--muted);font-size:12.5px}
+.sync b{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--pass)}
+
+.subj{background:var(--card);border-radius:18px;margin-top:12px;border:1px solid var(--line);overflow:hidden;scroll-margin-top:130px}
+.subj>header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--line)}
+.subj h3{margin:0;font-size:16.5px;font-weight:800}
+.badge{font-size:12.5px;font-weight:800;border-radius:20px;padding:3px 12px;white-space:nowrap}
+.badge.pass{background:#e4f6ee;color:#12704b}
+.badge.resit,.badge.fail{background:#fde8e8;color:#b42318}
+.badge.review{background:#000;color:#fff}
+.badge.pending{background:#eceff4;color:#475569}
+.rows{padding:6px 15px 4px}
+.r{display:grid;grid-template-columns:62px 1fr auto;align-items:center;gap:10px;padding:8px 0}
+.r+.r{border-top:1px dashed var(--line)}
+.r .lab{font-size:13.5px;color:var(--muted);font-weight:700}
+.bar{height:8px;border-radius:5px;background:#e6ebf3;overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:5px;background:var(--blue)}
+.bar.low>i{background:var(--fail)}
+.chip{display:inline-flex;align-items:baseline;gap:4px;min-width:104px;justify-content:center;border-radius:10px;padding:5px 10px;background:#f1f5f9;font-weight:800;font-size:15px}
+.chip small{font-weight:500;color:var(--muted);font-size:12px}
+.chip em{font-style:normal;font-weight:700;font-size:12px;color:var(--muted)}
+.chip.low{background:#fde8e8;color:#b42318;box-shadow:inset 0 0 0 1px #f2b4b4}
+.chip.low small,.chip.low em{color:#b42318}
+.chip.wh{background:#000;color:#fff;font-size:13px;padding:7px 10px}
+.chip.na{background:#e9edf3;color:#475569;font-size:13.5px;border:1px dashed #a7b1c2}
+.r.replaced .chip{opacity:.5;text-decoration:line-through}
+.r.replaced .bar{opacity:.4}
+.hint{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
+.hint.wh{color:#000;font-weight:700}
+.tot{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;background:#f7f9fc;border-top:1px solid var(--line);font-size:14px}
+.tot strong{font-size:17px}
+.tot .g{font-size:12.5px;color:#12704b;font-weight:700}
+.tot.low strong{color:#b42318}
+
+/* ===== شاشات الخدام ===== */
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.panel h2{margin:0 0 10px;font-size:17px;font-weight:800}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fld label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.fld select,.fld input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff}
+.kinds{display:flex;gap:6px;margin-top:10px}
+.kinds button{flex:1;border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:9px 4px;font-weight:700}
+.kinds button[aria-pressed="true"]{border-color:var(--blue);background:#eaf0ff;color:var(--blue)}
+.banner{margin-top:10px;font-size:13px;background:#fff7e0;border:1px solid #f3dd9a;border-radius:10px;padding:8px 11px}
+.prog{display:flex;align-items:center;gap:10px;margin:2px 0 8px;font-size:13px;color:var(--muted);font-weight:700}
+.prog .bar{flex:1}
+.stu{display:grid;grid-template-columns:1fr 92px auto;gap:8px;align-items:center;padding:9px 0}
+.stu+.stu{border-top:1px solid var(--line)}
+.stu .nm b{display:block;font-size:14.5px}
+.stu .nm span{font-size:12px;color:var(--muted)}
+.stu input{width:100%;text-align:center;font-weight:800;font-size:16px;border:1.5px solid var(--line);border-radius:10px;padding:8px 4px;background:#fff}
+.stu input.low{background:#fde8e8;border-color:#e99;color:#b42318}
+.stu input.bad{background:#fff3cd;border-color:#e0a800}
+.stu input:disabled{background:#e9edf3;color:#64748b;font-weight:700;font-size:13px}
+.stu.wh input{background:#000;color:#fff;border-color:#000}
+.acts{display:flex;gap:4px}
+.acts button{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;font-size:12.5px;font-weight:700;min-height:36px}
+.acts button[aria-pressed="true"]{background:#e9edf3;border-color:#94a3b8}
+.acts button.w[aria-pressed="true"]{background:#000;color:#fff;border-color:#000}
+.err{grid-column:1/-1;font-size:12px;color:#8a6100;font-weight:700}
+.bottom{position:fixed;inset-inline:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px;z-index:15}
+.bottom-in{max-width:560px;margin:auto;display:flex;gap:8px}
+.btn{flex:1;border:0;border-radius:12px;padding:12px 8px;font-weight:800;font-size:14.5px}
+.btn.pri{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff}
+.btn.sec{background:#eaf0ff;color:var(--blue)}
+.btn.ghost{background:#fff;border:1.5px solid var(--line)}
+.note-lock{font-size:12.5px;color:var(--muted);margin:0 0 10px}
+.ex{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.ex .line{display:flex;justify-content:space-between;gap:8px;background:#f7f9fc;border-radius:10px;padding:8px 11px;font-size:13.5px}
+.ex .line b.ok{color:#12704b} .ex .line b.no{color:#b42318}
+.sw{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.sw input{width:20px;height:20px}
+input[type=range]{padding:0;border:0}
+
+dialog{border:0;border-radius:18px;padding:0;width:min(520px,94vw);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(10,20,50,.55)}
+.dl{padding:16px}
+.dl h2{margin:0 0 4px;font-size:18px}
+.dl p{margin:0 0 10px;color:var(--muted);font-size:13px}
+.itab{width:100%;border-collapse:collapse;font-size:13px}
+.itab th,.itab td{padding:6px 7px;border-bottom:1px solid var(--line);text-align:right}
+.itab th{color:var(--muted);font-weight:700}
+.itab tr.e td{background:#fff3f3}
+.tag{font-weight:800;font-size:12px;border-radius:8px;padding:2px 8px}
+.tag.ok{background:#e4f6ee;color:#12704b} .tag.no{background:#fde8e8;color:#b42318}
+.dl .row{display:flex;gap:8px;margin-top:14px}
+
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#101a3d;color:#fff;border-radius:12px;padding:10px 16px;font-weight:700;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:40;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:380px){.r{grid-template-columns:52px 1fr auto}.chip{min-width:92px}.stu{grid-template-columns:1fr 78px}.acts{grid-column:1/-1}}
+</style>
+</head>
+<body>
+
+<div class="pv">
+  <div class="pv-in">
+    <div class="pv-note">معاينة تصميم بأرقام تجريبية، وليست بيانات حقيقية</div>
+    <div class="seg" role="tablist" aria-label="الشاشات">
+      <button role="tab" aria-selected="true" data-view="student">شاشة المخدوم</button>
+      <button role="tab" aria-selected="false" data-view="entry">إدخال الدرجات</button>
+      <button role="tab" aria-selected="false" data-view="settings">الإعدادات</button>
+    </div>
+    <div class="pv-role">
+      <label for="role">أنت تتصفح كـ</label>
+      <select id="role"><option value="admin">أمين الخدمة</option><option value="servant">خادم</option></select>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- ========== شاشة المخدوم ========== -->
+  <section id="v-student" class="view">
+    <div class="topline">
+      <a class="back" href="#" onclick="return false">&rarr; العودة للرئيسية</a>
+      <span class="lvl">الفرقة الأولى</span>
+    </div>
+    <div class="hero" id="hero"></div>
+    <div class="sync"><b></b> تعمل بدون إنترنت. آخر تحديث اليوم 9:40 صباحاً</div>
+    <div id="subjects"></div>
+  </section>
+
+  <!-- ========== إدخال الدرجات ========== -->
+  <section id="v-entry" class="view" hidden>
+    <div class="panel">
+      <h2>إدخال الدرجات</h2>
+      <div class="grid2">
+        <div class="fld"><label for="fLevel">الفرقة</label>
+          <select id="fLevel"><option>الفرقة الأولى</option><option>الفرقة الثانية</option></select></div>
+        <div class="fld"><label for="fSubj">المادة</label><select id="fSubj"></select></div>
+      </div>
+      <div class="kinds" id="kinds" role="group" aria-label="نوع الدرجة">
+        <button data-k="w" aria-pressed="true">تحريري</button>
+        <button data-k="o" aria-pressed="false">شفوي</button>
+        <button data-k="r" aria-pressed="false">إعادة التحريري</button>
+      </div>
+      <div class="banner" id="entryBanner" hidden></div>
+    </div>
+    <div class="panel">
+      <div class="prog"><span id="progTxt"></span><div class="bar" id="progBar"><i style="width:0"></i></div></div>
+      <div id="stuList"></div>
+    </div>
+  </section>
+
+  <!-- ========== الإعدادات ========== -->
+  <section id="v-settings" class="view" hidden>
+    <div class="panel" id="setLocked" hidden>
+      <h2>إعدادات الدرجات</h2>
+      <p class="note-lock">هذه الصفحة لأمين الخدمة فقط. بدّل الدور من الأعلى لتراها.</p>
+    </div>
+    <div id="setBody">
+      <div class="panel">
+        <h2>إعدادات الدرجات</h2>
+        <p class="note-lock">تنطبق على الفرقة الأولى. يمكن تخصيص أي مادة لاحقاً.</p>
+        <div class="grid2">
+          <div class="fld"><label for="sW">النهاية العظمى للتحريري</label><input id="sW" type="number" min="1" inputmode="numeric"></div>
+          <div class="fld"><label for="sO">النهاية العظمى للشفوي</label><input id="sO" type="number" min="1" inputmode="numeric"></div>
+          <div class="fld"><label for="sP">حد النجاح (%)</label><input id="sP" type="number" min="1" max="100" inputmode="numeric"></div>
+          <div class="fld"><label for="sG">سقف الرأفة (%)</label><input id="sG" type="number" min="0" max="20" inputmode="numeric"></div>
+        </div>
+        <div class="fld" style="margin-top:10px"><label for="sR">قاعدة الإعادة</label>
+          <select id="sR">
+            <option value="cap">تحل محل التحريري وسقفها حد النجاح</option>
+            <option value="full">تحل محل التحريري بالدرجة كاملة</option>
+          </select></div>
+        <label class="sw"><input type="checkbox" id="sShow" checked> يرى المخدوم سطر «رأفة» في نتيجته</label>
+      </div>
+      <div class="panel">
+        <h2>جرّب قاعدة الرأفة</h2>
+        <div class="fld"><label for="sTry">مجموع المخدوم قبل الرأفة: <b id="sTryV"></b>%</label>
+          <input id="sTry" type="range" min="40" max="70" value="56"></div>
+        <div class="ex" id="exBox"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="bottom" id="bottom" hidden>
+  <div class="bottom-in">
+    <button class="btn ghost" id="bImport">استيراد من Excel</button>
+    <button class="btn sec" id="bDraft">حفظ مسودة</button>
+    <button class="btn pri" id="bPub">نشر النتائج</button>
+  </div>
+</div>
+
+<dialog id="impDlg">
+  <div class="dl">
+    <h2>معاينة الاستيراد</h2>
+    <p>فحصنا الملف قبل الحفظ. الصفوف السليمة فقط ستُستورد.</p>
+    <table class="itab">
+      <thead><tr><th>الكود</th><th>الاسم</th><th>الدرجة</th><th>الفحص</th></tr></thead>
+      <tbody>
+        <tr><td>1001</td><td>مينا جرجس</td><td>58</td><td><span class="tag ok">سليم</span></td></tr>
+        <tr><td>1002</td><td>مريم سمير</td><td>40</td><td><span class="tag ok">سليم</span></td></tr>
+        <tr><td>1003</td><td>بيتر عادل</td><td>غائب</td><td><span class="tag ok">سليم</span></td></tr>
+        <tr><td>1004</td><td>مارتينا ناجي</td><td>66</td><td><span class="tag ok">سليم</span></td></tr>
+        <tr><td>1005</td><td>كيرلس فادي</td><td>30</td><td><span class="tag ok">سليم</span></td></tr>
+        <tr class="e"><td>1099</td><td>غير موجود</td><td>55</td><td><span class="tag no">الكود غير مسجل</span></td></tr>
+        <tr class="e"><td>1006</td><td>إيريني صبحي</td><td>85</td><td><span class="tag no">أكبر من 70</span></td></tr>
+      </tbody>
+    </table>
+    <div class="row">
+      <button class="btn ghost" id="impCancel">إلغاء</button>
+      <button class="btn pri" id="impOk">استيراد 5 صفوف سليمة</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- المنطق: دوال حسابية بحتة (تُختبر بمعزل عن الواجهة) -->
+<script id="logic">
+const CFG = { wMax: 70, oMax: 30, pass: 60, graceMax: 5, resit: 'cap', showGrace: true };
+const S = v => ({ t: 'score', v });
+const ABS = { t: 'absent' }, EXC = { t: 'excused' }, WH = { t: 'withheld' };
+const pct = (v, max) => Math.round(v / max * 1000) / 10;
+const isNum = e => !!e && e.t === 'score';
+
+function evaluate(rec, c) {
+  const subjMax = c.wMax + c.oMax;
+  const passMarks = subjMax * c.pass / 100;
+  const graceMarks = subjMax * c.graceMax / 100;
+  if ([rec.w, rec.o, rec.r].some(e => e && e.t === 'withheld')) return { status: 'review' };
+  let wEff = null, resitUsed = false;
+  if (isNum(rec.r)) {
+    resitUsed = true;
+    wEff = c.resit === 'cap' ? Math.min(rec.r.v, c.wMax * c.pass / 100) : rec.r.v;
+  } else if (isNum(rec.w)) wEff = rec.w.v;
+  const oEff = isNum(rec.o) ? rec.o.v : null;
+  if (wEff === null) {
+    if (rec.w && (rec.w.t === 'absent' || rec.w.t === 'excused')) return { status: 'resit', absent: true };
+    return { status: 'pending' };
+  }
+  if (oEff === null) return { status: 'pending' };
+  const base = wEff + oEff;
+  let grace = 0;
+  if (base < passMarks) {
+    const need = Math.round((passMarks - base) * 100) / 100;
+    if (need <= graceMarks) grace = need;
+  }
+  const total = base + grace;
+  const passed = total >= passMarks - 1e-9;
+  return { status: passed ? 'pass' : (resitUsed ? 'fail' : 'resit'), base, grace, total,
+           totalPct: pct(total, subjMax), resitUsed, wEff, subjMax };
+}
+</script>
+
+<script>
+const SUBJECTS = [
+  { id: 's1', name: 'العقيدة المسيحية',   rec: { w: S(58), o: S(26) } },
+  { id: 's2', name: 'العهد القديم',        rec: { w: S(34), o: S(18) } },
+  { id: 's3', name: 'العهد الجديد',        rec: { w: S(45), o: S(25) } },
+  { id: 's4', name: 'الطقوس والألحان',     rec: { w: WH,    o: S(24) } },
+  { id: 's5', name: 'تاريخ الكنيسة',       rec: { w: ABS,   o: S(21) } },
+  { id: 's6', name: 'الرعاية والافتقاد',   rec: { w: S(31), o: S(22), r: S(49) } },
+  { id: 's7', name: 'اللاهوت المقارن',     rec: { w: S(40), o: S(18) } }
+];
+const STATUS_TXT = { pass: 'ناجح', resit: 'إعادة مطلوبة', fail: 'راسب', review: 'قيد المراجعة', pending: 'لم تكتمل' };
+const $ = id => document.getElementById(id);
+const fmt = n => (Math.round(n * 10) / 10).toString();
+
+function chip(e, max) {
+  if (!e) return '<span class="chip na">لم تُرصد</span>';
+  if (e.t === 'withheld') return '<span class="chip wh">⛔ محجوبة</span>';
+  if (e.t === 'absent') return '<span class="chip na">غائب</span>';
+  if (e.t === 'excused') return '<span class="chip na">غائب بعذر</span>';
+  const p = pct(e.v, max), low = p < CFG.pass;
+  return `<span class="chip ${low ? 'low' : ''}">${low ? '✗ ' : ''}${fmt(e.v)}<small>/${max}</small><em>${fmt(p)}%</em></span>`;
+}
+function bar(e, max) {
+  if (!isNum(e)) return '<div class="bar"></div>';
+  const p = pct(e.v, max);
+  return `<div class="bar ${p < CFG.pass ? 'low' : ''}"><i style="width:${Math.min(p, 100)}%"></i></div>`;
+}
+
+function renderStudent() {
+  const res = SUBJECTS.map(s => ({ s, r: evaluate(s.rec, CFG) }));
+  const passed = res.filter(x => x.r.status === 'pass').length;
+  const resit = res.filter(x => x.r.status === 'resit' || x.r.status === 'fail').length;
+  const review = res.filter(x => x.r.status === 'review').length;
+  const parts = [];
+  if (resit) parts.push(`إعادة تحريري مطلوبة في ${resit === 1 ? 'مادة' : resit === 2 ? 'مادتين' : resit + ' مواد'}`);
+  if (review) parts.push(`${review === 1 ? 'مادة' : review + ' مواد'} قيد المراجعة`);
+  $('hero').innerHTML = `
+    <h1>نتائجي</h1>
+    <p class="big">ناجح في ${passed} من ${SUBJECTS.length} مواد</p>
+    <div class="strip" role="list">${res.map(x => `<a role="listitem" href="#${x.s.id}" class="${x.r.status}" aria-label="${x.s.name}: ${STATUS_TXT[x.r.status]}" title="${x.s.name}"></a>`).join('')}</div>
+    <div class="legend">
+      <span><i style="background:var(--pass)"></i>ناجح</span>
+      <span><i style="background:var(--fail)"></i>إعادة مطلوبة</span>
+      <span><i style="background:#000;box-shadow:inset 0 0 0 1px #fff8"></i>قيد المراجعة</span>
+    </div>
+    ${parts.length ? `<p class="sub-note">${parts.join(' · ')}</p>` : ''}`;
+
+  $('subjects').innerHTML = res.map(({ s, r }) => {
+    const rec = s.rec, replaced = r.resitUsed;
+    let rows = `
+      <div class="r ${replaced ? 'replaced' : ''}"><span class="lab">تحريري</span>${bar(rec.w, CFG.wMax)}${chip(rec.w, CFG.wMax)}</div>`;
+    if (rec.r) {
+      const cap = CFG.resit === 'cap' ? CFG.wMax * CFG.pass / 100 : null;
+      rows += `<div class="r"><span class="lab">إعادة</span>${bar(rec.r, CFG.wMax)}${chip(rec.r, CFG.wMax)}
+        ${isNum(rec.r) && cap !== null && rec.r.v > cap ? `<div class="hint">المعتمد ${fmt(cap)} من ${CFG.wMax} (سقف الإعادة عند حد النجاح)</div>` : ''}</div>`;
+    }
+    rows += `<div class="r"><span class="lab">شفوي</span>${bar(rec.o, CFG.oMax)}${chip(rec.o, CFG.oMax)}</div>`;
+    if (rec.w && rec.w.t === 'withheld')
+      rows += `<div class="r"><span class="hint wh">درجة هذه المادة محجوبة. للاستفسار تواصل مع أمين الخدمة.</span></div>`;
+    let tot = '';
+    if (r.total !== undefined) {
+      const low = r.totalPct < CFG.pass;
+      tot = `<div class="tot ${low ? 'low' : ''}"><span>المجموع</span>
+        <span><strong>${fmt(r.total)}</strong> / ${r.subjMax} · ${fmt(r.totalPct)}%
+        ${r.grace && CFG.showGrace ? `<br><span class="g">منها رأفة +${fmt(r.grace)}</span>` : ''}</span></div>`;
+    } else {
+      tot = `<div class="tot"><span>المجموع</span><span>${r.status === 'review' ? 'بعد انتهاء المراجعة' : r.absent ? 'بعد درجة الإعادة' : 'عند اكتمال الدرجات'}</span></div>`;
+    }
+    return `<article class="subj" id="${s.id}"><header><h3>${s.name}</h3><span class="badge ${r.status}">${STATUS_TXT[r.status]}</span></header><div class="rows">${rows}</div>${tot}</article>`;
+  }).join('');
+}
+
+/* ===== إدخال الدرجات ===== */
+const STUDENTS = [
+  { code: '1001', name: 'مينا جرجس',   prevW: 58 },
+  { code: '1002', name: 'مريم سمير',   prevW: 40 },
+  { code: '1003', name: 'بيتر عادل',   prevW: 'abs' },
+  { code: '1004', name: 'مارتينا ناجي', prevW: 66 },
+  { code: '1005', name: 'كيرلس فادي',  prevW: 30 },
+  { code: '1006', name: 'إيريني صبحي', prevW: 49 },
+  { code: '1007', name: 'مارك ماهر',   prevW: 35 },
+  { code: '1008', name: 'فيرينا نبيل', prevW: 62 }
+];
+let kind = 'w';
+const entries = { w: {}, o: {}, r: {} };
+[[ '1001', 58 ], [ '1002', 40 ], [ '1004', 66 ], [ '1006', 49 ], [ '1008', 62 ]].forEach(([c, v]) => entries.w[c] = S(v));
+entries.w['1003'] = ABS;
+entries.o['1001'] = S(26); entries.o['1004'] = S(27);
+const maxOf = k => (k === 'o' ? CFG.oMax : CFG.wMax);
+const kindName = { w: 'التحريري', o: 'الشفوي', r: 'إعادة التحريري' };
+
+function visibleStudents() {
+  if (kind !== 'r') return STUDENTS;
+  return STUDENTS.filter(s => s.prevW === 'abs' || s.prevW / CFG.wMax * 100 < CFG.pass);
+}
+function renderEntry() {
+  const role = $('role').value, max = maxOf(kind), list = visibleStudents();
+  const banner = $('entryBanner');
+  banner.hidden = kind !== 'r';
+  banner.textContent = `يظهر هنا الراسبون والغائبون في التحريري فقط (${list.length} من ${STUDENTS.length}).`;
+  $('stuList').innerHTML = list.map(s => {
+    const e = entries[kind][s.code], t = e && e.t;
+    const val = isNum(e) ? e.v : '';
+    const dis = t && t !== 'score';
+    const low = isNum(e) && e.v / max * 100 < CFG.pass;
+    const label = t === 'absent' ? 'غائب' : t === 'excused' ? 'بعذر' : t === 'withheld' ? '⛔ محجوبة' : t === 'flag' ? '🚩 ملاحظة مرفوعة' : '';
+    const wBtn = role === 'admin'
+      ? `<button class="w" data-act="withheld" aria-pressed="${t === 'withheld'}" title="حجب الدرجة (لأمين الخدمة فقط)">⛔</button>`
+      : `<button data-act="flag" aria-pressed="${t === 'flag'}" title="رفع ملاحظة لأمين الخدمة">🚩</button>`;
+    return `<div class="stu ${t === 'withheld' ? 'wh' : ''}" data-code="${s.code}">
+      <div class="nm"><b>${s.name}</b><span>كود ${s.code}</span></div>
+      <input type="text" inputmode="decimal" aria-label="درجة ${s.name}" value="${dis ? label : val}" ${dis ? 'disabled' : ''} class="${low ? 'low' : ''}">
+      <div class="acts">
+        <button data-act="absent" aria-pressed="${t === 'absent'}">غائب</button>
+        <button data-act="excused" aria-pressed="${t === 'excused'}">بعذر</button>${wBtn}
+      </div></div>`;
+  }).join('');
+  updateProgress();
+}
+function updateProgress() {
+  const list = visibleStudents();
+  const done = list.filter(s => entries[kind][s.code]).length;
+  $('progTxt').textContent = `تم إدخال ${done} من ${list.length}`;
+  $('progBar').firstElementChild.style.width = (list.length ? done / list.length * 100 : 0) + '%';
+}
+$('stuList').addEventListener('input', ev => {
+  const inp = ev.target; if (inp.tagName !== 'INPUT') return;
+  const row = inp.closest('.stu'), code = row.dataset.code, max = maxOf(kind);
+  const raw = inp.value.trim().replace(',', '.');
+  row.querySelectorAll('.err').forEach(n => n.remove());
+  inp.classList.remove('low', 'bad');
+  if (raw === '') { delete entries[kind][code]; updateProgress(); return; }
+  const v = Number(raw);
+  if (!isFinite(v) || v < 0 || v > max) {
+    inp.classList.add('bad'); delete entries[kind][code];
+    row.insertAdjacentHTML('beforeend', `<div class="err">الدرجة يجب أن تكون بين 0 و ${max}</div>`);
+  } else {
+    entries[kind][code] = S(v);
+    if (v / max * 100 < CFG.pass) inp.classList.add('low');
+  }
+  updateProgress();
+});
+$('stuList').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-act]'); if (!b) return;
+  const code = b.closest('.stu').dataset.code, act = b.dataset.act;
+  const cur = entries[kind][code];
+  if (cur && cur.t === act) delete entries[kind][code];
+  else entries[kind][code] = act === 'absent' ? ABS : act === 'excused' ? EXC : act === 'withheld' ? WH : { t: 'flag' };
+  if (act === 'flag' && entries[kind][code]) toast('أُرسلت ملاحظتك لأمين الخدمة');
+  if (act === 'withheld' && entries[kind][code]) toast('حُجبت الدرجة. ستظهر للمخدوم «محجوبة» دون ذكر السبب');
+  renderEntry();
+});
+$('kinds').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-k]'); if (!b) return;
+  kind = b.dataset.k;
+  $('kinds').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  renderEntry();
+});
+$('role').addEventListener('change', () => { renderEntry(); renderSettings(); });
+$('fLevel').addEventListener('change', () => toast('هذه معاينة: بيانات الفرقة الثانية تأتي من القاعدة'));
+SUBJECTS.forEach(s => $('fSubj').insertAdjacentHTML('beforeend', `<option>${s.name}</option>`));
+
+$('bDraft').addEventListener('click', () => toast('حُفظت المسودة. لن يراها المخدومون'));
+$('bPub').addEventListener('click', () => toast(`نُشرت نتائج ${kindName[kind]} للفرقة الأولى`));
+$('bImport').addEventListener('click', () => $('impDlg').showModal());
+$('impCancel').addEventListener('click', () => $('impDlg').close());
+$('impOk').addEventListener('click', () => { $('impDlg').close(); toast('استُوردت 5 درجات. راجعها ثم انشرها'); });
+
+/* ===== الإعدادات ===== */
+function renderSettings() {
+  const admin = $('role').value === 'admin';
+  $('setLocked').hidden = admin; $('setBody').hidden = !admin;
+  $('sW').value = CFG.wMax; $('sO').value = CFG.oMax; $('sP').value = CFG.pass; $('sG').value = CFG.graceMax;
+  $('sR').value = CFG.resit; $('sShow').checked = CFG.showGrace;
+  renderExample();
+}
+function renderExample() {
+  const total = CFG.wMax + CFG.oMax, p = Number($('sTry').value);
+  $('sTryV').textContent = p;
+  const marks = total * p / 100, passM = total * CFG.pass / 100, gM = total * CFG.graceMax / 100;
+  const need = Math.round((passM - marks) * 100) / 100;
+  let html;
+  if (marks >= passM) html = `<div class="line"><span>المخدوم جايب ${fmt(marks)} من ${total}</span><b class="ok">ناجح بدون رأفة</b></div>`;
+  else if (need <= gM) html = `<div class="line"><span>ينقصه ${fmt(need)} وسقف الرأفة ${fmt(gM)}</span><b class="ok">رأفة +${fmt(need)} ويصبح ${CFG.pass}%</b></div>`;
+  else html = `<div class="line"><span>ينقصه ${fmt(need)} وسقف الرأفة ${fmt(gM)}</span><b class="no">لا تُمنح رأفة، يبقى ${p}%</b></div>`;
+  $('exBox').innerHTML = html + `<div class="line"><span>نفس القاعدة لكل المواد ولكل المخدومين</span><b>دون استثناء</b></div>`;
+}
+['sW', 'sO', 'sP', 'sG'].forEach(id => $(id).addEventListener('input', () => {
+  const n = Number($(id).value);
+  if (!isFinite(n) || n < 0) return;
+  if (id === 'sW' && n > 0) CFG.wMax = n;
+  if (id === 'sO' && n > 0) CFG.oMax = n;
+  if (id === 'sP' && n > 0 && n <= 100) CFG.pass = n;
+  if (id === 'sG' && n <= 20) CFG.graceMax = n;
+  renderExample();
+}));
+$('sR').addEventListener('change', () => { CFG.resit = $('sR').value; });
+$('sShow').addEventListener('change', () => { CFG.showGrace = $('sShow').checked; });
+$('sTry').addEventListener('input', renderExample);
+
+/* ===== التنقل والإشعارات ===== */
+const views = { student: 'v-student', entry: 'v-entry', settings: 'v-settings' };
+document.querySelector('.seg').addEventListener('click', ev => {
+  const b = ev.target.closest('button[data-view]'); if (!b) return;
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-selected', x === b));
+  Object.entries(views).forEach(([k, id]) => $(id).hidden = k !== b.dataset.view);
+  $('bottom').hidden = b.dataset.view !== 'entry';
+  if (b.dataset.view === 'student') renderStudent();
+  if (b.dataset.view === 'entry') renderEntry();
+  if (b.dataset.view === 'settings') renderSettings();
+  window.scrollTo({ top: 0 });
+});
+let tt;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2600); }
+
+renderStudent();
+</script>
+</body>
+</html>

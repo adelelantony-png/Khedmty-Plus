@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة السلوك الروحي للمخدومين | خدمتي برو</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+        .main-container { max-width: 950px; margin: 20px auto; padding: 0 15px; }
+        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 20px; }
+        .table-card { background: #fff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .table thead { background: #1e3a8a; color: #fff; }
+        .table th, .table td { vertical-align: middle; text-align: center; padding: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="servant-dashboard.html?tab=membersTab" class="btn btn-outline-secondary btn-sm fw-bold">
+            <i class="fa-solid fa-arrow-right me-1"></i> العودة لتبويب المخدومين
+        </a>
+        <button class="btn btn-success fw-bold px-4 shadow-sm" onclick="exportToExcel()">
+            <i class="fa-solid fa-file-excel me-1"></i> تحميل شيت الإكسيل (Excel)
+        </button>
+    </div>
+
+    <div class="header-card text-center">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-chart-line me-2"></i>متابعة السلوك الروحي والأكاديمي للمخدومين (مباشر)</h4>
+        <small class="opacity-75">كشف شامل متزامن سحابياً لحضور الاجتماع، قراءة الإنجيل، وسجلات النوتة الروحية</small>
+    </div>
+
+    <div class="table-card">
+        <div class="table-responsive mb-0">
+            <table class="table table-hover mb-0" id="followupTable">
+                <thead>
+                    <tr>
+                        <th>كود الدارس</th>
+                        <th>اسم المخدوم</th>
+                        <th>الفرقة / المرحلة</th>
+                        <th>حضور الجمعة</th>
+                        <th>أيام النوتة المسجلة</th>
+                        <th>قراءات الإنجيل</th>
+                        <th>إجمالي النقاط ⭐</th>
+                    </tr>
+                </thead>
+                <tbody id="followupTbody">
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i> جاري سحب إحصائيات المخدومين من السحابة...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+    'use strict';
+    // حماية فورية: خادم أو أمين خدمة فقط
+    if (window.AuthClient) {
+        AuthClient.enforceAuth(['servant', 'admin']);
+    }
+
+    const FB_CONFIG = {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    const fsdb = firebase.firestore();
+
+    async function loadFollowupData() {
+        const tbody = document.getElementById('followupTbody');
+        try {
+            // 1. جلب المخدومين والحضور من Firestore مباشرة
+            const [membersSnap, attSnap] = await Promise.all([
+                fsdb.collection('members').get(),
+                fsdb.collection('attendance').get()
+            ]);
+
+            let students = membersSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+            if (students.length === 0) {
+                students = JSON.parse(localStorage.getItem('my_church_class')) || [];
+            }
+
+            let attendanceRecord = {};
+            attSnap.forEach(doc => {
+                attendanceRecord[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+            });
+            if (Object.keys(attendanceRecord).length === 0) {
+                attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+            }
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">لا يوجد مخدومين مسجلين في النظام حالياً.</td></tr>';
+                return;
+            }
+
+            const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+            const localBible = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+
+            // 2. جلب سجلات النوتة والإنجيل لكل مخدوم من السحابة بالتوازي
+            const rowsData = await Promise.all(students.map(async st => {
+                const sCode = String(st.code || st.id || '').trim();
+                const sName = st.name || 'مخدوم';
+                const sLevel = st.stage || st.level || 'الفرقة الأولى';
+
+                // حساب حضور الجمعة ونقاط الحضور
+                let fridayCount = 0;
+                let attPoints = 0;
+                Object.keys(attendanceRecord).forEach(dateKey => {
+                    const list = attendanceRecord[dateKey] || [];
+                    const found = list.find(a => String(a.code || a.id || '') === sCode);
+                    if (found && !found.isAbsentDueToDelay) {
+                        const isFri = new Date(dateKey).getDay() === 5;
+                        if (isFri) fridayCount++;
+                        attPoints += (found.points || (isFri ? 5 : 15));
+                    }
+                });
+
+                // حساب النوتة والإنجيل من السحابة + المحلي
+                let cloudSpiritualCount = 0;
+                let cloudBibleCount = 0;
+                try {
+                    const [spSnap, rdSnap] = await Promise.all([
+                        fsdb.collection('students').doc(sCode).collection('daily_logs').get(),
+                        fsdb.collection('students').doc(sCode).collection('reading_logs').get()
+                    ]);
+                    cloudSpiritualCount = spSnap.size;
+                    cloudBibleCount = rdSnap.size;
+                } catch (e) {}
+
+                const localSpCount = Object.keys(localSpiritual).filter(k => k.endsWith(`_${sCode}`)).length;
+                const localBiCount = Object.keys(localBible).filter(k => k.endsWith(`_${sCode}`) || String((localBible[k] || {}).code || '') === sCode).length;
+
+                const spiritualDaysCount = Math.max(cloudSpiritualCount, localSpCount);
+                const bibleCount = Math.max(cloudBibleCount, localBiCount);
+
+                // معادلة النقاط الموحدة (حضور + 5 لكل يوم نوتة + 5 لكل قراءة إنجيل)
+                const totalPoints = attPoints + (spiritualDaysCount * 5) + (bibleCount * 5);
+
+                return { sCode, sName, sLevel, fridayCount, spiritualDaysCount, bibleCount, totalPoints };
+            }));
+
+            tbody.innerHTML = '';
+            rowsData.forEach(r => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-primary">${r.sCode}</td>
+                        <td class="fw-bold text-dark">${r.sName}</td>
+                        <td><span class="badge bg-light text-dark border">${r.sLevel}</span></td>
+                        <td><span class="text-success fw-bold">${r.fridayCount} اجتماع</span></td>
+                        <td><span class="text-danger fw-bold">${r.spiritualDaysCount} يوم</span></td>
+                        <td><span class="text-warning text-dark fw-bold">${r.bibleCount} قراءة</span></td>
+                        <td><strong class="text-primary fs-6">${r.totalPoints} ⭐</strong></td>
+                    </tr>
+                `;
+            });
+
+        } catch (err) {
+            console.error("Followup load error:", err);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">تعذر الاتصال بالسحابة، يرجى التحقق من الإنترنت.</td></tr>';
+        }
+    }
+
+    function exportToExcel() {
+        const table = document.getElementById("followupTable");
+        let csvContent = "\uFEFF";
+        const rows = table.querySelectorAll("tr");
+        rows.forEach(row => {
+            const cols = row.querySelectorAll("th, td");
+            const data = Array.from(cols).map(col => `"${col.innerText}"`);
+            csvContent += data.join(",") + "\n";
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Khedmety_Followup_Report_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    loadFollowupData();
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مفكرة الخادم | خدمتي برو</title>
+    <meta name="theme-color" content="#1e3799">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; padding-bottom: 40px; }
+        .main-container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
+        .header-card { background: linear-gradient(135deg, #1e3799 0%, #0984e3 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 16px; box-shadow: 0 8px 20px rgba(30,55,153,.2); }
+        .card-custom { background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,.04); margin-bottom: 16px; }
+        .tpl { background: #fff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 10px 12px; font-weight: 700; font-size: .85rem; cursor: pointer; text-align: right; transition: .2s; }
+        .tpl:hover { border-color: #0984e3; background: #f0f7ff; }
+        .tag { display: inline-flex; align-items: center; gap: 4px; background: #e0f2f1; color: #0f766e; border-radius: 999px; padding: 4px 12px; font-size: .8rem; font-weight: 700; cursor: pointer; border: 0; margin: 0 0 6px 6px; }
+        .tag.sug { background: #f1f5f9; color: #475569; }
+        .tag.on { background: #0f766e; color: #fff; }
+        .entry { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; border-right: 5px solid #0984e3; padding: 14px; margin-bottom: 12px; cursor: pointer; transition: .2s; box-shadow: 0 2px 8px rgba(0,0,0,.03); }
+        .entry:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,.07); }
+        .snippet { color: #475569; font-size: .92rem; line-height: 1.8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+<div class="main-container" id="app" style="display:none;">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-secondary btn-sm fw-bold btn-smart-back" data-smart-back data-fallback="servant-dashboard.html"><i class="fa-solid fa-arrow-right me-1"></i> العودة للوحة الخدمة</button>
+        <button class="btn btn-outline-success btn-sm fw-bold" onclick="exportAll()"><i class="fa-solid fa-download me-1"></i> نسخة نصية احتياطية</button>
+    </div>
+
+    <div class="header-card text-center">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-pen-nib me-2"></i>مفكرة الخادم</h4>
+        <small id="who" class="opacity-90 d-block">جاري التحميل...</small>
+        <small class="opacity-75">خواطرك وتأملاتك وأفكار خدمتك، خاصة بك على هذا الجهاز</small>
+    </div>
+
+    <div id="msg" class="alert d-none fw-bold text-center" role="alert"></div>
+
+    <!-- ===== قائمة الكتابات ===== -->
+    <div id="view-list">
+        <button class="btn btn-primary w-100 py-2 fw-bold mb-3" onclick="openEditor()"><i class="fa-solid fa-plus me-1"></i> كتابة جديدة</button>
+        <div class="card-custom">
+            <input type="search" id="q" class="form-control mb-2" placeholder="🔍 ابحث في العناوين والنصوص...">
+            <select id="fProject" class="form-select mb-2"><option value="">كل المشاريع</option></select>
+            <div id="fTags"></div>
+        </div>
+        <div id="list"></div>
+    </div>
+
+    <!-- ===== المحرر ===== -->
+    <div id="view-edit" class="d-none">
+        <div class="card-custom">
+            <label class="form-label small fw-bold text-muted"><i class="fa-regular fa-lightbulb me-1"></i> قوالب سريعة (اضغط لتعبئة هيكل الكتابة):</label>
+            <div class="row g-2 mb-3" id="tpls"></div>
+
+            <label class="form-label small fw-bold text-muted">عنوان التأمل أو الخاطرة:</label>
+            <input type="text" id="title" class="form-control fw-bold mb-3" maxlength="120" placeholder="مثال: تأمل في سكون الليل">
+
+            <label class="form-label small fw-bold text-muted">المشروع:</label>
+            <div class="d-flex gap-2 mb-3">
+                <select id="project" class="form-select"></select>
+                <button class="btn btn-outline-primary fw-bold text-nowrap" onclick="newProject()">+ مشروع</button>
+            </div>
+
+            <label class="form-label small fw-bold text-muted">الوسوم:</label>
+            <div id="chosen" class="mb-1"></div>
+            <div id="sugs" class="mb-2"></div>
+            <div class="input-group mb-3">
+                <input type="text" id="customTag" class="form-control" placeholder="وسم مخصص ثم Enter" maxlength="30">
+                <button class="btn btn-outline-secondary" onclick="addCustomTag()">إضافة</button>
+            </div>
+
+            <label class="form-label small fw-bold text-muted">النص (اكتب وعدّل بحرية):</label>
+            <textarea id="body" class="form-control mb-3" rows="9" placeholder="اكتب هنا..."></textarea>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-success flex-grow-1 py-2 fw-bold" onclick="saveEntry()"><i class="fa-solid fa-floppy-disk me-1"></i> حفظ</button>
+                <button class="btn btn-outline-danger fw-bold d-none" id="btnDel" onclick="deleteEntry()"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn btn-outline-secondary fw-bold" onclick="closeEditor()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    if (window.AuthClient) {
+        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
+    }
+
+    // ---------- الحماية: خادم أو أدمن مسجّل الدخول ----------
+    function getServant() {
+        try {
+            const u = JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user'));
+            return (u && (u.role === 'admin' || u.role === 'servant' || u.permission)) ? u : null;
+        } catch (e) { return null; }
+    }
+    const me = getServant();
+    if (!me || (me.role !== 'admin' && me.role !== 'servant')) { location.replace('index.html'); return; }
+    const code = String(me.code || me.id || 'servant');
+    const KEY = 'khedmety_servant_journal';
+
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    $('app').style.display = '';
+    $('who').textContent = `${me.name || 'الخادم'} (كود: ${code})`;
+
+    // ---------- التخزين: لكل خادم دفتره الخاص ----------
+    function readAll() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+    function mine() { const a = readAll(); return a[code] || { entries: [], projects: ['عام'] }; }
+    function persist(data) {
+        try { const a = readAll(); a[code] = data; localStorage.setItem(KEY, JSON.stringify(a)); return true; }
+        catch (e) { flash('تعذر الحفظ: مساحة التخزين ممتلئة.', 'danger'); return false; }
+    }
+    function flash(t, type = 'success') {
+        const m = $('msg'); m.className = `alert alert-${type} fw-bold text-center`; m.textContent = t;
+        setTimeout(() => m.classList.add('d-none'), 2500);
+    }
+    const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+    // ---------- القوالب والوسوم المقترحة ----------
+    const TEMPLATES = [
+        { n: '🤝 ملاحظة وتقرير افتقاد', tags: ['افتقاد'], t: 'تقرير افتقاد', b: 'المخدوم:\nتاريخ الافتقاد:\nطريقة التواصل (زيارة / اتصال / رسالة):\nما دار في الحديث:\nاحتياجات أو مشكلات ظهرت:\nما سأفعله لاحقاً:\nموعد المتابعة القادمة:\n' },
+        { n: '✝️ تأمل في آية إنجيلية', tags: ['تأمل', 'آية'], t: 'تأمل في آية', b: 'الآية:\nما لفت نظري:\nما تقوله لي اليوم:\nصلاة قصيرة:\n' },
+        { n: '💡 فكرة درس ونشاط', tags: ['فكرة_خدمة'], t: 'فكرة درس', b: 'موضوع الدرس:\nالهدف:\nفكرة النشاط التفاعلي:\nالأدوات المطلوبة:\nأسئلة للنقاش:\nالمدة:\n' },
+        { n: '🙏 صلاة وتضرع شخصي', tags: ['صلاة'], t: 'صلاة وتضرع', b: 'ما أحمله في قلبي اليوم:\nما أطلبه من الله:\nأسماء أصلي لأجلها:\nشكر:\n' }
+    ];
+    const SUGGESTED = ['تأمل', 'صلاة', 'افتقاد', 'عظة', 'آية', 'فكرة_خدمة', 'سلام_داخلي', 'مدارس_أحد', 'شباب', 'طقسي', 'عقيدي', 'رجاء'];
+
+    let data = mine();
+    let editingId = null;
+    let chosen = [];
+    let activeTag = '';
+
+    // ---------- القائمة ----------
+    function renderList() {
+        data = mine();
+        const q = $('q').value.trim().toLowerCase(), fp = $('fProject').value;
+        const projSel = $('fProject'), keep = projSel.value;
+        projSel.innerHTML = '<option value="">كل المشاريع</option>' + data.projects.map(p => `<option>${esc(p)}</option>`).join('');
+        projSel.value = data.projects.includes(keep) ? keep : '';
+
+        const allTags = [...new Set(data.entries.flatMap(e => e.tags || []))];
+        $('fTags').innerHTML = allTags.map(t => `<button class="tag sug ${activeTag === t ? 'on' : ''}" data-ft="${esc(t)}">#${esc(t)}</button>`).join('');
+
+        const rows = data.entries
+            .filter(e => (!projSel.value || e.project === projSel.value) && (!activeTag || (e.tags || []).includes(activeTag)) &&
+                         (!q || (e.title + ' ' + e.body).toLowerCase().includes(q)))
+            .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+        $('list').innerHTML = rows.length ? rows.map(e => `
+            <div class="entry" data-id="${esc(e.id)}">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                    <div class="fw-bold">${esc(e.title || 'بدون عنوان')}</div>
+                    <small class="text-muted text-nowrap">${esc(e.date || '')}</small>
+                </div>
+                <div class="snippet mb-2">${esc(e.body)}</div>
+                <div><span class="badge bg-primary bg-opacity-10 text-primary me-1">📁 ${esc(e.project || 'عام')}</span>${(e.tags || []).map(t => `<span class="badge bg-success bg-opacity-10 text-success me-1">#${esc(t)}</span>`).join('')}</div>
+            </div>`).join('')
+            : `<div class="text-center text-muted py-5">${data.entries.length ? 'لا توجد نتائج مطابقة.' : 'لم تكتب شيئاً بعد. ابدأ بأول خاطرة ✍️'}</div>`;
+    }
+
+    // ---------- المحرر ----------
+    function renderTags() {
+        $('chosen').innerHTML = chosen.map(t => `<button class="tag on" data-rm="${esc(t)}">#${esc(t)} ×</button>`).join('');
+        $('sugs').innerHTML = SUGGESTED.filter(t => !chosen.includes(t)).map(t => `<button class="tag sug" data-add="${esc(t)}">#${esc(t)}</button>`).join('');
+    }
+    function fillProjects(sel) {
+        $('project').innerHTML = data.projects.map(p => `<option>${esc(p)}</option>`).join('');
+        $('project').value = data.projects.includes(sel) ? sel : data.projects[0];
+    }
+    window.openEditor = function (id) {
+        data = mine();
+        const e = id ? data.entries.find(x => x.id === id) : null;
+        editingId = e ? e.id : null;
+        $('title').value = e ? e.title : '';
+        $('body').value = e ? e.body : '';
+        chosen = e ? [...(e.tags || [])] : [];
+        fillProjects(e ? e.project : '');
+        $('btnDel').classList.toggle('d-none', !e);
+        renderTags();
+        $('view-list').classList.add('d-none'); $('view-edit').classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    window.closeEditor = function () { $('view-edit').classList.add('d-none'); $('view-list').classList.remove('d-none'); renderList(); };
+    const openEditor = window.openEditor, closeEditor = window.closeEditor;
+
+    window.newProject = function () {
+        const n = (prompt('اسم المشروع الجديد:') || '').trim().slice(0, 60);
+        if (!n) return;
+        data = mine();
+        if (!data.projects.includes(n)) { data.projects.push(n); persist(data); }
+        fillProjects(n);
+    };
+    function cleanTag(t) { return t.trim().replace(/^#+/, '').replace(/\s+/g, '_').slice(0, 30); }
+    window.addCustomTag = function () {
+        const t = cleanTag($('customTag').value);
+        if (t && !chosen.includes(t)) { chosen.push(t); renderTags(); }
+        $('customTag').value = '';
+    };
+    $('customTag').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); window.addCustomTag(); } });
+
+    window.saveEntry = function () {
+        const title = $('title').value.trim(), body = $('body').value.trim();
+        if (!title && !body) return flash('اكتب عنواناً أو نصاً أولاً.', 'warning');
+        data = mine();
+        const now = Date.now();
+        const rec = { id: editingId || 'e' + now, title, body, project: $('project').value || 'عام', tags: chosen, date: today(), updatedAt: now };
+        const i = data.entries.findIndex(x => x.id === rec.id);
+        if (i >= 0) { rec.date = data.entries[i].date || rec.date; data.entries[i] = rec; } else data.entries.unshift(rec);
+        if (persist(data)) { flash('تم الحفظ ✔️'); closeEditor(); }
+    };
+    window.deleteEntry = function () {
+        if (!editingId || !confirm('حذف هذه الكتابة نهائياً؟')) return;
+        data = mine(); data.entries = data.entries.filter(x => x.id !== editingId);
+        if (persist(data)) { flash('تم الحذف'); closeEditor(); }
+    };
+
+    // ---------- نسخة احتياطية نصية ----------
+    window.exportAll = function () {
+        data = mine();
+        if (!data.entries.length) return flash('لا توجد كتابات للتصدير.', 'warning');
+        const txt = data.entries.map(e => `【${e.title || 'بدون عنوان'}】  ${e.date || ''}\nالمشروع: ${e.project || 'عام'}   الوسوم: ${(e.tags || []).map(t => '#' + t).join(' ')}\n\n${e.body}\n\n${'─'.repeat(30)}\n`).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['\uFEFF' + txt], { type: 'text/plain;charset=utf-8' }));
+        a.download = `Khedmety_Journal_${today()}.txt`;
+        document.body.appendChild(a); a.click(); a.remove();
+    };
+
+    // ---------- الأحداث ----------
+    $('tpls').innerHTML = TEMPLATES.map((t, i) => `<div class="col-6"><button class="tpl w-100" data-tpl="${i}">${t.n}</button></div>`).join('');
+    $('tpls').addEventListener('click', e => {
+        const b = e.target.closest('[data-tpl]'); if (!b) return;
+        const t = TEMPLATES[+b.dataset.tpl];
+        if ($('body').value.trim() && !confirm('سيُستبدل النص الحالي بالقالب. متابعة؟')) return;
+        if (!$('title').value.trim()) $('title').value = t.t;
+        $('body').value = t.b;
+        t.tags.forEach(x => { if (!chosen.includes(x)) chosen.push(x); });
+        renderTags(); $('body').focus();
+    });
+    $('chosen').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { chosen = chosen.filter(t => t !== b.dataset.rm); renderTags(); } });
+    $('sugs').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) { chosen.push(b.dataset.add); renderTags(); } });
+    $('fTags').addEventListener('click', e => { const b = e.target.closest('[data-ft]'); if (b) { activeTag = activeTag === b.dataset.ft ? '' : b.dataset.ft; renderList(); } });
+    $('list').addEventListener('click', e => { const c = e.target.closest('[data-id]'); if (c) openEditor(c.dataset.id); });
+    $('q').addEventListener('input', renderList);
+    $('fProject').addEventListener('change', renderList);
+
+    renderList();
+})();
+</script>
+<script src="js/pwa-helper.js"></script>
+</body>
+</html>

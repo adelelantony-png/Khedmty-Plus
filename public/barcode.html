@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كارنيه حضور كورس إعداد خدام - بطاقة الدارسين</title>
+    <meta name="theme-color" content="#1e3799">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <!-- مكتبة QR Code المعتمدة في لوحة الخدام -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --badge-navy: #0c2461;
+            --badge-blue: #1e3799;
+            --badge-cyan: #00cec9;
+            --badge-gold: #d4af37;
+            --badge-red: #c0392b;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #0a192f 0%, #1e3c72 50%, #2a5298 100%);
+            min-height: 100vh;
+            color: #2d3436;
+            padding: 24px 12px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .badge-wrapper {
+            width: 100%;
+            max-width: 680px;
+            margin: auto;
+        }
+
+        /* الكارنيه الذكي المعتمد */
+        .official-card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            padding: 28px 24px 20px;
+            box-sizing: border-box;
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .official-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.42);
+        }
+
+        /* خلفية الأشرطة والمنحنيات الجمالية */
+        .card-wave-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background: linear-gradient(135deg, rgba(192, 57, 43, 0.9) 0%, rgba(231, 76, 60, 0.85) 30%, rgba(0, 206, 201, 0.8) 70%, rgba(9, 132, 227, 0.95) 100%);
+            clip-path: polygon(0 45%, 100% 15%, 100% 100%, 0% 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .card-wave-accent {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(90deg, #c0392b 0%, #e17055 35%, #00cec9 70%, #0984e3 100%);
+            clip-path: polygon(0 60%, 100% 30%, 100% 100%, 0% 100%);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ترويسة الكارنيه الكنسية */
+        .badge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .church-info {
+            text-align: right;
+        }
+
+        .church-title-main {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--badge-navy);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .church-title-sub {
+            font-size: 13px;
+            color: #636e72;
+            margin: 2px 0 0;
+            font-weight: 600;
+        }
+
+        .cross-logo {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .cross-icon {
+            font-size: 26px;
+            color: var(--badge-red);
+            filter: drop-shadow(0 2px 4px rgba(192, 57, 43, 0.3));
+        }
+
+        .cross-coptic {
+            font-size: 10px;
+            font-weight: 800;
+            color: #2c3e50;
+            letter-spacing: 0.5px;
+        }
+
+        /* العنوان الرئيسي المجسم للكورس */
+        .course-title-box {
+            text-align: center;
+            margin-bottom: 22px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .course-title-main {
+            font-size: clamp(22px, 5vw, 32px);
+            font-weight: 900;
+            color: #c0392b;
+            text-shadow: 1px 1px 0 #fff, 2px 2px 0 rgba(192, 57, 43, 0.15);
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        .course-title-sub {
+            font-size: clamp(14px, 3.5vw, 18px);
+            font-weight: 800;
+            color: #2d3436;
+            margin-top: 4px;
+        }
+
+        /* جسم الكارنيه (الباركود والبيانات) */
+        .badge-body {
+            display: grid;
+            grid-template-columns: 190px 1fr;
+            gap: 24px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 580px) {
+            .badge-body {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 16px;
+            }
+        }
+
+        /* صندوق الـ QR Code */
+        .qr-card-container {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border: 2px dashed #0984e3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .qr-card-container img, .qr-card-container svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .qr-hint-label {
+            font-size: 11px;
+            color: #636e72;
+            font-weight: 700;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* بيانات الدارس */
+        .student-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .meta-field {
+            background: #f8f9fd;
+            border: 1px solid #e3e8f3;
+            border-radius: 14px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s ease;
+        }
+
+        .meta-field:hover {
+            border-color: var(--badge-blue);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 55, 153, 0.08);
+        }
+
+        .meta-label {
+            font-size: 14px;
+            font-weight: 800;
+            color: #e74c3c;
+            min-width: 95px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-value-name {
+            font-size: clamp(18px, 4vw, 24px);
+            font-weight: 900;
+            color: #0c2461;
+            line-height: 1.3;
+        }
+
+        .meta-value-code {
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 900;
+            color: #c0392b;
+            font-family: 'Tajawal', sans-serif;
+            letter-spacing: 2px;
+        }
+
+        .meta-value-stage {
+            font-size: 14px;
+            font-weight: 700;
+            color: #27ae60;
+        }
+
+        /* تذييل الكارنيه بالسنوات الكنسية */
+        .badge-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            padding-top: 10px;
+            color: #ffffff;
+            font-weight: 900;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .year-coptic {
+            font-size: clamp(18px, 4vw, 24px);
+            letter-spacing: 1px;
+        }
+
+        .year-miladi {
+            font-size: clamp(18px, 4vw, 24px);
+            letter-spacing: 1px;
+            direction: ltr;
+        }
+
+        /* أزرار التحكم والإجراءات أسفل الكارنيه */
+        .action-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 180px;
+            padding: 12px 20px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(243, 156, 18, 0.35);
+        }
+
+        .btn-print:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(243, 156, 18, 0.45);
+            color: #ffffff;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.4);
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* تنسيق الطباعة المباشرة لتوليد كارنيه ورقي رسمي */
+        @media print {
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                color: #000000 !important;
+            }
+            .action-bar, .qr-hint-label, #pwaInstallBanner {
+                display: none !important;
+            }
+            .official-card {
+                box-shadow: none !important;
+                border: 2px solid #000000 !important;
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+            .badge-footer {
+                color: #000000 !important;
+                text-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="badge-wrapper">
+
+    <!-- الكارنيه الذكي المعتمد -->
+    <div class="official-card" id="studentIdCard">
+        <div class="card-wave-accent"></div>
+        <div class="card-wave-bg"></div>
+
+        <!-- ترويسة الكنيسة والخدمة -->
+        <div class="badge-header">
+            <div class="church-info">
+                <h5 class="church-title-main">بطريركية الأقباط الأرثوذكس</h5>
+                <p class="church-title-sub">كنيسة الملاك والروماني بالمطرية</p>
+                <div style="font-size:12px; color:#0984e3; font-weight:700; margin-top:2px;">
+                    <i class="fa-solid fa-graduation-cap me-1"></i> <span id="ui-stage-header">سنة أولى إعداد خدام</span>
+                </div>
+            </div>
+
+            <div class="cross-logo">
+                <i class="fa-solid fa-cross cross-icon"></i>
+                <span class="cross-coptic">Ⲡⲓⲡⲁⲧⲣⲓⲁⲣⲭⲏⲥ</span>
+                <small style="font-size:10px; color:#7f8c8d; font-weight:bold;">خدمتي برو</small>
+            </div>
+        </div>
+
+        <!-- العنوان الرئيسي الرسمي للكورس -->
+        <div class="course-title-box">
+            <h2 class="course-title-main">حضور كورس إعداد خدام</h2>
+            <div class="course-title-sub">اجتماع القديس بولس الرسول لإعداد الخدام</div>
+        </div>
+
+        <!-- جسم الكارنيه (الـ QR المعتمد وبيانات الدارس) -->
+        <div class="badge-body">
+            <!-- كود الـ QR الرسمي المعتمد في لوحة الخدام للكاميرا -->
+            <div class="qr-card-container">
+                <div id="qrCodeTarget" style="display:flex; justify-content:center; align-items:center;">
+                    <i class="fa-solid fa-spinner fa-spin fs-2 text-primary"></i>
+                </div>
+                <div class="qr-hint-label">
+                    <i class="fa-solid fa-camera me-1"></i> امسح بالكاميرا في الاجتماع
+                </div>
+            </div>
+
+            <!-- بيانات الدارس الموثقة -->
+            <div class="student-meta">
+                <div class="meta-field">
+                    <div class="meta-label"><i class="fa-solid fa-user me-1"></i> الاسم:</div>
+                    <div class="meta-value-name" id="ui-student-name">جاري التحميل...</div>
+                </div>
+
+                <div class="meta-field">
+                    <div class="meta-label"><i class="fa-solid fa-barcode me-1"></i> كود الامتحان:</div>
+                    <div class="meta-value-code" id="ui-student-code">----</div>
+                </div>
+
+                <div class="meta-field" style="padding: 8px 18px;">
+                    <div class="meta-label" style="font-size:13px; color:#27ae60;"><i class="fa-solid fa-shield-halved me-1"></i> الحالة:</div>
+                    <div class="meta-value-stage" id="ui-status-text">مسجل ومصرح له بالدخول والامتحانات</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- تذييل الكارنيه بالسنوات الكنسية والميلادية -->
+        <div class="badge-footer">
+            <div class="year-miladi" id="ui-year-miladi">2025–2026</div>
+            <div class="year-coptic" id="ui-year-coptic">1742 ش</div>
+        </div>
+    </div>
+
+    <!-- أزرار الإجراءات والتحكم -->
+    <div class="action-bar">
+        <button type="button" class="btn-action btn-print" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> طباعة / حفظ الكارنيه
+        </button>
+        <button type="button" class="btn-action btn-back btn-smart-back" data-smart-back data-fallback="student.html">
+            <i class="fa-solid fa-arrow-right"></i> العودة لبوابة المخدوم
+        </button>
+    </div>
+
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+    if (window.AuthClient) {
+        AuthClient.enforceAuth(['student', 'servant', 'admin']);
+    }
+
+    // استخراج بيانات المخدوم من عميل المصادقة الموحد أو الجلسة المحلية
+    const studentUser = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
+    const studentCode = (window.AuthClient && AuthClient.getUserCode()) || 
+                        (studentUser && (studentUser.code || studentUser.exam_code)) || 
+                        String(localStorage.getItem('student_code') || '').trim();
+    const studentName = (studentUser && studentUser.name) || 
+                        localStorage.getItem('student_name') || 
+                        'دارس إعداد خدام';
+    const studentStage = (studentUser && (studentUser.stage || studentUser.level)) || 
+                         localStorage.getItem('student_level') || 
+                         'الفرقة الأولى';
+    const studentDob = (studentUser && studentUser.dob) || 
+                       localStorage.getItem('student_dob') || '';
+
+    if (!studentCode) {
+        window.location.replace('index.html');
+    }
+
+    // عرض البيانات في واجهة الكارنيه
+    document.getElementById('ui-student-name').textContent = studentName;
+    document.getElementById('ui-student-code').textContent = studentCode;
+    document.getElementById('ui-stage-header').textContent = studentStage;
+
+    // حساب السنة القبطية والميلادية تلقائياً
+    const curYear = new Date().getFullYear();
+    document.getElementById('ui-year-miladi').textContent = `${curYear}–${curYear + 1}`;
+    // حساب السنة القبطية (السنة الميلادية - 283 تقريباً في شهر أكتوبر/توت)
+    const copticYearNum = curYear - 283;
+    document.getElementById('ui-year-coptic').textContent = `${copticYearNum} ش`;
+
+    /**
+     * استخراج وتوليد سلسلة الـ QR المعتمدة تماماً كما في servant-dashboard.html
+     * الصيغة المعتمدة: "الاسم/رقم_اليوم" أو كود الامتحان المباشر
+     */
+    function computeOfficialQrString() {
+        let bDay = "01";
+        if (studentDob) {
+            let cleanDob = studentDob.toString().trim();
+            if (cleanDob.includes('-')) {
+                let parts = cleanDob.split('-');
+                bDay = parts[2] ? parseInt(parts[2]).toString() : "01";
+            } else if (cleanDob.includes('/')) {
+                let parts = cleanDob.split('/');
+                bDay = parts[0] ? parseInt(parts[0]).toString() : "01";
+            }
+        }
+        // السلسلة الرسمية المعتمدة في نظام كاميرا الخدمة
+        return `${studentName.trim()}/${bDay}`;
+    }
+
+    // توليد الـ QR Code الرسمي عبر مكتبة qrcode-generator المعتمدة في servant-dashboard
+    try {
+        const qrTarget = document.getElementById('qrCodeTarget');
+        const qrString = computeOfficialQrString();
+        
+        if (typeof qrcode !== 'undefined') {
+            const qr = qrcode(0, 'M');
+            // تشفير النص العربي UTF-8 بأمان تام لمنع أي تشوه في الحروف
+            const utf8String = unescape(encodeURIComponent(qrString));
+            qr.addData(utf8String);
+            qr.make();
+            qrTarget.innerHTML = qr.createImgTag(5, 12);
+            
+            // إضافة خاصية الاستجابة على الصورة
+            const imgEl = qrTarget.querySelector('img');
+            if (imgEl) {
+                imgEl.style.maxWidth = '160px';
+                imgEl.style.height = 'auto';
+                imgEl.style.display = 'block';
+                imgEl.alt = `QR Code: ${studentName}`;
+            }
+        } else {
+            qrTarget.innerHTML = `<span class="badge bg-danger">تعذر تحميل مولد الباركود</span>`;
+        }
+    } catch (qrErr) {
+        console.error('فشل رسم الـ QR Code:', qrErr);
+        document.getElementById('qrCodeTarget').innerHTML = `<span class="badge bg-warning text-dark">خطأ في الـ QR</span>`;
+    }
+</script>
+<script src="js/pwa-helper.js"></script>
+</body>
+</html>

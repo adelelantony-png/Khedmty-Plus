@@ -1,0 +1,120 @@
+rules_version = '2';
+
+// قواعد الأمان المطورة لمشروع خدمتي برو (Khedmty-Plus)
+// تعتمد الهوية على Firebase Custom Tokens الصادرة من /api/login:
+//   request.auth.token.role : student | servant | admin
+//   request.auth.token.code : كود المخدوم أو معرف الخادم
+//   request.auth.token.perm : admin | full | attend (صلاحية الخادم)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function role()     { return signedIn() ? request.auth.token.get('role', '') : ''; }
+    function myCode()   { return signedIn() ? request.auth.token.get('code', '') : ''; }
+    function isAdmin()  { return role() == 'admin'; }
+    function isStaff()  { return role() == 'admin' || role() == 'servant'; }
+    function isFull()   { return isAdmin() || (role() == 'servant' && request.auth.token.get('perm', '') == 'full'); }
+    function isMe(code) { return (role() == 'student' && myCode() == code) || (isStaff() && myCode() == code); }
+
+    // ---- 1. مجموعة المخدومين الأساسية students ----
+    match /students/{code} {
+      allow read: if isStaff() || isMe(code);
+      allow create, update, delete: if isFull();
+
+      // سجلات قراءة الإنجيل (الأسماء بالصيغتين Snake_case و CamelCase)
+      match /daily_reading_logs/{id} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /reading_logs/{id} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /bibleReadings/{id} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+
+      // سجلات النوتة الروحية اليومية
+      match /daily_logs/{date} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /dailyLogs/{date} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+
+      // تسليم إجابات الشيتات والامتحانات
+      match /sheet_submissions/{subjectId} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+      match /sheetSubmissions/{subjectId} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+    }
+
+    // ---- 2. مجموعة المخدومين البديلة members المستخدمة في الواجهة الحالية ----
+    match /members/{code} {
+      allow read: if isStaff() || isMe(code);
+      allow create, update, delete: if isFull();
+
+      match /{subcollection=**} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
+    }
+
+    // ---- 3. كشوفات الحضور اليومية ----
+    match /attendance/{date} {
+      allow read: if signedIn();
+      allow create, update: if isStaff();
+      allow delete: if isFull();
+    }
+
+    // ---- 4. الخدام وأمناء الخدمة ----
+    match /servants/{servantId} {
+      allow read: if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // ---- 5. سجلات وملاحظات الخدام الخاصة ----
+    match /servantLogs/{servantId}/{doc=**} {
+      allow read: if (role() == 'servant' && myCode() == servantId) || isAdmin();
+      allow write: if role() == 'servant' && myCode() == servantId;
+    }
+
+    // ---- 6. المقررات والمواد الدراسية ----
+    match /subjects/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- 7. الخطة السنوية والأنشطة ----
+    match /masterPlan/{id} {
+      allow read: if isStaff();
+      allow write: if isFull();
+    }
+
+    // ---- 8. إعدادات وسنة الخدمة ----
+    match /settings/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- 9. سجل التدقيق والعمليات (Audit Log) ----
+    match /audit/{id} {
+      allow create: if isStaff();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // منع أي مسار خارجي غير مصرح به
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

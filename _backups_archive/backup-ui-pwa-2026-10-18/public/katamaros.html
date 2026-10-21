@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القطمارس الكنسي والسنكسار اليومي الكامل</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 50px; }
+        .main-card { max-width: 860px; margin: 20px auto; background: #ffffff; border-radius: 22px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .nav-pills .nav-link { font-weight: 700; color: #64748b; border-radius: 12px; padding: 10px 20px; transition: 0.2s; }
+        .nav-pills .nav-link.active { background: #1e3799; color: #fff; box-shadow: 0 4px 12px rgba(30, 55, 153, 0.2); }
+        .reading-card { border-radius: 16px; border: 1px solid #e2e8f0; background: #ffffff; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .reading-card-header { border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 15px; }
+        .reading-title { color: #1e3799; font-weight: 800; font-size: 1.25rem; }
+        .reading-ref { color: #d97706; font-size: 0.95rem; font-weight: 700; }
+        .reading-body { font-size: 1.15rem; line-height: 2.3; color: #334155; text-align: justify; }
+        .verse-num { display: inline-block; font-size: 0.8rem; font-weight: 700; color: #1e3799; background: #e0e7ff; border-radius: 6px; padding: 1px 6px; margin: 0 4px; vertical-align: middle; }
+        .reading-intro, .reading-conclusion { font-style: italic; color: #64748b; margin: 10px 0; padding: 6px 12px; background: #f8fafc; border-radius: 8px; font-size: 0.95rem; }
+        .date-box { background: #f1f5f9; border-radius: 16px; padding: 15px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container pb-5">
+    <div class="main-card">
+        <!-- شريط التنقل العلوي -->
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3 flex-wrap gap-2">
+            <a href="#" onclick="goBack(event)" class="btn btn-outline-secondary btn-sm fw-bold">
+                <i class="fa-solid fa-arrow-right me-1"></i> العودة للرئيسية
+            </a>
+            <h4 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-book-bible me-2"></i>القطمارس والسنكسار الكنسي</h4>
+            <span id="copticDateBadge" class="badge bg-primary fs-6 px-3 py-2">جاري الحساب...</span>
+        </div>
+
+        <!-- حقل البحث في أي تاريخ -->
+        <div class="date-box">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label small fw-bold text-muted">اختر تاريخاً لعرض القراءات والسنكسار:</label>
+                    <input type="date" id="selectedDateInput" class="form-control fw-bold text-center" onchange="fetchReadingsForDate(this.value)">
+                </div>
+                <div class="col-md-6 d-flex align-items-end mt-2 mt-md-0">
+                    <button class="btn btn-primary w-100 fw-bold py-2" onclick="setTodayDate()">
+                        <i class="fa-solid fa-calendar-day me-1"></i> قراءات اليوم الحالي
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويبات الخدمات الطقسية -->
+        <ul class="nav nav-pills nav-fill mb-3" id="readingsTabs">
+            <li class="nav-item">
+                <button class="nav-link" data-tab="vespers" onclick="setActiveTab('vespers')">
+                    <i class="fa-solid fa-moon me-1"></i> عشية
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-tab="matins" onclick="setActiveTab('matins')">
+                    <i class="fa-solid fa-sun me-1"></i> باكر
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link active" data-tab="liturgy" onclick="setActiveTab('liturgy')">
+                    <i class="fa-solid fa-church me-1"></i> القداس الإلهي
+                </button>
+            </li>
+        </ul>
+
+        <!-- حاوية القراءات والنصوص الحية -->
+        <div id="readingsContainer">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <div>جاري جلب القراءات والسنكسار من السيرفر الكنسي...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        apiUrl: 'https://api.katameros.app',
+        languageId: 3, // Arabic
+        calendar: 'gregorian'
+    };
+
+    let katamerosData = null;
+    let activeTab = 'liturgy';
+
+    function formatDateForApi(dateObj) {
+        const d = dateObj.getDate().toString().padStart(2, '0');
+        const m = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const y = dateObj.getFullYear();
+        return `${d}-${m}-${y}`;
+    }
+
+    function convertToCoptic(dateObj) {
+        try {
+            const str = new Intl.DateTimeFormat('ar-EG-u-ca-coptic', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            }).format(dateObj);
+            return str.replace(' ERA1', '').trim();
+        } catch (e) {
+            return "تاريخ قبطي";
+        }
+    }
+
+    async function fetchReadingsForDate(dateStr) {
+        const container = document.getElementById('readingsContainer');
+        container.innerHTML = `
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <div>جاري جلب القراءات والسنكسار الكنسي...</div>
+            </div>`;
+
+        const targetDate = new Date(dateStr);
+        document.getElementById('copticDateBadge').textContent = convertToCoptic(targetDate);
+
+        const dateParam = formatDateForApi(targetDate);
+
+        try {
+            const url = `${CONFIG.apiUrl}/readings/${CONFIG.calendar}/${dateParam}?languageId=${CONFIG.languageId}`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('فشل الاستجابة من السيرفر');
+            
+            katamerosData = await response.json();
+            renderActiveSection();
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `
+                <div class="alert alert-warning text-center p-4">
+                    <i class="fa-solid fa-triangle-exclamation fs-3 mb-2 d-block text-warning"></i>
+                    <strong>تعذر جلب القراءات عبر الإنترنت حالياً</strong><br>
+                    <small class="text-muted">${error.message}</small><br>
+                    <button class="btn btn-outline-primary btn-sm mt-3 fw-bold" onclick="fetchReadingsForDate('${dateStr}')">
+                        <i class="fa-solid fa-rotate-right me-1"></i> إعادة المحاولة
+                    </button>
+                </div>`;
+        }
+    }
+
+    function setActiveTab(tab) {
+        activeTab = tab;
+        document.querySelectorAll('#readingsTabs .nav-link').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        renderActiveSection();
+    }
+
+    function renderActiveSection() {
+        if (!katamerosData || !katamerosData.sections) return;
+
+        const container = document.getElementById('readingsContainer');
+        container.innerHTML = '';
+
+        let keyword = "قداس";
+        if (activeTab === 'vespers') keyword = "عشية";
+        else if (activeTab === 'matins') keyword = "باكر";
+
+        const section = katamerosData.sections.find(s => s.title && s.title.includes(keyword));
+
+        if (!section || !section.subSections || section.subSections.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-circle-info fs-3 mb-2 d-block"></i>
+                    لا توجد قراءات مسجلة لهذا القسم في هذا اليوم.
+                </div>`;
+            return;
+        }
+
+        section.subSections.forEach(sub => {
+            if (!sub.readings) return;
+
+            sub.readings.forEach(reading => {
+                const title = reading.title || sub.title || 'قراءة';
+                
+                // جمع الشواهد
+                let refText = "";
+                if (reading.passages && reading.passages.length > 0) {
+                    refText = reading.passages.map(p => `${p.bookTranslation || ''} ${p.ref || ''}`).join(' | ');
+                }
+
+                // تجهيز المتن
+                let bodyHtml = "";
+                if (reading.introduction) {
+                    bodyHtml += `<div class="reading-intro">${reading.introduction}</div>`;
+                }
+
+                if (reading.html) {
+                    bodyHtml += `<div class="synaxarium-html">${reading.html}</div>`;
+                } else if (reading.passages) {
+                    reading.passages.forEach(p => {
+                        if (p.verses) {
+                            p.verses.forEach(v => {
+                                bodyHtml += `<span class="verse"><span class="verse-num">${v.number}</span> ${v.text} </span>`;
+                            });
+                        }
+                    });
+                }
+
+                if (reading.conclusion) {
+                    bodyHtml += `<div class="reading-conclusion">${reading.conclusion}</div>`;
+                }
+
+                if (!bodyHtml.trim()) return;
+
+                const card = document.createElement('div');
+                card.className = 'reading-card shadow-sm';
+                card.innerHTML = `
+                    <div class="reading-card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="reading-title"><i class="fa-solid fa-cross me-1"></i> ${title}</span>
+                        ${refText ? `<span class="reading-ref">${refText}</span>` : ''}
+                    </div>
+                    <div class="reading-body">${bodyHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+        });
+    }
+
+
+    function goBack(e) {
+        e.preventDefault();
+        if (document.referrer && history.length > 1) { history.back(); return; }
+        const r = localStorage.getItem('user_role');
+        location.href = (r === 'admin' || r === 'servant') ? 'servant-dashboard.html' : 'student.html';
+    }
+
+    function setTodayDate() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('selectedDateInput').value = todayStr;
+        fetchReadingsForDate(todayStr);
+    }
+
+    window.onload = setTodayDate;
+</script>
+</body>
+</html>

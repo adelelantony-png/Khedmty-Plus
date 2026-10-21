@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز المساعدة | دليل خدمتي برو</title>
+    <meta name="theme-color" content="#1e3799">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <style>
+        :root { --primary:#1e3799; --primary-dark:#0c2461; --accent:#0984e3; --ok:#00b894; --warn:#f59e0b; --bad:#d63031; }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family:'Tajawal','Segoe UI',Tahoma,sans-serif; background:#f1f5f9; color:#1e293b; line-height:1.8; }
+        .wrap { max-width: 860px; margin: 0 auto; padding: 14px 14px 60px; }
+        a { color: var(--accent); }
+
+        .topbar { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; }
+        .btn { border:2px solid #cbd5e1; background:#fff; color:#334155; border-radius:12px; padding:8px 14px; font:inherit; font-weight:700; font-size:.88rem; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+        .btn:hover { border-color:var(--accent); color:var(--accent); }
+        .btn.primary { background:linear-gradient(135deg,var(--primary),var(--accent)); border:0; color:#fff; box-shadow:0 6px 14px rgba(9,132,227,.3); }
+        .btn.primary:hover { color:#fff; filter:brightness(1.08); }
+        .btn.off { opacity:.45; pointer-events:none; }
+
+        .hero { background:linear-gradient(145deg,#0c2461,#1e3799 50%,#0984e3); color:#fff; border-radius:24px; padding:26px 20px; text-align:center; box-shadow:0 14px 34px rgba(30,55,153,.3); position:relative; overflow:hidden; }
+        .hero::after { content:''; position:absolute; width:220px; height:220px; border-radius:50%; background:rgba(253,203,110,.25); filter:blur(40px); bottom:-90px; right:-60px; }
+        .hero h1 { margin:0 0 4px; font-size:1.55rem; font-weight:800; position:relative; }
+        .hero p { margin:0 0 16px; opacity:.88; position:relative; font-size:.95rem; }
+        .search { position:relative; max-width:520px; margin:auto; }
+        .search input { width:100%; border:0; border-radius:16px; padding:14px 46px 14px 16px; font:inherit; font-size:1rem; box-shadow:0 8px 22px rgba(0,0,0,.2); outline:0; }
+        .search span { position:absolute; right:16px; top:50%; transform:translateY(-50%); font-size:1.1rem; }
+
+        .role { background:#fff; border-radius:18px; padding:14px 16px; margin:14px 0; box-shadow:0 4px 14px rgba(0,0,0,.05); display:flex; gap:12px; align-items:center; border-right:5px solid var(--accent); }
+        .role .ic { font-size:1.8rem; }
+        .role small { color:#64748b; display:block; }
+
+        .grp { display:grid; grid-template-columns:repeat(auto-fit,minmax(86px,1fr)); gap:8px; margin:14px 0; }
+        .chip { background:#eef1fb; border-radius:16px; padding:10px 4px; text-align:center; font-weight:800; font-size:.8rem; cursor:pointer; user-select:none; transition:.2s; color:#33415c; }
+        .chip .ic { font-size:1.4rem; display:block; line-height:1.3; }
+        .chip:hover { background:#dfe7fb; }
+        .chip.active { background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; box-shadow:0 8px 18px rgba(9,132,227,.35); transform:translateY(-2px); }
+
+        .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:8px 0 18px; }
+        .step { background:#fff; border-radius:18px; padding:16px; box-shadow:0 4px 14px rgba(0,0,0,.05); position:relative; }
+        .step b.n { position:absolute; top:-10px; right:14px; width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--accent)); color:#fff; display:grid; place-items:center; font-size:.9rem; }
+        .step h3 { margin:6px 0 4px; font-size:1rem; color:var(--primary); }
+        .step p { margin:0; font-size:.88rem; color:#475569; }
+
+        h2.sec { font-size:1.1rem; color:var(--primary); margin:22px 0 10px; font-weight:800; }
+        details { background:#fff; border-radius:16px; margin-bottom:10px; box-shadow:0 3px 10px rgba(0,0,0,.05); border:1px solid #e8edf6; overflow:hidden; }
+        details[open] { border-color:#b7c9f5; box-shadow:0 8px 22px rgba(30,55,153,.12); }
+        summary { list-style:none; cursor:pointer; padding:14px 16px; display:flex; align-items:center; gap:10px; font-weight:800; }
+        summary::-webkit-details-marker { display:none; }
+        summary .fi { width:40px; height:40px; border-radius:12px; background:#eef4ff; display:grid; place-items:center; font-size:1.3rem; flex:none; }
+        summary .t { flex:1; }
+        summary .t small { display:block; font-weight:500; color:#64748b; font-size:.8rem; }
+        summary::after { content:'▾'; color:#94a3b8; transition:.2s; }
+        details[open] summary::after { transform:rotate(180deg); }
+        .body { padding:0 16px 16px; }
+        .body p { margin:0 0 10px; color:#334155; }
+        .body h4 { margin:12px 0 4px; font-size:.9rem; color:var(--primary); }
+        .body ol, .body ul { margin:0; padding-right:22px; color:#334155; font-size:.93rem; }
+        .body li { margin-bottom:3px; }
+        .tip { background:#fffbeb; border-right:4px solid var(--warn); border-radius:10px; padding:8px 12px; font-size:.88rem; margin-top:8px; }
+        .badge { display:inline-block; border-radius:999px; padding:1px 10px; font-size:.72rem; font-weight:800; margin-right:6px; }
+        .b-all { background:#dcfce7; color:#166534; } .b-att { background:#dbeafe; color:#1e40af; } .b-full { background:#fef3c7; color:#92400e; } .b-adm { background:#fee2e2; color:#991b1b; } .b-new { background:#ede9fe; color:#5b21b6; }
+        .locked { opacity:.7; } .lockmsg { color:var(--bad); font-weight:700; font-size:.85rem; margin-top:6px; }
+        .gl { font-size:.75rem; color:#94a3b8; font-weight:700; }
+
+        table { width:100%; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 3px 10px rgba(0,0,0,.05); font-size:.92rem; }
+        th { background:var(--primary); color:#fff; padding:10px; } td { padding:10px; border-top:1px solid #e8edf6; vertical-align:top; }
+        td:first-child { font-weight:800; white-space:nowrap; }
+        .empty { text-align:center; color:#64748b; padding:40px 0; }
+        .foot { text-align:center; color:#94a3b8; font-size:.8rem; margin-top:30px; }
+
+        @media print {
+            body { background:#fff; } .topbar, .search, .grp, .btn, .role { display:none !important; }
+            details { box-shadow:none; break-inside:avoid; } .hero { color:#000; background:#fff; box-shadow:none; border:2px solid #1e3799; } .hero::after { display:none; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap" id="app" style="display:none;">
+
+    <div class="topbar">
+        <button type="button" class="btn btn-smart-back" data-smart-back data-fallback="servant-dashboard.html">← العودة للوحة الخدمة</button>
+        <button class="btn" onclick="window.print()">🖨️ طباعة الدليل</button>
+    </div>
+
+    <div class="hero">
+        <h1>مركز المساعدة</h1>
+        <p>دليلك الكامل لكل ما في «خدمتي برو» — ابحث أو تصفح الأقسام</p>
+        <div class="search"><input id="q" type="search" placeholder="اكتب ما تبحث عنه: الحضور، الافتقاد، النسخ الاحتياطي..." autocomplete="off"><span>🔍</span></div>
+    </div>
+
+    <div class="role" id="role"></div>
+    <div class="grp" id="grp"></div>
+    <div id="content"></div>
+    <div class="foot">خدمتي برو — دليل الخادم</div>
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    if (window.AuthClient) {
+        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
+    }
+
+    // ---------- الهوية والصلاحية ----------
+    function getUser() {
+        try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
+    }
+    const user = getUser();
+    if (!user || (user.role !== 'admin' && user.role !== 'servant')) { location.replace('index.html'); return; }
+    document.getElementById('app').style.display = '';
+
+    const LEVEL = (user.role === 'admin' || user.permission === 'admin') ? 'admin'
+                : (['full', 'attend_only', 'view_only'].includes(user.permission) ? user.permission : 'full');
+    const RANK = { view_only: 0, attend_only: 1, full: 2, admin: 3 };
+    const NEED = { all: 0, att: 1, full: 2, adm: 3 };
+    const can = need => RANK[LEVEL] >= NEED[need] && !(need === 'att' && LEVEL === 'view_only');
+    const LEVEL_TXT = {
+        admin: ['👑', 'أمين خدمة (أدمن كامل)', 'يمكنك استخدام كل أقسام المنظومة بلا قيود.'],
+        full: ['🤝', 'خادم متكامل', 'حضور وافتقاد وتعديل بيانات المخدومين. أقسام الإدارة مخفية عنك.'],
+        attend_only: ['📷', 'تسجيل حضور فقط', 'تستطيع تسجيل الحضور بالكاميرا. بقية الأقسام للاطلاع أو غير متاحة.'],
+        view_only: ['👁️', 'مشاهدة فقط', 'تستطيع الاطلاع على البيانات دون تعديل.']
+    }[LEVEL];
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    document.getElementById('role').innerHTML =
+        `<div class="ic">${LEVEL_TXT[0]}</div><div><b>${esc(user.name || 'الخادم')}</b> — ${LEVEL_TXT[1]}<small>${LEVEL_TXT[2]} الأقسام التي لا تناسب صلاحيتك مُعلَّمة بقفل 🔒.</small></div>`;
+
+    // ---------- المحتوى ----------
+    const GROUPS = [
+        { id: 'start',  ic: '🚀', n: 'ابدأ هنا' },
+        { id: 'home',   ic: '🏠', n: 'الرئيسية' },
+        { id: 'attend', ic: '📷', n: 'الحضور' },
+        { id: 'people', ic: '👥', n: 'المخدومون' },
+        { id: 'study',  ic: '🎓', n: 'الدراسة' },
+        { id: 'spirit', ic: '🕊️', n: 'الروحيات' },
+        { id: 'admin',  ic: '⚙️', n: 'الإدارة' },
+        { id: 'perm',   ic: '🔐', n: 'الصلاحيات' },
+        { id: 'faq',    ic: '❓', n: 'أسئلة شائعة' }
+    ];
+
+    // need: all | att | full | adm  — tab: تبويب في اللوحة، أو link: صفحة مستقلة
+    const F = [
+        { g: 'home', ic: '📊', t: 'لوحة التحكم الرئيسية', s: 'نظرة سريعة على حال الخدمة اليوم', need: 'all', tab: 'dashTab',
+          d: 'أول ما تراه عند الدخول. تجمع لك ما يلزم معرفته قبل أي خطوة.',
+          st: ['افتح «الرئيسية» من اللوحة.', 'راجع «تذكير بتكليفك القادم» و«محطات قادمة في خطة السنة».', 'انظر «مناسبات وأعياد ميلاد هذا الأسبوع» لتجهز التهنئة.', 'طالع إحصائيات المخدومين والخدام.', 'افحص «الخريطة الحرارية» و«رادار المنقطعين».'],
+          tp: ['الخريطة الحرارية تحسب آخر 4 لقاءات جمعة، ورادار المنقطعين يعرض من غاب جمعتين متتاليتين.', 'ابدأ كل أسبوع بالرادار ثم افتح «الافتقاد الذكي» لتتصل بهم.'] },
+        { g: 'home', ic: '🗓️', t: 'خطة السنة والأجندة', s: 'كل فعاليات ومحطات الخدمة مرتبة زمنياً', need: 'all', tab: 'planTab',
+          d: 'أجندة سنوية شاملة تظهر محطاتها القادمة في الرئيسية.',
+          st: ['لإدخال الخطة دفعة واحدة: حمّل «نموذج الخطة فارغ» واملأه ثم «استيراد الخطة من Excel».', 'أو أضف فعالية واحدة من «إدراج فعالية جديدة» ثم «حفظ وإدراج».', 'راجع الجدول المرتب زمنياً أسفل الصفحة.', '«تصدير الخطة السنوية» يعطيك نسخة Excel.'],
+          tp: ['زر «حذف جميع الفعاليات» لا رجعة فيه، فخذ نسخة احتياطية قبل استخدامه.'] },
+
+        { g: 'attend', ic: '📷', t: 'تسجيل الحضور', s: 'ماسح ذكي بالكاميرا + تسجيل يدوي', need: 'att', tab: 'attendanceTab',
+          d: 'تسجّل حضور اجتماع اليوم أو أي تاريخ سابق، ويُحتسب للمخدوم فوراً.',
+          st: ['اختر التاريخ بأزرار «السابق» و«التالي» و«اليوم الحالي».', 'اضغط «فتح الكاميرا» ووجّهها إلى كارنيه المخدوم (كود QR).', 'أو اكتب الكود يدوياً واضغط «تسجيل».', 'لمن نسي هاتفه أو كارنيهه: «تسجيل حضور يدوي من قائمة الأسماء».', 'راجع «سجل الحضور لتاريخ…» أسفل الشاشة.'],
+          tp: ['حضور الجمعة هو الذي يدخل في نسبة التخرج (75%)، وبقية الأيام تُحتسب فعاليات بونص ⭐.', 'التأخير الشديد يُسجَّل غياباً.', '«حذف كشف هذا اليوم بالكامل» يمسح سجل التاريخ كله.'] },
+        { g: 'attend', ic: '📋', t: 'سجل الخدام', s: 'التزام الخدام ونشاطهم', need: 'all', tab: 'servantsAttendanceTab',
+          d: 'متابعة التزام خدام الاجتماع في جدول سنوي ويومي، مع «سجل أحدث الافتقادات الميدانية».',
+          st: ['افتح «سجل الخدام».', 'تابع جدول الالتزام السنوي واليومي.', 'راجع أحدث الافتقادات التي سجّلها الخدام.'], tp: [] },
+
+        { g: 'people', ic: '👥', t: 'الدارسون والمخدومون', s: 'الإضافة والملفات والتخرج', need: 'all', tab: 'membersTab',
+          d: 'قاعدة بيانات المخدومين: لكل واحد ملف وكارنيه QR ومؤشر تخرج.',
+          st: ['لإضافة مخدوم: «إضافة دارس جديد» — الاسم والفرقة والهاتف وتاريخ الميلاد، وأضف المنطقة والعنوان وأب الاعتراف، ثم «حفظ في المنظومة».', 'استخدم «تصفيات الدفعات وجاهزية التخرج» لعرض كل فرقة.', 'اضغط اسم المخدوم لفتح ملفه (4 تبويبات: سجل الحضور، الافتقادات، التربية العملية، البيانات).', 'أو اضغط «مسح كارنيه» لفتح ملفه بالكاميرا فوراً.', '«تحويل المجموعة» ينقل مجموعة مخدومين إلى فرقة أخرى.'],
+          tp: ['اكتب «المنطقة» لكل مخدوم؛ تعتمد عليها صفحة الافتقاد في تنظيم الزيارات.', 'كل تعديل في بيانات الدارس يُسجَّل في «سجل تعديلات هذا الدارس».'] },
+        { g: 'people', ic: '🤝', t: 'الافتقاد الذكي', s: 'من يحتاج افتقاداً الآن؟ مرتباً بالأحوج', need: 'full', link: 'servant_followup.html', isNew: true,
+          d: 'قائمة ذكية ترتب المخدومين حسب الغياب المتتالي ونسبة الحضور، ومعها اتصال وواتساب وخريطة بضغطة.',
+          st: ['اختر الفترة: آخر اجتماع، أسبوعان، شهر، شهران، أو كل الخدمة.', 'اختر العرض: «يحتاج افتقاد»، «عاجل»، «نسبة حضور 0%»، أو «الكل».', 'صفِّ بالمنطقة، أو فعّل «تجميع حسب المنطقة» لتخطيط جولة زيارات.', 'اضغط «اتصال» أو «واتساب» أو «الخريطة» على بطاقة المخدوم.', 'اضغط «تصدير» لحفظ القائمة في Excel.'],
+          tp: ['«عاجل» = غياب 3 اجتماعات متتالية فأكثر أو حضور 0% في الفترة. ✔️ تعني أنك تواصلت معه أو افتقدته بعد آخر اجتماع.', 'يُسجَّل اتصالك وواتسابك تلقائياً (على هذا الجهاز) لتعرف متى آخر تواصل.', 'افتح لوحة الخدام أولاً على نفس الجهاز ليتم تحميل البيانات.'] },
+        { g: 'people', ic: '📲', t: 'واتساب جماعي', s: 'رسائل جاهزة للغائبين وأولياء أمورهم', need: 'full', tab: 'broadcastTab',
+          d: 'مراسلة الغائبين عبر واتساب بقوالب جاهزة تعدّلها كما تشاء.',
+          st: ['اختر «قالب الغياب العام» أو «قالب الافتقاد الروحي والأسرار».', 'عدّل نص الرسالة.', 'اختر المستلمين: «هواتف الغائبين مباشرة» أو «أولياء أمور الغائبين».', 'أرسل عبر واتساب.'],
+          tp: ['اكتب بصيغة محبة وليس بصيغة محاسبة؛ الهدف أن يشعر المخدوم أن غيابه افتُقد.'] },
+
+        { g: 'study', ic: '🎓', t: 'المواد والامتحانات', s: 'بناء جدول المواد وتوليد الخطة تلقائياً', need: 'all', tab: 'coursesTab',
+          d: 'تُعرّف مواد كل فرقة ومحاضريها (من الخدام)، فيبني النظام جدولاً متتابعاً حسب أيام الاجتماع.',
+          st: ['اختر الفرقة، ثم «إضافة مادة»: الاسم والمحاضر وعدد الأسابيع (أو «إضافة الكل» بـ 4 أسابيع لكل مادة).', 'حدد «يوم الاجتماع»، وعدد مواد كل كتلة، وتواريخ التوقف (امتحانات الجامعة والأعياد).', 'اضغط «تقسيم المواد إلى كتل وتوليد الخطة».', 'راجع «الجدول المتتابع»، ثم «إضافة للخطة السنوية».', 'للامتحانات: حدّد الدرجة العظمى ونسبة النجاح لتظهر نتيجة كل مخدوم.'],
+          tp: ['رتّب المواد بالأسهم ▲ ▼.', '«ضبط أسابيع المواد تلقائياً» يوزعها لتناسب الفترة المتاحة.', 'يمكنك تصدير الجداول إلى Excel.'] },
+        { g: 'study', ic: '📚', t: 'مكتبة المواد', s: 'مراجع الكورس في مكان واحد', need: 'all', tab: 'materialsTab',
+          d: 'تحفظ مواد الكورس وتعرضها لمن يحتاجها.',
+          st: ['افتح «مكتبة المواد».', 'في «إضافة مادة جديدة» املأ البيانات.', 'اضغط «إضافة للمكتبة».'], tp: [] },
+
+        { g: 'spirit', ic: '🕊️', t: 'نوتة الخادم الروحية', s: 'وسائط نعمتك اليومية', need: 'all', link: 'servant_spiritual_note.html',
+          d: 'سجل يومي لحياتك الروحية: الخلوة والأجبية والقداس والصوم والاعتراف وتعويض الفائت.',
+          st: ['اختر اليوم.', 'من كرت «قراءات هذا التاريخ» افتح قراءة اليوم أو السنكسار.', 'علّم ما صلّيته وفعلته، ودوّن آية أو تأملاً.', 'اضغط «حفظ تسجيل هذا اليوم».'],
+          tp: ['إن قرأت قراءة اليوم من قارئ الكتاب المقدس تظهر «مُنجز ✔️» تلقائياً.', 'نوتتك خاصة بك ومحفوظة على هذا الجهاز.'] },
+        { g: 'spirit', ic: '✍️', t: 'مفكرة الخادم', s: 'خواطرك وتقارير افتقادك وأفكار خدمتك', need: 'all', link: 'servant_journal.html', isNew: true,
+          d: 'دفتر شخصي بعنوان ومشروع ووسوم، مع قوالب جاهزة.',
+          st: ['اضغط «كتابة جديدة».', 'اختر قالباً: تقرير افتقاد، تأمل في آية، فكرة درس، أو صلاة.', 'اختر المشروع (أو أضف مشروعاً جديداً) وأضف وسوماً.', 'احفظ، ثم ابحث أو صفِّ بالوسم لاحقاً.'],
+          tp: ['كل خادم يرى كتاباته فقط.', 'محفوظة على جهازك؛ استخدم «نسخة نصية احتياطية» دورياً.'] },
+        { g: 'spirit', ic: '📖', t: 'قارئ الكتاب المقدس', s: 'قراءة اليوم حسب الخطة السنوية', need: 'all', link: 'bible.html',
+          d: 'اقرأ الأسفار والأصحاحات، ويفتح مباشرة على قراءة اليوم عند الدخول من روابط النوتة.', st: [], tp: [] },
+        { g: 'spirit', ic: '📜', t: 'القطمارس اليومي', s: 'قراءات العشية وباكر والقداس', need: 'all', link: 'katamaros.html',
+          d: 'قراءات أي يوم مع التاريخ القبطي. اختر العشية أو باكر أو القداس من التبويبات.',
+          st: ['اختر التاريخ أو «قراءات اليوم الحالي».', 'اختر الخدمة: عشية / باكر / القداس الإلهي.'], tp: ['يحتاج اتصالاً بالإنترنت لجلب القراءات.'] },
+        { g: 'spirit', ic: '⛪', t: 'السنكسار', s: 'سير وتذكارات قديسي اليوم', need: 'all', link: 'synaxarium.html',
+          d: 'تذكارات القديسين لأي تاريخ.', st: ['اختر التاريخ أو «سنكسار اليوم الحالي».'], tp: ['يحتاج اتصالاً بالإنترنت.'] },
+
+        { g: 'admin', ic: '⚙️', t: 'إدارة الخدام', s: 'الحسابات والصلاحيات', need: 'adm', tab: 'servantsTab',
+          d: 'إضافة الخدام وتحديد صلاحية كل واحد.',
+          st: ['اكتب اسم الخادم ورقم هاتفه.', 'اختر الصلاحية: خادم متكامل، حضور فقط، مشاهدة فقط، أو أمين خدمة.', 'اضغط «حفظ الخادم».'],
+          tp: ['أعطِ كل خادم أقل صلاحية تكفي عمله.', 'رقم هاتف الخادم هو كلمة مروره عند الدخول حالياً، فتأكد أنه صحيح وغير مشترك.'] },
+        { g: 'admin', ic: '🎓', t: 'أرشفة وتخريج', s: 'إنهاء السنة وبدء سنة جديدة', need: 'adm', tab: 'rolloverTab',
+          d: 'نقل المتخرجين إلى «خريجين» وأرشفة بيانات الدورة.',
+          st: ['حدد المتخرجين: «تحديد المؤهلين فقط (≥75%)» أو «تحديد الكل» أو اختر يدوياً.', 'اضبط «خيارات الترحيل والأرشفة السحابية».', 'اضغط «تنفيذ التخريج والأرشفة وبدء السنة الجديدة».'],
+          tp: ['خذ نسخة احتياطية كاملة قبل التنفيذ دائماً.'] },
+        { g: 'admin', ic: '🛡️', t: 'سجل العمليات', s: 'من فعل ماذا ومتى', need: 'adm', tab: 'auditTab',
+          d: 'سجل تدقيق لنشاط المنظومة، وسجل منفصل لأخطاء النظام.',
+          st: ['افتح «سجل العمليات» لمراجعة الأنشطة.', '«تصدير السجل Excel» لحفظه، و«تحديث» لإعادة التحميل.', 'راجع «سجل أخطاء النظام» عند ظهور سلوك غريب.'], tp: [] },
+        { g: 'admin', ic: '🔒', t: 'الإعدادات', s: 'الكنيسة والمواعيد والسحابة والأجهزة', need: 'adm', tab: 'settingsTab',
+          d: 'اسم الكنيسة والنطاق السنوي، ومواعيد اجتماع الجمعة ونظام الصيف والموعد الإضافي (بونص ⭐)، والربط السحابي.',
+          st: ['عدّل اسم الخدمة والنطاق السنوي ثم «حفظ جميع الإعدادات».', 'لتفعيل الخادم على جهاز جديد: «إرسال رابط تفعيل السحابة» (واتساب).', 'راقب «رادار استهلاك سحابة Firebase» لتبقى ضمن الخطة المجانية.', 'في «الأجهزة المتصلة حالياً» يمكنك «طرد جميع الخدام المتصلين» عند الطوارئ.'],
+          tp: ['لا تشارك مفاتيح الربط السحابي مع أحد.'] },
+        { g: 'admin', ic: '📁', t: 'التقارير والنسخ الاحتياطي', s: 'استيراد وتصدير وحماية بياناتك', need: 'all', tab: 'dataTab',
+          d: 'استيراد المخدومين والخدام من Excel، وتقرير الحضور الشامل، ونسخ احتياطية كاملة.',
+          st: ['«تحميل التقرير الشامل للحضور والبونص» لملف Excel.', 'حمّل «نموذج المخدومين» أو «نموذج الخدام»، املأه، ثم «استيراد من Excel».', '«تحميل نسخة احتياطية كاملة (JSON)» لحفظ كل بياناتك، ويمكن استعادتها لاحقاً.'],
+          tp: ['هناك أيضاً نسخ تلقائية صامتة لآخر 7 أيام.', 'خذ نسخة يدوية قبل أي عملية كبيرة (حذف جماعي، تخريج، استيراد).'] }
+    ];
+
+    const FAQ = [
+        ['لا أستطيع الدخول، ماذا أفعل؟', 'تأكد من كتابة اسمك أو كودك كما هو مسجل، وكلمة المرور هي رقم هاتفك المسجل. بعد 5 محاولات خاطئة يتوقف الدخول دقائق، فانتظر ثم أعد المحاولة. وإن استمر الأمر فتواصل مع أمين الخدمة ليراجع بياناتك.'],
+        ['ما الفرق بين الحضور الرسمي والبونص؟', 'اجتماع الجمعة هو الحضور الرسمي وهو الذي تُحسب منه نسبة التخرج (المطلوب 75%). أي يوم آخر يُسجَّل فيه حضور يُعتبر فعالية بونص تمنح نقاطاً إضافية ولا تدخل في النسبة.'],
+        ['مخدوم نسي هاتفه أو كارنيهه، كيف أسجل حضوره؟', 'من «تسجيل الحضور» اضغط «تسجيل حضور يدوي من قائمة الأسماء» واختر اسمه.'],
+        ['ما معنى «عاجل» في الافتقاد الذكي؟', 'غياب 3 اجتماعات متتالية فأكثر، أو حضور 0% في الفترة المختارة (مع اجتماعين على الأقل).'],
+        ['أين تُحفظ بياناتي؟', 'بيانات الخدمة الأساسية (المخدومون والحضور وغيرها) تُحفظ على الجهاز وتُزامَن سحابياً إذا كان الربط السحابي مفعّلاً من الإعدادات. أما «مفكرة الخادم» و«نوتة الخادم» و«سجل التواصل» في الافتقاد فمحفوظة على جهازك فقط، فاستخدم نسخها الاحتياطية، ولا تمسح بيانات المتصفح قبل ذلك.'],
+        ['هل أستطيع العمل دون إنترنت؟', 'اللوحة تحفظ ما تسجّله على جهازك وتزامنه عند عودة الاتصال. أما القطمارس والسنكسار فيحتاجان إنترنت لجلب القراءات.'],
+        ['كيف أحمي بيانات المخدومين؟', 'لا تشارك كلمات المرور، وأعطِ كل خادم أقل صلاحية تكفي، وراجع «سجل العمليات» بين حين وآخر، وخذ نسخة احتياطية أسبوعية من «التقارير والنسخ الاحتياطي».'],
+        ['حذفت شيئاً بالخطأ، هل أستعيده؟', 'الحذف الجماعي لا رجعة فيه من داخل المنظومة. الحل هو آخر نسخة احتياطية (يدوية أو من النسخ التلقائية لآخر 7 أيام) من «التقارير والنسخ الاحتياطي».']
+    ];
+
+    const NEEDBADGE = { all: ['b-all', 'للجميع'], att: ['b-att', 'تسجيل حضور'], full: ['b-full', 'خادم متكامل'], adm: ['b-adm', 'أمين الخدمة'] };
+    const TABURL = t => `servant-dashboard.html?tab=${t}`;
+
+    function featureHtml(f, showGroup) {
+        const ok = can(f.need), b = NEEDBADGE[f.need];
+        const url = f.link || TABURL(f.tab);
+        const gname = GROUPS.find(g => g.id === f.g).n;
+        return `<details class="${ok ? '' : 'locked'}" data-search="${esc((f.t + ' ' + f.s + ' ' + f.d + ' ' + f.st.join(' ') + ' ' + f.tp.join(' ')).toLowerCase())}">
+            <summary><span class="fi">${f.ic}</span>
+              <span class="t">${esc(f.t)}${f.isNew ? '<span class="badge b-new">جديد</span>' : ''}<span class="badge ${b[0]}">${b[1]}</span>${ok ? '' : ' 🔒'}<small>${esc(f.s)}${showGroup ? ' <span class="gl">• ' + gname + '</span>' : ''}</small></span></summary>
+            <div class="body">
+              <p>${esc(f.d)}</p>
+              ${f.st.length ? `<h4>الخطوات</h4><ol>${f.st.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+              ${f.tp.map(x => `<div class="tip">💡 ${esc(x)}</div>`).join('')}
+              <div style="margin-top:12px">${ok ? `<a class="btn primary" href="${url}">افتح الآن ←</a>` : `<span class="btn off">غير متاح لصلاحيتك</span><div class="lockmsg">🔒 يتطلب صلاحية: ${b[1]}</div>`}</div>
+            </div></details>`;
+    }
+    const faqHtml = (x, i) => `<details data-search="${esc((x[0] + ' ' + x[1]).toLowerCase())}"><summary><span class="fi">❓</span><span class="t">${esc(x[0])}</span></summary><div class="body"><p>${esc(x[1])}</p></div></details>`;
+
+    function startHtml() {
+        const steps = [
+            ['سجّل دخولك', 'من الصفحة الأولى باسمك أو كودك ورقم هاتفك المسجل.'],
+            ['عرّف نفسك بالتنقل', 'استخدم الشريط العلوي (🏠 📷 👥 🎓 🕊️ ⚙️): اضغط مجموعة لتظهر تبويباتها.'],
+            ['سجّل الحضور', 'من 📷 الحضور: امسح كارنيه المخدوم أو سجّله يدوياً.'],
+            ['افتقد الغائبين', 'من 👥 المخدومون ← «الافتقاد الذكي»: اتصل أو راسلهم بضغطة.'],
+            ['اهتم بنفسك أيضاً', 'من 🕊️ الروحيات: نوتتك ومفكرتك وقراءة اليوم.']
+        ];
+        const news = [
+            ['🤝', 'الافتقاد الذكي', 'ترتيب بالأحوج + اتصال وواتساب وخريطة + سجل التواصل.'],
+            ['📍', 'مناطق الافتقاد', 'حقل «المنطقة» لكل مخدوم وتجميع الزيارات حسبها.'],
+            ['✍️', 'مفكرة الخادم', 'دفتر بقوالب ووسوم ومشاريع.'],
+            ['🕊️', 'نوتة الخادم الروحية', 'متابعة وسائط النعمة اليومية بتصميم جديد.'],
+            ['🧭', 'التنقل بالمجموعات', 'بدل 15 تبويباً متراصة، ستة أقسام واضحة.'],
+            ['❔', 'مركز المساعدة', 'هذه الصفحة، وزرها العائم في كل شاشة.']
+        ];
+        return `<h2 class="sec">خمس خطوات للبداية</h2>
+            <div class="steps">${steps.map((s, i) => `<div class="step"><b class="n">${i + 1}</b><h3>${s[0]}</h3><p>${s[1]}</p></div>`).join('')}</div>
+            <h2 class="sec">ما الجديد؟</h2>
+            <div class="steps">${news.map(n => `<div class="step"><h3>${n[0]} ${n[1]}</h3><p>${n[2]}</p></div>`).join('')}</div>`;
+    }
+    function permHtml() {
+        return `<h2 class="sec">مستويات الصلاحية</h2>
+        <table><thead><tr><th>الصلاحية</th><th>ما تستطيع فعله</th></tr></thead><tbody>
+          <tr><td>👑 أمين الخدمة</td><td>كل شيء: إدارة الخدام، الإعدادات، الأرشفة والتخريج، سجل العمليات، والنسخ الاحتياطي.</td></tr>
+          <tr><td>🤝 خادم متكامل</td><td>الحضور والافتقاد وتعديل بيانات المخدومين، واتساب الجماعي، والافتقاد الذكي.</td></tr>
+          <tr><td>📷 حضور فقط</td><td>تسجيل الحضور بالكاميرا فقط.</td></tr>
+          <tr><td>👁️ مشاهدة فقط</td><td>الاطلاع على البيانات دون تعديل.</td></tr>
+        </tbody></table>
+        <div class="tip" style="margin-top:12px">💡 صلاحيتك الحالية: <b>${LEVEL_TXT[1]}</b>. لتغييرها اطلب من أمين الخدمة تعديلها من «إدارة الخدام».</div>`;
+    }
+
+    // ---------- العرض ----------
+    let current = 'start';
+    const $ = id => document.getElementById(id);
+    function render() {
+        const q = $('q').value.trim().toLowerCase();
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', !q && c.dataset.g === current));
+        let html = '';
+        if (q) {
+            const hits = F.filter(f => (f.t + ' ' + f.s + ' ' + f.d + ' ' + f.st.join(' ') + ' ' + f.tp.join(' ')).toLowerCase().includes(q));
+            const fq = FAQ.filter(x => (x[0] + ' ' + x[1]).toLowerCase().includes(q));
+            html = hits.length || fq.length
+                ? `<h2 class="sec">نتائج البحث (${hits.length + fq.length})</h2>` + hits.map(f => featureHtml(f, true)).join('') + fq.map(faqHtml).join('')
+                : '<div class="empty">لا توجد نتائج مطابقة. جرّب كلمة أخرى مثل «حضور» أو «نسخة».</div>';
+        } else if (current === 'start') html = startHtml();
+        else if (current === 'perm') html = permHtml();
+        else if (current === 'faq') html = `<h2 class="sec">أسئلة شائعة</h2>` + FAQ.map(faqHtml).join('');
+        else html = `<h2 class="sec">${GROUPS.find(g => g.id === current).ic} ${GROUPS.find(g => g.id === current).n}</h2>` + F.filter(f => f.g === current).map(f => featureHtml(f, false)).join('');
+        $('content').innerHTML = html;
+        if (q) document.querySelectorAll('#content details').forEach(d => d.open = true);
+    }
+
+    $('grp').innerHTML = GROUPS.map(g => `<div class="chip" data-g="${g.id}" role="button" tabindex="0"><span class="ic">${g.ic}</span>${g.n}</div>`).join('');
+    $('grp').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) { current = c.dataset.g; $('q').value = ''; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+    $('q').addEventListener('input', render);
+    window.addEventListener('beforeprint', () => document.querySelectorAll('#content details').forEach(d => d.open = true));
+
+    // فتح المجموعة المطلوبة من اللوحة: ?g=people
+    const g = new URLSearchParams(location.search).get('g');
+    if (g && GROUPS.some(x => x.id === g)) current = g;
+    render();
+})();
+</script>
+<script src="js/pwa-helper.js"></script>
+</body>
+</html>

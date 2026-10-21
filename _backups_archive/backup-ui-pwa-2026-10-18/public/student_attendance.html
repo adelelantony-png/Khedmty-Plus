@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الحضور والغياب الشخصي | خدمتي برو</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 50px; }
+        .main-card { max-width: 850px; margin: 20px auto; padding: 0 15px; }
+        .header-card { background: linear-gradient(135deg, #1e3799 0%, #0984e3 100%); color: #ffffff; border-radius: 20px; padding: 22px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(30, 55, 153, 0.15); }
+        .stat-box { background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .stat-box .num { font-size: 1.6rem; font-weight: 800; color: #1e3799; }
+        .progress-box { background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 18px; margin-bottom: 20px; }
+        .alert-warning-box { background: #fffbeb; border: 1px solid #f59e0b; border-radius: 16px; padding: 16px; margin-bottom: 20px; display: none; }
+        .table-card { background: #ffffff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .table thead { background: #1e3799; color: #ffffff; }
+        .table th, .table td { vertical-align: middle; padding: 12px 10px; text-align: center; font-size: 0.95rem; }
+        .badge-status { padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="student.html" class="btn btn-outline-secondary btn-sm fw-bold">
+            <i class="fa-solid fa-arrow-right me-1"></i> العودة للرئيسية
+        </a>
+        <span class="badge bg-primary px-3 py-2 fw-bold" id="ui-student-level">الفرقة الأولى</span>
+    </div>
+
+    <div class="header-card text-center">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-clipboard-user me-2"></i>سجل الحضور والغياب الشخصي</h4>
+        <div class="opacity-90 fs-6 mt-1" id="ui-student-info">جاري التحميل...</div>
+        <div class="small opacity-75 mt-1">«كُونُوا أَمَنَاءَ إِلَى الْمَوْتِ فَسَأُعْطِيكُمْ إِكْلِيلَ الْحَيَاةِ»</div>
+    </div>
+
+    <div id="warning-alert-box" class="alert-warning-box">
+        <div class="d-flex align-items-start">
+            <div class="fs-3 text-warning ms-3"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div>
+                <h6 class="fw-bold text-dark mb-1">تنبيه رعوي لمستوى الالتزام والحضور:</h6>
+                <p class="small text-muted mb-0" id="warning-msg-text">نلاحظ تدنياً في نسبة حضورك الأسبوعي أو التزامك بنطاق وسائط النعمة. نرجو الحرص على الانتظام لكي لا يفوتك بنيان الخدمة.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <small class="text-muted fw-bold d-block mb-1">حضور الجمعة</small>
+                <div class="num text-success" id="stat-attended-count">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <small class="text-muted fw-bold d-block mb-1">تأخير شديد</small>
+                <div class="num text-warning" id="stat-delayed-count">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <small class="text-muted fw-bold d-block mb-1">أيام التناول 🕊️</small>
+                <div class="num text-primary" id="stat-communion-count">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-box">
+                <small class="text-muted fw-bold d-block mb-1">نقاط التميز ⭐</small>
+                <div class="num" style="color: #6c5ce7;" id="stat-points-count">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress-box">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong class="text-secondary small"><i class="fa-solid fa-graduation-cap me-1"></i> نسبة حضور اجتماع الجمعة الرسمي:</strong>
+            <span class="fw-bold fs-6" id="ui-grad-percent">0%</span>
+        </div>
+        <div class="progress" style="height: 12px; border-radius: 8px;">
+            <div id="ui-grad-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;"></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-2 small">
+            <span id="ui-grad-desc" class="text-muted">النسبة المطلوبة للتخرج لا تقل عن 75%</span>
+            <span id="ui-grad-badge" class="badge bg-secondary">جاري الحساب...</span>
+        </div>
+    </div>
+
+    <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-calendar-days me-1"></i> كشف الحركات واللقاءات السابقة:</h6>
+    <div class="table-card">
+        <div class="table-responsive mb-0">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>المناسبة</th>
+                        <th>وقت المسح</th>
+                        <th>الحالة</th>
+                        <th>التناول 🕊</th>
+                        <th>النقاط ⭐</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTbody">
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">جاري سحب بيانات السجل من السحابة...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+    if (window.AuthClient) {
+        AuthClient.enforceAuth(['student', 'servant', 'admin']);
+    }
+
+    const FB_CONFIG = {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    const fsdb = firebase.firestore();
+
+    const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+    const studentName = localStorage.getItem('student_name') || 'المخدوم';
+    const studentLevel = localStorage.getItem('student_level');
+
+    if (!studentCode) window.location.href = 'index.html';
+
+    document.getElementById('ui-student-info').textContent = `${studentName} (كود: ${studentCode})`;
+    document.getElementById('ui-student-level').textContent = studentLevel || 'الفرقة الأولى';
+
+    function isFriday(dateStr) {
+        return new Date(dateStr).getDay() === 5;
+    }
+
+    function renderAttendanceUI(attendanceRecord, spiritualLogs, settings) {
+        let start = new Date(settings.serviceStart || "2026-09-01");
+        let end = new Date(settings.serviceEnd || "2027-07-01");
+        let totalFridays = 0;
+        let cur = new Date(start);
+        while (cur <= end) {
+            if (cur.getDay() === 5) totalFridays++;
+            cur.setDate(cur.getDate() + 1);
+        }
+        totalFridays = Math.max(1, totalFridays);
+
+        let myHistory = [];
+        let attendedFridays = 0;
+        let delayedCount = 0;
+        let communionCount = 0;
+        let totalPoints = 0;
+
+        Object.keys(spiritualLogs).forEach(key => {
+            if (key.endsWith(`_${studentCode}`)) {
+                const note = spiritualLogs[key];
+                if (note && (note.mass || note.attended_mass)) communionCount++;
+            }
+        });
+
+        const allDates = Object.keys(attendanceRecord).sort().reverse();
+
+        allDates.forEach(dateKey => {
+            const dayList = attendanceRecord[dateKey] || [];
+            const myRecord = dayList.find(a => String(a.code || a.id || '') === studentCode);
+
+            if (myRecord) {
+                const fri = isFriday(dateKey);
+                if (fri && !myRecord.isAbsentDueToDelay) attendedFridays++;
+                if (myRecord.isAbsentDueToDelay) delayedCount++;
+                if (myRecord.communion) communionCount++;
+                
+                totalPoints += (myRecord.points || (fri ? 5 : 15));
+
+                myHistory.push({
+                    date: dateKey,
+                    isFri: fri,
+                    time: myRecord.time || '--:--',
+                    isAbsentDueToDelay: myRecord.isAbsentDueToDelay,
+                    communion: myRecord.communion || false,
+                    points: myRecord.points || (fri ? 5 : 15),
+                    isBonusEvent: myRecord.isBonusEvent || !fri
+                });
+            }
+        });
+
+        document.getElementById('stat-attended-count').textContent = attendedFridays;
+        document.getElementById('stat-delayed-count').textContent = delayedCount;
+        document.getElementById('stat-communion-count').textContent = communionCount;
+        document.getElementById('stat-points-count').textContent = totalPoints;
+
+        let percent = Math.min(100, Math.round((attendedFridays / totalFridays) * 100));
+        document.getElementById('ui-grad-percent').textContent = `${percent}% (${attendedFridays}/${totalFridays} اجتماع)`;
+        const bar = document.getElementById('ui-grad-bar');
+        bar.style.width = `${percent}%`;
+
+        const badge = document.getElementById('ui-grad-badge');
+        const warningBox = document.getElementById('warning-alert-box');
+        const warningText = document.getElementById('warning-msg-text');
+
+        if (percent >= 75) {
+            badge.className = 'badge bg-success';
+            badge.textContent = 'مؤهل للتخرج 🎓';
+            bar.className = 'progress-bar bg-success';
+        } else {
+            badge.className = 'badge bg-warning text-dark';
+            badge.textContent = 'أقل من الحد الأدنى (<75%)';
+            bar.className = 'progress-bar bg-warning';
+        }
+
+        if (percent < 60 || delayedCount >= 3) {
+            warningBox.style.display = 'block';
+            warningText.innerHTML = `تم رصد تدنٍ في نسبة حضورك الأسبوعي (<strong>${percent}%</strong>) أو تكرار التأخير. نرجو الاهتمام بحضور الاجتماع بانتظام للاستفادة الكاملة من خدمة الإعداد.`;
+        } else {
+            warningBox.style.display = 'none';
+        }
+
+        const tbody = document.getElementById('attendanceTbody');
+        tbody.innerHTML = '';
+
+        if (myHistory.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">لم يتم رصد أي حركات حضور لك حتى الآن في الكشوفات.</td></tr>';
+            return;
+        }
+
+        myHistory.forEach(item => {
+            let statusHtml = item.isAbsentDueToDelay
+                ? '<span class="badge bg-danger badge-status">تأخير شديد (غياب)</span>'
+                : (item.isBonusEvent
+                    ? '<span class="badge bg-purple text-white badge-status" style="background:#6c5ce7;">حاضر (بونص إضافي ⭐)</span>'
+                    : '<span class="badge bg-success badge-status">حاضر رسمي ✔️</span>');
+
+            let communionHtml = item.communion 
+                ? '<span class="text-success fw-bold"><i class="fa-solid fa-check me-1"></i>نعم</span>' 
+                : '<span class="text-muted">—</span>';
+
+            let eventType = item.isFri ? 'اجتماع الجمعة الرسمي' : 'نشاط / فعالية بونص';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="fw-bold">${item.date}</td>
+                    <td><small class="text-muted">${eventType}</small></td>
+                    <td dir="ltr" class="fw-bold text-primary">${item.time}</td>
+                    <td>${statusHtml}</td>
+                    <td>${communionHtml}</td>
+                    <td><strong class="text-primary">+${item.points}</strong></td>
+                </tr>
+            `;
+        });
+    }
+
+    async function syncAndLoadAttendance() {
+        let att = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+        let spir = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        let sets = JSON.parse(localStorage.getItem('my_church_settings')) || { serviceStart: "2026-09-01", serviceEnd: "2027-07-01" };
+
+        renderAttendanceUI(att, spir, sets);
+
+        try {
+            const [attSnap, spirSnap, setDoc] = await Promise.all([
+                fsdb.collection('attendance').get(),
+                fsdb.collection('students').doc(studentCode).collection('daily_logs').get(),
+                fsdb.collection('config').doc('settings').get()
+            ]);
+
+            const cloudAtt = {};
+            attSnap.forEach(doc => { cloudAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
+            if (Object.keys(cloudAtt).length > 0) {
+                att = cloudAtt;
+                localStorage.setItem('my_church_attendance', JSON.stringify(att));
+            }
+
+            spirSnap.forEach(doc => {
+                spir[`${doc.id}_${studentCode}`] = doc.data();
+            });
+            localStorage.setItem('khedmety_student_spiritual', JSON.stringify(spir));
+
+            if (setDoc.exists) {
+                sets = Object.assign(sets, setDoc.data());
+                localStorage.setItem('my_church_settings', JSON.stringify(sets));
+            }
+
+            renderAttendanceUI(att, spir, sets);
+        } catch (e) {
+            console.warn("Cloud attendance sync warning:", e);
+        }
+    }
+
+    syncAndLoadAttendance();
+</script>
+</body>
+</html>

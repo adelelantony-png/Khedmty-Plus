@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e3799">
+    <title>أنت غير متصل بالإنترنت | خدمتي برو</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(145deg, #0c2461 0%, #1e3799 45%, #0984e3 100%);
+            color: #ffffff;
+            text-align: center;
+        }
+        .offline-card {
+            background: rgba(255, 255, 255, 0.98);
+            color: #1e293b;
+            max-width: 460px;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            padding: 35px 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+        .offline-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #fff7ed;
+            color: #ea580c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            margin: 0 auto 18px;
+            border: 2px dashed #fdba74;
+        }
+        .offline-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin: 0 0 10px;
+            color: #0c2461;
+        }
+        .offline-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .offline-tips {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 0.85rem;
+            color: #475569;
+            text-align: right;
+            margin-bottom: 24px;
+        }
+        .offline-tips ul {
+            margin: 6px 0 0;
+            padding-right: 20px;
+        }
+        .btn-retry {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="offline-card">
+    <div class="offline-icon">📡</div>
+    <h2 class="offline-title">أنت في وضع عدم الاتصال</h2>
+    <p class="offline-desc">
+        تعذّر الاتصال بشبكة الإنترنت للوصول إلى هذه الصفحة السحابية. يمكنك متابعة استخدام البيانات المحفوظة محلياً على جهازك.
+    </p>
+
+    <div class="offline-tips">
+        <strong>💡 ما يمكنك فعله أثناء انقطاع الإنترنت:</strong>
+        <ul>
+            <li>قراءة الكتاب المقدس والخطة السنوية المحفوظة.</li>
+            <li>الاطلاع على النوتة وقراءات السنكسار.</li>
+            <li>سجلاتك المحفوظة محلياً تظل آمنة على جهازك.</li>
+        </ul>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-app btn-app-primary btn-retry" onclick="window.location.reload()">
+            🔄 إعادة المحاولة الآن
+        </button>
+        <button class="btn-smart-back btn-retry" onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'">
+            ↩️ العودة للصفحة السابقة
+        </button>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استرجاع الدخول | خدمتي برو</title>
+<style>
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#f1f2f6;margin:0;padding:16px;color:#2d3436}
+.box{max-width:480px;margin:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+h2{margin:0 0 4px;color:#1e3799}
+.warn{background:#fff3cd;border-right:4px solid #e17055;padding:10px 12px;border-radius:8px;font-size:13px;margin:12px 0}
+ul{padding:0;list-style:none;font-size:14px;line-height:2;margin:10px 0}
+li b{float:left;direction:ltr}
+button,input{width:100%;padding:13px;border-radius:10px;font:inherit;margin-top:8px;border:1px solid #ccc}
+button{border:0;color:#fff;font-weight:bold;cursor:pointer;background:#0984e3}
+.red{background:#d63031}.grn{background:#00b894}
+#msg{margin-top:12px;font-weight:bold;color:#00b894}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>استرجاع الدخول</h2>
+  <div>يجب فتح هذه الصفحة من نفس رابط الموقع الذي تفتح منه index.html وبنفس المتصفح.</div>
+  <div class="warn">احذف هذا الملف من الموقع فور الانتهاء، فمن يعرف رابطه يستطيع تغيير كلمة مرور الأدمن.</div>
+  <ul id="info"></ul>
+
+  <input id="np" type="text" placeholder="كلمة مرور جديدة للأدمن (8 أحرف فأكثر)">
+  <button class="grn" id="setpw">حفظ كلمة المرور الجديدة</button>
+  <button class="red" id="defpw">إعادة كلمة المرور إلى الافتراضية (1234567)</button>
+  <button id="unlock">فك قفل المحاولات الخاطئة</button>
+  <div id="msg"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const K={pwd:'my_church_admin_pwd',fail:'khedmety_login_fail_count',lock:'khedmety_login_lock_until',s:'my_church_servants',m:'my_church_class'};
+const cnt=k=>{try{const v=JSON.parse(localStorage.getItem(k));return Array.isArray(v)?v.length:0}catch(e){return 0}};
+function render(){
+  const lock=Math.max(0,(parseInt(localStorage.getItem(K.lock)||'0')||0)-Date.now());
+  $('info').innerHTML=
+   `<li>الرابط الحالي <b>${location.origin||'file'}</b></li>`+
+   `<li>كلمة مرور الأدمن <b>${localStorage.getItem(K.pwd)?'تم تغييرها':'الافتراضية'}</b></li>`+
+   `<li>عدد الخدام المحفوظين <b>${cnt(K.s)}</b></li>`+
+   `<li>عدد المخدومين المحفوظين <b>${cnt(K.m)}</b></li>`+
+   `<li>قفل الدخول <b>${lock?Math.ceil(lock/60000)+' دقيقة':'لا يوجد'}</b></li>`+
+   `<li>اتصال آمن (HTTPS) <b>${window.isSecureContext?'نعم':'لا'}</b></li>`;
+}
+const say=t=>{$('msg').textContent=t;render()};
+$('unlock').onclick=()=>{localStorage.removeItem(K.lock);localStorage.removeItem(K.fail);say('تم فك القفل.')};
+$('defpw').onclick=()=>{localStorage.removeItem(K.pwd);say('عادت كلمة المرور إلى 1234567. ادخل وغيّرها فوراً.')};
+$('setpw').onclick=async()=>{
+  const p=$('np').value.trim();
+  if(p.length<8)return say('كلمة المرور أقل من 8 أحرف.');
+  if(!(window.crypto&&crypto.subtle))return say('المتصفح لا يدعم التشفير هنا، افتح الموقع عبر HTTPS أو استخدم زر الإعادة للافتراضية.');
+  const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p));
+  localStorage.setItem(K.pwd,Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''));
+  $('np').value='';say('تم حفظ كلمة المرور الجديدة.');
+};
+render();
+</script>
+</body>
+</html>

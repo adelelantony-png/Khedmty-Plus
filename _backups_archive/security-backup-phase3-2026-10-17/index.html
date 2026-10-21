@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e3799">
+<title>تسجيل الدخول | خدمتي برو - إعداد الخدام</title>
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root{--primary:#1e3799;--primary-dark:#0c2461;--accent:#0984e3;--success:#00b894;--danger:#d63031;--gold:#fdcb6e;--dark:#2d3436}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;color:var(--dark);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;
+  background:linear-gradient(145deg,#0c2461 0%,#1e3799 45%,#0984e3 100%);overflow:hidden;position:relative}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;animation:drift 18s ease-in-out infinite alternate}
+.b1{width:340px;height:340px;background:#74b9ff;top:-90px;left:-80px}
+.b2{width:300px;height:300px;background:var(--gold);bottom:-110px;right:-60px;opacity:.3;animation-duration:22s}
+.b3{width:220px;height:220px;background:#6c5ce7;top:55%;left:55%;opacity:.3;animation-duration:26s}
+@keyframes drift{to{transform:translate(40px,-30px) scale(1.15)}}
+.wrap{width:100%;max-width:410px;position:relative;z-index:1;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.card{background:rgba(255,255,255,.97);border-radius:28px;padding:34px 28px 26px;box-shadow:0 25px 60px rgba(7,20,70,.45);position:relative}
+.logo{width:84px;height:84px;margin:-76px auto 14px;border-radius:50%;display:grid;place-items:center;color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--accent));border:5px solid #fff;box-shadow:0 10px 26px rgba(30,55,153,.5),0 0 0 8px rgba(253,203,110,.35)}
+.logo svg{width:40px;height:40px}
+h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary)}
+.sub{margin:4px 0 22px;text-align:center;font-size:13px;color:#636e72;font-weight:500}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#2f3b52}
+.input{display:flex;align-items:center;gap:8px;background:#f4f6fb;border:2px solid transparent;border-radius:14px;padding:0 14px;transition:.2s}
+.input:focus-within{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(9,132,227,.12)}
+.input svg{width:18px;height:18px;flex:none;color:#8a96ab}
+.input input{flex:1;min-width:0;border:0;background:transparent;outline:0;padding:14px 0;font:inherit;font-size:15px;font-weight:500;color:var(--dark)}
+.eye{border:0;background:none;cursor:pointer;padding:6px;color:#8a96ab;display:grid;place-items:center}
+.eye:hover{color:var(--primary)}
+.row{display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px;font-size:13px}
+.row label{display:flex;align-items:center;gap:7px;cursor:pointer;color:#4b5870;font-weight:500}
+.row input{accent-color:var(--primary);width:16px;height:16px}
+.btn{width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:16px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 10px 22px rgba(9,132,227,.35);transition:.2s}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 28px rgba(9,132,227,.45)}
+.btn:disabled{opacity:.7;cursor:wait}
+.err{display:none;margin-bottom:14px;padding:11px 14px;border-radius:12px;background:#ffeaea;border-right:4px solid var(--danger);color:#a82224;font-size:13px;font-weight:700}
+.err.show{display:block;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hint{margin:16px 0 0;text-align:center;font-size:12px;color:#8a96ab;line-height:1.7}
+.verse{margin-top:18px;text-align:center;color:rgba(255,255,255,.92);font-size:15px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.25)}
+.verse small{display:block;font-weight:500;font-size:12px;opacity:.8;margin-top:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+
+<main class="wrap">
+  <div class="card" style="margin-top:42px">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M6 8h12"/></svg>
+    </div>
+    <h1>خدمتي برو</h1>
+    <p class="sub">خدمة إعداد الخدام &middot; بوابة الدخول الموحدة</p>
+
+    <div id="err" class="err" role="alert"></div>
+
+    <form id="form" autocomplete="off" novalidate>
+      <div class="field">
+        <label for="u">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</label>
+        <div class="input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+          <input id="u" type="text" placeholder="اكتب اسم الخادم أو كود الامتحان" autofocus>
+        </div>
+      </div>
+      <div class="field">
+        <label for="p">كلمة المرور / رقم الهاتف</label>
+        <div class="input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="p" type="password" placeholder="كلمة المرور الخاصة بك أو رقم الهاتف" autocomplete="current-password">
+          <button type="button" class="eye" id="eye" aria-label="إظهار كلمة المرور">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <label><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
+      </div>
+      <button type="submit" id="btn" class="btn">تسجيل الدخول</button>
+    </form>
+    <p class="hint" id="hint">نسيت بياناتك؟ تواصل مع أمين الخدمة.</p>
+  </div>
+  <div class="verse">اعبدوا الرب بفرح<small>مزمور ١٠٠: ٢</small></div>
+</main>
+
+<script>
+'use strict';
+const K = { servants:'my_church_servants', members:'my_church_class', adminPwd:'my_church_admin_pwd',
+            active:'my_church_active_user', fail:'khedmety_login_fail_count', lock:'khedmety_login_lock_until' };
+const $ = id => document.getElementById(id);
+
+// الإعدادات المدمجة لمشروع khedmety-plus
+const PUBLIC_FIREBASE_CONFIG = {
+  "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+  "authDomain": "khedmety-plus.firebaseapp.com",
+  "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+  "projectId": "khedmety-plus",
+  "storageBucket": "khedmety-plus.firebasestorage.app",
+  "messagingSenderId": "3510220845",
+  "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+};
+
+const readList = k => { try { const v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
+const norm = s => String(s ?? '').trim().toLowerCase();
+const convertArabicDigits = s => String(s ?? '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+const digits = s => convertArabicDigits(s).replace(/\D/g, '');
+
+function normalizePhone(str) {
+  if (!str) return '';
+  const d = digits(str);
+  return d.replace(/^20|^2|^0/, '');
+}
+
+function phonesMatch(storedPhone, inputPhone) {
+  const normStored = normalizePhone(storedPhone);
+  const normInput = normalizePhone(inputPhone);
+  if (!normStored || !normInput) return false;
+  if (normStored === normInput) return true;
+  if (normStored.length >= 9 && normInput.length >= 9) {
+    return normStored.slice(-9) === normInput.slice(-9);
+  }
+  return false;
+}
+
+function codesMatch(recCode, input) {
+  if (recCode == null || input == null) return false;
+  const sRec = String(recCode).trim();
+  const sInput = String(input).trim();
+  if (!sRec || !sInput) return false;
+  if (sRec.toLowerCase() === sInput.toLowerCase()) return true;
+
+  const dRec = digits(sRec);
+  const dInput = digits(sInput);
+  if (dRec && dInput && dRec === dInput) return true;
+
+  return false;
+}
+
+async function sha(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+const lockLeft = () => Math.max(0, (parseInt(localStorage.getItem(K.lock) || '0') || 0) - Date.now());
+function recordFail() {
+  const n = (parseInt(localStorage.getItem(K.fail) || '0') || 0) + 1;
+  localStorage.setItem(K.fail, n);
+  if (n % 5 === 0) {
+    const mins = Math.min(2 * Math.pow(2, Math.floor(n / 5) - 1), 30);
+    localStorage.setItem(K.lock, Date.now() + mins * 60000);
+  }
+  return n;
+}
+const resetFails = () => { localStorage.removeItem(K.fail); localStorage.removeItem(K.lock); };
+
+async function checkPhoneOrHash(rec, p) {
+  if (rec.passwordHash && (await sha(p)) === rec.passwordHash) return true;
+  if (phonesMatch(rec.phone, p)) return true;
+  if (rec.password && typeof rec.password === 'string' && rec.password === p) return true;
+  return false;
+}
+
+async function checkStudentPassword(m, p) {
+  // 1. رقم الهاتف أو رقم ولي الأمر هو كلمة المرور الرسمية المعتمدة للمخدوم
+  if (phonesMatch(m.phone, p) || phonesMatch(m.parent_phone, p)) {
+    return true;
+  }
+  // 2. كلمة المرور المشفرة إن تم تعيينها له
+  if (m.passwordHash && (await sha(p)) === m.passwordHash) {
+    return true;
+  }
+  // 3. كلمة المرور كنص صريح إن وُجد حقل password
+  if (m.password && typeof m.password === 'string' && m.password === p) {
+    return true;
+  }
+  return false;
+}
+
+let fbReady = null;
+function initCloud() {
+  if (fbReady !== null) return fbReady;
+  fbReady = (async () => {
+    try {
+      let cfg = PUBLIC_FIREBASE_CONFIG;
+      localStorage.setItem('my_firebase_config', JSON.stringify(cfg));
+      if (typeof firebase === 'undefined' || !navigator.onLine) return null;
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      return firebase.firestore();
+    } catch (e) {
+      console.warn('تعذر الاتصال بالسحابة:', e.code || e.message);
+      return null;
+    }
+  })();
+  return fbReady;
+}
+
+function snapToList(qs) { return qs.docs.map(d => Object.assign({ id: d.id }, d.data())); }
+
+async function cloudFetchDirectory() {
+  const db = await initCloud();
+  if (!db) return null;
+  try {
+    const [sSnap, mSnap] = await Promise.all([db.collection('servants').get(), db.collection('members').get()]);
+    const servants = snapToList(sSnap), members = snapToList(mSnap);
+    try {
+      localStorage.setItem(K.servants, JSON.stringify(servants));
+      localStorage.setItem(K.members, JSON.stringify(members));
+    } catch (e) {}
+    return { servants, members };
+  } catch (e) { console.warn('فشل تنزيل البيانات من السحابة:', e.code || e.message); return null; }
+}
+
+/**
+ * محاولة تسجيل الدخول عبر واجهة الخادم السحابي /api/login (إن وُجد سيرفر Node)
+ */
+async function authenticateViaServer(u, p, extra = {}) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000); // مهلة 3 ثوانٍ حتى لا يعلق المستخدم
+    const resp = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ identifier: u, password: p }, extra)),
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    const data = await resp.json();
+    return { status: resp.status, data };
+  } catch (e) {
+    return { status: 0, error: e };
+  }
+}
+
+/**
+ * التحقق الموثوق (يعمل فوراً سواء كان المشروع على Vercel أو يُفتح محلياً كملف HTML)
+ */
+async function authenticateFallback(u, p) {
+  const un = norm(u);
+
+  // 1) فحص أمين الخدمة الرئيسي (عادل جورج / admin) لضمان عدم إقفال النظام عليه أبداً
+  const ADMIN_KEYS = ['admin', 'الأدمن', 'عادل جورج'];
+  if (ADMIN_KEYS.some(n => norm(n) === un)) {
+    const saved = localStorage.getItem(K.adminPwd) || '';
+    const ok = saved ? (await sha(p)) === saved : (p === '1234567' || p === 'admin');
+    if (ok) {
+      return { 
+        kind: 'staff', 
+        role: 'admin',
+        user: { id: 1001, name: 'عادل جورج', role: 'admin', permission: 'admin', code: 'admin', isSuperAdmin: true } 
+      };
+    }
+  }
+
+  // سحب أحدث بيانات الخدام والمخدومين من فايربيز أو التخزين المحلي
+  let servantsList = readList(K.servants);
+  let membersList = readList(K.members);
+  if (navigator.onLine) {
+    const cloud = await cloudFetchDirectory();
+    if (cloud) {
+      servantsList = cloud.servants;
+      membersList = cloud.members;
+    }
+  }
+
+  // 2) فحص الخدام بالاسم أولاً ثم بالكود
+  for (const s of servantsList) {
+    const isNameMatch = norm(s.name) === un;
+    const isCodeMatch = codesMatch(s.code, u) || (s.id != null && codesMatch(s.id, u));
+    if ((isNameMatch || isCodeMatch) && await checkPhoneOrHash(s, p)) {
+      const realRole = (s.role === 'admin' || s.permission === 'admin') ? 'admin' : 'servant';
+      return { 
+        kind: 'staff', 
+        role: realRole, 
+        user: Object.assign({}, s, { role: realRole, permission: s.permission || realRole }) 
+      };
+    }
+  }
+
+  // 3) فحص المخدومين بكود الامتحان (ورقم الهاتف أو كلمة المرور)
+  for (const m of membersList) {
+    const isCodeMatch = codesMatch(m.code, u) || (m.id != null && codesMatch(m.id, u));
+    if (isCodeMatch && await checkStudentPassword(m, p)) {
+      return { kind: 'student', rec: m };
+    }
+  }
+
+  return null;
+}
+
+async function startSession(r, remember, customToken) {
+  localStorage.removeItem(K.active); sessionStorage.removeItem(K.active);
+  ['student_code', 'student_name', 'student_level', 'user_role', 'auth_token'].forEach(k => {
+    localStorage.removeItem(k);
+    sessionStorage.removeItem(k);
+  });
+
+  const storage = remember ? localStorage : sessionStorage;
+
+  // تسجيل الدخول في Firebase Auth بالـ Custom Token في حال توفره
+  if (customToken && typeof firebase !== 'undefined' && firebase.auth) {
+    try {
+      await firebase.auth().signInWithCustomToken(customToken);
+      const idToken = await firebase.auth().currentUser.getIdToken();
+      storage.setItem('auth_token', idToken);
+    } catch (authErr) {
+      console.warn('تنبيه Firebase Auth:', authErr.message);
+    }
+  }
+
+  if (r.kind === 'staff' || r.role === 'admin' || r.role === 'servant') {
+    const role = (r.role === 'admin' || (r.user && r.user.role === 'admin')) ? 'admin' : 'servant';
+    const user = Object.assign({}, r.user || r, { role: role, loginTimestamp: Date.now() });
+    delete user.passwordHash;
+    storage.setItem(K.active, JSON.stringify(user));
+    localStorage.setItem('user_role', role);
+    location.href = 'servant-dashboard.html';
+  } else {
+    const m = r.user || r.rec || r;
+    const studentUser = {
+      code: String(m.code ?? m.id ?? '').trim(),
+      name: m.name || '',
+      level: m.level || m.stage || 'الفرقة الأولى',
+      role: 'student',
+      loginTimestamp: Date.now()
+    };
+    storage.setItem(K.active, JSON.stringify(studentUser));
+    localStorage.setItem('student_code', studentUser.code);
+    localStorage.setItem('student_name', studentUser.name);
+    localStorage.setItem('student_level', studentUser.level);
+    localStorage.setItem('user_role', 'student');
+    location.href = 'student.html';
+  }
+}
+
+const err = $('err'), btn = $('btn');
+function showErr(msg) { err.textContent = msg; err.classList.remove('show'); void err.offsetWidth; err.classList.add('show'); }
+function setBusy(b) { btn.disabled = b; btn.textContent = b ? 'جاري التحقق…' : 'تسجيل الدخول'; }
+let hintTimer = null;
+function showCloudHint() { hintTimer = setTimeout(() => { $('hint').textContent = 'جاري التحقق من بيانات الدخول...'; }, 500); }
+function hideCloudHint() { clearTimeout(hintTimer); $('hint').textContent = 'نسيت بياناتك؟ تواصل مع أمين الخدمة.'; }
+
+$('eye').addEventListener('click', () => { const i = $('p'); i.type = i.type === 'password' ? 'text' : 'password'; });
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  err.classList.remove('show');
+  const left = lockLeft();
+  if (left) return showErr(`تم إيقاف المحاولات مؤقتاً. حاول بعد ${Math.ceil(left / 60000)} دقيقة.`);
+  
+  const u = $('u').value.trim(), p = $('p').value.trim();
+  if (!u) return showErr('من فضلك أدخل اسم الخادم أو كود الامتحان للمخدوم.');
+  if (!p) return showErr('من فضلك أدخل كلمة المرور أو رقم الهاتف.');
+
+  setBusy(true); showCloudHint();
+  let redirecting = false;
+
+  try {
+    // 1. المحاولة عبر خادم السيرفر /api/login أولاً (في بيئة السيرفر)
+    const serverResult = await authenticateViaServer(u, p);
+    if (serverResult.status === 200 && serverResult.data && serverResult.data.success) {
+      resetFails();
+      redirecting = true;
+      await startSession(serverResult.data.user, $('remember').checked, serverResult.data.customToken);
+      return;
+    }
+
+    // 2. التحقق المباشر (لضمان عمل النظام في كل الحالات دون توقف أو إقفال)
+    const authResult = await authenticateFallback(u, p);
+    if (authResult) {
+      if (authResult.kind === 'error') {
+        showErr(authResult.message);
+        return;
+      }
+      resetFails();
+      redirecting = true;
+      await startSession(authResult, $('remember').checked, null);
+      return;
+    }
+
+    const n = recordFail();
+    showErr(lockLeft() ? 'تكررت المحاولات الخاطئة، تم إيقاف الدخول مؤقتاً.'
+                       : `بيانات الدخول غير صحيحة. المحاولات المتبقية قبل الإيقاف: ${5 - (n % 5)}`);
+
+  } catch (ex) {
+    console.error(ex);
+    showErr('حدث خطأ غير متوقع، حاول مرة أخرى.');
+  } finally {
+    hideCloudHint();
+    if (!redirecting) setBusy(false);
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => { initCloud(); });
+</script>
+</body>
+</html>

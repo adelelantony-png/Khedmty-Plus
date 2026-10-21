@@ -1,0 +1,807 @@
+/**
+ * public/css/app-theme.css
+ * Khedmety-Plus — نظام التصميم الموحد والتكيفي ULTRA PRO MAX
+ *
+ * المواصفات الفنية:
+ * - هوية بصرية ملكية: كحلي عميق (#081a42, #0c2461, #1e3799) وذهبي هادئ (#d4af37, #f39c12) وخلفيات ثلجية مريحة (#f8fafc).
+ * - تصميم تكيفي حقيقي (Adaptive Responsive): Sidebar للشاشات الكبيرة + Bottom Nav للهواتف + Drawer للأجهزة اللوحية.
+ * - دعم كامل لنقاط التوقف: 320px, 360px, 390px, 768px, 1024px, 1366px, 1920px.
+ * - دعم الاتجاه العربي الأصيل (RTL) مع خط 'Tajawal' العربي الاحترافي.
+ * - مقاييس لمس معيارية للموبايل (Touch Targets >= 44px، والمفضل 48px).
+ * - مراعاة المناطق الآمنة للهواتف (Safe Area Insets: top / bottom).
+ * - توافق كامل مع إمكانية الوصول Keyboard Focus (:focus-visible) وتباين ألوان WCAG AA.
+ * - جداول متجاوبة بتثبيت العمود الأول، ونماذج بتركيز ناعم ومسودات آمنة.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+
+/* ========================================================
+   1. متغيرات النظام والهوية البصرية (Design Tokens)
+   ======================================================== */
+:root {
+    /* لوحة الكحلي العميق */
+    --k-primary-900: #081a42;
+    --k-primary-800: #0c2461;
+    --k-primary-700: #1e3799;
+    --k-primary-600: #2749be;
+    --k-primary-500: #3867d6;
+    --k-primary-gradient: linear-gradient(135deg, #081a42 0%, #0c2461 45%, #1e3799 100%);
+    --k-header-gradient: linear-gradient(135deg, #0c2461 0%, #1e3799 60%, #0984e3 100%);
+
+    /* لوحة الذهبي الهادئ الموقر */
+    --k-gold-700: #9e782f;
+    --k-gold-600: #b88b32;
+    --k-gold-500: #d4af37;
+    --k-gold-400: #e5c07b;
+    --k-gold-100: #fcf8ee;
+    --k-gold-gradient: linear-gradient(135deg, #b88b32 0%, #d4af37 50%, #f1c40f 100%);
+
+    /* الألوان الوظيفية */
+    --k-accent: #0984e3;
+    --k-accent-hover: #0770c2;
+    --k-success: #00b894;
+    --k-success-bg: #ecfdf5;
+    --k-warning: #f59e0b;
+    --k-warning-bg: #fffbeb;
+    --k-danger: #d63031;
+    --k-danger-bg: #fef2f2;
+    --k-info: #0284c7;
+
+    /* الخلفيات والأسطح */
+    --k-bg-body: #f8fafc;
+    --k-bg-card: #ffffff;
+    --k-bg-muted: #f1f5f9;
+    --k-bg-glass: rgba(255, 255, 255, 0.85);
+
+    /* النصوص */
+    --k-text-main: #0f172a;
+    --k-text-muted: #64748b;
+    --k-text-light: #94a3b8;
+    --k-text-white: #ffffff;
+
+    /* الحدود والظلال الفائقة الدقة */
+    --k-border-subtle: #e2e8f0;
+    --k-border-strong: #cbd5e1;
+    --k-border-gold: rgba(212, 175, 55, 0.45);
+
+    --k-shadow-xs: 0 1px 3px rgba(12, 36, 97, 0.04);
+    --k-shadow-sm: 0 3px 8px rgba(12, 36, 97, 0.05);
+    --k-shadow-md: 0 8px 24px rgba(12, 36, 97, 0.08);
+    --k-shadow-lg: 0 16px 38px rgba(12, 36, 97, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(212, 175, 55, 0.22);
+
+    /* الأبعاد وهندسة الواجهة */
+    --touch-target-min: 44px;
+    --touch-target-optimal: 48px;
+    --sidebar-width: 270px;
+    --sidebar-collapsed-width: 76px;
+    --topbar-height: 64px;
+    --bottom-nav-height: 64px;
+
+    /* أنصاف الأقطار */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+
+    /* الخطوط والانتقالات */
+    --font-arabic: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    --transition-fast: 0.16s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ========================================================
+   2. ضبط الأساس وتوحيد الـ Reset
+   ======================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    direction: rtl;
+    text-align: right;
+    -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-arabic);
+    background-color: var(--k-bg-body);
+    color: var(--k-text-main);
+    margin: 0;
+    padding: 0;
+    line-height: 1.65;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* إمكانية الوصول والتنقل عبر لوحة المفاتيح Focus Accessibility */
+:focus-visible {
+    outline: 3px solid rgba(30, 55, 153, 0.45);
+    outline-offset: 2px;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+}
+
+a {
+    color: var(--k-primary-700);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--k-accent);
+}
+
+/* ========================================================
+   3. هيكل التخطيط التكيفي ULTRA PRO MAX (Adaptive Shell)
+   ======================================================== */
+.ultra-shell {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    background: var(--k-bg-body);
+}
+
+/* الشريط الجانبي للشاشات الكبيرة (Sidebar) */
+.ultra-sidebar {
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--k-primary-900) 0%, var(--k-primary-800) 100%);
+    color: var(--k-text-white);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 1040;
+    transition: width var(--transition-smooth), transform var(--transition-smooth);
+    box-shadow: 4px 0 24px rgba(8, 26, 66, 0.15);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.ultra-sidebar-header {
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ultra-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.ultra-sidebar-brand .brand-badge {
+    background: var(--k-gold-gradient);
+    color: var(--k-primary-900);
+    font-size: 0.72rem;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.ultra-nav-group {
+    padding: 12px 14px 6px;
+}
+
+.ultra-nav-group-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 8px;
+    padding: 0 10px;
+    letter-spacing: 0.5px;
+}
+
+.ultra-sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 14px;
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-md);
+    margin-bottom: 4px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+    user-select: none;
+    text-decoration: none;
+}
+
+.ultra-sidebar-nav-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    transform: translateX(-3px);
+}
+
+.ultra-sidebar-nav-item.active {
+    background: var(--k-gold-gradient);
+    color: var(--k-primary-900);
+    box-shadow: var(--k-shadow-gold);
+    font-weight: 800;
+}
+
+.ultra-sidebar-nav-item .nav-icon {
+    font-size: 1.25rem;
+    min-width: 26px;
+    text-align: center;
+}
+
+/* الشريط الجانبي في وضع الطي (Collapsed Mode) */
+.ultra-sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.ultra-sidebar.collapsed .ultra-sidebar-brand span,
+.ultra-sidebar.collapsed .ultra-nav-group-title,
+.ultra-sidebar.collapsed .ultra-sidebar-nav-item span {
+    display: none;
+}
+
+.ultra-sidebar.collapsed .ultra-sidebar-nav-item {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+/* مساحة العمل الرئيسية (Content Canvas) */
+.ultra-main-canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100vh;
+    background: var(--k-bg-body);
+}
+
+/* الشريط العلوي الفخم (Top App Bar) */
+.ultra-topbar {
+    height: var(--topbar-height);
+    background: var(--k-bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--k-border-subtle);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    box-shadow: var(--k-shadow-xs);
+}
+
+.ultra-topbar-start {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ultra-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--k-text-muted);
+}
+
+.ultra-breadcrumbs a {
+    color: var(--k-text-muted);
+}
+
+.ultra-breadcrumbs a:hover {
+    color: var(--k-primary-700);
+}
+
+.ultra-breadcrumbs .crumb-sep {
+    color: var(--k-text-light);
+    font-size: 0.75rem;
+}
+
+.ultra-breadcrumbs .crumb-current {
+    color: var(--k-primary-800);
+    font-weight: 800;
+}
+
+.ultra-topbar-end {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* زر تحديث الكاش واستحضار النسخة الأحدث */
+.ultra-btn-updater {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
+    border: 1px solid rgba(212, 175, 55, 0.6);
+    color: #92400e;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--k-shadow-xs);
+    min-height: 40px;
+}
+
+.ultra-btn-updater:hover {
+    background: var(--k-gold-gradient);
+    color: var(--k-primary-900);
+    box-shadow: var(--k-shadow-gold);
+    transform: translateY(-1px);
+}
+
+.ultra-btn-updater i {
+    font-size: 1rem;
+    transition: transform var(--transition-base);
+}
+
+.ultra-btn-updater:hover i {
+    transform: rotate(180deg);
+}
+
+/* زر الرجوع الذكي المطور Smart Back Button */
+.btn-smart-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1.5px solid var(--k-border-strong);
+    color: var(--k-primary-800);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    min-height: var(--touch-target-min);
+}
+
+.btn-smart-back:hover {
+    border-color: var(--k-primary-700);
+    background: var(--k-primary-gradient);
+    color: #ffffff;
+    box-shadow: var(--k-shadow-sm);
+    transform: translateX(2px);
+}
+
+.btn-smart-back i {
+    transition: transform var(--transition-fast);
+}
+
+.btn-smart-back:hover i {
+    transform: translateX(3px);
+}
+
+/* الحاوية الداخلية للمحتوى */
+.ultra-content-container {
+    padding: clamp(14px, 2.8vw, 32px);
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ========================================================
+   4. البطاقات والشبكات الاحترافية (Cards & Stat Grids)
+   ======================================================== */
+.ultra-card {
+    background: var(--k-bg-card);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--k-border-subtle);
+    padding: clamp(16px, 2.5vw, 26px);
+    box-shadow: var(--k-shadow-xs);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.ultra-card:hover {
+    box-shadow: var(--k-shadow-md);
+    border-color: rgba(30, 55, 153, 0.2);
+}
+
+.ultra-card-gold {
+    border-right: 5px solid var(--k-gold-500);
+}
+
+.ultra-card-primary {
+    border-right: 5px solid var(--k-primary-700);
+}
+
+/* شبكة الإحصائيات المرنة (Flexible Stat Grid) */
+.ultra-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ultra-stat-card {
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--k-border-subtle);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--k-shadow-xs);
+    transition: all var(--transition-fast);
+}
+
+.ultra-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-sm);
+}
+
+.ultra-stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    font-size: 1.45rem;
+    flex-shrink: 0;
+}
+
+.ultra-stat-icon.primary { background: #eef2ff; color: var(--k-primary-700); }
+.ultra-stat-icon.gold { background: var(--k-gold-100); color: var(--k-gold-700); }
+.ultra-stat-icon.success { background: var(--k-success-bg); color: var(--k-success); }
+.ultra-stat-icon.warning { background: var(--k-warning-bg); color: var(--k-warning); }
+
+.ultra-stat-details .stat-val {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--k-primary-900);
+    line-height: 1.2;
+}
+
+.ultra-stat-details .stat-lbl {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--k-text-muted);
+}
+
+/* ========================================================
+   5. شريط الملاحة السفلي للهواتف (Bottom Navigation Bar)
+   ======================================================== */
+.ultra-bottom-nav {
+    display: none; /* يظهر فقط على الهواتف والأجهزة اللوحية */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--k-border-subtle);
+    z-index: 1030;
+    box-shadow: 0 -4px 20px rgba(12, 36, 97, 0.08);
+    justify-content: space-around;
+    align-items: center;
+}
+
+.ultra-bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--k-text-muted);
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    position: relative;
+    user-select: none;
+    min-height: var(--touch-target-min);
+}
+
+.ultra-bottom-nav-item .nav-icon {
+    font-size: 1.35rem;
+    margin-bottom: 2px;
+    transition: transform var(--transition-fast);
+}
+
+.ultra-bottom-nav-item:hover, .ultra-bottom-nav-item.active {
+    color: var(--k-primary-700);
+}
+
+.ultra-bottom-nav-item.active .nav-icon {
+    color: var(--k-gold-600);
+    transform: translateY(-2px);
+}
+
+.ultra-bottom-nav-item.active::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 28%;
+    right: 28%;
+    height: 3px;
+    background: var(--k-gold-gradient);
+    border-radius: 0 0 4px 4px;
+}
+
+/* الدرج الجانبي المنبثق للهاتف (Slide-over Drawer) */
+.ultra-drawer-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(12, 36, 97, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.ultra-drawer-overlay.open {
+    display: block;
+    opacity: 1;
+}
+
+.ultra-drawer {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100vh;
+    background: #ffffff;
+    z-index: 1060;
+    box-shadow: -8px 0 30px rgba(0,0,0,0.25);
+    transition: right var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.ultra-drawer.open {
+    right: 0;
+}
+
+/* ========================================================
+   6. الجداول المتقدمة للهواتف (Responsive Sticky Data Tables)
+   ======================================================== */
+.table-responsive-ultra {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--k-border-subtle);
+    background: #ffffff;
+    box-shadow: var(--k-shadow-xs);
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.table-responsive-ultra table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    text-align: right;
+}
+
+.table-responsive-ultra th {
+    background: #f8fafc;
+    color: var(--k-primary-900);
+    font-weight: 800;
+    padding: 14px 16px;
+    border-bottom: 2px solid var(--k-border-subtle);
+    white-space: nowrap;
+}
+
+.table-responsive-ultra td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--k-border-subtle);
+    vertical-align: middle;
+}
+
+.table-responsive-ultra tbody tr:hover {
+    background: #f1f5f9;
+}
+
+/* تثبيت العمود الأول أفقياً Sticky First Column */
+.table-responsive-ultra .sticky-col {
+    position: sticky;
+    right: 0;
+    background: #ffffff;
+    z-index: 2;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+.table-responsive-ultra th.sticky-col {
+    background: #f8fafc;
+    z-index: 3;
+}
+
+/* ========================================================
+   7. النماذج والأزرار الفاخرة (Forms & Buttons)
+   ======================================================== */
+.ultra-form-control {
+    width: 100%;
+    min-height: var(--touch-target-optimal);
+    padding: 10px 16px;
+    border: 1.5px solid var(--k-border-strong);
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    color: var(--k-text-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.ultra-form-control:focus {
+    border-color: var(--k-primary-700);
+    box-shadow: 0 0 0 4px rgba(30, 55, 153, 0.12);
+    outline: none;
+}
+
+.ultra-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 22px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    min-height: var(--touch-target-min);
+    user-select: none;
+    text-decoration: none;
+}
+
+.ultra-btn:active {
+    transform: scale(0.98);
+}
+
+.ultra-btn-primary {
+    background: var(--k-primary-gradient);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(12, 36, 97, 0.25);
+}
+
+.ultra-btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 8px 22px rgba(12, 36, 97, 0.35);
+    color: #ffffff;
+}
+
+.ultra-btn-gold {
+    background: var(--k-gold-gradient);
+    color: var(--k-primary-900);
+    box-shadow: var(--k-shadow-gold);
+}
+
+.ultra-btn-gold:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+}
+
+.ultra-btn-secondary {
+    background: #ffffff;
+    border: 1.5px solid var(--k-border-strong);
+    color: var(--k-text-main);
+}
+
+.ultra-btn-secondary:hover {
+    background: var(--k-bg-muted);
+    border-color: var(--k-text-muted);
+}
+
+/* ========================================================
+   8. إشعار التحديث الحي وشريط الشبكة (Live Update & Status)
+   ======================================================== */
+.ultra-update-toast {
+    animation: slideDownToast 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDownToast {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -30px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* ========================================================
+   9. استعلامات الوسائط التكيفية (Adaptive Breakpoints)
+   ======================================================== */
+
+/* 1. هواتف صغيرة جداً (320px) */
+@media (max-width: 359px) {
+    html { font-size: 14px; }
+    .ultra-content-container { padding: 10px; }
+    .ultra-stat-grid { grid-template-columns: 1fr; }
+    .ultra-card { padding: 12px; }
+    .btn-smart-back span { display: none; } /* يكتفي بالأيقونة توفيراً للمساحة */
+}
+
+/* 2. هواتف قياسية وشائعة (360px - 480px) */
+@media (max-width: 480px) {
+    .ultra-topbar { padding: 0 12px; }
+    .ultra-breadcrumbs .crumb-sep, .ultra-breadcrumbs a { display: none; }
+    .ultra-stat-grid { grid-template-columns: 1fr; }
+}
+
+/* 3. شاشات الهواتف والأجهزة اللوحية الصغيرة (أقل من 1024px) */
+@media (max-width: 1023px) {
+    .ultra-sidebar {
+        display: none; /* إخفاء الـ Sidebar الدائم واستبداله بـ Bottom Nav + Drawer */
+    }
+
+    .ultra-bottom-nav {
+        display: flex;
+    }
+
+    /* إضافة مساحة سفلية تعادل ارتفاع الـ Bottom Nav حتى لا تحجب الأزرار */
+    .ultra-main-canvas, body {
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+    }
+}
+
+/* 4. الحواسب المحمولة والشاشات الكبيرة (1024px - 1365px) */
+@media (min-width: 1024px) {
+    .ultra-bottom-nav {
+        display: none !important;
+    }
+
+    .ultra-sidebar {
+        display: flex;
+    }
+}
+
+/* 5. الشاشات العريضة جداً (1366px فما فوق) */
+@media (min-width: 1366px) {
+    .ultra-content-container {
+        max-width: 1320px;
+        padding: 32px;
+    }
+
+    .ultra-stat-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* توافق مخصص للطباعة */
+@media print {
+    .ultra-sidebar, .ultra-topbar, .ultra-bottom-nav, .ultra-btn-updater, .btn-smart-back {
+        display: none !important;
+    }
+    body, .ultra-shell, .ultra-main-canvas {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+    }
+}

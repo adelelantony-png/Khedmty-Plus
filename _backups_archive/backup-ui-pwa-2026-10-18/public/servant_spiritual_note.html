@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>النوتة الروحية للخادم - وسائط النعمة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .main-container { max-width: 650px; margin: 20px auto; padding: 0 15px; }
+        .card-custom { background: #ffffff; border-radius: 20px; padding: 20px; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.04); margin-bottom: 20px; }
+        .header-card { background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%); color: #ffffff; border-radius: 20px; padding: 20px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2); margin-bottom: 20px; }
+        .check-pill { display: flex; align-items: center; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px; }
+        .check-pill:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .check-pill input { width: 22px; height: 22px; margin-left: 12px; cursor: pointer; flex: none; }
+        .check-pill:has(input:checked) { background: #fef2f2; border-color: #fca5a5; }
+        .group-label { font-size: .85rem; font-weight: 700; color: #1e3799; margin-bottom: 8px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="main-container pb-5" id="app" style="display:none;">
+
+    <!-- شريط التنقل -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="servant-dashboard.html" class="btn btn-outline-secondary btn-sm fw-bold">
+            <i class="fa-solid fa-arrow-right me-1"></i> العودة للوحة الخدمة
+        </a>
+        <span class="badge bg-danger px-3 py-2 fw-bold">نوتة الخادم الروحية 🕊️</span>
+    </div>
+
+    <!-- الترويسة -->
+    <div class="header-card text-center">
+        <h4 class="fw-bold mb-1"><i class="fa-solid fa-heart-pulse me-2"></i>خلوة ونوتة الخادم اليومية</h4>
+        <small id="ui-servant-info" class="opacity-90 d-block mb-2">جاري التحميل...</small>
+        <div class="bg-white bg-opacity-20 rounded-pill py-1 px-3 d-inline-block small">
+            «أَمَّا أَنَا فَبِكَثْرَةِ رَحْمَتِكَ أَدْخُلُ بَيْتَكَ، أَسْجُدُ فِي هَيْكَلِ قُدْسِكَ بِخَوْفِكَ»
+        </div>
+    </div>
+
+    <!-- رسائل النظام -->
+    <div id="system-msg" class="alert d-none fw-bold text-center" role="alert"></div>
+
+    <div class="card card-custom">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold text-danger mb-0"><i class="fa-solid fa-calendar-check me-1"></i> تسجيل وسائط النعمة لليوم</h6>
+        </div>
+
+        <form id="servant-spiritual-form">
+            <div class="mb-3">
+                <label class="form-label small fw-bold text-muted">اختر اليوم للمتابعة أو التسجيل:</label>
+                <input type="date" id="target_date" class="form-control text-center fw-bold" required onchange="onDateChanged(this.value)">
+            </div>
+
+            <!-- الكلمة المقدسة -->
+            <span class="group-label"><i class="fa-solid fa-book-bible me-1"></i> الكلمة المقدسة والخلوة:</span>
+            <label class="check-pill">
+                <input type="checkbox" id="bible_reading">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-book-open-reader text-primary me-1"></i> قراءة الأصحاح المخصص</strong><small class="text-muted">من الإنجيل اليومي وخطة القراءة السنوية</small></div>
+            </label>
+            <div class="mb-4">
+                <label class="form-label small text-muted" for="s_bible_note">تدوين آية أو تأمل سري من خلوتك:</label>
+                <textarea id="s_bible_note" class="form-control" rows="2" placeholder="اكتب آية لمست قلبك اليوم..."></textarea>
+            </div>
+
+            <!-- الأجبية -->
+            <span class="group-label"><i class="fa-solid fa-hands-praying me-1"></i> صلوات الأجبية اليومية:</span>
+            <label class="check-pill">
+                <input type="checkbox" id="prayed_baker">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-sun text-warning me-1"></i> صلاة باكر</strong><small class="text-muted">مزامير وإنجيل وطلبة باكر الصباحية</small></div>
+            </label>
+            <label class="check-pill">
+                <input type="checkbox" id="prayed_saasaa">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-clock text-secondary me-1"></i> الساعة الثالثة والسادسة</strong><small class="text-muted">صلوات النهار</small></div>
+            </label>
+            <label class="check-pill">
+                <input type="checkbox" id="prayed_ghoroub">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-cloud-sun text-info me-1"></i> صلاة الغروب</strong><small class="text-muted">الساعة الحادية عشرة</small></div>
+            </label>
+            <label class="check-pill mb-4">
+                <input type="checkbox" id="prayed_noam">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-moon text-primary me-1"></i> صلاة النوم</strong><small class="text-muted">الساعة الثانية عشرة</small></div>
+            </label>
+
+            <!-- الأسرار والجهاد -->
+            <span class="group-label"><i class="fa-solid fa-shield-heart me-1"></i> الأسرار والجهاد الروحي:</span>
+            <label class="check-pill">
+                <input type="checkbox" id="attended_mass">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-church text-success me-1"></i> حضور القداس والتناول</strong><small class="text-muted">المشاركة في سر الإفخارستيا</small></div>
+            </label>
+            <label class="check-pill">
+                <input type="checkbox" id="fasting">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-utensils text-danger me-1"></i> الصوم الانقطاعي</strong><small class="text-muted">حسب تقويم الكنيسة أو النذر</small></div>
+            </label>
+            <label class="check-pill">
+                <input type="checkbox" id="s_confession">
+                <div><strong class="d-block text-dark"><i class="fa-solid fa-dove text-primary me-1"></i> جلسة الاعتراف</strong><small class="text-muted">الاعتراف الشهري مع أب الاعتراف</small></div>
+            </label>
+            <button type="submit" id="save-btn" class="btn btn-danger w-100 py-2 fw-bold">
+                <i class="fa-solid fa-floppy-disk me-1"></i> حفظ تسجيل هذا اليوم
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script src="bible_plan.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    if (window.AuthClient) {
+        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
+    }
+
+    // ---------- الهوية: نفس جلسة بوابة الدخول (index.html) ----------
+    function getCurrentServant() {
+        try {
+            const u = JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user'));
+            return (u && (u.role === 'admin' || u.role === 'servant' || u.permission)) ? u : null;
+        } catch (e) { return null; }
+    }
+    const me = getCurrentServant();
+    if (!me || (me.role !== 'admin' && me.role !== 'servant')) { location.replace('index.html'); return; }
+
+    const servantCode = String(me.code || me.id || 'servant');
+    const STORE = 'khedmety_servant_spiritual_detailed';
+    const $ = id => document.getElementById(id);
+
+    $('app').style.display = '';
+    $('ui-servant-info').textContent = `${me.name || 'الخادم'} (كود: ${servantCode})`;
+
+    // تاريخ محلي (وليس UTC) حتى لا يتأخر اليوم فجراً
+    const dateKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const today = dateKey(new Date());
+    $('target_date').value = today;
+
+    const readJSON = (k) => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } };
+
+    // ---------- خطة القراءة والتعويض ----------
+    const FALLBACK = {
+        "10-1": { reading: "سفر يونان (1 إلى 4)", book: "يونان", chapter: 1, chapter_end: 4 },
+        "10-2": { reading: "سفر ميخا (1 إلى 3)", book: "ميخا", chapter: 1, chapter_end: 3 },
+        "10-3": { reading: "سفر ميخا (4 إلى 7)", book: "ميخا", chapter: 4, chapter_end: 7 },
+        "10-4": { reading: "سفر ناحوم (1 إلى 3)", book: "ناحوم", chapter: 1, chapter_end: 3 },
+        "10-5": { reading: "سفر حبقوق (1 إلى 3)", book: "حبقوق", chapter: 1, chapter_end: 3 },
+        "10-6": { reading: "سفر صفنيا (1 إلى 3)", book: "صفنيا", chapter: 1, chapter_end: 3 },
+        "10-7": { reading: "سفر حجي (1 إلى 2)", book: "حجي", chapter: 1, chapter_end: 2 }
+    };
+    let planCache = window.BIBLE_PLAN_DATA || null;
+
+    async function getPlan() {
+        if (planCache) return planCache;
+        try {
+            const res = await fetch('bible_plan.json');
+            if (res.ok) planCache = await res.json();
+        } catch (e) { /* نكمل بالخطة الاحتياطية */ }
+        return planCache || {};
+    }
+
+    // فحص صامت (بلا واجهة) لمعرفة هل قراءة إنجيل اليوم مُنجزة مسبقاً، ليُعلَّم مربع الاختيار تلقائياً
+    function isBibleAlreadyRead(selectedDate) {
+        const d = new Date(selectedDate + 'T00:00:00');
+        const planKey = `${d.getMonth() + 1}-${d.getDate()}`;
+        const readings = readJSON('khedmety_bible_readings') || {};
+        return !!(readings[planKey] || readings[`${planKey}_${servantCode}`] || readings[selectedDate]);
+    }
+
+    // ---------- استرجاع السجل المحفوظ (مع دعم الأسماء القديمة) ----------
+    function loadSavedLog(selectedDate, bibleAlreadyRead) {
+        const logs = readJSON(STORE);
+        const legacy = readJSON('khedmety_servant_spiritual');
+        const s = logs[`${selectedDate}_${servantCode}`] || legacy[`${selectedDate}_${servantCode}`] || null;
+        const set = (id, v) => { $(id).checked = !!v; };
+
+        set('bible_reading', s ? (s.bible || s.bible_reading) : bibleAlreadyRead);
+        $('s_bible_note').value = s ? (s.bibleNote || '') : '';
+        set('prayed_baker', s && (s.baker || s.prayed_baker));
+        set('prayed_saasaa', s && s.saasaa);
+        set('prayed_ghoroub', s && (s.ghoroub || s.prayed_ghoroub));
+        set('prayed_noam', s && s.noam);
+        set('attended_mass', s && (s.mass || s.attended_mass));
+        set('fasting', s && (s.fasting || s.fast));
+        set('s_confession', s && s.confession);
+    }
+
+    window.onDateChanged = function (val) {
+        if (!val) return;
+        loadSavedLog(val, isBibleAlreadyRead(val));
+    };
+
+    // ---------- الحفظ ----------
+    $('servant-spiritual-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const btn = $('save-btn'), msg = $('system-msg');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحفظ...';
+        msg.classList.add('d-none');
+
+        const payload = {
+            code: servantCode,
+            date: $('target_date').value,
+            bible: $('bible_reading').checked,
+            bibleNote: $('s_bible_note').value.trim(),
+            baker: $('prayed_baker').checked,
+            saasaa: $('prayed_saasaa').checked,
+            ghoroub: $('prayed_ghoroub').checked,
+            noam: $('prayed_noam').checked,
+            mass: $('attended_mass').checked,
+            fasting: $('fasting').checked,
+            confession: $('s_confession').checked,
+            updatedAt: Date.now()
+        };
+
+        try {
+            const logs = readJSON(STORE);
+            logs[`${payload.date}_${payload.code}`] = payload;
+            localStorage.setItem(STORE, JSON.stringify(logs));
+            msg.className = 'alert alert-success fw-bold text-center';
+            msg.textContent = 'تم حفظ تسجيل وسائط النعمة بنجاح!';
+        } catch (err) {
+            msg.className = 'alert alert-danger fw-bold text-center';
+            msg.textContent = 'تعذر الحفظ: مساحة التخزين ممتلئة أو التخزين غير متاح في هذا المتصفح.';
+        }
+
+        msg.classList.remove('d-none');
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> حفظ تسجيل هذا اليوم';
+        btn.disabled = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    window.onDateChanged(today);
+})();
+</script>
+</body>
+</html>

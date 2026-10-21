@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الترحيل الشامل لقاعدة البيانات إلى Firestore | خدمتي برو</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="auth-client.js"></script>
+<style>
+:root{--primary:#1e3799;--accent:#0984e3;--ok:#00b894;--warn:#f59e0b;--bad:#d63031}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;background:#f1f5f9;color:#1e293b;padding:16px 16px 50px}
+.wrap{max-width:780px;margin:auto}
+.btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:9px 16px;font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;text-decoration:none}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(9,132,227,.3)}
+.btn.primary:hover{color:#fff;filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.hero{background:linear-gradient(145deg,#0c2461,#1e3799 55%,#0984e3);color:#fff;border-radius:22px;padding:22px 20px;margin-bottom:16px}
+.hero h1{margin:0 0 4px;font-size:1.35rem;font-weight:800}
+.hero p{margin:0;opacity:.85;font-size:.9rem}
+.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.card h2{margin:0 0 10px;font-size:1rem;color:var(--primary)}
+.status{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem;margin-bottom:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#cbd5e1;flex:none}
+.dot.ok{background:var(--ok)} .dot.bad{background:var(--bad)} .dot.warn{background:var(--warn)}
+.log{background:#0f172a;color:#cbd5e1;border-radius:12px;padding:12px;font-family:monospace;font-size:.78rem;max-height:280px;overflow:auto;white-space:pre-wrap;line-height:1.7}
+.log .ok{color:#4ade80}.log .bad{color:#f87171}.log .warn{color:#fbbf24}
+.tip{background:#fffbeb;border-right:4px solid var(--warn);border-radius:10px;padding:10px 14px;font-size:.85rem;margin-top:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.locked{text-align:center;padding:60px 20px;color:#64748b}
+.grid-tables{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;margin-bottom:15px}
+.table-opt{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:12px;cursor:pointer;transition:.2s}
+.table-opt:hover{border-color:var(--accent)}
+.table-opt input{margin-left:6px;accent-color:var(--primary)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app" style="display:none">
+
+    <div class="topbar">
+        <a href="servant-dashboard.html" class="btn">← العودة للوحة التحكم</a>
+    </div>
+
+    <div class="hero">
+        <h1>🚀 الترحيل الشامل لقاعدة البيانات إلى Firestore</h1>
+        <p>تسحب هذه الأداة البيانات تلقائياً من قاعدة Realtime Database القديمة (أو من التخزين المحلي) وتنقلها مباشرة إلى Firestore.</p>
+    </div>
+
+    <div class="card">
+        <h2>حالة الاتصال بمشروع (khedmety-plus)</h2>
+        <div class="status"><span class="dot" id="dotRTDB"></span> Realtime DB (القديمة): <span id="txtRTDB">جاري الاتصال...</span></div>
+        <div class="status"><span class="dot" id="dotFS"></span> Firestore (الجديدة): <span id="txtFS">جاري الاتصال...</span></div>
+    </div>
+
+    <div class="card">
+        <h2>اختر الجداول (Collections) المراد ترحيلها</h2>
+        <div class="grid-tables">
+            <label class="table-opt"><input type="checkbox" name="col" value="members" checked> <b>المخدومين والدارسين</b> (members)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="servants" checked> <b>حسابات الخدام</b> (servants)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="attendance" checked> <b>سجل حضور المخدومين</b> (attendance)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="servants_attendance" checked> <b>سجل حضور الخدام</b> (servants_attendance)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="master_plan" checked> <b>خطة السنة والأجندة</b> (config/master_plan)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="course_materials" checked> <b>مكتبة المواد</b> (config/course_materials)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="self_reflections" checked> <b>النوتة والتقييمات</b> (config/self_reflections)</label>
+            <label class="table-opt"><input type="checkbox" name="col" value="settings" checked> <b>إعدادات الخدمة</b> (config/settings)</label>
+        </div>
+        <div class="row">
+            <button class="btn primary" id="btnMigrateAll" disabled>⏳ جاري تهيئة الاتصال...</button>
+        </div>
+    </div>
+
+    <div class="card" id="logCard" style="display:none">
+        <h2>سجل العمليات والتقدم</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <div class="tip">💡 تأكد أن قواعد Firestore Rules مضبوطة على <code>allow read, write: if true;</code> لكي يقبل السيرفر كتابة الجداول بدون أخطاء صلاحيات.</div>
+</div>
+
+<div id="locked" class="locked" style="display:none">🔒 هذه الأداة لأمين الخدمة فقط.</div>
+
+<script>
+(function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+
+    const HARDCODED_CONFIG = {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+
+    if (window.AuthClient) {
+        if (!AuthClient.enforceAuth(['admin'])) return;
+    } else {
+        function getUser() {
+            try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
+        }
+        const user = getUser();
+        if (!user || user.role !== 'admin') {
+            $('locked').style.display = '';
+            return;
+        }
+    }
+    $('app').style.display = '';
+
+    let rtdb = null, fsdb = null;
+    const log = (msg, cls) => {
+        $('logCard').style.display = '';
+        const line = document.createElement('div');
+        if (cls) line.className = cls;
+        line.textContent = `[${new Date().toLocaleTimeString('ar-EG')}] ${msg}`;
+        $('log').appendChild(line);
+        $('log').scrollTop =$('log').scrollHeight;
+    };
+    const setDot = (id, state, text) => { $('dot' + id).className = 'dot ' + state; $('txt' + id).textContent = text; };
+
+    async function initCloud() {
+        try {
+            localStorage.setItem('my_firebase_config', JSON.stringify(HARDCODED_CONFIG));
+            if (!firebase.apps.length) {
+                firebase.initializeApp(HARDCODED_CONFIG);
+            }
+            rtdb = firebase.database();
+            fsdb = firebase.firestore();
+            setDot('RTDB', 'ok', 'متصل بـ Realtime Database');
+            setDot('FS', 'ok', 'متصل بـ Firestore');
+            $('btnMigrateAll').disabled = false;
+            $('btnMigrateAll').textContent = '🚀 بدء الترحيل الشامل الآن';
+            return true;
+        } catch (e) {
+            setDot('RTDB', 'bad', 'فشل الاتصال: ' + (e.code || e.message));
+            setDot('FS', 'bad', 'فشل الاتصال');
+            return false;
+        }
+    }
+
+    async function readFromRtdbOrLocal(rtdbPath, localKey, isArray = true) {
+        try {
+            const snap = await rtdb.ref(rtdbPath).once('value');
+            if (snap.exists() && snap.val() != null) {
+                const val = snap.val();
+                if (isArray) return Array.isArray(val) ? val.filter(Boolean) : Object.values(val).filter(Boolean);
+                return val;
+            }
+        } catch (e) {
+            log(`⚠️ تعذر قراءة [${rtdbPath}] من RTDB، جاري الفحص محلياً...`, 'warn');
+        }
+        try {
+            const localVal = JSON.parse(localStorage.getItem(localKey));
+            if (localVal != null) return localVal;
+        } catch (e) {}
+        return isArray ? [] : {};
+    }
+
+    async function migrateCollection(name) {
+        log(`جاري تجهيز ترحيل الجدول: [${name}]...`);
+        try {
+            if (name === 'members') {
+                let list = await readFromRtdbOrLocal('members', 'my_church_class', true);
+                if (!list.length) { log(`ℹ️ الجدول [members] فارغ في القاعدة القديمة ومحلياً.`, 'warn'); return; }
+                for (let i = 0; i < list.length; i += 400) {
+                    let batch = fsdb.batch();
+                    list.slice(i, i + 400).forEach(m => {
+                        let docId = String(m.id || m.code || Date.now() + Math.random());
+                        batch.set(fsdb.collection('members').doc(docId), m, { merge: true });
+                    });
+                    await batch.commit();
+                }
+                log(`✔️ تم ترحيل ${list.length} سجل في [members] بنجاح.`, 'ok');
+            }
+            else if (name === 'servants') {
+                let list = await readFromRtdbOrLocal('servants', 'my_church_servants', true);
+                if (!list.length) { log(`ℹ️ الجدول [servants] فارغ في القاعدة القديمة ومحلياً.`, 'warn'); return; }
+                let batch = fsdb.batch();
+                list.forEach(s => {
+                    let docId = String(s.id || s.code || Date.now() + Math.random());
+                    batch.set(fsdb.collection('servants').doc(docId), s, { merge: true });
+                });
+                await batch.commit();
+                log(`✔️ تم ترحيل ${list.length} سجل في [servants] بنجاح.`, 'ok');
+            }
+            else if (name === 'attendance') {
+                let fullAtt = await readFromRtdbOrLocal('attendance', 'my_church_attendance', false);
+                let dates = Object.keys(fullAtt || {});
+                if (!dates.length) { log(`ℹ️ لا توجد تواريخ حضور مسجلة.`, 'warn'); return; }
+                for (let d of dates) {
+                    let node = fullAtt[d];
+                    let partitionObj = {};
+                    if (Array.isArray(node)) {
+                        node.filter(Boolean).forEach(item => {
+                            let p = (item.code || item.id || '').toString().replace(/\D/g, '');
+                            if (p) partitionObj[p] = item;
+                        });
+                    } else if (node && typeof node === 'object') {
+                        partitionObj = node;
+                    }
+                    await fsdb.collection('attendance').doc(d).set(partitionObj, { merge: true });
+                }
+                log(`✔️ تم ترحيل سجلات حضور المخدومين لـ (${dates.length}) يوماً بنجاح.`, 'ok');
+            }
+            else if (name === 'servants_attendance') {
+                let fullServAtt = await readFromRtdbOrLocal('servants_attendance', 'my_church_servants_attendance', false);
+                let dates = Object.keys(fullServAtt || {});
+                if (!dates.length) { log(`ℹ️ لا توجد سجلات حضور خدام.`, 'warn'); return; }
+                for (let d of dates) {
+                    let node = fullServAtt[d];
+                    let list = Array.isArray(node) ? node.filter(Boolean) : ((node && node.list) ? node.list : Object.values(node || {}).filter(Boolean));
+                    await fsdb.collection('servants_attendance').doc(d).set({ list: list }, { merge: true });
+                }
+                log(`✔️ تم ترحيل سجلات حضور الخدام لـ (${dates.length}) يوماً بنجاح.`, 'ok');
+            }
+            else if (name === 'master_plan') {
+                let plan = await readFromRtdbOrLocal('master_plan', 'my_church_master_plan', true);
+                await fsdb.collection('config').doc('master_plan').set({ list: plan }, { merge: true });
+                log(`✔️ تم ترحيل خطة السنة والأجندة (${plan.length} فعالية) بنجاح.`, 'ok');
+            }
+            else if (name === 'course_materials') {
+                let mats = await readFromRtdbOrLocal('course_materials', 'khedmety_course_materials', true);
+                await fsdb.collection('config').doc('course_materials').set({ list: mats }, { merge: true });
+                log(`✔️ تم ترحيل مكتبة المواد (${mats.length} مادة) بنجاح.`, 'ok');
+            }
+            else if (name === 'self_reflections') {
+                let refs = await readFromRtdbOrLocal('self_reflections', 'khedmety_self_reflections', true);
+                await fsdb.collection('config').doc('self_reflections').set({ list: refs }, { merge: true });
+                log(`✔️ تم ترحيل التقييمات والنوتة بنجاح.`, 'ok');
+            }
+            else if (name === 'settings') {
+                let sets = await readFromRtdbOrLocal('settings', 'my_church_settings', false);
+                await fsdb.collection('config').doc('settings').set(sets || {}, { merge: true });
+                log(`✔️ تم ترحيل إعدادات الخدمة بنجاح.`, 'ok');
+            }
+        } catch (e) {
+            log(`❌ خطأ أثناء ترحيل [${name}]: ${e.code || e.message}`, 'bad');
+        }
+    }
+
+    $('btnMigrateAll').addEventListener('click', async () => {
+        let checkboxes = document.querySelectorAll('input[name="col"]:checked');
+        if (!checkboxes.length) return alert("اختر جدولاً واحداً على الأقل للترحيل!");
+        if (!confirm("هل أنت متأكد من بدء عملية الترحيل الشامل إلى Firestore؟")) return;
+
+        $('btnMigrateAll').disabled = true;
+        log('=== بدء عملية الترحيل الشامل إلى Firestore ===');
+        for (let chk of checkboxes) {
+            await migrateCollection(chk.value);
+        }
+        log('🎉 انتهت عملية الترحيل الشامل!', 'ok');
+        $('btnMigrateAll').disabled = false;
+    });
+
+    (async () => { await initCloud(); })();
+})();
+</script>
+</body>
+</html>

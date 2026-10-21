@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e3799">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<title>تسجيل الخروج | خدمتي برو</title>
+<style>
+  body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Tajawal','Segoe UI',Tahoma,sans-serif;
+       background:linear-gradient(145deg,#0c2461,#1e3799 45%,#0984e3);color:#fff;text-align:center}
+  p{font-size:18px;font-weight:700}
+  a{color:#fdcb6e}
+</style>
+</head>
+<body>
+<div>
+  <p>جاري تسجيل الخروج…</p>
+  <noscript><a href="index.html">اضغط هنا للعودة لصفحة الدخول</a></noscript>
+</div>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="auth-client.js"></script>
+<script>
+// يمسح بيانات الجلسة السحابية والمحلية دون المساس بسجلات النوتة والقراءات
+(async function() {
+  try {
+    if (window.AuthClient && typeof AuthClient.logout === 'function') {
+      AuthClient.logout('index.html');
+      return;
+    }
+  } catch (e) {
+    console.warn('Logout fallback notice:', e);
+  }
+  ['student_code','student_name','student_level','student_points','user_role','my_church_active_user','auth_token','my_active_session_id']
+    .forEach(function(k){ try{ localStorage.removeItem(k); sessionStorage.removeItem(k); }catch(e){} });
+  location.replace('index.html');
+})();
+</script>
+</body>
+</html>

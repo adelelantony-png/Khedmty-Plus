@@ -1,0 +1,2198 @@
+{
+  "1-1": {
+    "reading": "تكوين من 1 إلى 3",
+    "book": "التكوين",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "1-2": {
+    "reading": "تكوين من 4 إلى 7",
+    "book": "التكوين",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "1-3": {
+    "reading": "تكوين من 8 إلى 10",
+    "book": "التكوين",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "1-4": {
+    "reading": "تكوين من 11 إلى 14",
+    "book": "التكوين",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "1-5": {
+    "reading": "تكوين من 15 إلى 17",
+    "book": "التكوين",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "1-6": {
+    "reading": "تكوين من 18 إلى 21",
+    "book": "التكوين",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "1-7": {
+    "reading": "تكوين من 22 إلى 25",
+    "book": "التكوين",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "1-8": {
+    "reading": "تكوين من 26 إلى 28",
+    "book": "التكوين",
+    "chapter": 26,
+    "chapter_end": 28
+  },
+  "1-9": {
+    "reading": "تكوين من 29 إلى 32",
+    "book": "التكوين",
+    "chapter": 29,
+    "chapter_end": 32
+  },
+  "1-10": {
+    "reading": "تكوين من 33 إلى 35",
+    "book": "التكوين",
+    "chapter": 33,
+    "chapter_end": 35
+  },
+  "1-11": {
+    "reading": "تكوين من 36 إلى 39",
+    "book": "التكوين",
+    "chapter": 36,
+    "chapter_end": 39
+  },
+  "1-12": {
+    "reading": "تكوين من 40 إلى 42",
+    "book": "التكوين",
+    "chapter": 40,
+    "chapter_end": 42
+  },
+  "1-13": {
+    "reading": "تكوين من 43 إلى 46",
+    "book": "التكوين",
+    "chapter": 43,
+    "chapter_end": 46
+  },
+  "1-14": {
+    "reading": "تكوين من 47 إلى 50",
+    "book": "التكوين",
+    "chapter": 47,
+    "chapter_end": 50
+  },
+  "1-15": {
+    "reading": "خروج من 1 إلى 3",
+    "book": "الخروج",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "1-16": {
+    "reading": "خروج من 4 إلى 7",
+    "book": "الخروج",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "1-17": {
+    "reading": "خروج من 8 إلى 10",
+    "book": "الخروج",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "1-18": {
+    "reading": "خروج من 11 إلى 14",
+    "book": "الخروج",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "1-19": {
+    "reading": "خروج من 15 إلى 18",
+    "book": "الخروج",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "1-20": {
+    "reading": "خروج من 19 إلى 21",
+    "book": "الخروج",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "1-21": {
+    "reading": "خروج من 22 إلى 25",
+    "book": "الخروج",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "1-22": {
+    "reading": "خروج من 26 إلى 29",
+    "book": "الخروج",
+    "chapter": 26,
+    "chapter_end": 29
+  },
+  "1-23": {
+    "reading": "خروج من 30 إلى 32",
+    "book": "الخروج",
+    "chapter": 30,
+    "chapter_end": 32
+  },
+  "1-24": {
+    "reading": "خروج من 33 إلى 36",
+    "book": "الخروج",
+    "chapter": 33,
+    "chapter_end": 36
+  },
+  "1-25": {
+    "reading": "خروج من 37 إلى 40",
+    "book": "الخروج",
+    "chapter": 37,
+    "chapter_end": 40
+  },
+  "1-26": {
+    "reading": "لاويين من 1 إلى 3",
+    "book": "اللاويين",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "1-27": {
+    "reading": "لاويين من 4 إلى 7",
+    "book": "اللاويين",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "1-28": {
+    "reading": "لاويين من 8 إلى 11",
+    "book": "اللاويين",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "1-29": {
+    "reading": "لاويين من 12 إلى 15",
+    "book": "اللاويين",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "1-30": {
+    "reading": "لاويين من 16 إلى 19",
+    "book": "اللاويين",
+    "chapter": 16,
+    "chapter_end": 19
+  },
+  "1-31": {
+    "reading": "لاويين من 20 إلى 23",
+    "book": "اللاويين",
+    "chapter": 20,
+    "chapter_end": 23
+  },
+  "2-1": {
+    "reading": "لاويين من 24 إلى 27",
+    "book": "اللاويين",
+    "chapter": 24,
+    "chapter_end": 27
+  },
+  "2-2": {
+    "reading": "العدد من 1 إلى 3",
+    "book": "العدد",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "2-3": {
+    "reading": "العدد من 4 إلى 7",
+    "book": "العدد",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "2-4": {
+    "reading": "العدد من 8 إلى 10",
+    "book": "العدد",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "2-5": {
+    "reading": "العدد من 11 إلى 14",
+    "book": "العدد",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "2-6": {
+    "reading": "العدد من 15 إلى 18",
+    "book": "العدد",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "2-7": {
+    "reading": "العدد من 19 إلى 21",
+    "book": "العدد",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "2-8": {
+    "reading": "العدد من 22 إلى 25",
+    "book": "العدد",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "2-9": {
+    "reading": "العدد من 26 إلى 28",
+    "book": "العدد",
+    "chapter": 26,
+    "chapter_end": 28
+  },
+  "2-10": {
+    "reading": "العدد من 29 إلى 32",
+    "book": "العدد",
+    "chapter": 29,
+    "chapter_end": 32
+  },
+  "2-11": {
+    "reading": "العدد من 33 إلى 36",
+    "book": "العدد",
+    "chapter": 33,
+    "chapter_end": 36
+  },
+  "2-12": {
+    "reading": "تثنية من 1 إلى 3",
+    "book": "التثنية",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "2-13": {
+    "reading": "تثنية من 4 إلى 7",
+    "book": "التثنية",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "2-14": {
+    "reading": "تثنية من 8 إلى 11",
+    "book": "التثنية",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "2-15": {
+    "reading": "تثنية من 12 إلى 15",
+    "book": "التثنية",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "2-16": {
+    "reading": "تثنية من 16 إلى 18",
+    "book": "التثنية",
+    "chapter": 16,
+    "chapter_end": 18
+  },
+  "2-17": {
+    "reading": "تثنية من 19 إلى 22",
+    "book": "التثنية",
+    "chapter": 19,
+    "chapter_end": 22
+  },
+  "2-18": {
+    "reading": "تثنية من 23 إلى 26",
+    "book": "التثنية",
+    "chapter": 23,
+    "chapter_end": 26
+  },
+  "2-19": {
+    "reading": "تثنية من 27 إلى 30",
+    "book": "التثنية",
+    "chapter": 27,
+    "chapter_end": 30
+  },
+  "2-20": {
+    "reading": "تثنية من 31 إلى 34",
+    "book": "التثنية",
+    "chapter": 31,
+    "chapter_end": 34
+  },
+  "2-21": {
+    "reading": "يشوع من 1 إلى 3",
+    "book": "يشوع",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "2-22": {
+    "reading": "يشوع من 4 إلى 6",
+    "book": "يشوع",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "2-23": {
+    "reading": "يشوع من 7 إلى 10",
+    "book": "يشوع",
+    "chapter": 7,
+    "chapter_end": 10
+  },
+  "2-24": {
+    "reading": "يشوع من 11 إلى 13",
+    "book": "يشوع",
+    "chapter": 11,
+    "chapter_end": 13
+  },
+  "2-25": {
+    "reading": "يشوع من 14 إلى 17",
+    "book": "يشوع",
+    "chapter": 14,
+    "chapter_end": 17
+  },
+  "2-26": {
+    "reading": "يشوع من 18 إلى 20",
+    "book": "يشوع",
+    "chapter": 18,
+    "chapter_end": 20
+  },
+  "2-27": {
+    "reading": "يشوع من 21 إلى 24",
+    "book": "يشوع",
+    "chapter": 21,
+    "chapter_end": 24
+  },
+  "2-28": {
+    "reading": "قضاة من 1 إلى 3",
+    "book": "القضاة",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "2-29": {
+    "reading": "قضاة من 4 إلى 7",
+    "book": "القضاة",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "3-1": {
+    "reading": "قضاة من 8 إلى 10",
+    "book": "القضاة",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "3-2": {
+    "reading": "قضاة من 11 إلى 14",
+    "book": "القضاة",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "3-3": {
+    "reading": "قضاة من 15 إلى 17",
+    "book": "القضاة",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "3-4": {
+    "reading": "قضاة من 18 إلى 21",
+    "book": "القضاة",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "3-5": {
+    "reading": "راعوث من 1 إلى 4",
+    "book": "راعوث",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "3-6": {
+    "reading": "صموئيل الأول من 1 إلى 3",
+    "book": "صموئيل الأول",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "3-7": {
+    "reading": "صموئيل الأول من 4 إلى 7",
+    "book": "صموئيل الأول",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "3-8": {
+    "reading": "صموئيل الأول من 8 إلى 11",
+    "book": "صموئيل الأول",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "3-9": {
+    "reading": "صموئيل الأول من 12 إلى 15",
+    "book": "صموئيل الأول",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "3-10": {
+    "reading": "صموئيل الأول من 16 إلى 19",
+    "book": "صموئيل الأول",
+    "chapter": 16,
+    "chapter_end": 19
+  },
+  "3-11": {
+    "reading": "صموئيل الأول من 20 إلى 23",
+    "book": "صموئيل الأول",
+    "chapter": 20,
+    "chapter_end": 23
+  },
+  "3-12": {
+    "reading": "صموئيل الأول من 24 إلى 27",
+    "book": "صموئيل الأول",
+    "chapter": 24,
+    "chapter_end": 27
+  },
+  "3-13": {
+    "reading": "صموئيل الأول من 28 إلى 31",
+    "book": "صموئيل الأول",
+    "chapter": 28,
+    "chapter_end": 31
+  },
+  "3-14": {
+    "reading": "صموئيل الثاني من 1 إلى 4",
+    "book": "صموئيل الثاني",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "3-15": {
+    "reading": "صموئيل الثاني من 5 إلى 8",
+    "book": "صموئيل الثاني",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "3-16": {
+    "reading": "صموئيل الثاني من 9 إلى 12",
+    "book": "صموئيل الثاني",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "3-17": {
+    "reading": "صموئيل الثاني من 13 إلى 16",
+    "book": "صموئيل الثاني",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "3-18": {
+    "reading": "صموئيل الثاني من 17 إلى 20",
+    "book": "صموئيل الثاني",
+    "chapter": 17,
+    "chapter_end": 20
+  },
+  "3-19": {
+    "reading": "صموئيل الثاني من 21 إلى 24",
+    "book": "صموئيل الثاني",
+    "chapter": 21,
+    "chapter_end": 24
+  },
+  "3-20": {
+    "reading": "ملوك الأول من 1 إلى 3",
+    "book": "الملوك الأول",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "3-21": {
+    "reading": "ملوك الأول من 4 إلى 7",
+    "book": "الملوك الأول",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "3-22": {
+    "reading": "ملوك الأول من 8 إلى 11",
+    "book": "الملوك الأول",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "3-23": {
+    "reading": "ملوك الأول من 12 إلى 14",
+    "book": "الملوك الأول",
+    "chapter": 12,
+    "chapter_end": 14
+  },
+  "3-24": {
+    "reading": "ملوك الأول من 15 إلى 18",
+    "book": "الملوك الأول",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "3-25": {
+    "reading": "ملوك الأول من 19 إلى 22",
+    "book": "الملوك الأول",
+    "chapter": 19,
+    "chapter_end": 22
+  },
+  "3-26": {
+    "reading": "ملوك الثاني من 1 إلى 3",
+    "book": "الملوك الثاني",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "3-27": {
+    "reading": "ملوك الثاني من 4 إلى 7",
+    "book": "الملوك الثاني",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "3-28": {
+    "reading": "ملوك الثاني من 8 إلى 10",
+    "book": "الملوك الثاني",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "3-29": {
+    "reading": "ملوك الثاني من 11 إلى 14",
+    "book": "الملوك الثاني",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "3-30": {
+    "reading": "ملوك الثاني من 15 إلى 17",
+    "book": "الملوك الثاني",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "3-31": {
+    "reading": "ملوك الثاني من 18 إلى 21",
+    "book": "الملوك الثاني",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "4-1": {
+    "reading": "ملوك الثاني من 22 إلى 25",
+    "book": "الملوك الثاني",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "4-2": {
+    "reading": "أخبار الأيام الأول من 1 إلى 3",
+    "book": "أخبار الأيام الأول",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "4-3": {
+    "reading": "أخبار الأيام الأول من 4 إلى 7",
+    "book": "أخبار الأيام الأول",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "4-4": {
+    "reading": "أخبار الأيام الأول من 8 إلى 10",
+    "book": "أخبار الأيام الأول",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "4-5": {
+    "reading": "أخبار الأيام الأول من 11 إلى 14",
+    "book": "أخبار الأيام الأول",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "4-6": {
+    "reading": "أخبار الأيام الأول من 15 إلى 18",
+    "book": "أخبار الأيام الأول",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "4-7": {
+    "reading": "أخبار الأيام الأول من 19 إلى 21",
+    "book": "أخبار الأيام الأول",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "4-8": {
+    "reading": "أخبار الأيام الأول من 22 إلى 25",
+    "book": "أخبار الأيام الأول",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "4-9": {
+    "reading": "أخبار الأيام الأول من 26 إلى 29",
+    "book": "أخبار الأيام الأول",
+    "chapter": 26,
+    "chapter_end": 29
+  },
+  "4-10": {
+    "reading": "أخبار الأيام الثاني من 1 إلى 3",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "4-11": {
+    "reading": "أخبار الأيام الثاني من 4 إلى 7",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "4-12": {
+    "reading": "أخبار الأيام الثاني من 8 إلى 10",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "4-13": {
+    "reading": "أخبار الأيام الثاني من 11 إلى 14",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "4-14": {
+    "reading": "أخبار الأيام الثاني من 15 إلى 18",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "4-15": {
+    "reading": "أخبار الأيام الثاني من 19 إلى 21",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "4-16": {
+    "reading": "أخبار الأيام الثاني من 22 إلى 25",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "4-17": {
+    "reading": "أخبار الأيام الثاني من 26 إلى 28",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 26,
+    "chapter_end": 28
+  },
+  "4-18": {
+    "reading": "أخبار الأيام الثاني من 29 إلى 32",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 29,
+    "chapter_end": 32
+  },
+  "4-19": {
+    "reading": "أخبار الأيام الثاني من 33 إلى 36",
+    "book": "أخبار الأيام الثاني",
+    "chapter": 33,
+    "chapter_end": 36
+  },
+  "4-20": {
+    "reading": "عزرا من 1 إلى 3",
+    "book": "عزرا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "4-21": {
+    "reading": "عزرا من 4 إلى 6",
+    "book": "عزرا",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "4-22": {
+    "reading": "عزرا من 7 إلى 10",
+    "book": "عزرا",
+    "chapter": 7,
+    "chapter_end": 10
+  },
+  "4-23": {
+    "reading": "نحميا من 1 إلى 4",
+    "book": "نحميا",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "4-24": {
+    "reading": "نحميا من 5 إلى 8",
+    "book": "نحميا",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "4-25": {
+    "reading": "نحميا من 9 إلى 13",
+    "book": "نحميا",
+    "chapter": 9,
+    "chapter_end": 13
+  },
+  "4-26": {
+    "reading": "طوبيا من 1 إلى 3",
+    "book": "طوبيا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "4-27": {
+    "reading": "طوبيا من 4 إلى 7",
+    "book": "طوبيا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "4-28": {
+    "reading": "طوبيا من 8 إلى 10",
+    "book": "طوبيا",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "4-29": {
+    "reading": "طوبيا من 11 إلى 14",
+    "book": "طوبيا",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "4-30": {
+    "reading": "يهوديت من 1 إلى 4",
+    "book": "يهوديت",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "5-1": {
+    "reading": "يهوديت من 5 إلى 8",
+    "book": "يهوديت",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "5-2": {
+    "reading": "يهوديت من 9 إلى 12",
+    "book": "يهوديت",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "5-3": {
+    "reading": "يهوديت من 13 إلى 16",
+    "book": "يهوديت",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "5-4": {
+    "reading": "أستير من 1 إلى 3",
+    "book": "أستير",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "5-5": {
+    "reading": "أستير من 4 إلى 6",
+    "book": "أستير",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "5-6": {
+    "reading": "أستير من 7 إلى 10",
+    "book": "أستير",
+    "chapter": 7,
+    "chapter_end": 10
+  },
+  "5-7": {
+    "reading": "تتمة أستير من 1 إلى 3",
+    "book": "تتمة أستير",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "5-8": {
+    "reading": "تتمة أستير من 4 إلى 6",
+    "book": "تتمة أستير",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "5-9": {
+    "reading": "أيوب من 1 إلى 3",
+    "book": "أيوب",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "5-10": {
+    "reading": "أيوب من 4 إلى 7",
+    "book": "أيوب",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "5-11": {
+    "reading": "أيوب من 8 إلى 11",
+    "book": "أيوب",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "5-12": {
+    "reading": "أيوب من 12 إلى 15",
+    "book": "أيوب",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "5-13": {
+    "reading": "أيوب من 16 إلى 19",
+    "book": "أيوب",
+    "chapter": 16,
+    "chapter_end": 19
+  },
+  "5-14": {
+    "reading": "أيوب من 20 إلى 22",
+    "book": "أيوب",
+    "chapter": 20,
+    "chapter_end": 22
+  },
+  "5-15": {
+    "reading": "أيوب من 23 إلى 26",
+    "book": "أيوب",
+    "chapter": 23,
+    "chapter_end": 26
+  },
+  "5-16": {
+    "reading": "أيوب من 27 إلى 30",
+    "book": "أيوب",
+    "chapter": 27,
+    "chapter_end": 30
+  },
+  "5-17": {
+    "reading": "أيوب من 31 إلى 34",
+    "book": "أيوب",
+    "chapter": 31,
+    "chapter_end": 34
+  },
+  "5-18": {
+    "reading": "أيوب من 35 إلى 38",
+    "book": "أيوب",
+    "chapter": 35,
+    "chapter_end": 38
+  },
+  "5-19": {
+    "reading": "أيوب من 39 إلى 42",
+    "book": "أيوب",
+    "chapter": 39,
+    "chapter_end": 42
+  },
+  "5-20": {
+    "reading": "مزامير من 1 إلى 8",
+    "book": "المزامير",
+    "chapter": 1,
+    "chapter_end": 8
+  },
+  "5-21": {
+    "reading": "مزامير من 9 إلى 13",
+    "book": "المزامير",
+    "chapter": 9,
+    "chapter_end": 13
+  },
+  "5-22": {
+    "reading": "مزامير من 14 إلى 17",
+    "book": "المزامير",
+    "chapter": 14,
+    "chapter_end": 17
+  },
+  "5-23": {
+    "reading": "مزامير 18",
+    "book": "المزامير",
+    "chapter": 18,
+    "chapter_end": 18
+  },
+  "5-24": {
+    "reading": "مزامير من 19 إلى 21",
+    "book": "المزامير",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "5-25": {
+    "reading": "مزامير من 22 إلى 24",
+    "book": "المزامير",
+    "chapter": 22,
+    "chapter_end": 24
+  },
+  "5-26": {
+    "reading": "مزامير من 25 إلى 27",
+    "book": "المزامير",
+    "chapter": 25,
+    "chapter_end": 27
+  },
+  "5-27": {
+    "reading": "مزامير من 28 إلى 32",
+    "book": "المزامير",
+    "chapter": 28,
+    "chapter_end": 32
+  },
+  "5-28": {
+    "reading": "مزامير من 33 إلى 34",
+    "book": "المزامير",
+    "chapter": 33,
+    "chapter_end": 34
+  },
+  "5-29": {
+    "reading": "مزامير من 35 إلى 36",
+    "book": "المزامير",
+    "chapter": 35,
+    "chapter_end": 36
+  },
+  "5-30": {
+    "reading": "مزامير 37",
+    "book": "المزامير",
+    "chapter": 37,
+    "chapter_end": 37
+  },
+  "5-31": {
+    "reading": "مزامير من 38 إلى 40",
+    "book": "المزامير",
+    "chapter": 38,
+    "chapter_end": 40
+  },
+  "6-1": {
+    "reading": "مزامير من 41 إلى 44",
+    "book": "المزامير",
+    "chapter": 41,
+    "chapter_end": 44
+  },
+  "6-2": {
+    "reading": "مزامير من 45 إلى 48",
+    "book": "المزامير",
+    "chapter": 45,
+    "chapter_end": 48
+  },
+  "6-3": {
+    "reading": "مزامير من 49 إلى 51",
+    "book": "المزامير",
+    "chapter": 49,
+    "chapter_end": 51
+  },
+  "6-4": {
+    "reading": "مزامير من 52 إلى 56",
+    "book": "المزامير",
+    "chapter": 52,
+    "chapter_end": 56
+  },
+  "6-5": {
+    "reading": "مزامير من 57 إلى 61",
+    "book": "المزامير",
+    "chapter": 57,
+    "chapter_end": 61
+  },
+  "6-6": {
+    "reading": "مزامير من 62 إلى 65",
+    "book": "المزامير",
+    "chapter": 62,
+    "chapter_end": 65
+  },
+  "6-7": {
+    "reading": "مزامير من 66 إلى 68",
+    "book": "المزامير",
+    "chapter": 66,
+    "chapter_end": 68
+  },
+  "6-8": {
+    "reading": "مزامير من 69 إلى 70",
+    "book": "المزامير",
+    "chapter": 69,
+    "chapter_end": 70
+  },
+  "6-9": {
+    "reading": "مزامير من 71 إلى 73",
+    "book": "المزامير",
+    "chapter": 71,
+    "chapter_end": 73
+  },
+  "6-10": {
+    "reading": "مزامير من 74 إلى 76",
+    "book": "المزامير",
+    "chapter": 74,
+    "chapter_end": 76
+  },
+  "6-11": {
+    "reading": "مزامير من 77 إلى 78",
+    "book": "المزامير",
+    "chapter": 77,
+    "chapter_end": 78
+  },
+  "6-12": {
+    "reading": "مزامير من 79 إلى 82",
+    "book": "المزامير",
+    "chapter": 79,
+    "chapter_end": 82
+  },
+  "6-13": {
+    "reading": "مزامير من 83 إلى 86",
+    "book": "المزامير",
+    "chapter": 83,
+    "chapter_end": 86
+  },
+  "6-14": {
+    "reading": "مزامير من 87 إلى 89",
+    "book": "المزامير",
+    "chapter": 87,
+    "chapter_end": 89
+  },
+  "6-15": {
+    "reading": "مزامير من 90 إلى 93",
+    "book": "المزامير",
+    "chapter": 90,
+    "chapter_end": 93
+  },
+  "6-16": {
+    "reading": "مزامير من 94 إلى 98",
+    "book": "المزامير",
+    "chapter": 94,
+    "chapter_end": 98
+  },
+  "6-17": {
+    "reading": "مزامير من 99 إلى 103",
+    "book": "المزامير",
+    "chapter": 99,
+    "chapter_end": 103
+  },
+  "6-18": {
+    "reading": "مزامير من 104 إلى 105",
+    "book": "المزامير",
+    "chapter": 104,
+    "chapter_end": 105
+  },
+  "6-19": {
+    "reading": "مزامير من 106 إلى 107",
+    "book": "المزامير",
+    "chapter": 106,
+    "chapter_end": 107
+  },
+  "6-20": {
+    "reading": "مزامير من 108 إلى 111",
+    "book": "المزامير",
+    "chapter": 108,
+    "chapter_end": 111
+  },
+  "6-21": {
+    "reading": "مزامير من 112 إلى 118",
+    "book": "المزامير",
+    "chapter": 112,
+    "chapter_end": 118
+  },
+  "6-22": {
+    "reading": "مزامير 119 (1: 48)",
+    "book": "المزامير",
+    "chapter": 119,
+    "chapter_end": 119
+  },
+  "6-23": {
+    "reading": "مزامير 119 (49: 104)",
+    "book": "المزامير",
+    "chapter": 119,
+    "chapter_end": 119
+  },
+  "6-24": {
+    "reading": "مزامير 119 (105: 176)",
+    "book": "المزامير",
+    "chapter": 119,
+    "chapter_end": 119
+  },
+  "6-25": {
+    "reading": "مزامير من 120 إلى 131",
+    "book": "المزامير",
+    "chapter": 120,
+    "chapter_end": 131
+  },
+  "6-26": {
+    "reading": "مزامير من 132 إلى 135",
+    "book": "المزامير",
+    "chapter": 132,
+    "chapter_end": 135
+  },
+  "6-27": {
+    "reading": "مزامير من 136 إلى 138",
+    "book": "المزامير",
+    "chapter": 136,
+    "chapter_end": 138
+  },
+  "6-28": {
+    "reading": "مزامير من 139 إلى 142",
+    "book": "المزامير",
+    "chapter": 139,
+    "chapter_end": 142
+  },
+  "6-29": {
+    "reading": "مزامير من 143 إلى 146",
+    "book": "المزامير",
+    "chapter": 143,
+    "chapter_end": 146
+  },
+  "6-30": {
+    "reading": "مزامير من 147 إلى 151",
+    "book": "المزامير",
+    "chapter": 147,
+    "chapter_end": 151
+  },
+  "7-1": {
+    "reading": "أمثال من 1 إلى 3",
+    "book": "الأمثال",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "7-2": {
+    "reading": "أمثال من 4 إلى 7",
+    "book": "الأمثال",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "7-3": {
+    "reading": "أمثال من 8 إلى 11",
+    "book": "الأمثال",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "7-4": {
+    "reading": "أمثال من 12 إلى 15",
+    "book": "الأمثال",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "7-5": {
+    "reading": "أمثال من 16 إلى 19",
+    "book": "الأمثال",
+    "chapter": 16,
+    "chapter_end": 19
+  },
+  "7-6": {
+    "reading": "أمثال من 20 إلى 23",
+    "book": "الأمثال",
+    "chapter": 20,
+    "chapter_end": 23
+  },
+  "7-7": {
+    "reading": "أمثال من 24 إلى 27",
+    "book": "الأمثال",
+    "chapter": 24,
+    "chapter_end": 27
+  },
+  "7-8": {
+    "reading": "أمثال من 28 إلى 31",
+    "book": "الأمثال",
+    "chapter": 28,
+    "chapter_end": 31
+  },
+  "7-9": {
+    "reading": "جامعة من 1 إلى 4",
+    "book": "الجامعة",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "7-10": {
+    "reading": "جامعة من 5 إلى 8",
+    "book": "الجامعة",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "7-11": {
+    "reading": "جامعة من 9 إلى 12",
+    "book": "الجامعة",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "7-12": {
+    "reading": "نشيد الأنشاد من 1 إلى 4",
+    "book": "نشيد الأنشاد",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "7-13": {
+    "reading": "نشيد الأنشاد من 5 إلى 8",
+    "book": "نشيد الأنشاد",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "7-14": {
+    "reading": "حكمة من 1 إلى 3",
+    "book": "حكمة",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "7-15": {
+    "reading": "حكمة من 4 إلى 7",
+    "book": "حكمة",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "7-16": {
+    "reading": "حكمة من 8 إلى 11",
+    "book": "حكمة",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "7-17": {
+    "reading": "حكمة من 12 إلى 15",
+    "book": "حكمة",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "7-18": {
+    "reading": "حكمة من 16 إلى 19",
+    "book": "حكمة",
+    "chapter": 16,
+    "chapter_end": 19
+  },
+  "7-19": {
+    "reading": "يشوع بن سيراخ من 1 إلى 3",
+    "book": "يشوع بن سيراخ",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "7-20": {
+    "reading": "يشوع بن سيراخ من 4 إلى 7",
+    "book": "يشوع بن سيراخ",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "7-21": {
+    "reading": "يشوع بن سيراخ من 8 إلى 10",
+    "book": "يشوع بن سيراخ",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "7-22": {
+    "reading": "يشوع بن سيراخ من 11 إلى 14",
+    "book": "يشوع بن سيراخ",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "7-23": {
+    "reading": "يشوع بن سيراخ من 15 إلى 18",
+    "book": "يشوع بن سيراخ",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "7-24": {
+    "reading": "يشوع بن سيراخ من 19 إلى 21",
+    "book": "يشوع بن سيراخ",
+    "chapter": 19,
+    "chapter_end": 21
+  },
+  "7-25": {
+    "reading": "يشوع بن سيراخ من 22 إلى 25",
+    "book": "يشوع بن سيراخ",
+    "chapter": 22,
+    "chapter_end": 25
+  },
+  "7-26": {
+    "reading": "يشوع بن سيراخ من 26 إلى 29",
+    "book": "يشوع بن سيراخ",
+    "chapter": 26,
+    "chapter_end": 29
+  },
+  "7-27": {
+    "reading": "يشوع بن سيراخ من 30 إلى 32",
+    "book": "يشوع بن سيراخ",
+    "chapter": 30,
+    "chapter_end": 32
+  },
+  "7-28": {
+    "reading": "يشوع بن سيراخ من 33 إلى 36",
+    "book": "يشوع بن سيراخ",
+    "chapter": 33,
+    "chapter_end": 36
+  },
+  "7-29": {
+    "reading": "يشوع بن سيراخ من 37 إلى 40",
+    "book": "يشوع بن سيراخ",
+    "chapter": 37,
+    "chapter_end": 40
+  },
+  "7-30": {
+    "reading": "يشوع بن سيراخ من 41 إلى 43",
+    "book": "يشوع بن سيراخ",
+    "chapter": 41,
+    "chapter_end": 43
+  },
+  "7-31": {
+    "reading": "يشوع بن سيراخ من 44 إلى 47",
+    "book": "يشوع بن سيراخ",
+    "chapter": 44,
+    "chapter_end": 47
+  },
+  "8-1": {
+    "reading": "يشوع بن سيراخ من 48 إلى 51",
+    "book": "يشوع بن سيراخ",
+    "chapter": 48,
+    "chapter_end": 51
+  },
+  "8-2": {
+    "reading": "إشعياء من 1 إلى 3",
+    "book": "إشعياء",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "8-3": {
+    "reading": "إشعياء من 4 إلى 7",
+    "book": "إشعياء",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "8-4": {
+    "reading": "إشعياء من 8 إلى 11",
+    "book": "إشعياء",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "8-5": {
+    "reading": "إشعياء من 12 إلى 14",
+    "book": "إشعياء",
+    "chapter": 12,
+    "chapter_end": 14
+  },
+  "8-6": {
+    "reading": "إشعياء من 15 إلى 18",
+    "book": "إشعياء",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "8-7": {
+    "reading": "إشعياء من 19 إلى 22",
+    "book": "إشعياء",
+    "chapter": 19,
+    "chapter_end": 22
+  },
+  "8-8": {
+    "reading": "إشعياء من 23 إلى 25",
+    "book": "إشعياء",
+    "chapter": 23,
+    "chapter_end": 25
+  },
+  "8-9": {
+    "reading": "إشعياء من 26 إلى 29",
+    "book": "إشعياء",
+    "chapter": 26,
+    "chapter_end": 29
+  },
+  "8-10": {
+    "reading": "إشعياء من 30 إلى 33",
+    "book": "إشعياء",
+    "chapter": 30,
+    "chapter_end": 33
+  },
+  "8-11": {
+    "reading": "إشعياء من 34 إلى 36",
+    "book": "إشعياء",
+    "chapter": 34,
+    "chapter_end": 36
+  },
+  "8-12": {
+    "reading": "إشعياء من 37 إلى 40",
+    "book": "إشعياء",
+    "chapter": 37,
+    "chapter_end": 40
+  },
+  "8-13": {
+    "reading": "إشعياء من 41 إلى 44",
+    "book": "إشعياء",
+    "chapter": 41,
+    "chapter_end": 44
+  },
+  "8-14": {
+    "reading": "إشعياء من 45 إلى 47",
+    "book": "إشعياء",
+    "chapter": 45,
+    "chapter_end": 47
+  },
+  "8-15": {
+    "reading": "إشعياء من 48 إلى 51",
+    "book": "إشعياء",
+    "chapter": 48,
+    "chapter_end": 51
+  },
+  "8-16": {
+    "reading": "إشعياء من 52 إلى 55",
+    "book": "إشعياء",
+    "chapter": 52,
+    "chapter_end": 55
+  },
+  "8-17": {
+    "reading": "إشعياء من 56 إلى 58",
+    "book": "إشعياء",
+    "chapter": 56,
+    "chapter_end": 58
+  },
+  "8-18": {
+    "reading": "إشعياء من 59 إلى 62",
+    "book": "إشعياء",
+    "chapter": 59,
+    "chapter_end": 62
+  },
+  "8-19": {
+    "reading": "إشعياء من 63 إلى 66",
+    "book": "إشعياء",
+    "chapter": 63,
+    "chapter_end": 66
+  },
+  "8-20": {
+    "reading": "إرميا من 1 إلى 3",
+    "book": "إرميا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "8-21": {
+    "reading": "إرميا من 4 إلى 7",
+    "book": "إرميا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "8-22": {
+    "reading": "إرميا من 8 إلى 11",
+    "book": "إرميا",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "8-23": {
+    "reading": "إرميا من 12 إلى 14",
+    "book": "إرميا",
+    "chapter": 12,
+    "chapter_end": 14
+  },
+  "8-24": {
+    "reading": "إرميا من 15 إلى 18",
+    "book": "إرميا",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "8-25": {
+    "reading": "إرميا من 19 إلى 22",
+    "book": "إرميا",
+    "chapter": 19,
+    "chapter_end": 22
+  },
+  "8-26": {
+    "reading": "إرميا من 23 إلى 26",
+    "book": "إرميا",
+    "chapter": 23,
+    "chapter_end": 26
+  },
+  "8-27": {
+    "reading": "إرميا من 27 إلى 29",
+    "book": "إرميا",
+    "chapter": 27,
+    "chapter_end": 29
+  },
+  "8-28": {
+    "reading": "إرميا من 30 إلى 33",
+    "book": "إرميا",
+    "chapter": 30,
+    "chapter_end": 33
+  },
+  "8-29": {
+    "reading": "إرميا من 34 إلى 37",
+    "book": "إرميا",
+    "chapter": 34,
+    "chapter_end": 37
+  },
+  "8-30": {
+    "reading": "إرميا من 38 إلى 40",
+    "book": "إرميا",
+    "chapter": 38,
+    "chapter_end": 40
+  },
+  "8-31": {
+    "reading": "إرميا من 41 إلى 44",
+    "book": "إرميا",
+    "chapter": 41,
+    "chapter_end": 44
+  },
+  "9-1": {
+    "reading": "إرميا من 45 إلى 48",
+    "book": "إرميا",
+    "chapter": 45,
+    "chapter_end": 48
+  },
+  "9-2": {
+    "reading": "إرميا من 49 إلى 52",
+    "book": "إرميا",
+    "chapter": 49,
+    "chapter_end": 52
+  },
+  "9-3": {
+    "reading": "مراثي إرميا من 1 إلى 5",
+    "book": "مراثي إرميا",
+    "chapter": 1,
+    "chapter_end": 5
+  },
+  "9-4": {
+    "reading": "باروخ من 1 إلى 3",
+    "book": "باروخ",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "9-5": {
+    "reading": "باروخ من 4 إلى 6",
+    "book": "باروخ",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "9-6": {
+    "reading": "حزقيال من 1 إلى 3",
+    "book": "حزقيال",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "9-7": {
+    "reading": "حزقيال من 4 إلى 7",
+    "book": "حزقيال",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "9-8": {
+    "reading": "حزقيال من 8 إلى 11",
+    "book": "حزقيال",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "9-9": {
+    "reading": "حزقيال من 12 إلى 14",
+    "book": "حزقيال",
+    "chapter": 12,
+    "chapter_end": 14
+  },
+  "9-10": {
+    "reading": "حزقيال من 15 إلى 18",
+    "book": "حزقيال",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "9-11": {
+    "reading": "حزقيال من 19 إلى 22",
+    "book": "حزقيال",
+    "chapter": 19,
+    "chapter_end": 22
+  },
+  "9-12": {
+    "reading": "حزقيال من 23 إلى 25",
+    "book": "حزقيال",
+    "chapter": 23,
+    "chapter_end": 25
+  },
+  "9-13": {
+    "reading": "حزقيال من 26 إلى 29",
+    "book": "حزقيال",
+    "chapter": 26,
+    "chapter_end": 29
+  },
+  "9-14": {
+    "reading": "حزقيال من 30 إلى 33",
+    "book": "حزقيال",
+    "chapter": 30,
+    "chapter_end": 33
+  },
+  "9-15": {
+    "reading": "حزقيال من 34 إلى 36",
+    "book": "حزقيال",
+    "chapter": 34,
+    "chapter_end": 36
+  },
+  "9-16": {
+    "reading": "حزقيال من 37 إلى 40",
+    "book": "حزقيال",
+    "chapter": 37,
+    "chapter_end": 40
+  },
+  "9-17": {
+    "reading": "حزقيال من 41 إلى 44",
+    "book": "حزقيال",
+    "chapter": 41,
+    "chapter_end": 44
+  },
+  "9-18": {
+    "reading": "حزقيال من 45 إلى 48",
+    "book": "حزقيال",
+    "chapter": 45,
+    "chapter_end": 48
+  },
+  "9-19": {
+    "reading": "دانيال من 1 إلى 4",
+    "book": "دانيال",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "9-20": {
+    "reading": "دانيال من 5 إلى 8",
+    "book": "دانيال",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "9-21": {
+    "reading": "دانيال من 9 إلى 12",
+    "book": "دانيال",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "9-22": {
+    "reading": "تتمة دانيال من 1 إلى 2",
+    "book": "تتمة دانيال",
+    "chapter": 1,
+    "chapter_end": 2
+  },
+  "9-23": {
+    "reading": "هوشع من 1 إلى 3",
+    "book": "هوشع",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "9-24": {
+    "reading": "هوشع من 4 إلى 7",
+    "book": "هوشع",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "9-25": {
+    "reading": "هوشع من 8 إلى 10",
+    "book": "هوشع",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "9-26": {
+    "reading": "هوشع من 11 إلى 14",
+    "book": "هوشع",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "9-27": {
+    "reading": "يوئيل من 1 إلى 3",
+    "book": "يوئيل",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "9-28": {
+    "reading": "عاموس من 1 إلى 4",
+    "book": "عاموس",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "9-29": {
+    "reading": "عاموس من 5 إلى 9",
+    "book": "عاموس",
+    "chapter": 5,
+    "chapter_end": 9
+  },
+  "9-30": {
+    "reading": "عوبديا 1",
+    "book": "عوبديا",
+    "chapter": 1,
+    "chapter_end": 1
+  },
+  "10-1": {
+    "reading": "يونان من 1 إلى 4",
+    "book": "يونان",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "10-2": {
+    "reading": "ميخا من 1 إلى 3",
+    "book": "ميخا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-3": {
+    "reading": "ميخا من 4 إلى 7",
+    "book": "ميخا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "10-4": {
+    "reading": "ناحوم من 1 إلى 3",
+    "book": "ناحوم",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-5": {
+    "reading": "حبقوق من 1 إلى 3",
+    "book": "حبقوق",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-6": {
+    "reading": "صفنيا من 1 إلى 3",
+    "book": "صفنيا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-7": {
+    "reading": "حجي من 1 إلى 2",
+    "book": "حجي",
+    "chapter": 1,
+    "chapter_end": 2
+  },
+  "10-8": {
+    "reading": "زكريا من 1 إلى 3",
+    "book": "زكريا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-9": {
+    "reading": "زكريا من 4 إلى 7",
+    "book": "زكريا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "10-10": {
+    "reading": "زكريا من 8 إلى 10",
+    "book": "زكريا",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "10-11": {
+    "reading": "زكريا من 11 إلى 14",
+    "book": "زكريا",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "10-12": {
+    "reading": "ملاخي من 1 إلى 4",
+    "book": "ملاخي",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "10-13": {
+    "reading": "مكابيين الأول من 1 إلى 4",
+    "book": "المكابيين الأول",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "10-14": {
+    "reading": "مكابيين الأول من 5 إلى 8",
+    "book": "المكابيين الأول",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "10-15": {
+    "reading": "مكابيين الأول من 9 إلى 12",
+    "book": "المكابيين الأول",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "10-16": {
+    "reading": "مكابيين الأول من 13 إلى 16",
+    "book": "المكابيين الأول",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "10-17": {
+    "reading": "مكابيين الثاني من 1 إلى 3",
+    "book": "المكابيين الثاني",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-18": {
+    "reading": "مكابيين الثاني من 4 إلى 7",
+    "book": "المكابيين الثاني",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "10-19": {
+    "reading": "مكابيين الثاني من 8 إلى 11",
+    "book": "المكابيين الثاني",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "10-20": {
+    "reading": "مكابيين الثاني من 12 إلى 15",
+    "book": "المكابيين الثاني",
+    "chapter": 12,
+    "chapter_end": 15
+  },
+  "10-21": {
+    "reading": "متى من 1 إلى 3",
+    "book": "إنجيل متى",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "10-22": {
+    "reading": "متى من 4 إلى 7",
+    "book": "إنجيل متى",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "10-23": {
+    "reading": "متى من 8 إلى 10",
+    "book": "إنجيل متى",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "10-24": {
+    "reading": "متى من 11 إلى 14",
+    "book": "إنجيل متى",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "10-25": {
+    "reading": "متى من 15 إلى 17",
+    "book": "إنجيل متى",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "10-26": {
+    "reading": "متى من 18 إلى 21",
+    "book": "إنجيل متى",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "10-27": {
+    "reading": "متى من 22 إلى 24",
+    "book": "إنجيل متى",
+    "chapter": 22,
+    "chapter_end": 24
+  },
+  "10-28": {
+    "reading": "متى من 25 إلى 28",
+    "book": "إنجيل متى",
+    "chapter": 25,
+    "chapter_end": 28
+  },
+  "10-29": {
+    "reading": "مرقس من 1 إلى 4",
+    "book": "إنجيل مرقس",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "10-30": {
+    "reading": "مرقس من 5 إلى 8",
+    "book": "إنجيل مرقس",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "10-31": {
+    "reading": "مرقس من 9 إلى 12",
+    "book": "إنجيل مرقس",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "11-1": {
+    "reading": "مرقس من 13 إلى 16",
+    "book": "إنجيل مرقس",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "11-2": {
+    "reading": "لوقا من 1 إلى 4",
+    "book": "إنجيل لوقا",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "11-3": {
+    "reading": "لوقا من 5 إلى 8",
+    "book": "إنجيل لوقا",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "11-4": {
+    "reading": "لوقا من 9 إلى 12",
+    "book": "إنجيل لوقا",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "11-5": {
+    "reading": "لوقا من 13 إلى 16",
+    "book": "إنجيل لوقا",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "11-6": {
+    "reading": "لوقا من 17 إلى 20",
+    "book": "إنجيل لوقا",
+    "chapter": 17,
+    "chapter_end": 20
+  },
+  "11-7": {
+    "reading": "لوقا من 21 إلى 24",
+    "book": "إنجيل لوقا",
+    "chapter": 21,
+    "chapter_end": 24
+  },
+  "11-8": {
+    "reading": "يوحنا من 1 إلى 3",
+    "book": "إنجيل يوحنا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "11-9": {
+    "reading": "يوحنا من 4 إلى 7",
+    "book": "إنجيل يوحنا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "11-10": {
+    "reading": "يوحنا من 8 إلى 10",
+    "book": "إنجيل يوحنا",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "11-11": {
+    "reading": "يوحنا من 11 إلى 14",
+    "book": "إنجيل يوحنا",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "11-12": {
+    "reading": "يوحنا من 15 إلى 17",
+    "book": "إنجيل يوحنا",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "11-13": {
+    "reading": "يوحنا من 18 إلى 21",
+    "book": "إنجيل يوحنا",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "11-14": {
+    "reading": "أعمال الرسل من 1 إلى 3",
+    "book": "سفر أعمال الرسل",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "11-15": {
+    "reading": "أعمال الرسل من 4 إلى 7",
+    "book": "سفر أعمال الرسل",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "11-16": {
+    "reading": "أعمال الرسل من 8 إلى 10",
+    "book": "سفر أعمال الرسل",
+    "chapter": 8,
+    "chapter_end": 10
+  },
+  "11-17": {
+    "reading": "أعمال الرسل من 11 إلى 14",
+    "book": "سفر أعمال الرسل",
+    "chapter": 11,
+    "chapter_end": 14
+  },
+  "11-18": {
+    "reading": "أعمال الرسل من 15 إلى 17",
+    "book": "سفر أعمال الرسل",
+    "chapter": 15,
+    "chapter_end": 17
+  },
+  "11-19": {
+    "reading": "أعمال الرسل من 18 إلى 21",
+    "book": "سفر أعمال الرسل",
+    "chapter": 18,
+    "chapter_end": 21
+  },
+  "11-20": {
+    "reading": "أعمال الرسل من 22 إلى 24",
+    "book": "سفر أعمال الرسل",
+    "chapter": 22,
+    "chapter_end": 24
+  },
+  "11-21": {
+    "reading": "أعمال الرسل من 25 إلى 28",
+    "book": "سفر أعمال الرسل",
+    "chapter": 25,
+    "chapter_end": 28
+  },
+  "11-22": {
+    "reading": "رومية من 1 إلى 4",
+    "book": "رومية",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "11-23": {
+    "reading": "رومية من 5 إلى 8",
+    "book": "رومية",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "11-24": {
+    "reading": "رومية من 9 إلى 12",
+    "book": "رومية",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "11-25": {
+    "reading": "رومية من 13 إلى 16",
+    "book": "رومية",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "11-26": {
+    "reading": "كورنثوس الأولى من 1 إلى 4",
+    "book": "كورنثوس الأولى",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "11-27": {
+    "reading": "كورنثوس الأولى من 5 إلى 8",
+    "book": "كورنثوس الأولى",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "11-28": {
+    "reading": "كورنثوس الأولى من 9 إلى 12",
+    "book": "كورنثوس الأولى",
+    "chapter": 9,
+    "chapter_end": 12
+  },
+  "11-29": {
+    "reading": "كورنثوس الأولى من 13 إلى 16",
+    "book": "كورنثوس الأولى",
+    "chapter": 13,
+    "chapter_end": 16
+  },
+  "11-30": {
+    "reading": "كورنثوس الثانية من 1 إلى 4",
+    "book": "كورنثوس الثانية",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "12-1": {
+    "reading": "كورنثوس الثانية من 5 إلى 8",
+    "book": "كورنثوس الثانية",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "12-2": {
+    "reading": "كورنثوس الثانية من 9 إلى 13",
+    "book": "كورنثوس الثانية",
+    "chapter": 9,
+    "chapter_end": 13
+  },
+  "12-3": {
+    "reading": "غلاطية من 1 إلى 3",
+    "book": "غلاطية",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-4": {
+    "reading": "غلاطية من 4 إلى 6",
+    "book": "غلاطية",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "12-5": {
+    "reading": "أفسس من 1 إلى 3",
+    "book": "أفسس",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-6": {
+    "reading": "أفسس من 4 إلى 6",
+    "book": "أفسس",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "12-7": {
+    "reading": "فيلبي من 1 إلى 4",
+    "book": "فيلبي",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "12-8": {
+    "reading": "كولوسي من 1 إلى 4",
+    "book": "كولوسي",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "12-9": {
+    "reading": "تسالونيكي الأولى من 1 إلى 5",
+    "book": "تسالونيكي الأولى",
+    "chapter": 1,
+    "chapter_end": 5
+  },
+  "12-10": {
+    "reading": "تسالونيكي الثانية من 1 إلى 3",
+    "book": "تسالونيكي الثانية",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-11": {
+    "reading": "تيموثاوس الأولى من 1 إلى 3",
+    "book": "تيموثاوس الأولى",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-12": {
+    "reading": "تيموثاوس الأولى من 4 إلى 6",
+    "book": "تيموثاوس الأولى",
+    "chapter": 4,
+    "chapter_end": 6
+  },
+  "12-13": {
+    "reading": "تيموثاوس الثانية من 1 إلى 4",
+    "book": "تيموثاوس الثانية",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "12-14": {
+    "reading": "تيطس من 1 إلى 3",
+    "book": "تيطس",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-15": {
+    "reading": "فليمون 1",
+    "book": "فليمون",
+    "chapter": 1,
+    "chapter_end": 1
+  },
+  "12-16": {
+    "reading": "عبرانيين من 1 إلى 4",
+    "book": "العبرانيين",
+    "chapter": 1,
+    "chapter_end": 4
+  },
+  "12-17": {
+    "reading": "عبرانيين من 5 إلى 8",
+    "book": "العبرانيين",
+    "chapter": 5,
+    "chapter_end": 8
+  },
+  "12-18": {
+    "reading": "عبرانيين من 9 إلى 13",
+    "book": "العبرانيين",
+    "chapter": 9,
+    "chapter_end": 13
+  },
+  "12-19": {
+    "reading": "يعقوب من 1 إلى 5",
+    "book": "يعقوب",
+    "chapter": 1,
+    "chapter_end": 5
+  },
+  "12-20": {
+    "reading": "بطرس الأولى من 1 إلى 5",
+    "book": "بطرس الأولى",
+    "chapter": 1,
+    "chapter_end": 5
+  },
+  "12-21": {
+    "reading": "بطرس الثانية من 1 إلى 3",
+    "book": "بطرس الثانية",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-22": {
+    "reading": "يوحنا الأولى من 1 إلى 5",
+    "book": "يوحنا الأولى",
+    "chapter": 1,
+    "chapter_end": 5
+  },
+  "12-23": {
+    "reading": "يوحنا الثانية 1",
+    "book": "يوحنا الثانية",
+    "chapter": 1,
+    "chapter_end": 1
+  },
+  "12-24": {
+    "reading": "يوحنا الثالثة 1",
+    "book": "يوحنا الثالثة",
+    "chapter": 1,
+    "chapter_end": 1
+  },
+  "12-25": {
+    "reading": "يهوذا 1",
+    "book": "يهوذا",
+    "chapter": 1,
+    "chapter_end": 1
+  },
+  "12-26": {
+    "reading": "رؤيا من 1 إلى 3",
+    "book": "سفر الرؤيا",
+    "chapter": 1,
+    "chapter_end": 3
+  },
+  "12-27": {
+    "reading": "رؤيا من 4 إلى 7",
+    "book": "سفر الرؤيا",
+    "chapter": 4,
+    "chapter_end": 7
+  },
+  "12-28": {
+    "reading": "رؤيا من 8 إلى 11",
+    "book": "سفر الرؤيا",
+    "chapter": 8,
+    "chapter_end": 11
+  },
+  "12-29": {
+    "reading": "رؤيا من 12 إلى 14",
+    "book": "سفر الرؤيا",
+    "chapter": 12,
+    "chapter_end": 14
+  },
+  "12-30": {
+    "reading": "رؤيا من 15 إلى 18",
+    "book": "سفر الرؤيا",
+    "chapter": 15,
+    "chapter_end": 18
+  },
+  "12-31": {
+    "reading": "رؤيا من 19 إلى 22",
+    "book": "سفر الرؤيا",
+    "chapter": 19,
+    "chapter_end": 22
+  }
+}
