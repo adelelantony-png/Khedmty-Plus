@@ -71,17 +71,17 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
 
     <form id="form" autocomplete="off" novalidate>
       <div class="field">
-        <label for="u">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</label>
+        <label for="u">كود الامتحان (للطلبة) أو اسم الخادم (للخدام)</label>
         <div class="input">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-          <input id="u" type="text" placeholder="اكتب اسم الخادم أو كود الامتحان" autofocus>
+          <input id="u" type="text" placeholder="اكتب كود الامتحان (مثلاً: 1446) أو اسم الخادم" autofocus>
         </div>
       </div>
       <div class="field">
-        <label for="p">كلمة المرور / رقم الهاتف</label>
+        <label for="p">رقم الهاتف المسجل بالكشف (للطلبة) / كلمة المرور (للخدام)</label>
         <div class="input">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <input id="p" type="password" placeholder="كلمة المرور الخاصة بك أو رقم الهاتف" autocomplete="current-password">
+          <input id="p" type="password" placeholder="أدخل رقم الهاتف المسجل بالكشف (01xxxxxxxxx)" autocomplete="current-password">
           <button type="button" class="eye" id="eye" aria-label="إظهار كلمة المرور">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -90,9 +90,9 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
       <div class="row">
         <label><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
       </div>
-      <button type="submit" id="btn" class="btn">تسجيل الدخول</button>
+      <button type="submit" id="btn" class="btn">عرض النتيجة والملف 🎓</button>
     </form>
-    <p class="hint" id="hint">نسيت بياناتك؟ تواصل مع أمين الخدمة.</p>
+    <p class="hint" id="hint">💡 للطلبة: اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض نتيجتك وملفك بأمان.</p>
   </div>
   <div class="verse">اعبدوا الرب بفرح<small>مزمور ١٠٠: ٢</small></div>
 </main>
