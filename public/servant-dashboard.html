@@ -3260,13 +3260,21 @@ function exportFollowupToExcel() {
             if (servants.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="9" class="empty-state">لا يوجد خدام مسجلون.</td></tr>';
             }
+            let seenKeys = new Set();
             servants.forEach(s => {
+                let key = (s.code || s.id || '').toString().trim();
+                if (key && seenKeys.has(key)) return;
+                if (key) seenKeys.add(key);
+
+                let cleanDob = (s.dob || '').toString().trim().split(' ')[0].split('T')[0];
+                let cleanPhone = (s.phone || '').toString().trim().replace(/\.0$/, '');
+
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td data-label="كود الخادم">${escapeHtml(s.code) || escapeHtml(s.id)}</td>
                     <td data-label="الاسم"><strong>${escapeHtml(s.name)}</strong></td>
-                    <td data-label="الهاتف">${escapeHtml(s.phone)}</td>
-                    <td data-label="تاريخ الميلاد">${escapeHtml(s.dob) || '-'}</td>
+                    <td data-label="الهاتف">${escapeHtml(cleanPhone)}</td>
+                    <td data-label="تاريخ الميلاد">${escapeHtml(cleanDob) || '-'}</td>
                     <td data-label="الصلاحية"><span class="role-badge" style="background:var(--accent);">${escapeHtml(s.permission || s.role || 'خادم')}</span></td>
                     <td data-label="الحساب السحابي">${s.cloudUid
                         ? '<span style="color:var(--success); font-weight:bold; font-size:11px;">مربوط ✅</span>'
