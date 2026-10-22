@@ -3288,6 +3288,24 @@ function exportFollowupToExcel() {
             updateRoleUI();
         }
 
+        function normalizePhoneNumber(raw) {
+            if (!raw) return '';
+            let s = String(raw).trim().replace(/\.0$/, '').replace(/[\s\-]/g, '');
+            const arDigits = '٠١٢٣٤٥٦٧٨٩';
+            let clean = '';
+            for (let i = 0; i < s.length; i++) {
+                let idx = arDigits.indexOf(s[i]);
+                if (idx !== -1) clean += idx;
+                else clean += s[i];
+            }
+            if (clean.startsWith('20') && clean.length === 12) {
+                clean = '0' + clean.slice(2);
+            } else if (!clean.startsWith('0') && clean.length === 10) {
+                clean = '0' + clean;
+            }
+            return clean;
+        }
+
         function addServantManual() {
             // حماية: لا يسمح بإضافة خادم أو أدمن إلا إذا كان المستخدم الحالي أدمن حقيقي
             if (currentPermission !== 'admin') {
@@ -3295,37 +3313,66 @@ function exportFollowupToExcel() {
             }
 
             let name = document.getElementById('newServantName').value.trim();
-            let phone = document.getElementById('newServantPhone').value.trim();
+            let rawPhone = document.getElementById('newServantPhone').value.trim();
             let code = document.getElementById('newServantCode').value.trim();
             let dob = document.getElementById('newServantDob').value;
             let perm = document.getElementById('newServantPermission').value;
-            if (!name || !phone) return alert("يرجى إدخال اسم ورقم هاتف الخادم (أو كلمة المرور)!");
+            if (!name || !rawPhone) return alert("يرجى إدخال اسم ورقم هاتف الخادم (أو كلمة المرور)!");
 
-            let newId = Date.now();
+            // 1. تنظيف وتوحيد رقم الهاتف
+            let phone = normalizePhoneNumber(rawPhone) || rawPhone;
+
+            // 2. التحقق الصارم من عدم تكرار الاسم
+            let duplicateName = servants.some(s => (s.name || '').trim().toLowerCase() === name.toLowerCase());
+            if (duplicateName) {
+                return alert(`⛔ تنبيه: اسم الخادم "${name}" مسجل بالفعل في المنظومة ولا يقبل التكرار!`);
+            }
+
+            // 3. التحقق الصارم من عدم تكرار رقم الهاتف
+            let duplicatePhone = servants.some(s => normalizePhoneNumber(s.phone) === phone);
+            if (duplicatePhone) {
+                return alert(`⛔ تنبيه: رقم الهاتف "${phone}" مسجل بالفعل لخادم آخر ولا يمكن تكراره!`);
+            }
+
+            // 4. تحديد الكود التلقائي إن لم يُكتب
+            let finalCode = code;
+            if (!finalCode) {
+                let maxCode = 100;
+                servants.forEach(s => {
+                    let c = parseInt(s.code || s.id);
+                    if (!isNaN(c) && c > maxCode && c < 1000) maxCode = c;
+                });
+                finalCode = (maxCode + 1).toString();
+            }
+
+            let cleanDob = (dob || '').toString().trim().split(' ')[0].split('T')[0];
+
             let newS = {
-                id: newId,
+                id: finalCode,
+                code: finalCode,
                 name: name,
                 phone: phone,
-                code: code || (servants.length + 101).toString(),
-                dob: dob || "",
+                dob: cleanDob,
                 role: perm === 'admin' ? 'admin' : 'servant',
                 permission: perm,
-                roleType: perm === 'admin' ? 'أمين خدمة' : 'خادم'
+                roleType: perm === 'admin' ? 'أمين خدمة' : 'خادم',
+                stage: 'عام',
+                status: 'active'
             };
 
             servants.push(newS);
             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
 
-            // حفظ مباشر وفوري كوثيقة مستقلة في Firestore داخل جدول servants
+            // حفظ مباشر وفوري كوثيقة بكود الخادم في Firestore
             if (isFirebaseActive && fsdb) {
-                fsdb.collection('servants').doc(String(newId)).set(newS)
-                    .then(() => showToast("✅ تم حفظ الحساب في قاعدة البيانات السحابية فوراً!"))
+                fsdb.collection('servants').doc(String(finalCode)).set(newS)
+                    .then(() => showToast("✅ تم حفظ الخادم في قاعدة البيانات السحابية فوراً!"))
                     .catch(() => syncToCloud('servants', servants));
             } else {
                 syncToCloud('servants', servants);
             }
 
-            logActivity("إضافة خادم/أدمن", name, `صلاحية: ${perm}`);
+            logActivity("إضافة خادم/أدمن", name, `كود: ${finalCode} | صلاحية: ${perm}`);
             renderServantsTable();
             renderServantsAttendanceTable();
             populatePlanServantsDropdown();
@@ -3335,16 +3382,35 @@ function exportFollowupToExcel() {
         }
 
         function editServant(id) {
-            let s = servants.find(x => x.id === id);
+            let s = servants.find(x => String(x.id) === String(id) || String(x.code) === String(id));
             if (!s) return;
             let oldSnapshot = Object.assign({}, s);
             let newName = prompt("تعديل اسم الخادم:", s.name);
-            if (newName) s.name = newName.trim();
+            if (newName && newName.trim()) {
+                let checkName = newName.trim();
+                let dupName = servants.some(x => String(x.id) !== String(id) && String(x.code) !== String(id) && (x.name || '').trim().toLowerCase() === checkName.toLowerCase());
+                if (dupName) {
+                    return alert(`⛔ تنبيه: الاسم "${checkName}" مسجل بالفعل لخادم آخر ولا يقبل التكرار!`);
+                }
+                s.name = checkName;
+            }
             let newPhone = prompt("تعديل رقم الهاتف:", s.phone);
-            if (newPhone) s.phone = newPhone.trim();
+            if (newPhone && newPhone.trim()) {
+                let checkPhone = normalizePhoneNumber(newPhone.trim()) || newPhone.trim();
+                let dupPhone = servants.some(x => String(x.id) !== String(id) && String(x.code) !== String(id) && normalizePhoneNumber(x.phone) === checkPhone);
+                if (dupPhone) {
+                    return alert(`⛔ تنبيه: رقم الهاتف "${checkPhone}" مسجل بالفعل لخادم آخر ولا يمكن تكراره!`);
+                }
+                s.phone = checkPhone;
+            }
             saveVersionSnapshot('servant', s.id, oldSnapshot.name, oldSnapshot);
             localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
-            syncToCloud('servants', servants);
+            if (isFirebaseActive && fsdb) {
+                fsdb.collection('servants').doc(String(s.code || s.id)).set(s, { merge: true })
+                    .catch(() => syncToCloud('servants', servants));
+            } else {
+                syncToCloud('servants', servants);
+            }
             logActivity("تعديل خادم", s.name, `هاتف: ${s.phone}`);
             renderServantsTable();
             renderServantsAttendanceTable();
