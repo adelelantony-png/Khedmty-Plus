@@ -64,6 +64,18 @@
   </div>
 
   <script>
+    // حماية الصفحة من F12 وفحص العناصر
+    document.addEventListener('contextmenu', e => e.preventDefault(), { capture: true });
+    window.addEventListener('keydown', e => {
+      if (e.key === 'F12' || e.keyCode === 123 ||
+          (e.ctrlKey && e.shiftKey && (['I','i','J','j','C','c'].includes(e.key) || [73,74,67].includes(e.keyCode))) ||
+          (e.ctrlKey && (['U','u','S','s'].includes(e.key) || [85,83].includes(e.keyCode)))) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    }, { capture: true });
+
     // تمرير كود الطالب تلقائياً إن كان مسجلاً بالمتصفح أو بالرابط
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code') || localStorage.getItem('student_code') || '';

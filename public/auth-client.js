@@ -343,6 +343,46 @@
         }
     }
 
+
+    // ==========================================
+    // حماية شاملة لجميع شاشات الموقع ضد F12 و DevTools وفحص العناصر
+    // ==========================================
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        // 1. تعطيل زر الفأرة الأيمن لمنع القوائم وفحص العناصر Inspect
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            return false;
+        }, { capture: true });
+
+        // 2. حظر مفاتيح المطورين F12 واختصارات لوحة المفاتيح
+        window.addEventListener('keydown', function (e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+Shift+I (Inspect), Ctrl+Shift+J (Console), Ctrl+Shift+C (Inspect Element)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+U (عرض كود المصدر View Source)
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            // Ctrl+S (حفظ الصفحة Save Page)
+            if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, { capture: true });
+    }
+
     if (root) {
         root.AuthClient = AuthClient;
     }
