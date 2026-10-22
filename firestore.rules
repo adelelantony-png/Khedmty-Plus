@@ -93,10 +93,18 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ---- 7. الخطة السنوية والأنشطة ----
+    // ---- 7. الخطة السنوية والأنشطة وإعدادات التكوين ----
+    match /config/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
     match /masterPlan/{id} {
-      allow read: if isStaff();
-      allow write: if isFull();
+      allow read: if signedIn();
+      allow write: if isStaff();
+    }
+    match /master_plan/{id} {
+      allow read: if signedIn();
+      allow write: if isStaff();
     }
 
     // ---- 8. إعدادات وسنة الخدمة ----
