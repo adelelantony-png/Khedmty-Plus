@@ -1688,8 +1688,38 @@
         }
 
         // ==========================================
-        // 2. نظام قياس التخزين المحلي
+        // 2. نظام قياس وحماية التخزين المحلي (LocalStorage Guard)
         // ==========================================
+        function autoPruneStorageIfNearFull() {
+            try {
+                let totalBytes = 0;
+                for (let key in localStorage) {
+                    if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+                        totalBytes += (localStorage[key].length + key.length) * 2;
+                    }
+                }
+                // إجراء وقائي ذكي عند تجاوز الاستهلاك 75%
+                if (totalBytes > (MAX_LOCAL_STORAGE_BYTES * 0.75)) {
+                    // 1. تقليص سجلات التدقيق لأحدث 50 سجلاً
+                    try {
+                        let logs = JSON.parse(localStorage.getItem(STORAGE_KEYS.AUDIT_LOGS) || '[]');
+                        if (Array.isArray(logs) && logs.length > 50) {
+                            localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(logs.slice(0, 50)));
+                        }
+                    } catch (e) {}
+                    // 2. إزالة المفاتيح المؤقتة
+                    const tempPrefixes = ['sync_cache_', 'temp_', 'temp_scan_'];
+                    for (let key in localStorage) {
+                        if (tempPrefixes.some(p => key.startsWith(p))) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('LocalStorage auto-prune warning:', e);
+            }
+        }
+
         function checkLocalStorageUsage() {
             let totalBytes = 0;
             for (let key in localStorage) {
@@ -1707,6 +1737,7 @@
                 if (usagePercent > 80) {
                     bar.style.background = 'var(--danger)';
                     txt.innerHTML += ' <strong style="color:var(--danger);">(⚠️ المساحة قاربت على الامتلاء)</strong>';
+                    autoPruneStorageIfNearFull();
                 } else {
                     bar.style.background = 'var(--success)';
                 }
