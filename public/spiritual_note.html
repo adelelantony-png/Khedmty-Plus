@@ -47,7 +47,7 @@
     <div class="header-card text-center">
         <h4 class="fw-bold mb-1"><i class="fa-solid fa-heart-pulse me-2"></i>النوتة الروحية اليومية</h4>
         <small id="ui-student-info" class="opacity-90 d-block mb-2">جاري التحميل...</small>
-        <div class="bg-white bg-opacity-20 rounded-pill py-1 px-3 d-inline-block small">
+        <div class="bg-white bg-opacity-25 text-white rounded-pill py-1 px-3 d-inline-block small fw-bold">
             «أَمَّا أَنَا فَبِكَثْرَةِ رَحْمَتِكَ أَدْخُلُ بَيْتَكَ، أَسْجُدُ فِي هَيْكَلِ قُدْسِكَ بِخَوْفِكَ»
         </div>
     </div>
@@ -132,23 +132,67 @@
 </div>
 
 <script>
-    if (typeof firebase !== 'undefined' && typeof FB_CONFIG !== 'undefined' && !firebase.apps.length) {
-        firebase.initializeApp(FB_CONFIG);
+    const FB_CONFIG = window.FIREBASE_CONFIG || {
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "3510220845",
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+    };
+
+    try {
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+            firebase.initializeApp(FB_CONFIG);
+        }
+    } catch (fbErr) {
+        console.warn('Firebase init warning:', fbErr);
     }
-    const fsdb = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
-    if (window.AuthClient && typeof AuthClient.setupTokenRefreshListener === 'function') {
-        AuthClient.setupTokenRefreshListener();
+
+    let fsdb = null;
+    try {
+        if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length && typeof firebase.firestore === 'function') {
+            fsdb = firebase.firestore();
+        }
+    } catch (fsErr) {
+        console.warn('Firestore instance warning:', fsErr);
     }
-    if (window.AuthClient) {
-        AuthClient.enforceAuth(['student', 'servant', 'admin']);
+
+    try {
+        if (window.AuthClient && typeof AuthClient.setupTokenRefreshListener === 'function') {
+            AuthClient.setupTokenRefreshListener();
+        }
+        if (window.AuthClient && typeof AuthClient.enforceAuth === 'function') {
+            AuthClient.enforceAuth(['student', 'servant', 'admin']);
+        }
+    } catch (authErr) {
+        console.warn('Auth check warning:', authErr);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     const paramCode = urlParams.get('code') || urlParams.get('studentCode');
 
-    const activeUser = (window.AuthClient && (typeof AuthClient.getUser === "function" ? AuthClient.getUser() : (typeof AuthClient.getActiveUser === "function" ? AuthClient.getActiveUser() : null))) || null;
-    const studentCode = paramCode || (window.AuthClient && typeof AuthClient.getUserCode === 'function' && AuthClient.getUserCode()) || localStorage.getItem('student_code') || '';
-    const studentName = (activeUser && activeUser.name) || localStorage.getItem('student_name') || 'المخدوم';
+    let activeUser = null;
+    try {
+        if (window.AuthClient) {
+            if (typeof AuthClient.getUser === 'function') activeUser = AuthClient.getUser();
+            else if (typeof AuthClient.getActiveUser === 'function') activeUser = AuthClient.getActiveUser();
+        }
+    } catch(e) {}
+
+    let studentCode = paramCode;
+    if (!studentCode && window.AuthClient && typeof AuthClient.getUserCode === 'function') {
+        try { studentCode = AuthClient.getUserCode(); } catch(e) {}
+    }
+    if (!studentCode) {
+        try { studentCode = localStorage.getItem('student_code') || ''; } catch(e) {}
+    }
+
+    let studentName = (activeUser && activeUser.name) || '';
+    if (!studentName) {
+        try { studentName = localStorage.getItem('student_name') || 'المخدوم'; } catch(e) { studentName = 'المخدوم'; }
+    }
 
     if (!studentCode) {
         window.location.href = 'index.html';
