@@ -263,9 +263,9 @@
         @media print { .help-fab { display: none; } }
     </style>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -1614,6 +1614,29 @@
         let myCurrentSessionId = localStorage.getItem(STORAGE_KEYS.ACTIVE_SESSION_ID) || ('sess_' + Date.now() + '_' + Math.floor(Math.random() * 1000));
         localStorage.setItem(STORAGE_KEYS.ACTIVE_SESSION_ID, myCurrentSessionId);
 
+        // محمل ديناميكي استباقي لمكتبات الإكسيل والباركود لتسريع فتح اللوحة على الموبايل
+        function ensureXlsxLoaded() {
+            if (typeof XLSX !== 'undefined') return Promise.resolve(window.XLSX);
+            return new Promise((resolve, reject) => {
+                let script = document.createElement('script');
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+                script.onload = () => resolve(window.XLSX);
+                script.onerror = () => reject(new Error("تعذر تحميل مكتبة الإكسيل"));
+                document.head.appendChild(script);
+            });
+        }
+
+        function ensureHtml5QrLoaded() {
+            if (typeof Html5Qrcode !== 'undefined') return Promise.resolve(window.Html5Qrcode);
+            return new Promise((resolve, reject) => {
+                let script = document.createElement('script');
+                script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+                script.onload = () => resolve(window.Html5Qrcode);
+                script.onerror = () => reject(new Error("تعذر تحميل مكتبة قراءة الباركود"));
+                document.head.appendChild(script);
+            });
+        }
+
         // ==========================================
         // دوال مساعدة: تاريخ محلي + معرّفات فريدة + حساب الغياب المتتالي
         // ==========================================
@@ -2039,7 +2062,8 @@ function renderFollowupTab() {
     });
 }
 
-function exportFollowupToExcel() {
+async function exportFollowupToExcel() {
+    await ensureXlsxLoaded().catch(() => {});
     let table = document.getElementById("followupTable");
     if (!table) return;
     let headers = ["كود الدارس", "اسم المخدوم", "المرحلة", "حضور الجمعة", "أيام النوتة المسجلة", "قراءات الإنجيل", "غياب متتالي (جمعات)", "إجمالي النقاط"];
@@ -2433,7 +2457,8 @@ function exportFollowupToExcel() {
             });
         }
 
-        function exportAuditLogToExcel() {
+        async function exportAuditLogToExcel() {
+            await ensureXlsxLoaded().catch(() => {});
             let headers = ["التاريخ", "الوقت", "الخادم المنفذ", "نوع العملية", "المخدوم / الهدف", "التفاصيل"];
             let rows = auditLogs.map(l => [l.date, l.timestamp, l.servant, l.action, l.target, l.details]);
             let ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -4112,6 +4137,10 @@ function exportFollowupToExcel() {
         async function openQrSearchModal() {
             document.getElementById('qrSearchModal').style.display = 'flex';
             try {
+                if (typeof Html5Qrcode === 'undefined') {
+                    showToast("⏳ جاري تهيئة قارئ الكارنيه...");
+                    await ensureHtml5QrLoaded().catch(() => {});
+                }
                 if (qrSearchScanner) {
                     try { await qrSearchScanner.stop(); } catch(e){ console.warn("[خدمتي برو]", e); }
                 }
@@ -4629,13 +4658,14 @@ function exportFollowupToExcel() {
             document.body.removeChild(link);
         }
 
-        function triggerAttendanceExport(format) {
+        async function triggerAttendanceExport(format) {
             let data = buildAttendanceMatrixData();
             if (!data) return;
 
             let { aoa, fileName } = data;
 
             if (format === 'xlsx') {
+                await ensureXlsxLoaded().catch(() => {});
                 if (typeof XLSX !== 'undefined') {
                     try {
                         let ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -4778,6 +4808,10 @@ function exportFollowupToExcel() {
         async function startCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 return alert("يرجى استخدام متصفح حديث يدعم الكاميرا.");
+            }
+            if (typeof Html5Qrcode === 'undefined') {
+                showToast("⏳ جاري تهيئة كاميرا المسح الضوئي...");
+                await ensureHtml5QrLoaded().catch(() => {});
             }
             try {
                 const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -6418,7 +6452,8 @@ function checkSession() {
             XLSX.writeFile(wb, fileName);
         }
 
-        function importMembers() {
+        async function importMembers() {
+            await ensureXlsxLoaded().catch(() => {});
             let file = document.getElementById('importFile').files[0];
             if (!file) return alert("اختر ملف إكسيل أولاً");
             let reader = new FileReader();
