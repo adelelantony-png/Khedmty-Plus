@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="auth-client.js"></script>
     <script src="js/xlsx.full.min.js"></script>
+    <script src="js/html2pdf.bundle.min.js"></script>
     <script>if (typeof XLSX === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>'); }</script>
     <style>
         :root {
@@ -380,6 +381,225 @@
             background: #eef2ff;
         }
 
+
+        /* لوحة معايير القبول والجو العام المطورة وشريط الطيف */
+        .curve-panel-modern {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-bottom: 22px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(12, 36, 97, 0.06);
+        }
+
+        .spectrum-bar-wrapper {
+            margin: 16px 0 18px;
+        }
+
+        .spectrum-bar {
+            height: 14px;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            background: #e2e8f0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .spectrum-segment {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .spectrum-seg-accepted { background: #10b981; }
+        .spectrum-seg-conditional { background: #eab308; }
+        .spectrum-seg-interview { background: #f97316; }
+        .spectrum-seg-rejected { background: #ef4444; }
+
+        .spectrum-legend {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* شبكة البطاقات الأربعة للمعايير */
+        .criteria-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .criteria-card {
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1.5px solid;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .criteria-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+
+        .card-acc {
+            background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);
+            border-color: #6ee7b7;
+            color: #065f46;
+        }
+
+        .card-cond {
+            background: linear-gradient(135deg, #fefce8 0%, #ffffff 100%);
+            border-color: #fde047;
+            color: #854d0e;
+        }
+
+        .card-int {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
+            border-color: #fdba74;
+            color: #9a3412;
+        }
+
+        .card-rej {
+            background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .card-badge-title {
+            font-size: 0.88rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-rule-desc {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .card-live-count {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .card-sub-pct {
+            font-size: 0.78rem;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+
+        /* حاوية ضبط المقاييس والدرجة العظمى */
+        .scale-config-drawer {
+            background: #f1f5f9;
+            border-radius: 12px;
+            border: 1px dashed #cbd5e1;
+            padding: 14px 18px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        .scale-config-drawer.open {
+            display: block;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        /* نافذة معاينة تقرير PDF الرسمي */
+        .pdf-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 36, 97, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .pdf-modal-content {
+            background: #ffffff;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 16px 45px rgba(0,0,0,0.35);
+        }
+
+        .pdf-preview-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #525659;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .pdf-sheet {
+            background: #ffffff;
+            width: 100%;
+            max-width: 900px;
+            min-height: 550px;
+            padding: 30px 35px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-radius: 4px;
+            box-sizing: border-box;
+            color: #000;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #printablePdfReport, #printablePdfReport * {
+                visibility: visible !important;
+            }
+            #printablePdfReport {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 10mm 8mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: #ffffff !important;
+            }
+            @page {
+                size: A4 landscape;
+                margin: 6mm;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -394,6 +614,9 @@
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
                 <i class="fa-solid fa-cloud-arrow-down text-success"></i> سحب البيانات من جوجل فورم / شيت 📥
+            </button>
+                        <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background: linear-gradient(135deg, #b91c1c, #dc2626); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">
+                <i class="fa-solid fa-file-pdf"></i> تصدير تقرير PDF رسمي 📄
             </button>
             <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
                 <i class="fa-solid fa-file-excel text-success"></i> تصدير شيت خدمتي برو (CSV)
@@ -477,7 +700,8 @@
             <option value="interview">معلق للمقابلة 🟠</option>
             <option value="rejected">غير مجتاز / غائب 🔴</option>
         </select>
-                <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥</button>
+                        <button type="button" class="btn-custom" style="background:#fee2e2; color:#991b1b; border-color:#fecaca;" onclick="openPdfExportModal()"><i class="fa-solid fa-file-pdf me-1"></i> تصدير PDF 📄</button>
+        <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥</button>
         <button type="button" class="btn-custom" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;" onclick="openUserFormModal()"><i class="fa-solid fa-window-restore me-1"></i> فتح فورم رصد الدرجات (VBA) 🪟</button>
         <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
             <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم جديد
@@ -513,6 +737,138 @@
 
 </div>
 
+
+
+    <!-- نافذة معاينة وطباعة تقرير PDF الرسمي المعتمد -->
+    <div id="pdfExportModal" class="pdf-modal-overlay">
+        <div class="pdf-modal-content">
+            <!-- رأس نافذة التقرير -->
+            <div style="background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%); color: #ffffff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pdf fs-5 text-danger"></i>
+                    <strong style="font-size: 1.1rem;">معاينة وتصدير تقرير النتائج الرسمي (PDF / الطباعة A4)</strong>
+                </div>
+                <button type="button" onclick="closePdfExportModal()" class="import-close-btn">&times;</button>
+            </div>
+
+            <!-- شريط تصفية وخيارات التقرير -->
+            <div style="background: #f8fafc; border-bottom: 1px solid #cbd5e1; padding: 10px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 700;">
+                    <span>تصفية المخدومين في التقرير:</span>
+                    <select id="pdfFilterSelect" onchange="renderPdfPreview()" style="padding: 5px 10px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-family: inherit; font-size: 0.88rem;">
+                        <option value="all">كل المتقدمين (تقرير شامل رسمي)</option>
+                        <option value="passed">المقبولون فقط (نهائي وبشرط الاعتراف) 🟢🟡</option>
+                        <option value="interview">المعلقون للمقابلة الشخصية فقط 🟠</option>
+                        <option value="conditional">المقبولون بشرط الاعتراف فقط 🟡</option>
+                        <option value="rejected">غير المجتازين والدور الثاني 🔴</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-custom" onclick="downloadDirectPdf()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
+                        <i class="fa-solid fa-download me-1"></i> تنزيل ملف PDF مباشر (.pdf)
+                    </button>
+                    <button type="button" class="btn-custom btn-navy" onclick="printPdfReport()">
+                        <i class="fa-solid fa-print me-1"></i> طباعة فورية / حفظ PDF (A4)
+                    </button>
+                </div>
+            </div>
+
+            <!-- حاوية الورقة البيضاء المجهزة للطباعة -->
+            <div class="pdf-preview-container">
+                <div id="printablePdfReport" class="pdf-sheet">
+                    <!-- الترويسة الكنسية الرسمية للتقرير -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2.5px solid #0c2461; padding-bottom: 12px; margin-bottom: 16px;">
+                        <div style="text-align: right; line-height: 1.5;">
+                            <div style="font-size: 13pt; font-weight: 900; color: #0c2461;">كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية</div>
+                            <div style="font-size: 11pt; font-weight: 800; color: #1e3799;">اجتماع القديس بولس الرسول لإعداد الخدام ✝️</div>
+                            <div style="font-size: 9.5pt; color: #475569; font-weight: 700;">فصل إعداد خدام — الفرقة الأولى (دفعة 2026 / 2027)</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 26pt; color: #0c2461; line-height: 1;">☩</div>
+                            <div style="font-size: 8.5pt; font-weight: 800; color: #64748b; margin-top: 2px;">كن أميناً إلى الموت</div>
+                        </div>
+                        <div style="text-align: left; font-size: 8.5pt; font-weight: 700; color: #334155; line-height: 1.6;">
+                            <div>التاريخ: <strong id="pdfHeaderDate"></strong></div>
+                            <div>الدرجة العظمى: <strong id="pdfHeaderMaxScore">100</strong></div>
+                            <div>نسبة القبول: <strong id="pdfHeaderPassPct" style="color:#065f46;">60%</strong></div>
+                            <div>حد المقابلة: <strong id="pdfHeaderIntPct" style="color:#c2410c;">50%</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- عنوان التقرير -->
+                    <div style="text-align: center; margin-bottom: 14px;">
+                        <h3 id="pdfReportTitle" style="margin: 0; font-size: 14pt; font-weight: 900; color: #0c2461; background: #f1f5f9; padding: 6px 14px; border-radius: 8px; display: inline-block; border: 1px solid #cbd5e1;">
+                            كشف النتيجة النهائية لامتحانات القبول ومعايير الجو العام للدفعة
+                        </h3>
+                    </div>
+
+                    <!-- ملخص مؤشرات الجو العام والشرائح الأربعة -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; text-align: center;">
+                        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 6px 4px;">
+                            <div style="font-size: 8pt; font-weight: 800; color: #065f46;">مقبول نهائياً 🟢</div>
+                            <div style="font-size: 12pt; font-weight: 900; color: #065f46;" id="pdfKpiAccepted">0</div>
+                        </div>
+                        <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 6px; padding: 6px 4px;">
+                            <div style="font-size: 8pt; font-weight: 800; color: #854d0e;">مقبول بشرط الاعتراف 🟡</div>
+                            <div style="font-size: 12pt; font-weight: 900; color: #854d0e;" id="pdfKpiConditional">0</div>
+                        </div>
+                        <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 6px 4px;">
+                            <div style="font-size: 8pt; font-weight: 800; color: #9a3412;">معلق للمقابلة 🟠</div>
+                            <div style="font-size: 12pt; font-weight: 900; color: #9a3412;" id="pdfKpiInterview">0</div>
+                        </div>
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 4px;">
+                            <div style="font-size: 8pt; font-weight: 800; color: #991b1b;">غير مجتاز / دور ثان 🔴</div>
+                            <div style="font-size: 12pt; font-weight: 900; color: #991b1b;" id="pdfKpiRejected">0</div>
+                        </div>
+                    </div>
+
+                    <!-- جدول المخدومين الرسمي بالتقرير -->
+                    <table style="width: 100%; border-collapse: collapse; font-size: 8pt; margin-bottom: 18px;">
+                        <thead>
+                            <tr style="background: #0c2461; color: #ffffff; text-align: center;">
+                                <th style="border: 1px solid #000; padding: 5px 3px; width: 28px;">م</th>
+                                <th style="border: 1px solid #000; padding: 5px 4px; width: 45px;">كود</th>
+                                <th style="border: 1px solid #000; padding: 5px 6px; text-align: right;">اسم المخدوم الرباعي</th>
+                                <th style="border: 1px solid #000; padding: 5px 4px; width: 38px;">النوع</th>
+                                <th style="border: 1px solid #000; padding: 5px 4px;">الهاتف</th>
+                                <th style="border: 1px solid #000; padding: 5px 6px; text-align: right;">أب الاعتراف</th>
+                                <th style="border: 1px solid #000; padding: 5px 3px; width: 40px;" id="pdfThEx1">م 1</th>
+                                <th style="border: 1px solid #000; padding: 5px 3px; width: 40px;" id="pdfThEx2">م 2</th>
+                                <th style="border: 1px solid #000; padding: 5px 3px; width: 40px;" id="pdfThEx3">م 3</th>
+                                <th style="border: 1px solid #000; padding: 5px 3px; width: 40px;" id="pdfThEx4">م 4</th>
+                                <th style="border: 1px solid #000; padding: 5px 4px; width: 45px; background:#1e3799;">المجموع</th>
+                                <th style="border: 1px solid #000; padding: 5px 4px; width: 45px; background:#1e3799;">النسبة %</th>
+                                <th style="border: 1px solid #000; padding: 5px 6px; width: 130px;">القرار النهائي 🎯</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdfReportTableBody">
+                            <!-- تعبئة تلقائية -->
+                        </tbody>
+                    </table>
+
+                    <!-- خانات التوقيعات الرسمية المعتمدة -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; font-size: 9pt; font-weight: 800; color: #1e293b; margin-top: 25px; page-break-inside: avoid;">
+                        <div style="border-top: 1.5px dashed #64748b; padding-top: 8px;">
+                            <div>مسؤول الكنترول والرصد</div>
+                            <div style="height: 35px;"></div>
+                            <div style="font-size: 8pt; color: #64748b;">التوقيع: .....................</div>
+                        </div>
+                        <div style="border-top: 1.5px dashed #64748b; padding-top: 8px;">
+                            <div>أمين فصل إعداد الخدام</div>
+                            <div style="height: 35px;"></div>
+                            <div style="font-size: 8pt; color: #64748b;">التوقيع: .....................</div>
+                        </div>
+                        <div style="border-top: 1.5px dashed #64748b; padding-top: 8px;">
+                            <div>كاهن إعداد الخدام والشباب</div>
+                            <div style="height: 35px;"></div>
+                            <div style="font-size: 8pt; color: #64748b;">التوقيع: .....................</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة استيراد وسحب البيانات من جوجل فورم / جوجل شيت / إكسيل -->
     <div id="importModalOverlay" class="import-modal-overlay">
@@ -798,6 +1154,244 @@
         { code: "2206", name: "ديفيد نبيل كمال صليب", gender: "بنين", phone: "01255667788", parentPhone: "01255667700", dob: "2006-03-18", confessor: "أبونا توماس", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, email: "david.nabil@gmail.com", address: "3 ش المطرية محطة المترو" }
     ];
 
+
+    // =========================================================================
+    // إدارة مقاييس الدرجات العظمى ومعايير الشرائح الأربعة وتصدير PDF
+    // =========================================================================
+    let maxTotalScore = 100;
+    let examMaxScores = [25, 25, 25, 25];
+
+    function toggleScaleConfigPanel() {
+        const drawer = document.getElementById('scaleConfigDrawer');
+        if (drawer) drawer.classList.toggle('open');
+    }
+
+    function updateExamMaxScores() {
+        const e1 = Number(document.getElementById('cfgMaxExam1').value) || 25;
+        const e2 = Number(document.getElementById('cfgMaxExam2').value) || 25;
+        const e3 = Number(document.getElementById('cfgMaxExam3').value) || 25;
+        const e4 = Number(document.getElementById('cfgMaxExam4').value) || 25;
+
+        examMaxScores = [e1, e2, e3, e4];
+        maxTotalScore = e1 + e2 + e3 + e4;
+
+        document.getElementById('cfgTotalMaxScoreDisplay').textContent = maxTotalScore;
+        updateScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function applyPresetThresholds(passVal, intVal) {
+        passThreshold = passVal;
+        interviewThreshold = intVal;
+        document.getElementById('passThresholdSlider').value = passVal;
+        document.getElementById('thresholdDisplay').textContent = `${passVal}%`;
+        document.getElementById('interviewThresholdSlider').value = intVal;
+        document.getElementById('interviewThresholdDisplay').textContent = `${intVal}%`;
+        updateScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function updateScoreEquivalents() {
+        const passScore = (passThreshold / 100 * maxTotalScore).toFixed(1);
+        const intScore = (interviewThreshold / 100 * maxTotalScore).toFixed(1);
+        const elPassEq = document.getElementById('passScoreEquivalent');
+        if (elPassEq) elPassEq.textContent = `(${passScore} / ${maxTotalScore} درجة)`;
+        const elIntEq = document.getElementById('interviewScoreEquivalent');
+        if (elIntEq) elIntEq.textContent = `(${intScore} / ${maxTotalScore} درجة)`;
+    }
+
+    function updateCriteriaCards(totalCount, acceptedCount, conditionalCount, interviewCount, rejectedCount) {
+        const minPassScore = (passThreshold / 100 * maxTotalScore).toFixed(1);
+        const minInterviewScore = (interviewThreshold / 100 * maxTotalScore).toFixed(1);
+
+        // بطاقة مقبول نهائياً
+        const elCardAccCount = document.getElementById('cardAcceptedCount');
+        if (elCardAccCount) elCardAccCount.textContent = acceptedCount;
+        const elCardAccPct = document.getElementById('cardAcceptedPct');
+        if (elCardAccPct) elCardAccPct.textContent = totalCount > 0 ? `${((acceptedCount / totalCount) * 100).toFixed(1)}% من الدفعة` : '0%';
+        const elCardAccRange = document.getElementById('cardAcceptedRange');
+        if (elCardAccRange) elCardAccRange.textContent = `>= ${passThreshold}% (${minPassScore} - ${maxTotalScore} درجة) + اعتراف سليم`;
+
+        // بطاقة مقبول بشرط الاعتراف
+        const elCardCondCount = document.getElementById('cardConditionalCount');
+        if (elCardCondCount) elCardCondCount.textContent = conditionalCount;
+        const elCardCondPct = document.getElementById('cardConditionalPct');
+        if (elCardCondPct) elCardCondPct.textContent = totalCount > 0 ? `${((conditionalCount / totalCount) * 100).toFixed(1)}% من الدفعة` : '0%';
+        const elCardCondRange = document.getElementById('cardConditionalRange');
+        if (elCardCondRange) elCardCondRange.textContent = `>= ${passThreshold}% (${minPassScore} درجة) + مهلة اعتراف أسبوع`;
+
+        // بطاقة معلق للمقابلة
+        const elCardIntCount = document.getElementById('cardInterviewCount');
+        if (elCardIntCount) elCardIntCount.textContent = interviewCount;
+        const elCardIntPct = document.getElementById('cardInterviewPct');
+        if (elCardIntPct) elCardIntPct.textContent = totalCount > 0 ? `${((interviewCount / totalCount) * 100).toFixed(1)}% من الدفعة` : '0%';
+        const elCardIntRange = document.getElementById('cardInterviewRange');
+        if (elCardIntRange) elCardIntRange.textContent = `${interviewThreshold}% - ${(passThreshold - 0.1).toFixed(1)}% (${minInterviewScore} - ${minPassScore} درجة)`;
+
+        // بطاقة غير مجتاز
+        const elCardRejCount = document.getElementById('cardRejectedCount');
+        if (elCardRejCount) elCardRejCount.textContent = rejectedCount;
+        const elCardRejPct = document.getElementById('cardRejectedPct');
+        if (elCardRejPct) elCardRejPct.textContent = totalCount > 0 ? `${((rejectedCount / totalCount) * 100).toFixed(1)}% من الدفعة` : '0%';
+        const elCardRejRange = document.getElementById('cardRejectedRange');
+        if (elCardRejRange) elCardRejRange.textContent = `< ${interviewThreshold}% (< ${minInterviewScore} درجة أو غائب)`;
+
+        // شريط الطيف البصري المتصل (Visual Spectrum Bar)
+        if (totalCount > 0) {
+            const pAcc = (acceptedCount / totalCount) * 100;
+            const pCond = (conditionalCount / totalCount) * 100;
+            const pInt = (interviewCount / totalCount) * 100;
+            const pRej = (rejectedCount / totalCount) * 100;
+
+            const elSpAcc = document.getElementById('spectrumAccepted');
+            if (elSpAcc) {
+                elSpAcc.style.width = `${pAcc}%`;
+                elSpAcc.title = `مقبول نهائياً: ${acceptedCount} (${pAcc.toFixed(1)}%)`;
+            }
+            const elSpCond = document.getElementById('spectrumConditional');
+            if (elSpCond) {
+                elSpCond.style.width = `${pCond}%`;
+                elSpCond.title = `مقبول بشرط الاعتراف: ${conditionalCount} (${pCond.toFixed(1)}%)`;
+            }
+            const elSpInt = document.getElementById('spectrumInterview');
+            if (elSpInt) {
+                elSpInt.style.width = `${pInt}%`;
+                elSpInt.title = `معلق للمقابلة: ${interviewCount} (${pInt.toFixed(1)}%)`;
+            }
+            const elSpRej = document.getElementById('spectrumRejected');
+            if (elSpRej) {
+                elSpRej.style.width = `${pRej}%`;
+                elSpRej.title = `غير مجتاز: ${rejectedCount} (${pRej.toFixed(1)}%)`;
+            }
+        }
+    }
+
+    // =========================================================================
+    // إدارة نافذة وتصدير تقرير PDF الرسمي المعتمد
+    // =========================================================================
+    function openPdfExportModal() {
+        const overlay = document.getElementById('pdfExportModal');
+        overlay.style.display = 'flex';
+        renderPdfPreview();
+    }
+
+    function closePdfExportModal() {
+        document.getElementById('pdfExportModal').style.display = 'none';
+    }
+
+    function renderPdfPreview() {
+        const filterVal = document.getElementById('pdfFilterSelect').value;
+        const tbody = document.getElementById('pdfReportTableBody');
+
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('pdfHeaderDate').textContent = dateStr;
+        document.getElementById('pdfHeaderMaxScore').textContent = maxTotalScore;
+        document.getElementById('pdfHeaderPassPct').textContent = `${passThreshold}%`;
+        document.getElementById('pdfHeaderIntPct').textContent = `${interviewThreshold}%`;
+
+        document.getElementById('pdfThEx1').textContent = `م 1 (${examMaxScores[0]})`;
+        document.getElementById('pdfThEx2').textContent = `م 2 (${examMaxScores[1]})`;
+        document.getElementById('pdfThEx3').textContent = `م 3 (${examMaxScores[2]})`;
+        document.getElementById('pdfThEx4').textContent = `م 4 (${examMaxScores[3]})`;
+
+        let cAccepted = 0, cConditional = 0, cInterview = 0, cRejected = 0;
+
+        candidatesList.forEach(c => {
+            const dec = computeDecision(c);
+            if (dec.key === 'accepted') cAccepted++;
+            if (dec.key === 'conditional') cConditional++;
+            if (dec.key === 'interview') cInterview++;
+            if (dec.key === 'rejected') cRejected++;
+        });
+
+        document.getElementById('pdfKpiAccepted').textContent = cAccepted;
+        document.getElementById('pdfKpiConditional').textContent = cConditional;
+        document.getElementById('pdfKpiInterview').textContent = cInterview;
+        document.getElementById('pdfKpiRejected').textContent = cRejected;
+
+        const filtered = candidatesList.filter(c => {
+            const dec = computeDecision(c);
+            if (filterVal === 'all') return true;
+            if (filterVal === 'passed') return (dec.key === 'accepted' || dec.key === 'conditional');
+            if (filterVal === 'interview') return dec.key === 'interview';
+            if (filterVal === 'conditional') return dec.key === 'conditional';
+            if (filterVal === 'rejected') return dec.key === 'rejected';
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="13" style="text-align:center; padding:15px; font-weight:bold; color:#64748b;">لا يوجد مخدومين يطابقون خيار التصفية المختار.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map((c, idx) => {
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const pct = ((total / maxTotalScore) * 100).toFixed(1);
+            const dec = computeDecision(c);
+            const isConfClean = (c.confessor && c.confessor !== 'لا يوجد' && c.confessor !== 'none');
+
+            let badgeBg = '#d1fae5', badgeColor = '#065f46';
+            if (dec.key === 'conditional') { badgeBg = '#fef08a'; badgeColor = '#854d0e'; }
+            if (dec.key === 'interview') { badgeBg = '#ffedd5'; badgeColor = '#9a3412'; }
+            if (dec.key === 'rejected') { badgeBg = '#fee2e2'; badgeColor = '#991b1b'; }
+
+            return `
+                <tr style="border-bottom: 1px solid #cbd5e1; text-align: center; background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold;">${idx + 1}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold; color:#0c2461;">${c.code}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: right; font-weight:bold;">${c.name}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.gender || 'بنين'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 3px;">${c.phone || '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: right; color: ${isConfClean ? '#065f46' : '#b45309'}; font-weight:bold;">${c.confessor || 'لا يوجد'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.g1 ?? 0}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.g2 ?? 0}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.g3 ?? 0}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.g4 ?? 0}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold; background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold;">${c.attended ? pct + '%' : '-'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 4px;">
+                        <span style="display:inline-block; padding: 2px 6px; border-radius: 4px; font-weight:bold; font-size: 7.5pt; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid rgba(0,0,0,0.1);">
+                            ${dec.label}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function printPdfReport() {
+        renderPdfPreview();
+        window.print();
+    }
+
+    function downloadDirectPdf() {
+        renderPdfPreview();
+        const element = document.getElementById('printablePdfReport');
+        if (typeof html2pdf === 'undefined') {
+            alert('مكتبة التنزيل المباشر غير متوفرة، سيتم فتح نافذة الطباعة لاختيار حفظ كـ PDF.');
+            window.print();
+            return;
+        }
+
+        const opt = {
+            margin: [6, 6, 6, 6],
+            filename: `تقرير_امتحانات_قبول_المخدومين_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            alert('تم تنزيل تقرير الـ PDF بنجاح! 📄✅');
+        }).catch(err => {
+            console.error('html2pdf error:', err);
+            window.print();
+        });
+    }
+
     let passThreshold = 60;
     let interviewThreshold = 50;
 
@@ -818,6 +1412,22 @@
             const sInterview = localStorage.getItem('khedmety_interview_threshold');
             if (sInterview) {
                 interviewThreshold = Number(sInterview);
+            }
+            const sMax = localStorage.getItem('khedmety_max_total_score');
+            if (sMax) {
+                maxTotalScore = Number(sMax);
+                const elCfg = document.getElementById('cfgTotalMaxScoreDisplay');
+                if (elCfg) elCfg.textContent = maxTotalScore;
+            }
+            const sExamMax = localStorage.getItem('khedmety_exam_max_scores');
+            if (sExamMax) {
+                examMaxScores = JSON.parse(sExamMax);
+                if (Array.isArray(examMaxScores) && examMaxScores.length === 4) {
+                    if (document.getElementById('cfgMaxExam1')) document.getElementById('cfgMaxExam1').value = examMaxScores[0];
+                    if (document.getElementById('cfgMaxExam2')) document.getElementById('cfgMaxExam2').value = examMaxScores[1];
+                    if (document.getElementById('cfgMaxExam3')) document.getElementById('cfgMaxExam3').value = examMaxScores[2];
+                    if (document.getElementById('cfgMaxExam4')) document.getElementById('cfgMaxExam4').value = examMaxScores[3];
+                }
                 document.getElementById('interviewThresholdSlider').value = interviewThreshold;
                 document.getElementById('interviewThresholdDisplay').textContent = `${interviewThreshold}%`;
             }
@@ -829,6 +1439,8 @@
             localStorage.setItem('khedmety_new_applicants_grades', JSON.stringify(candidatesList));
             localStorage.setItem('khedmety_pass_threshold', passThreshold);
             localStorage.setItem('khedmety_interview_threshold', interviewThreshold);
+            localStorage.setItem('khedmety_max_total_score', maxTotalScore);
+            localStorage.setItem('khedmety_exam_max_scores', JSON.stringify(examMaxScores));
             if (showAlert) alert('تم حفظ درجات المخدومين وإعدادات القبول محلياً بنجاح ✅');
         } catch(e) {
             console.warn(e);
@@ -865,7 +1477,7 @@
             return { label: "غائب عن الامتحان 🔴", key: "rejected", class: "status-rejected" };
         }
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
-        const pct = (total / 100) * 100;
+        const pct = (total / maxTotalScore) * 100;
         const conf = String(candidate.confessor || '').trim().toLowerCase();
         const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none');
 
@@ -905,12 +1517,23 @@
             if (dec.key === 'interview') interviewCount++;
         });
 
-        // تحديث مؤشرات الـ KPIs
+        // تحديث مؤشرات الـ KPIs والبطاقات الأربعة وشريط الطيف
         document.getElementById('kpiTotal').textContent = totalCandidates;
         document.getElementById('kpiAvg').textContent = attendedCount > 0 ? (sumTotal / attendedCount).toFixed(1) : "0.0";
         document.getElementById('kpiMax').textContent = maxTotal.toFixed(1);
         document.getElementById('kpiPassed').textContent = passedCount;
         document.getElementById('kpiInterview').textContent = interviewCount;
+
+        // تحديث شبكة معايير الحالات الأربعة وشريط الطيف
+        const rejCount = totalCandidates - passedCount - interviewCount;
+        let accClean = 0, accCond = 0;
+        candidatesList.forEach(c => {
+            const dec = computeDecision(c);
+            if (dec.key === 'accepted') accClean++;
+            if (dec.key === 'conditional') accCond++;
+        });
+        updateCriteriaCards(totalCandidates, accClean, accCond, interviewCount, rejCount);
+        updateScoreEquivalents();
 
         // فلترة وعرض الصفوف
         const filtered = candidatesList.filter(c => {
@@ -939,7 +1562,7 @@
 
         tbody.innerHTML = filtered.map((c, idx) => {
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = ((total / 100) * 100).toFixed(1);
+            const pct = ((total / maxTotalScore) * 100).toFixed(1);
             const dec = computeDecision(c);
             const conf = String(c.confessor || '').trim();
             const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none');
