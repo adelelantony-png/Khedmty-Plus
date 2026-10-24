@@ -222,7 +222,7 @@ async function cloudFetchDirectory() {
 async function authenticateViaServer(u, p, extra = {}) {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3000); // مهلة 3 ثوانٍ حتى لا يعلق المستخدم
+    const timer = setTimeout(() => controller.abort(), 8000); // مهلة 8 ثوانٍ لتجنب انقطاع خادم Vercel أثناء البدء البارد
     const resp = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -308,6 +308,7 @@ async function startSession(r, remember, customToken) {
       await firebase.auth().signInWithCustomToken(customToken);
       const idToken = await firebase.auth().currentUser.getIdToken();
       storage.setItem('auth_token', idToken);
+      try { localStorage.setItem('auth_token', idToken); } catch (e) {}
     } catch (authErr) {
       console.warn('تنبيه Firebase Auth:', authErr.message);
     }

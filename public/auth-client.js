@@ -156,22 +156,56 @@
         },
 
         /**
+         * استرجاع رمز المصادقة المحدث (ID Token) مع فحصه من Firebase Auth مباشرة إن لزم
+         */
+        getFreshToken: async function () {
+            let token = this.getToken();
+            if ((!token || typeof token !== 'string' || token.trim().length < 15) && typeof firebase !== 'undefined' && firebase.auth && typeof firebase.auth === 'function') {
+                try {
+                    const user = firebase.auth().currentUser;
+                    if (user) {
+                        token = await user.getIdToken();
+                        if (token) {
+                            const s = getStorage('session'), l = getStorage('local');
+                            if (s && s.getItem(STORAGE_KEYS.TOKEN)) s.setItem(STORAGE_KEYS.TOKEN, token);
+                            if (l) l.setItem(STORAGE_KEYS.TOKEN, token);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('تعذر استخراج freshToken من Firebase Auth:', e);
+                }
+            }
+            return token || '';
+        },
+
+        /**
          * استدعاء واجهات الـ API مع إرفاق رمز التوكن تلقائياً
          */
         fetch: async function (url, options = {}) {
             const opts = Object.assign({}, options);
             opts.headers = Object.assign({}, opts.headers || {});
 
-            const token = this.getToken();
+            let token = await this.getFreshToken();
             if (token && !opts.headers['Authorization']) {
                 opts.headers['Authorization'] = 'Bearer ' + token;
             }
 
             try {
-                const response = await fetch(url, opts);
-                // إذا كان الرمز منتهياً أو غير مصرح به
-                if (response.status === 401) {
-                    console.warn('تنبيه: الجلسة منتهية أو التوكن غير صالح (401)');
+                let response = await fetch(url, opts);
+                // إذا كان الرمز منتهياً أو غير مصرح به (401)، نحاول تجديده قسرياً وإعادة المحاولة لمرة واحدة
+                if (response.status === 401 && typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                    try {
+                        const freshToken = await firebase.auth().currentUser.getIdToken(true);
+                        if (freshToken) {
+                            const s = getStorage('session'), l = getStorage('local');
+                            if (s && s.getItem(STORAGE_KEYS.TOKEN)) s.setItem(STORAGE_KEYS.TOKEN, freshToken);
+                            if (l) l.setItem(STORAGE_KEYS.TOKEN, freshToken);
+                            opts.headers['Authorization'] = 'Bearer ' + freshToken;
+                            response = await fetch(url, opts);
+                        }
+                    } catch (refreshErr) {
+                        console.warn('فشل تجديد التوكن عند 401:', refreshErr);
+                    }
                 }
                 return response;
             } catch (networkError) {

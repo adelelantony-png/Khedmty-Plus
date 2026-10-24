@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="auth-client.js"></script>
     <script src="bible_plan.js"></script>
@@ -131,6 +132,13 @@
 </div>
 
 <script>
+    if (typeof firebase !== 'undefined' && typeof FB_CONFIG !== 'undefined' && !firebase.apps.length) {
+        firebase.initializeApp(FB_CONFIG);
+    }
+    const fsdb = (typeof firebase !== 'undefined' && firebase.firestore) ? firebase.firestore() : null;
+    if (window.AuthClient && typeof AuthClient.setupTokenRefreshListener === 'function') {
+        AuthClient.setupTokenRefreshListener();
+    }
     if (window.AuthClient) {
         AuthClient.enforceAuth(['student', 'servant', 'admin']);
     }
@@ -278,6 +286,10 @@
         localSpiritual[logKey] = payload;
         localStorage.setItem('khedmety_student_spiritual', JSON.stringify(localSpiritual));
 
+        let cloudSaved = false;
+        let authExpired = false;
+
+        // 1. محاولة الحفظ عبر واجهة السيرفر الرسمية
         try {
             const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
             const response = await fetchFn('/api/spiritual_note', {
@@ -286,18 +298,45 @@
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
-            if (result && result.success) {
-                sysMsg.className = 'alert alert-success fw-bold text-center';
-                sysMsg.textContent = result.message || 'تم تسجيل وسائط النعمة بنجاح!';
-            } else if (result && result.message) {
-                sysMsg.className = 'alert alert-danger fw-bold text-center';
-                sysMsg.textContent = result.message;
-            } else {
-                throw new Error('تعذر الحفظ السحابي');
+            if (response.ok && result && result.success) {
+                cloudSaved = true;
+            } else if (response.status === 401 || (result && result.message && (result.message.includes('Bearer Token') || result.message.includes('رمز المصادقة')))) {
+                authExpired = true;
             }
-        } catch (error) {
+        } catch (apiErr) {
+            console.warn('API save error:', apiErr);
+        }
+
+        // 2. محاولة الحفظ المباشر كاحتياطي في Firestore
+        if (!cloudSaved && fsdb) {
+            try {
+                const cleanCode = String(studentCode).trim();
+                const dailyLogRef = fsdb.collection('students').doc(cleanCode).collection('daily_logs').doc(payload.date);
+                await dailyLogRef.set({
+                    prayed_baker: payload.baker ? 1 : 0,
+                    prayed_ghoroub: payload.ghoroub ? 1 : 0,
+                    prayed_noam: payload.noam ? 1 : 0,
+                    fasting: payload.fasting ? 1 : 0,
+                    attended_mass: payload.mass ? 1 : 0,
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                cloudSaved = true;
+                authExpired = false;
+            } catch (fsErr) {
+                console.warn('Direct firestore save note:', fsErr);
+            }
+        }
+
+        // 3. إظهار النتيجة للمستخدم برسائل واضحة ومطمئنة
+        if (cloudSaved) {
+            sysMsg.className = 'alert alert-success fw-bold text-center';
+            sysMsg.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> تم تسجيل وسائط النعمة وحفظها سحابياً بنجاح! ✝️';
+        } else if (authExpired) {
             sysMsg.className = 'alert alert-warning fw-bold text-center';
-            sysMsg.textContent = '⚠️ تم حفظ تسجيل وسائط النعمة على جهازك (وضع عدم الاتصال)';
+            sysMsg.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> تم حفظ تسجيل وسائط النعمة على جهازك بنجاح! <br><small class="fw-normal">انتهت صلاحية جلسة الدخول السحابية. يمكنك <a href="index.html" class="alert-link text-decoration-underline">تسجيل الدخول مجدداً</a> لمزامنة السجلات سحابياً.</small>';
+        } else {
+            sysMsg.className = 'alert alert-warning fw-bold text-center';
+            sysMsg.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> تم حفظ تسجيل وسائط النعمة على جهازك (وضع عدم الاتصال بالإنترنت).';
         }
 
         sysMsg.classList.remove('d-none');
