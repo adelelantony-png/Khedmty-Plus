@@ -157,6 +157,28 @@ module.exports = async (req, res) => {
             });
         }
 
+        // 5. جلب بيانات المخدومين والحضور لمزامنة الإكسيل (Two-Way Sync Engine)
+        if (action === 'get_sync_data') {
+            const mSnap = await db.collection('members').get();
+            const members = {};
+            mSnap.forEach(doc => {
+                const data = doc.data() || {};
+                members[doc.id] = Object.assign({ id: doc.id }, data);
+            });
+
+            const aSnap = await db.collection('attendance').get();
+            const attendance = {};
+            aSnap.forEach(doc => {
+                attendance[doc.id] = doc.data() || {};
+            });
+
+            return res.status(200).json({
+                success: true,
+                members: members,
+                attendance: attendance
+            });
+        }
+
         return res.status(400).json({ success: false, message: 'إجراء غير معروف' });
 
     } catch (error) {
