@@ -274,18 +274,19 @@
         renderAttendanceUI(att, spir, sets);
 
         try {
+            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                : fsdb.collection('attendance');
+
             const [attSnap, spirSnap, setDoc] = await Promise.all([
-                fsdb.collection('attendance').get(),
+                attQuery.get(),
                 fsdb.collection('students').doc(studentCode).collection('daily_logs').get(),
                 fsdb.collection('config').doc('settings').get()
             ]);
 
-            const cloudAtt = {};
-            attSnap.forEach(doc => { cloudAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
-            if (Object.keys(cloudAtt).length > 0) {
-                att = cloudAtt;
-                localStorage.setItem('my_church_attendance', JSON.stringify(att));
-            }
+            attSnap.forEach(doc => { att[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
+            localStorage.setItem('my_church_attendance', JSON.stringify(att));
 
             spirSnap.forEach(doc => {
                 spir[`${doc.id}_${studentCode}`] = doc.data();

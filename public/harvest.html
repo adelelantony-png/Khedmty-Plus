@@ -170,16 +170,21 @@
         }
 
         try {
-            // سحب مباشر ومتزامن من Firestore
+            // سحب مباشر ومتزامن من Firestore مع ترشيد قراءات الحضور
+            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                : fsdb.collection('attendance');
+
             const [attSnap, bibleSnap, spirSnap, sheetsSnap] = await Promise.all([
-                fsdb.collection('attendance').get(),
+                attQuery.get(),
                 fsdb.collection('students').doc(studentCode).collection('reading_logs').get(),
                 fsdb.collection('students').doc(studentCode).collection('daily_logs').get(),
                 fsdb.collection('students').doc(studentCode).collection('sheet_submissions').get()
             ]);
 
-            // تحديث الحضور المحلي من السحابة
-            const cloudAtt = {};
+            // تحديث الحضور المحلي من السحابة مع دمج الأيام السابقة
+            const cloudAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
             attSnap.forEach(doc => { cloudAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
             if (Object.keys(cloudAtt).length > 0) {
                 localStorage.setItem('my_church_attendance', JSON.stringify(cloudAtt));

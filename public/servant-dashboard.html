@@ -577,6 +577,7 @@
                         <button class="btn-mini btn-primary" onclick="changeCalendarMonth(1)" style="padding:4px 8px; margin:0;">التالي ▶</button>
                         <button class="btn-mini btn-success" onclick="selectAttendanceDate(today)" style="padding:4px 8px; margin:0;">اليوم الحالي ⏱️</button>
                         <button class="btn-mini btn-purple" onclick="openAttendanceExportModal()" style="padding:4px 10px; margin:0;" title="تصدير كشف الحضور لفترة أو لليوم الحالي إلى شيت إكسل">📊 تصدير الكشوفات</button>
+                        <button class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="padding:4px 8px; margin:0; background:#f1f2f6; border:1px solid #ced6e0; color:#2f3542; font-weight:bold;" title="جلب كافة سجلات السنة الخدمية من السحابة وتخزينها محلياً">🔄 جلب السجل الكامل</button>
                     </div>
                 </div>
                 <div style="display:flex; gap:12px; font-size:11px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
@@ -3026,13 +3027,66 @@ function exportFollowupToExcel() {
             renderAttendanceCalendar();
         }
 
-        function selectAttendanceDate(dateStr) {
+        async function selectAttendanceDate(dateStr) {
             activeSelectedDate = dateStr;
             if (!attendanceRecord[activeSelectedDate]) attendanceRecord[activeSelectedDate] = [];
             renderAttendanceTable();
             renderLiveCardsFeed();
             renderAttendanceCalendar();
             showToast(`📅 تم فتح سجل تاريخ: ${dateStr}`);
+
+            // ترشيد استهلاك السحابة: إذا لم يكن هذا اليوم محملاً محلياً، نجلبه سحابياً عند الطلب فقط (وثيقة واحدة)
+            if (isFirebaseActive && fsdb && (!attendanceRecord[dateStr] || attendanceRecord[dateStr].length === 0)) {
+                try {
+                    const snap = await fsdb.collection('attendance').doc(dateStr).get();
+                    if (snap.exists) {
+                        const dayData = Object.values(snap.data() || {}).filter(Boolean);
+                        if (dayData.length > 0) {
+                            attendanceRecord[dateStr] = dayData;
+                            localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+                            renderAttendanceTable();
+                            renderLiveCardsFeed();
+                            renderAttendanceCalendar();
+                            showToast(`✅ تم جلب حضور (${dateStr}) سحابياً`);
+                        }
+                    }
+                } catch (e) {}
+            }
+        }
+
+        async function loadFullAttendanceHistory(btnEl) {
+            if (!isFirebaseActive || !fsdb) {
+                showToast("⚠️ لا يوجد اتصال سحابي حالياً", true);
+                return;
+            }
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري جلب كامل سجلات السنة...';
+            }
+            try {
+                const fullSnap = await fsdb.collection('attendance').get();
+                let fullFormatted = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
+                fullSnap.forEach(doc => {
+                    fullFormatted[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+                });
+                attendanceRecord = fullFormatted;
+                if (!attendanceRecord[today]) attendanceRecord[today] = [];
+                localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+                renderAttendanceTable();
+                renderLiveCardsFeed();
+                renderMembersList();
+                renderDashboard();
+                renderAttendanceCalendar();
+                showToast(`✅ تم جلب السجل التاريخي بالكامل (${fullSnap.size} يوماً) وتخزينه محلياً`);
+            } catch (e) {
+                console.error(e);
+                showToast("❌ تعذر جلب السجل الكامل: " + (e.message || ''), true);
+            } finally {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = '🔄 جلب السجل الكامل';
+                }
+            }
         }
 
         // ==========================================
@@ -5166,14 +5220,20 @@ function exportFollowupToExcel() {
                         }
                     });
 
-                    fsdb.collection('attendance').onSnapshot(snap => {
+                    // ترشيد استهلاك السحابة وحماية الحصة المجانية: الاستماع للنافذة النشطة (آخر 45 يوماً)
+                    const activeAttCutoff = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                    const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                        ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', activeAttCutoff)
+                        : fsdb.collection('attendance');
+
+                    attQuery.onSnapshot(snap => {
                         if (shouldAcceptCloudData('attendance')) {
-                            let formattedRecord = {};
+                            let currentLocal = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
                             snap.forEach(doc => {
                                 let dayData = doc.data() || {};
-                                formattedRecord[doc.id] = Object.values(dayData).filter(Boolean);
+                                currentLocal[doc.id] = Object.values(dayData).filter(Boolean);
                             });
-                            attendanceRecord = formattedRecord;
+                            attendanceRecord = currentLocal;
                             if (!attendanceRecord[today]) attendanceRecord[today] = [];
                             localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
                             renderAttendanceTable();
@@ -5184,11 +5244,15 @@ function exportFollowupToExcel() {
                         }
                     }, err => console.warn('تعذر الاستماع لتحديثات الحضور:', err.code || err.message));
 
-                    fsdb.collection('servants_attendance').onSnapshot(snap => {
+                    const servAttQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                        ? fsdb.collection('servants_attendance').where(firebase.firestore.FieldPath.documentId(), '>=', activeAttCutoff)
+                        : fsdb.collection('servants_attendance');
+
+                    servAttQuery.onSnapshot(snap => {
                         if (shouldAcceptCloudData('servants_attendance')) {
-                            let formatted = {};
-                            snap.forEach(doc => { formatted[doc.id] = (doc.data() || {}).list || []; });
-                            servantsAttendance = formatted;
+                            let currentLocalServ = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS_ATTENDANCE)) || {};
+                            snap.forEach(doc => { currentLocalServ[doc.id] = (doc.data() || {}).list || []; });
+                            servantsAttendance = currentLocalServ;
                             if (!servantsAttendance[today]) servantsAttendance[today] = [];
                             localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
                             renderServantsAttendanceTable();

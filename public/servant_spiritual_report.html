@@ -135,8 +135,13 @@
                 }
             }
             const fsdb = firebase.firestore();
-            fsdb.collection('attendance').onSnapshot(snap => {
-                let rec = {};
+            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                : fsdb.collection('attendance');
+
+            attQuery.onSnapshot(snap => {
+                let rec = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
                 snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
                 attendanceRecord = rec;
                 try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}

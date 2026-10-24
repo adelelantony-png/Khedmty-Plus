@@ -965,9 +965,14 @@
             let attFromCloud = {};
 
             if (fsdb) {
+                const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                    ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                    : fsdb.collection('attendance');
+
                 const [mSnap, aSnap] = await Promise.all([
                     fsdb.collection('members').get(),
-                    fsdb.collection('attendance').get()
+                    attQuery.get()
                 ]);
 
                 membersFromCloud = mSnap.docs.map(doc => {
@@ -975,9 +980,11 @@
                     return Object.assign({ id: doc.id }, data);
                 });
 
+                let localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
                 aSnap.forEach(doc => {
-                    attFromCloud[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+                    localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
                 });
+                attFromCloud = localAtt;
 
                 isCloudOnline = true;
                 updateSyncStatus(true, `السحابة متصلة (${membersFromCloud.length} مخدوم)`);

@@ -266,14 +266,32 @@
         const localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
         renderTodayStatus(localAtt);
 
-        fsdb.collection('attendance').onSnapshot(snap => {
-            const formatted = {};
+        const now = new Date();
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        // ترشيد استهلاك السحابة وحماية الخصوصية:
+        // 1. الاستماع اللحظي ليوم الخدمة الحالي فقط (وثيقة واحدة) بدلاً من قراءة كامل السنة
+        fsdb.collection('attendance').doc(today).onSnapshot(docSnap => {
+            if (docSnap.exists) {
+                localAtt[today] = Object.values(docSnap.data() || {}).filter(Boolean);
+                localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
+                renderTodayStatus(localAtt);
+            }
+        }, err => console.warn("Today attendance sync error:", err));
+
+        // 2. تحديث الحضور الأخير (آخر 35 يوماً فقط لحساب نسبة الحضور وبانر التنبيه)
+        const cutoffDate = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+            ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+            : fsdb.collection('attendance');
+
+        attQuery.get().then(snap => {
             snap.forEach(doc => {
-                formatted[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+                localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
             });
-            localStorage.setItem('my_church_attendance', JSON.stringify(formatted));
-            renderTodayStatus(formatted);
-        }, err => console.warn("Attendance sync error:", err));
+            localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
+            renderTodayStatus(localAtt);
+        }).catch(err => console.warn("Recent attendance sync error:", err));
     }
 
     function getPlanItemForDate(planData, month, day) {
