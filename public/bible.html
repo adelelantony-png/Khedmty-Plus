@@ -511,7 +511,11 @@ window.onload = async function() {
         const isServant = fromParam === 'servant' || userRole === 'servant' || userRole === 'admin' || userRole === 'developer';
         const smartBackBtn = document.querySelector('[data-smart-back]');
         if (smartBackBtn) {
-            smartBackBtn.setAttribute('data-fallback', isServant ? 'servant-dashboard.html?group=spirit' : 'student.html');
+            if (fromParam === 'spiritual_note') {
+                smartBackBtn.setAttribute('data-fallback', 'spiritual_note.html');
+            } else {
+                smartBackBtn.setAttribute('data-fallback', isServant ? 'servant-dashboard.html?group=spirit' : 'student.html');
+            }
         }
     } catch (e) {
         console.warn('تعذر ضبط مسار العودة الذكي:', e);

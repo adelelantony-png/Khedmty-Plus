@@ -61,6 +61,13 @@
         },
 
         /**
+         * اسم مستعار متوافق مع كافة صفحات النظام لاسترجاع المستخدم النشط
+         */
+        getUser: function () {
+            return this.getActiveUser();
+        },
+
+        /**
          * دور المستخدم الحالي (مستخرج حصراً من كائن الجلسة الموثقة لتفادي التلاعب بالـ localStorage)
          */
         getUserRole: function () {
@@ -289,13 +296,20 @@
                 } catch (e) {}
             }
 
-            // إذا كان المرجع آمناً ويوجد سجل تصفح في المتصفح
+            // 1. إذا تم تحديد وجهة صريحة مخصصة بتبويب أو معلمات استعلام أو صفحة محددة (مثل servant-dashboard.html?tab=membersTab)
+            // ننتقل إليها فوراً منعاً للضياع أو الخروج من اللوحة
+            if (fallbackUrl && (fallbackUrl.includes('?') || fallbackUrl.includes('servant-dashboard.html') || fallbackUrl !== homeUrl)) {
+                doRedirect(targetFallback);
+                return;
+            }
+
+            // 2. إذا كان المرجع آمناً ونفس النطاق ويوجد سجل تصفح في المتصفح
             if (referrerSafe && typeof window !== 'undefined' && window.history && window.history.length > 1) {
                 window.history.back();
                 return;
             }
 
-            // فحص الصفحة السابقة المسجلة في الجلسة الداخلية
+            // 3. فحص الصفحة السابقة المسجلة في الجلسة الداخلية
             try {
                 const s = getStorage('session');
                 const sessionPrev = s ? s.getItem('_khedmety_prev_page') : null;
@@ -308,7 +322,7 @@
                 }
             } catch (e) {}
 
-            // الوجهة الافتراضية الآمنة
+            // 4. الوجهة الافتراضية الآمنة
             doRedirect(targetFallback);
         }
     };

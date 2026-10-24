@@ -29,7 +29,7 @@
 
 <div class="main-container">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <button type="button" class="btn-smart-back btn-sm" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab">
+        <button type="button" class="btn-smart-back btn-sm" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
             <i class="fa-solid fa-arrow-right me-1"></i> رجوع
         </button>
         <button class="btn btn-success fw-bold px-4 shadow-sm" onclick="exportToExcel()">
@@ -202,6 +202,15 @@
         document.body.removeChild(a);
     }
 
+        try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
+        const fromGroup = urlParams.get('group') || 'people';
+        const smartBackBtn = document.querySelector('[data-smart-back]');
+        if (smartBackBtn) {
+            smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
+        }
+    } catch (e) {}
     loadFollowupData();
 </script>
 </body>

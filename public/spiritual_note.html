@@ -135,27 +135,37 @@
         AuthClient.enforceAuth(['student', 'servant', 'admin']);
     }
 
-    const studentCode = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
-    const studentName = (window.AuthClient && AuthClient.getUser() && AuthClient.getUser().name) || localStorage.getItem('student_name');
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramCode = urlParams.get('code') || urlParams.get('studentCode');
 
-    if (!studentCode) window.location.href = 'index.html';
-// ترحيل قراءات قديمة كانت تُحفظ بدون كود الدارس (مرة واحدة)
-(function migrateLegacyBible(){
-  try{
-    var c = localStorage.getItem('student_code'); if(!c) return;
-    var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
-    Object.keys(r).forEach(function(k){
-      if(/^\d{1,2}-\d{1,2}$/.test(k)){
-        var nk = k + '_' + c;
-        if(!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
-        delete r[k]; changed = true;
-      }
-    });
-    if(changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
-  }catch(e){}
-})();
+    const activeUser = (window.AuthClient && (typeof AuthClient.getUser === "function" ? AuthClient.getUser() : (typeof AuthClient.getActiveUser === "function" ? AuthClient.getActiveUser() : null))) || null;
+    const studentCode = paramCode || (window.AuthClient && typeof AuthClient.getUserCode === 'function' && AuthClient.getUserCode()) || localStorage.getItem('student_code') || '';
+    const studentName = (activeUser && activeUser.name) || localStorage.getItem('student_name') || 'المخدوم';
 
-    document.getElementById('ui-student-info').textContent = `${studentName} (كود: ${studentCode})`;
+    if (!studentCode) {
+        window.location.href = 'index.html';
+    }
+
+    // ترحيل قراءات قديمة كانت تُحفظ بدون كود الدارس (مرة واحدة)
+    (function migrateLegacyBible(){
+      try{
+        var c = studentCode || localStorage.getItem('student_code'); if(!c) return;
+        var r = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {}, changed = false;
+        Object.keys(r).forEach(function(k){
+          if(/^\d{1,2}-\d{1,2}$/.test(k)){
+            var nk = k + '_' + c;
+            if(!r[nk]) r[nk] = Object.assign({code: String(c)}, r[k]);
+            delete r[k]; changed = true;
+          }
+        });
+        if(changed) localStorage.setItem('khedmety_bible_readings', JSON.stringify(r));
+      }catch(e){}
+    })();
+
+    const infoEl = document.getElementById('ui-student-info');
+    if (infoEl) {
+        infoEl.textContent = `${studentName} (كود: ${studentCode})`;
+    }
     
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('target_date');
@@ -197,10 +207,10 @@
             const dayPrefix = planItem.dayNumber ? `(اليوم ${planItem.dayNumber}): ` : '';
             const title = planItem.reading ? `${dayPrefix}${planItem.reading}` : `${dayPrefix}${planItem.book} ${planItem.chapter}`;
             readingName.textContent = title;
-            btnBible.href = `bible.html?book=${encodeURIComponent(planItem.book)}&chapter=${planItem.chapter}&chapter_end=${endChap}`;
+            btnBible.href = `bible.html?book=${encodeURIComponent(planItem.book)}&chapter=${planItem.chapter}&chapter_end=${endChap}&from=spiritual_note`;
         } else {
             readingName.textContent = "قراءة وتأمل حر";
-            btnBible.href = `bible.html`;
+            btnBible.href = `bible.html?from=spiritual_note`;
         }
 
         if (isBibleRead) {

@@ -392,8 +392,8 @@
 <a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">ترحيل الحضور لـFirestore 🔄</a>
             <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
             <div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin" style="border:1px solid #0984e3; color:#0984e3; font-weight:bold;">استهلاك السحابة (Vercel & Firebase) ☁️</div>
-<a href="servant_followup.html" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
-<a href="servant_spiritual_report.html" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">متابعة السلوك الروحي 📈</a>
+            <a href="servant_followup.html?fromTab=membersTab&group=people" onclick="this.href='servant_followup.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
+            <a href="servant_spiritual_report.html?fromTab=membersTab&group=people" onclick="this.href='servant_spiritual_report.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">متابعة السلوك الروحي 📈</a>
         </div>
 
         <!-- مكتبة المواد -->
@@ -7299,6 +7299,7 @@ function checkSession() {
     const urlParams = new URLSearchParams(location.search);
     let wantTab = urlParams.get('tab');
     let wantGroup = urlParams.get('group');
+    if (!wantGroup && wantTab && TAB_GROUP[wantTab]) wantGroup = TAB_GROUP[wantTab];
     const userKey = (window.AuthClient && typeof AuthClient.getUser === 'function' && AuthClient.getUser()?.id) || 
                     (typeof currentUser !== 'undefined' && currentUser && currentUser.id) || 'guest';
     if (!wantGroup && typeof sessionStorage !== 'undefined') {

@@ -49,7 +49,7 @@
 <div class="main-container" id="app" style="display:none;">
 
     <div class="topbar">
-        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab">
+        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
             <i class="fa-solid fa-arrow-right me-1"></i> رجوع
         </button>
         <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
@@ -141,7 +141,16 @@
                 attendanceRecord = rec;
                 try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
                 $('liveDot').className = 'dot live'; $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
-                render();
+                    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
+        const fromGroup = urlParams.get('group') || 'people';
+        const smartBackBtn = document.querySelector('[data-smart-back]');
+        if (smartBackBtn) {
+            smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
+        }
+    } catch (e) {}
+    render();
             }, err => {
                 $('liveDot').className = 'dot off'; $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
                 console.warn(err.code || err.message);
