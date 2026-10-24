@@ -156,19 +156,75 @@
         },
 
         /**
-         * استرجاع رمز المصادقة المحدث (ID Token) مع فحصه من Firebase Auth مباشرة إن لزم
+         * فحص هل رمز التوكن منتهي الصلاحية أو قارب على الانتهاء
          */
-        getFreshToken: async function () {
+        isTokenExpired: function (token) {
+            if (!token || typeof token !== 'string') return true;
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) return true;
+                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                if (!payload.exp) return false;
+                // إذا كان متبقياً أقل من 5 دقائق على انتهاء التوكن نعتبره منتهياً لنجدده مسبقاً
+                return (Date.now() / 1000) >= (payload.exp - 300);
+            } catch (e) {
+                return false;
+            }
+        },
+
+        /**
+         * انتظار استعادة جلسة مستخدم Firebase Auth من IndexedDB عند فتح الصفحة
+         */
+        waitForAuthUser: async function (timeoutMs = 2500) {
+            if (typeof firebase === 'undefined' || !firebase.auth || typeof firebase.auth !== 'function') {
+                return null;
+            }
+            try {
+                if (firebase.auth().currentUser) {
+                    return firebase.auth().currentUser;
+                }
+                return await new Promise(resolve => {
+                    let resolved = false;
+                    const timer = setTimeout(() => {
+                        if (!resolved) {
+                            resolved = true;
+                            resolve(firebase.auth().currentUser || null);
+                        }
+                    }, timeoutMs);
+
+                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                        if (!resolved) {
+                            resolved = true;
+                            clearTimeout(timer);
+                            if (typeof unsubscribe === 'function') unsubscribe();
+                            resolve(user);
+                        }
+                    });
+                });
+            } catch (e) {
+                console.warn('waitForAuthUser warning:', e);
+                return null;
+            }
+        },
+
+        /**
+         * استرجاع رمز المصادقة المحدث (ID Token) مع فحصه وتجديده تلقائياً من Firebase Auth
+         */
+        getFreshToken: async function (forceRefresh = false) {
             let token = this.getToken();
-            if ((!token || typeof token !== 'string' || token.trim().length < 15) && typeof firebase !== 'undefined' && firebase.auth && typeof firebase.auth === 'function') {
+            const expired = this.isTokenExpired(token);
+
+            if (forceRefresh || expired || !token || typeof token !== 'string' || token.trim().length < 15) {
                 try {
-                    const user = firebase.auth().currentUser;
-                    if (user) {
-                        token = await user.getIdToken();
-                        if (token) {
+                    const user = await this.waitForAuthUser(2500);
+                    if (user && typeof user.getIdToken === 'function') {
+                        const freshToken = await user.getIdToken(forceRefresh || expired);
+                        if (freshToken) {
+                            token = freshToken;
                             const s = getStorage('session'), l = getStorage('local');
-                            if (s && s.getItem(STORAGE_KEYS.TOKEN)) s.setItem(STORAGE_KEYS.TOKEN, token);
-                            if (l) l.setItem(STORAGE_KEYS.TOKEN, token);
+                            if (s) s.setItem(STORAGE_KEYS.TOKEN, freshToken);
+                            if (l) l.setItem(STORAGE_KEYS.TOKEN, freshToken);
+                            return freshToken;
                         }
                     }
                 } catch (e) {
@@ -179,32 +235,30 @@
         },
 
         /**
-         * استدعاء واجهات الـ API مع إرفاق رمز التوكن تلقائياً
+         * استدعاء واجهات الـ API مع إرفاق رمز التوكن وتجديده وإعادة المحاولة التلقائية عند 401
          */
         fetch: async function (url, options = {}) {
             const opts = Object.assign({}, options);
             opts.headers = Object.assign({}, opts.headers || {});
 
-            let token = await this.getFreshToken();
+            let token = await this.getFreshToken(false);
             if (token && !opts.headers['Authorization']) {
                 opts.headers['Authorization'] = 'Bearer ' + token;
             }
 
             try {
                 let response = await fetch(url, opts);
-                // إذا كان الرمز منتهياً أو غير مصرح به (401)، نحاول تجديده قسرياً وإعادة المحاولة لمرة واحدة
-                if (response.status === 401 && typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+
+                // إذا كان الرمز منتهياً (401)، نقوم بتجديده قسرياً وإعادة المحاولة تلقائياً لمرة واحدة
+                if (response.status === 401) {
                     try {
-                        const freshToken = await firebase.auth().currentUser.getIdToken(true);
-                        if (freshToken) {
-                            const s = getStorage('session'), l = getStorage('local');
-                            if (s && s.getItem(STORAGE_KEYS.TOKEN)) s.setItem(STORAGE_KEYS.TOKEN, freshToken);
-                            if (l) l.setItem(STORAGE_KEYS.TOKEN, freshToken);
+                        const freshToken = await this.getFreshToken(true);
+                        if (freshToken && freshToken !== token) {
                             opts.headers['Authorization'] = 'Bearer ' + freshToken;
                             response = await fetch(url, opts);
                         }
                     } catch (refreshErr) {
-                        console.warn('فشل تجديد التوكن عند 401:', refreshErr);
+                        console.warn('فشل تجديد التوكن وإعادة المحاولة عند 401:', refreshErr);
                     }
                 }
                 return response;

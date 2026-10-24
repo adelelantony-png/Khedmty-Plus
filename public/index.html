@@ -302,9 +302,12 @@ async function startSession(r, remember, customToken) {
 
   const storage = remember ? localStorage : sessionStorage;
 
-  // تسجيل الدخول في Firebase Auth بالـ Custom Token في حال توفره
+  // تسجيل الدخول في Firebase Auth بالـ Custom Token في حال توفره وتثبيت الجلسة في المتصفح
   if (customToken && typeof firebase !== 'undefined' && firebase.auth) {
     try {
+      if (typeof firebase.auth.Auth !== 'undefined' && firebase.auth.Auth.Persistence) {
+        await firebase.auth().setPersistence(remember ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION);
+      }
       await firebase.auth().signInWithCustomToken(customToken);
       const idToken = await firebase.auth().currentUser.getIdToken();
       storage.setItem('auth_token', idToken);

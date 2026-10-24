@@ -303,6 +303,34 @@
     // التشغيل الأولي
     onDateChanged(today);
 
+    // مزامنة تلقائية في الخلفية لأي نوتات روحية سابقة حُفظت محلياً أثناء انقطاع الإنترنت أو التوكن
+    async function syncPendingLocalNotes() {
+        try {
+            const local = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+            const cleanCode = String(studentCode).trim();
+            const keys = Object.keys(local).filter(k => k.endsWith(`_${cleanCode}`));
+            for (const k of keys) {
+                const item = local[k];
+                if (item && !item._synced) {
+                    try {
+                        const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
+                        const res = await fetchFn('/api/spiritual_note', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(item)
+                        });
+                        if (res.ok) {
+                            item._synced = true;
+                            local[k] = item;
+                            localStorage.setItem('khedmety_student_spiritual', JSON.stringify(local));
+                        }
+                    } catch (e) {}
+                }
+            }
+        } catch (e) {}
+    }
+    setTimeout(syncPendingLocalNotes, 1500);
+
     // حفظ البيانات
     document.getElementById('spiritual-form').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -321,10 +349,11 @@
             ghoroub: document.getElementById('prayed_ghoroub').checked,
             noam: document.getElementById('prayed_noam').checked,
             fasting: document.getElementById('fasting').checked,
-            mass: document.getElementById('attended_mass').checked
+            mass: document.getElementById('attended_mass').checked,
+            _synced: false
         };
 
-        // حفظ محلي فوري
+        // حفظ محلي فوري كإجراء أمان أولي
         let localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
         let logKey = `${payload.date}_${payload.code}`;
         localSpiritual[logKey] = payload;
@@ -333,7 +362,7 @@
         let cloudSaved = false;
         let authExpired = false;
 
-        // 1. محاولة الحفظ عبر واجهة السيرفر الرسمية
+        // 1. محاولة الحفظ عبر واجهة السيرفر الرسمية (مع التجديد التلقائي لرمز التوكن)
         try {
             const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
             const response = await fetchFn('/api/spiritual_note', {
@@ -344,6 +373,9 @@
             const result = await response.json();
             if (response.ok && result && result.success) {
                 cloudSaved = true;
+                payload._synced = true;
+                localSpiritual[logKey] = payload;
+                localStorage.setItem('khedmety_student_spiritual', JSON.stringify(localSpiritual));
             } else if (response.status === 401 || (result && result.message && (result.message.includes('Bearer Token') || result.message.includes('رمز المصادقة')))) {
                 authExpired = true;
             }
@@ -366,6 +398,9 @@
                 }, { merge: true });
                 cloudSaved = true;
                 authExpired = false;
+                payload._synced = true;
+                localSpiritual[logKey] = payload;
+                localStorage.setItem('khedmety_student_spiritual', JSON.stringify(localSpiritual));
             } catch (fsErr) {
                 console.warn('Direct firestore save note:', fsErr);
             }
