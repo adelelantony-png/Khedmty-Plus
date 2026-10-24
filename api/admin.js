@@ -51,14 +51,34 @@ module.exports = async (req, res) => {
             
             payload.students.forEach(std => {
                 if (std && std.code && std.name) {
-                    const studentRef = db.collection('students').doc(String(std.code).trim());
+                    const cleanCode = String(std.code).trim();
+                    const cleanName = String(std.name).trim();
+                    const cleanPhone = std.phone ? String(std.phone).trim() : '';
+                    const cleanFather = std.confession_father ? String(std.confession_father).trim() : '';
+                    const level = payload.import_level || 'الفرقة الأولى';
+
+                    // 1. مزامنة مع مجموعة students (الدارسين والنتائج)
+                    const studentRef = db.collection('students').doc(cleanCode);
                     batch.set(studentRef, {
-                        name: String(std.name).trim(),
-                        phone: std.phone ? String(std.phone).trim() : '',
-                        confession_father: std.confession_father ? String(std.confession_father).trim() : '',
-                        level: payload.import_level || 'الفرقة الأولى',
+                        name: cleanName,
+                        phone: cleanPhone,
+                        confession_father: cleanFather,
+                        level: level,
                         points: 0
                     }, { merge: true }); // Merge للحفاظ على النقاط إن كان مسجلاً سابقاً
+
+                    // 2. مزامنة مع مجموعة members (لوحة الخدام وحضور الجمعة)
+                    const memberRef = db.collection('members').doc(cleanCode);
+                    batch.set(memberRef, {
+                        id: cleanCode,
+                        code: cleanCode,
+                        name: cleanName,
+                        phone: cleanPhone,
+                        confessor: cleanFather,
+                        stage: level,
+                        active: true
+                    }, { merge: true });
+
                     count++;
                 }
             });
