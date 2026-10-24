@@ -157,25 +157,80 @@ module.exports = async (req, res) => {
             });
         }
 
-        // 5. جلب بيانات المخدومين والحضور لمزامنة الإكسيل (Two-Way Sync Engine)
+        // 5. جلب بيانات المخدومين والحضور والخدام والخطة لمزامنة الإكسيل الشاملة
         if (action === 'get_sync_data') {
-            const mSnap = await db.collection('members').get();
+            const [mSnap, aSnap, sSnap, pDoc] = await Promise.all([
+                db.collection('members').get(),
+                db.collection('attendance').get(),
+                db.collection('servants').get(),
+                db.collection('config').doc('master_plan').get()
+            ]);
+
             const members = {};
             mSnap.forEach(doc => {
                 const data = doc.data() || {};
                 members[doc.id] = Object.assign({ id: doc.id }, data);
             });
 
-            const aSnap = await db.collection('attendance').get();
             const attendance = {};
             aSnap.forEach(doc => {
                 attendance[doc.id] = doc.data() || {};
             });
 
+            const servants = {};
+            sSnap.forEach(doc => {
+                const data = doc.data() || {};
+                servants[doc.id] = Object.assign({ id: doc.id }, data);
+            });
+
+            const plan = (pDoc.exists && pDoc.data()) ? (pDoc.data().list || []) : [];
+
             return res.status(200).json({
                 success: true,
                 members: members,
-                attendance: attendance
+                attendance: attendance,
+                servants: servants,
+                plan: plan
+            });
+        }
+
+        // 6. حفظ واعتماد خطة السنة السحابية من كشف الإكسيل
+        if (action === 'save_master_plan') {
+            if (!payload || !Array.isArray(payload.events)) {
+                return res.status(400).json({ success: false, message: 'بيانات الخطة غير مكتملة' });
+            }
+            await db.collection('config').doc('master_plan').set({
+                list: payload.events,
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+            });
+            return res.status(200).json({
+                success: true,
+                message: `تم رفع واعتماد ${payload.events.length} فعالية على سحابة الموقع بنجاح!`
+            });
+        }
+
+        // 7. تحديث وحفظ بيانات الخدام دفعة واحدة (Batch Write)
+        if (action === 'update_servants_batch') {
+            if (!payload || !Array.isArray(payload.servants)) {
+                return res.status(400).json({ success: false, message: 'قائمة الخدام غير صحيحة' });
+            }
+            const batch = db.batch();
+            let count = 0;
+            payload.servants.forEach(s => {
+                const code = String(s.code || s.id || '').trim();
+                if (code) {
+                    const ref = db.collection('servants').doc(code);
+                    batch.set(ref, {
+                        ...s,
+                        updated_at: admin.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    count++;
+                }
+            });
+            await batch.commit();
+            return res.status(200).json({
+                success: true,
+                message: `تم تحديث ${count} خادم في السحابة بنجاح!`
             });
         }
 
