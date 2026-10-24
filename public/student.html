@@ -190,6 +190,45 @@
             <i class="fa-solid fa-chevron-left text-muted"></i>
         </a>
     </div>
+
+    <!-- قسم تقييم لقاء الجمعة والمقترحات (Feedback Widget) -->
+    <div class="card p-3 mt-4 mb-3 border-0 shadow-sm rounded-4" style="background: #ffffff; border: 1px solid #e2e8f0 !important;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fs-5 text-primary"><i class="fa-solid fa-comments"></i></span>
+                <strong class="text-dark" style="font-size: 0.98rem;">تقييم لقاء الجمعة وكورس إعداد الخدام</strong>
+            </div>
+            <span class="badge bg-light text-primary border rounded-pill px-2 py-1" style="font-size:0.75rem;">صوتك يهمنا 🕊️</span>
+        </div>
+        <p class="text-muted small mb-3">رأيك يساعدنا في تطوير فقرات الاجتماع والمحاضرات لتناسب احتياجك الروحي والخدمي.</p>
+
+        <!-- نجوم/خيارات التقييم -->
+        <div class="d-flex justify-content-center gap-2 mb-3 flex-wrap" id="feedbackRatingContainer">
+            <button type="button" class="btn btn-outline-warning btn-sm feedback-btn px-3 py-2 rounded-3" data-rating="5" onclick="setFeedbackRating(5)">
+                🌟 ممتاز
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm feedback-btn px-3 py-2 rounded-3" data-rating="4" onclick="setFeedbackRating(4)">
+                👍 جيد جداً
+            </button>
+            <button type="button" class="btn btn-outline-success btn-sm feedback-btn px-3 py-2 rounded-3" data-rating="3" onclick="setFeedbackRating(3)">
+                😊 جيد
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm feedback-btn px-3 py-2 rounded-3" data-rating="2" onclick="setFeedbackRating(2)">
+                💡 يحتاج تطوير
+            </button>
+        </div>
+
+        <div class="mb-2">
+            <textarea id="feedbackText" class="form-control rounded-3" rows="2" placeholder="ما أكثر ما لمسك في لقاء هذا الأسبوع؟ أو مقترحك للمرات القادمة (اختياري)..." style="font-size:0.88rem;"></textarea>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <span id="feedbackStatusMsg" class="small text-muted"></span>
+            <button type="button" id="btnSubmitFeedback" class="btn btn-primary btn-sm px-4 fw-bold rounded-pill" onclick="submitFeedback()">
+                <i class="fa-solid fa-paper-plane me-1"></i> إرسال الرأي
+            </button>
+        </div>
+    </div>
 </div>
 
 <script src="auth-client.js"></script>
@@ -432,6 +471,234 @@ document.addEventListener('DOMContentLoaded', function () {
         KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
     }
 });
+
+
+    // --- 1. حساب الالتزام المتتالي (Spiritual Streak) وحالة اليوم ---
+    function calculateSpiritualStreak(studentCode) {
+        if (!studentCode) return 0;
+        const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        const localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+        
+        let streak = 0;
+        const now = new Date();
+        
+        for (let i = 0; i < 365; i++) {
+            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            const planKey = `${d.getMonth() + 1}-${d.getDate()}_${studentCode}`;
+            const noteKey = `${dateStr}_${studentCode}`;
+            
+            const hasReading = Boolean(localReadings[planKey]);
+            const hasNote = Boolean(localSpiritual[noteKey]);
+            
+            if (hasReading || hasNote) {
+                streak++;
+            } else {
+                if (i === 0) continue; // لو اليوم لسه مخلصش لا نقطع السلسلة
+                break;
+            }
+        }
+        return streak;
+    }
+
+    function renderSpiritualHabitsDashboard() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
+        if (!code) return;
+
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        const planKey = `${now.getMonth() + 1}-${now.getDate()}_${code}`;
+        const noteKey = `${dateStr}_${code}`;
+
+        const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        const localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+
+        const readingDone = Boolean(localReadings[planKey]);
+        const noteDone = Boolean(localSpiritual[noteKey]);
+        const streak = calculateSpiritualStreak(code);
+
+        // تحديث شارة الحماس والسلسلة
+        const streakTxt = document.getElementById('ui-streak-text');
+        if (streakTxt) {
+            streakTxt.textContent = streak > 0 ? `${streak} أيام متتالية` : 'ابدأ سلسلتك اليوم!';
+        }
+
+        // حالة قراءة الإنجيل لليوم
+        const rIcon = document.getElementById('ui-reading-status-icon');
+        const rLabel = document.getElementById('ui-reading-status-label');
+        const rBtn = document.getElementById('btn-go-reading');
+        const rBtnText = document.getElementById('btn-reading-text');
+
+        if (readingDone) {
+            if (rIcon) rIcon.innerHTML = '<i class="fa-solid fa-circle-check text-success fs-5"></i>';
+            if (rLabel) rLabel.innerHTML = '<span class="text-success fw-bold">تمت القراءة بنجاح اليوم ✅ (+10 نقاط)</span>';
+            if (rBtn) {
+                rBtn.className = 'btn btn-sm btn-outline-warning text-dark fw-bold px-3 rounded-pill';
+                if (rBtnText) rBtnText.textContent = 'مراجعة الإصحاح';
+            }
+        } else {
+            if (rIcon) rIcon.innerHTML = '<i class="fa-solid fa-book-bible text-warning fs-5"></i>';
+            if (rLabel) rLabel.innerHTML = 'قراءة اليوم حسب الخطة السنوية';
+            if (rBtn) {
+                rBtn.className = 'btn btn-sm btn-warning text-dark fw-bold px-3 rounded-pill shadow-sm';
+                if (rBtnText) rBtnText.textContent = 'ابدأ القراءة';
+            }
+        }
+
+        // حالة النوتة الروحية لليوم
+        const nIcon = document.getElementById('ui-note-status-icon');
+        const nLabel = document.getElementById('ui-note-status-label');
+        const nBtn = document.getElementById('btn-go-note');
+        const nBtnText = document.getElementById('btn-note-text');
+
+        if (noteDone) {
+            if (nIcon) nIcon.innerHTML = '<i class="fa-solid fa-circle-check text-success fs-5"></i>';
+            if (nLabel) nLabel.innerHTML = '<span class="text-success fw-bold">تم تسجيل نوتة اليوم بنجاح ✅ (+15 نقطة)</span>';
+            if (nBtn) {
+                nBtn.className = 'btn btn-sm btn-outline-danger fw-bold px-3 rounded-pill';
+                if (nBtnText) nBtnText.textContent = 'تعديل النوتة';
+            }
+        } else {
+            if (nIcon) nIcon.innerHTML = '<i class="fa-solid fa-heart-pulse text-danger fs-5"></i>';
+            if (nLabel) nLabel.innerHTML = 'تسجيل الصلاة والمحاسبة اليومية';
+            if (nBtn) {
+                nBtn.className = 'btn btn-sm btn-danger fw-bold px-3 rounded-pill shadow-sm';
+                if (nBtnText) nBtnText.textContent = 'سجّل الآن';
+            }
+        }
+
+        // إظهار بانر التهنئة عند إنجاز الاثنين معاً
+        const completeBanner = document.getElementById('ui-daily-complete-msg');
+        const completeName = document.getElementById('ui-complete-student-name');
+        if (completeBanner) {
+            if (readingDone && noteDone) {
+                completeBanner.classList.remove('d-none');
+                completeBanner.classList.add('d-flex');
+                if (completeName) completeName.textContent = studentName || 'المخدوم';
+            } else {
+                completeBanner.classList.remove('d-flex');
+                completeBanner.classList.add('d-none');
+            }
+        }
+    }
+
+    function renderLocalPoints() {
+        renderSpiritualHabitsDashboard();
+    }
+
+    // --- 2. إدارة تقييم لقاء الجمعة (Feedback System) ---
+    let selectedRating = 0;
+
+    function getLatestFridayDateStr() {
+        const d = new Date();
+        const day = d.getDay();
+        const diff = (day >= 5) ? (day - 5) : (day + 2);
+        const friday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diff);
+        const yyyy = friday.getFullYear();
+        const mm = String(friday.getMonth() + 1).padStart(2, '0');
+        const dd = String(friday.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function setFeedbackRating(val) {
+        selectedRating = val;
+        document.querySelectorAll('.feedback-btn').forEach(btn => {
+            if (Number(btn.getAttribute('data-rating')) === val) {
+                btn.classList.add('active', 'shadow-sm');
+                btn.style.transform = 'scale(1.05)';
+            } else {
+                btn.classList.remove('active', 'shadow-sm');
+                btn.style.transform = 'none';
+            }
+        });
+    }
+
+    async function submitFeedback() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
+        if (!code) return;
+        if (!selectedRating) {
+            alert('يرجى اختيار أحد خيارات التقييم أولاً (ممتاز / جيد جداً / جيد / يحتاج تطوير)');
+            return;
+        }
+
+        const text = (document.getElementById('feedbackText').value || '').trim();
+        const fridayStr = getLatestFridayDateStr();
+        const submitBtn = document.getElementById('btnSubmitFeedback');
+        const statusMsg = document.getElementById('feedbackStatusMsg');
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+
+        const payload = {
+            rating: selectedRating,
+            notes: text,
+            fridayDate: fridayStr,
+            studentName: studentName || 'دارس',
+            studentCode: code,
+            timestamp: new Date().toISOString()
+        };
+
+        // 1. الحفظ المحلي فوراً
+        try {
+            localStorage.setItem(`khedmty_feedback_${fridayStr}_${code}`, JSON.stringify(payload));
+        } catch(e) {}
+
+        // 2. الحفظ السحابي في Firestore تحت وثيقة المخدوم (ضمن صلاحية isMe)
+        if (fsdb) {
+            try {
+                await fsdb.collection('students').doc(code).collection('feedback').doc(fridayStr).set(payload, { merge: true });
+            } catch(err) {
+                console.warn('Feedback cloud sync warning:', err);
+            }
+        }
+
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> تم الإرسال';
+        submitBtn.classList.replace('btn-primary', 'btn-success');
+        if (statusMsg) statusMsg.innerHTML = '<span class="text-success fw-bold">شكراً لك! تم تسجيل رأيك بمحبة ❤️</span>';
+        document.querySelectorAll('.feedback-btn').forEach(b => b.disabled = true);
+        const fbText = document.getElementById('feedbackText');
+        if (fbText) fbText.disabled = true;
+    }
+
+    function initFeedbackSection() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
+        if (!code) return;
+        const fridayStr = getLatestFridayDateStr();
+        const existing = JSON.parse(localStorage.getItem(`khedmty_feedback_${fridayStr}_${code}`)) || null;
+
+        if (existing && existing.rating) {
+            setFeedbackRating(existing.rating);
+            const fbText = document.getElementById('feedbackText');
+            if (fbText) {
+                fbText.value = existing.notes || '';
+                fbText.disabled = true;
+            }
+            const submitBtn = document.getElementById('btnSubmitFeedback');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> تم التقييم مسبقاً';
+                submitBtn.classList.replace('btn-primary', 'btn-secondary');
+            }
+            const statusMsg = document.getElementById('feedbackStatusMsg');
+            if (statusMsg) {
+                statusMsg.innerHTML = '<span class="text-muted">تم تسجيل تقييمك للقاء هذا الأسبوع بنجاح ✅</span>';
+            }
+            document.querySelectorAll('.feedback-btn').forEach(b => b.disabled = true);
+        }
+    }
+
+    // تشغيل التهيئة عند تحميل الصفحة
+    setTimeout(() => {
+        renderSpiritualHabitsDashboard();
+        initFeedbackSection();
+    }, 400);
+
 </script>
 </body>
 </html>
