@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رصد درجات امتحانات القبول وتحديد معايير الجو العام | خدمتي برو</title>
+    <meta name="theme-color" content="#0c2461">
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="auth-client.js"></script>
+    <style>
+        :root {
+            --primary: #0c2461;
+            --accent: #1e3799;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0284c7;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding-bottom: 50px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            transition: 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-custom:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .btn-custom.btn-navy {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 12px rgba(12, 36, 97, 0.25);
+        }
+
+        .btn-custom.btn-navy:hover {
+            color: #ffffff;
+            filter: brightness(1.1);
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #2563eb 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(12, 36, 97, 0.15);
+        }
+
+        .header-card h2 {
+            margin: 0 0 6px;
+            font-size: 1.6rem;
+            font-weight: 900;
+        }
+
+        .header-card p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* بطاقات الـ KPIs */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .kpi-title {
+            font-size: 0.82rem;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .kpi-val {
+            font-size: 1.7rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        /* لوحة التحكم في الجو العام والشرائح */
+        .curve-panel {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .curve-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .slider-box {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 18px;
+            border: 1px solid #e2e8f0;
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .slider-box input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .threshold-pill {
+            background: #eef2ff;
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 1.1rem;
+            padding: 4px 12px;
+            border-radius: 8px;
+            border: 1px solid #c7d2fe;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* جدول رصد الدرجات */
+        .table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+
+        thead {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        th {
+            padding: 12px 10px;
+            font-weight: 800;
+            text-align: center;
+            border-bottom: 2px solid #000;
+        }
+
+        td {
+            padding: 10px 8px;
+            vertical-align: middle;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .grade-input {
+            width: 58px;
+            text-align: center;
+            font-weight: 800;
+            padding: 6px 4px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: 0.2s ease;
+        }
+
+        .grade-input:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 55, 153, 0.15);
+            background: #fff;
+        }
+
+        .badge-status {
+            display: inline-block;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .status-accepted { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .status-conditional { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+        .status-interview { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
+        .status-rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input, .search-bar select {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.88rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+
+    <!-- شريط التنقل العلوي -->
+    <div class="topbar">
+        <a href="servant-dashboard.html?tab=coursesTab" class="btn-custom btn-smart-back" data-smart-back data-fallback="servant-dashboard.html?tab=coursesTab">
+            <i class="fa-solid fa-arrow-right"></i> العودة للوحة الخدمة
+        </a>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
+                <i class="fa-solid fa-file-excel text-success"></i> تصدير شيت خدمتي برو (CSV)
+            </button>
+            <button type="button" class="btn-custom btn-navy" onclick="saveGradesLocal(true)">
+                <i class="fa-solid fa-floppy-disk"></i> حفظ الدرجات الآن
+            </button>
+        </div>
+    </div>
+
+    <!-- كارت الترويسة -->
+    <div class="header-card">
+        <h2>🎓 رصد درجات امتحانات القبول وتحديد معيار القبول (الجو العام)</h2>
+        <p>اجتماع القديس بولس الرسول لإعداد الخدام ✝️ — أدخل درجات الامتحانات الأربعة وتحكم في نسبة القبول المرنة في ثوانٍ</p>
+    </div>
+
+    <!-- بطاقات الـ KPIs ومؤشرات الجو العام -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">إجمالي المتقدمين</div>
+            <div class="kpi-val" id="kpiTotal">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">متوسط الدفعة (الجو العام)</div>
+            <div class="kpi-val" id="kpiAvg" style="color: #d97706;">0.0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">أعلى درجة تم رصدها</div>
+            <div class="kpi-val" id="kpiMax" style="color: #10b981;">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">المقبولون (نهائي وبشرط)</div>
+            <div class="kpi-val" id="kpiPassed" style="color: #2563eb;">0</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">المعلقون للمقابلة 🟠</div>
+            <div class="kpi-val" id="kpiInterview" style="color: #ea580c;">0</div>
+        </div>
+    </div>
+
+    <!-- لوحة ضبط معيار القبول المرن (الجو العام) -->
+    <div class="curve-panel">
+        <div class="curve-panel-header">
+            <div>
+                <strong style="font-size: 1.05rem; color: var(--primary);">
+                    <i class="fa-solid fa-sliders me-1"></i> معيار القبول المرن وفق الجو العام للدرجات:
+                </strong>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">
+                    حرك المؤشر لتعديل الحد الأدنى للقبول في لحظة وسيعاد تقييم كافة المخدومين فورياً
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-custom" onclick="resetToDefaultThresholds()">
+                    <i class="fa-solid fa-rotate-left"></i> استعادة الافتراضي (60%)
+                </button>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+            <div class="slider-box">
+                <span style="font-weight: 800; font-size: 0.9rem;">نسبة القبول المباشر:</span>
+                <input type="range" id="passThresholdSlider" min="40" max="80" step="5" value="60" oninput="handleThresholdChange(this.value)">
+                <span class="threshold-pill" id="thresholdDisplay">60%</span>
+            </div>
+
+            <div class="slider-box">
+                <span style="font-weight: 800; font-size: 0.9rem;">حد المقابلة الشخصية:</span>
+                <input type="range" id="interviewThresholdSlider" min="30" max="70" step="5" value="50" oninput="handleInterviewThresholdChange(this.value)">
+                <span class="threshold-pill" id="interviewThresholdDisplay" style="color:#c2410c;">50%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط البحث والتصفية -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="🔍 بحث باسم المخدوم، كود الامتحان، أو الهاتف..." style="flex: 1; min-width: 220px;" onkeyup="renderTable()">
+        <select id="statusFilter" onchange="renderTable()" style="min-width: 170px;">
+            <option value="all">كل حالات القبول</option>
+            <option value="accepted">مقبول نهائياً 🟢</option>
+            <option value="conditional">مقبول بشرط الاعتراف 🟡</option>
+            <option value="interview">معلق للمقابلة 🟠</option>
+            <option value="rejected">غير مجتاز / غائب 🔴</option>
+        </select>
+        <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
+            <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم جديد
+        </button>
+    </div>
+
+    <!-- جدول الرصد والتقييم -->
+    <div class="table-card">
+        <div style="overflow-x: auto;">
+            <table id="gradesTable">
+                <thead>
+                    <tr>
+                        <th style="width: 75px;">كود</th>
+                        <th>اسم المخدوم</th>
+                        <th>النوع</th>
+                        <th>أب الاعتراف</th>
+                        <th style="width: 70px;">امتحان 1<br><small style="opacity:0.8;">(25)</small></th>
+                        <th style="width: 70px;">امتحان 2<br><small style="opacity:0.8;">(25)</small></th>
+                        <th style="width: 70px;">امتحان 3<br><small style="opacity:0.8;">(25)</small></th>
+                        <th style="width: 70px;">امتحان 4<br><small style="opacity:0.8;">(25)</small></th>
+                        <th style="width: 80px;">المجموع<br><small style="opacity:0.8;">(100)</small></th>
+                        <th style="width: 75px;">النسبة %</th>
+                        <th>الحالة الرعوية</th>
+                        <th>قرار القبول النهائي 🎯</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- تعبئة تلقائية بالجافاسكريبت -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // بيانات أولية نموذجية متطابقة مع شيت جوجل فورم
+    let candidatesList = [
+        { code: "2201", name: "يوسف جورج عادل جورج", gender: "بنين", phone: "01289123456", parentPhone: "01289123450", dob: "2003-05-14", confessor: "أبونا أنجيلوس", attended: true, g1: 24.0, g2: 23.5, g3: 25.0, g4: 22.5, email: "youssef.george@gmail.com", address: "15 شارع الترعة المطرية" },
+        { code: "2202", name: "مارينا ماجد حليم فرج", gender: "بنات", phone: "01099234567", parentPhone: "01099234500", dob: "2004-11-20", confessor: "أبونا رفائيل", attended: true, g1: 21.0, g2: 22.0, g3: 20.5, g4: 21.5, email: "marina.maged@gmail.com", address: "24 ش منشية التحرير عين شمس" },
+        { code: "2203", name: "كيرلس مايكل سامي نصيف", gender: "بنين", phone: "01145678901", parentPhone: "", dob: "2002-08-04", confessor: "لا يوجد", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5, email: "cyril.michael@gmail.com", address: "8 ش الخليفة المأمون روكسي" },
+        { code: "2204", name: "سارة سمير فريد بطرس", gender: "بنات", phone: "01233445566", parentPhone: "01233445500", dob: "2005-01-28", confessor: "أبونا بطرس", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5, email: "sara.samir@gmail.com", address: "12 ش الحرية هليوبوليس" },
+        { code: "2205", name: "بيتر هاني شكري أسعد", gender: "بنين", phone: "01011223344", parentPhone: "", dob: "2001-12-10", confessor: "أبونا يوحنا", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5, email: "peter.hany@gmail.com", address: "55 ش جسر السويس النزهة" },
+        { code: "2206", name: "ديفيد نبيل كمال صليب", gender: "بنين", phone: "01255667788", parentPhone: "01255667700", dob: "2006-03-18", confessor: "أبونا توماس", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, email: "david.nabil@gmail.com", address: "3 ش المطرية محطة المترو" }
+    ];
+
+    let passThreshold = 60;
+    let interviewThreshold = 50;
+
+    // استرجاع البيانات المحفوظة محلياً
+    function loadSavedData() {
+        try {
+            const raw = localStorage.getItem('khedmety_new_applicants_grades');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) candidatesList = parsed;
+            }
+            const sPass = localStorage.getItem('khedmety_pass_threshold');
+            if (sPass) {
+                passThreshold = Number(sPass);
+                document.getElementById('passThresholdSlider').value = passThreshold;
+                document.getElementById('thresholdDisplay').textContent = `${passThreshold}%`;
+            }
+            const sInterview = localStorage.getItem('khedmety_interview_threshold');
+            if (sInterview) {
+                interviewThreshold = Number(sInterview);
+                document.getElementById('interviewThresholdSlider').value = interviewThreshold;
+                document.getElementById('interviewThresholdDisplay').textContent = `${interviewThreshold}%`;
+            }
+        } catch(e) {}
+    }
+
+    function saveGradesLocal(showAlert = false) {
+        try {
+            localStorage.setItem('khedmety_new_applicants_grades', JSON.stringify(candidatesList));
+            localStorage.setItem('khedmety_pass_threshold', passThreshold);
+            localStorage.setItem('khedmety_interview_threshold', interviewThreshold);
+            if (showAlert) alert('تم حفظ درجات المخدومين وإعدادات القبول محلياً بنجاح ✅');
+        } catch(e) {
+            console.warn(e);
+        }
+    }
+
+    function handleThresholdChange(val) {
+        passThreshold = Number(val);
+        document.getElementById('thresholdDisplay').textContent = `${passThreshold}%`;
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function handleInterviewThresholdChange(val) {
+        interviewThreshold = Number(val);
+        document.getElementById('interviewThresholdDisplay').textContent = `${interviewThreshold}%`;
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function resetToDefaultThresholds() {
+        passThreshold = 60;
+        interviewThreshold = 50;
+        document.getElementById('passThresholdSlider').value = 60;
+        document.getElementById('thresholdDisplay').textContent = "60%";
+        document.getElementById('interviewThresholdSlider').value = 50;
+        document.getElementById('interviewThresholdDisplay').textContent = "50%";
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function computeDecision(candidate) {
+        if (!candidate.attended) {
+            return { label: "غائب عن الامتحان 🔴", key: "rejected", class: "status-rejected" };
+        }
+        const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
+        const pct = (total / 100) * 100;
+        const conf = String(candidate.confessor || '').trim().toLowerCase();
+        const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none');
+
+        if (pct >= passThreshold) {
+            if (hasConfIssue) {
+                return { label: "مقبول بشرط حل الاعتراف 🟡", key: "conditional", class: "status-conditional" };
+            }
+            return { label: "مقبول نهائياً 🟢", key: "accepted", class: "status-accepted" };
+        } else if (pct >= interviewThreshold) {
+            return { label: "معلق للمقابلة الشخصية 🟠", key: "interview", class: "status-interview" };
+        } else {
+            return { label: "غير مجتاز - دور ثانٍ 🔴", key: "rejected", class: "status-rejected" };
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const searchVal = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+        const statusVal = document.getElementById('statusFilter').value;
+
+        let totalCandidates = candidatesList.length;
+        let sumTotal = 0;
+        let maxTotal = 0;
+        let passedCount = 0;
+        let interviewCount = 0;
+        let attendedCount = 0;
+
+        candidatesList.forEach(c => {
+            const t = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            if (c.attended) {
+                attendedCount++;
+                sumTotal += t;
+                if (t > maxTotal) maxTotal = t;
+            }
+            const dec = computeDecision(c);
+            if (dec.key === 'accepted' || dec.key === 'conditional') passedCount++;
+            if (dec.key === 'interview') interviewCount++;
+        });
+
+        // تحديث مؤشرات الـ KPIs
+        document.getElementById('kpiTotal').textContent = totalCandidates;
+        document.getElementById('kpiAvg').textContent = attendedCount > 0 ? (sumTotal / attendedCount).toFixed(1) : "0.0";
+        document.getElementById('kpiMax').textContent = maxTotal.toFixed(1);
+        document.getElementById('kpiPassed').textContent = passedCount;
+        document.getElementById('kpiInterview').textContent = interviewCount;
+
+        // فلترة وعرض الصفوف
+        const filtered = candidatesList.filter(c => {
+            const name = String(c.name || '').toLowerCase();
+            const code = String(c.code || '').toLowerCase();
+            const phone = String(c.phone || '').toLowerCase();
+            const dec = computeDecision(c);
+
+            let matchSearch = true;
+            if (searchVal) {
+                matchSearch = name.includes(searchVal) || code.includes(searchVal) || phone.includes(searchVal);
+            }
+
+            let matchStatus = true;
+            if (statusVal !== 'all') {
+                matchStatus = (dec.key === statusVal);
+            }
+
+            return matchSearch && matchStatus;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-muted fw-bold">لا يوجد مخدومين يطابقون خيارات البحث الحالية.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map((c, idx) => {
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const pct = ((total / 100) * 100).toFixed(1);
+            const dec = computeDecision(c);
+            const conf = String(c.confessor || '').trim();
+            const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none');
+            const confBadge = isConfClean ? `<span class="badge bg-light text-dark">${conf}</span>` : `<span class="badge bg-warning text-dark">مشكلة اعتراف ⚠️</span>`;
+
+            return `
+                <tr>
+                    <td class="fw-bold text-primary">${c.code}</td>
+                    <td class="text-end fw-bold">${c.name}</td>
+                    <td><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender}</span></td>
+                    <td class="text-end">${confBadge}</td>
+                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
+                    <td class="fw-bold fs-6" style="background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
+                    <td class="fw-bold">${c.attended ? pct + '%' : '-'}</td>
+                    <td>${isConfClean ? '<span class="text-success fw-bold">سليم ✅</span>' : '<span class="text-danger fw-bold">يحتاج متابعة ⚠️</span>'}</td>
+                    <td><span class="badge-status ${dec.class}">${dec.label}</span></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function updateGrade(code, examNum, val) {
+        const item = candidatesList.find(c => String(c.code) === String(code));
+        if (item) {
+            item['g' + examNum] = val === '' ? 0 : Number(val);
+            item.attended = true;
+            saveGradesLocal(false);
+            renderTable();
+        }
+    }
+
+    function addNewCandidateModal() {
+        const name = prompt('أدخل اسم المخدوم الجديد الرباعي:');
+        if (!name || !name.trim()) return;
+        const phone = prompt('أدخل رقم الهاتف:') || '';
+        const confessor = prompt('اسم أب الاعتراف (أو اتركه فارغاً إذا كان لا يوجد):') || 'لا يوجد';
+        const nextCode = (candidatesList.length > 0) ? (Math.max(...candidatesList.map(c => Number(c.code) || 2200)) + 1).toString() : "2201";
+
+        candidatesList.push({
+            code: nextCode,
+            name: name.trim(),
+            gender: "بنين",
+            phone: phone.trim(),
+            parentPhone: "",
+            dob: "2004-01-01",
+            confessor: confessor.trim(),
+            attended: true,
+            g1: 0, g2: 0, g3: 0, g4: 0,
+            email: "", address: ""
+        });
+
+        saveGradesLocal(true);
+        renderTable();
+    }
+
+    function exportToExcelCSV() {
+        if (!candidatesList || candidatesList.length === 0) {
+            alert('لا توجد بيانات لتصديرها.');
+            return;
+        }
+
+        const headers = [
+            "الاسم",
+            "email",
+            "العنوان",
+            "رقم التليفون",
+            "رقم تليفون ولي الامر",
+            "تاريخ الميلاد اليوم",
+            "تاريخ الميلاد الشهر",
+            "تاريخ الميلاد السنه",
+            "اب الاعتراف",
+            "كود الامتحان",
+            "الباركود المعتمد للكاميرا",
+            "الفرقة",
+            "النوع",
+            "بيانات أخري والنتيجة"
+        ];
+
+        const rows = [headers];
+
+        candidatesList.forEach(c => {
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const dec = computeDecision(c);
+            let bDay = "01", bMonth = "01", bYear = "2004";
+            if (c.dob) {
+                const parts = c.dob.split('-');
+                if (parts.length >= 3) {
+                    bYear = parts[0];
+                    bMonth = parts[1];
+                    bDay = parts[2];
+                }
+            }
+
+            rows.push([
+                `"${(c.name || '').replace(/"/g, '""')}"`,
+                `"${c.email || ''}"`,
+                `"${(c.address || '').replace(/"/g, '""')}"`,
+                `"${c.phone || ''}"`,
+                `"${c.parentPhone || ''}"`,
+                parseInt(bDay).toString(),
+                parseInt(bMonth).toString(),
+                bYear,
+                `"${(c.confessor || '').replace(/"/g, '""')}"`,
+                `"${c.code || ''}"`,
+                `"${c.name}/${parseInt(bDay)}"`,
+                "الفرقة الأولى",
+                `"${c.gender || 'بنين'}"`,
+                `"${dec.label} | المجموع: ${total}/100 | ${c.confessor || 'بدون اعتراف'}"`
+            ]);
+        });
+
+        const csvContent = '\uFEFF' + rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `كشف_خدمتي_برو_المعتمد_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // التهيئة عند التحميل
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSavedData();
+        renderTable();
+    });
+</script>
+<script src="js/pwa-helper.js"></script>
+</body>
+</html>
