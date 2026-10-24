@@ -1125,11 +1125,11 @@
                 <option value="rejected">غير مجتاز / دور ثان 🔴</option>
             </select>
 
-            <!-- 2. فلترة النوع -->
+            <!-- 2. فلترة النوع (Male & Female) -->
             <select id="genderFilter" class="filter-select" onchange="renderTable()">
-                <option value="all">👥 كل المخدومين (بنين وبنات)</option>
-                <option value="بنين">بنين فقط 👦</option>
-                <option value="بنات">بنات فقط 👧</option>
+                <option value="all">👥 كل المخدومين (All)</option>
+                <option value="بنين">👨 بنين فقط (Male)</option>
+                <option value="بنات">👩 بنات فقط (Female)</option>
             </select>
 
             <!-- 3. فلترة حالة الاعتراف -->
@@ -1189,7 +1189,7 @@
                     <tr>
                         <th style="width: 65px;">كود</th>
                         <th>اسم المخدوم</th>
-                        <th style="width: 55px;">النوع</th>
+                        <th style="width: 105px;">النوع (Gender)</th>
                         <th>أب الاعتراف</th>
                         <th style="width: 80px; background:#0a2558;">✍️ تحريري روحي<br><small style="opacity:0.85;" id="thMaxEx1">(25)</small></th>
                         <th style="width: 80px; background:#0a2558;">✍️ تحريري نفسي<br><small style="opacity:0.85;" id="thMaxEx2">(25)</small></th>
@@ -1665,9 +1665,15 @@
                 <!-- قسم المعاينة والاعتماد (يظهر تلقائياً بمجرد استخراج البيانات) -->
                 <div id="importPreviewSection" style="display: none; margin-top: 18px; border-top: 1.5px dashed #cbd5e1; padding-top: 16px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                        <div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
                             <span class="badge bg-success" style="font-size: 0.9rem; padding: 6px 12px;">
                                 <i class="fa-solid fa-users me-1"></i> تم العثور على: <strong id="previewCandidateCount">0</strong> مخدوم
+                            </span>
+                            <span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.85rem; padding:6px 10px;">
+                                <i class="fa-solid fa-mars me-1"></i> <strong id="previewBoysCount">0</strong> بنين (Male)
+                            </span>
+                            <span class="badge" style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8; font-size:0.85rem; padding:6px 10px;">
+                                <i class="fa-solid fa-venus me-1"></i> <strong id="previewGirlsCount">0</strong> بنات (Female)
                             </span>
                         </div>
                         <div style="display: flex; gap: 14px; font-size: 0.88rem; font-weight: 700;">
@@ -1731,14 +1737,14 @@
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     <div>
                         <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px; color:#0c2461;">اسم المخدوم الرباعي (مطلوب):</label>
-                        <input type="text" id="newCand_name" placeholder="الاسم رباعي باللغة العربية..." style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                        <input type="text" id="newCand_name" oninput="autoDetectGenderOnName(this.value)" placeholder="الاسم رباعي باللغة العربية..." style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
                     </div>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                         <div>
-                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">النوع:</label>
+                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">النوع (Gender):</label>
                             <select id="newCand_gender" style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px;">
-                                <option value="بنين">بنين 👦</option>
-                                <option value="بنات">بنات 👧</option>
+                                <option value="بنين">👨 بنين / ذكر (Male)</option>
+                                <option value="بنات">👩 بنات / أنثى (Female)</option>
                             </select>
                         </div>
                         <div>
@@ -1819,6 +1825,13 @@
                         <strong style="font-size: 1.05rem; color: #0c2461;" id="royal_studentName">----</strong>
                         <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;" id="royal_studentMeta">
                             كود: ---- | هاتف: ---- | أب الاعتراف: ----
+                        </div>
+                        <div style="margin-top: 5px; display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 0.78rem; font-weight: 700; color: #475569;"><i class="fa-solid fa-venus-mars text-primary me-1"></i> النوع (Gender):</span>
+                            <select id="royal_cboGender" style="padding: 2px 8px; font-size: 0.78rem; font-weight: 800; border-radius: 6px; border: 1.5px solid #cbd5e1; background: #ffffff;" onchange="royalOnGenderChange()">
+                                <option value="بنين">👨 بنين / ذكر (Male)</option>
+                                <option value="بنات">👩 بنات / أنثى (Female)</option>
+                            </select>
                         </div>
                     </div>
                     <div style="text-align: left;">
@@ -2235,7 +2248,7 @@
                     <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold;">${idx + 1}</td>
                     <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:bold; color:#0c2461;">${c.code}</td>
                     <td style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: right; font-weight:bold;">${c.name}</td>
-                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.gender || 'بنين'}</td>
+                    <td style="border: 1px solid #cbd5e1; padding: 4px 2px; font-weight:700; color:${(c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى') ? '#9d174d' : '#1e3a8a'};">${(c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى') ? 'بنات (Female)' : 'بنين (Male)'}</td>
                     <td style="border: 1px solid #cbd5e1; padding: 4px 3px;">${c.phone || '-'}</td>
                     <td style="border: 1px solid #cbd5e1; padding: 4px 6px; text-align: right; color: ${isConfClean ? '#065f46' : '#b45309'}; font-weight:bold;">${c.confessor || 'لا يوجد'}</td>
                     <td style="border: 1px solid #cbd5e1; padding: 4px 2px;">${c.g1 ?? 0}</td>
@@ -2364,6 +2377,58 @@
         renderTable();
     }
 
+    // ==========================================
+    // 🧬 منظومة معالجة النوع الدقيقة (Male & Female Normalizer)
+    // ==========================================
+    function normalizeGender(rawGender, candidateName = '') {
+        const g = String(rawGender || '').trim().toLowerCase();
+
+        // 1. فحص الإناث بالإنجليزية والعربية (Female / Girls / Woman / أنثى / بنات)
+        if (
+            g.includes('female') || g === 'f' || g.includes('أنثى') || g.includes('انثى') || 
+            g.includes('بنت') || g.includes('بنات') || g.includes('آنسة') || g.includes('انسه') || 
+            g.includes('سيدة') || g.includes('woman') || g.includes('girl') || g.includes('خادمة')
+        ) {
+            return 'بنات';
+        }
+
+        // 2. فحص الذكور بالإنجليزية والعربية (Male / Boys / Man / ذكر / بنين)
+        if (
+            g.includes('male') || g === 'm' || g.includes('ذكر') || g.includes('بنين') || 
+            g.includes('ولد') || g.includes('أولاد') || g.includes('اولاد') || g.includes('شاب') || 
+            g.includes('man') || g.includes('boy') || g.includes('خادم')
+        ) {
+            return 'بنين';
+        }
+
+        // 3. ذكاء اصطناعي محلي / استنتاج النوع من الاسم الأول عند خلو حقل النوع أو عدم تحديده
+        if (candidateName) {
+            const firstName = String(candidateName).trim().split(/\s+/)[0].toLowerCase();
+            const femaleNames = [
+                'مارينا', 'سارة', 'ساره', 'مريم', 'ماريا', 'كيرستينا', 'كريستينا', 'كرستينا', 'كرستين',
+                'فيرينا', 'فرونا', 'يوستينا', 'يوستينه', 'دميانة', 'دميانه', 'مونيكا', 'ليديا',
+                'كلوديا', 'إيرين', 'ايرين', 'ايريني', 'إيريني', 'ساندرا', 'جولي', 'جوليا', 'نيفين',
+                'هيلانة', 'هيلانه', 'بافلينا', 'مهرائيل', 'رفقة', 'رفقا', 'مادونا', 'رانيا', 'ريم',
+                'نورا', 'نوره', 'نرمين', 'ميرنا', 'فيفيان', 'كاتيا', 'إيفا', 'ايفا', 'تريزا', 'تريزه',
+                'بربارة', 'برباره', 'هناء', 'هبة', 'هبه', 'سحر', 'كلير', 'فكتوريا', 'فيكتوريا',
+                'ريتا', 'دينا', 'شيري', 'شيرين', 'ديانا', 'جاكلين', 'جانيت', 'جيسيكا', 'انجي',
+                'إنجي', 'مرثا', 'مرتا', 'فيبي', 'حنان', 'مرفت', 'ميرفت', 'أماني', 'اماني', 'سيلفيا',
+                'ميريت', 'كارولين', 'هيلين', 'مارتينا', 'داليا', 'رندا', 'رندة', 'عبير', 'إيلاريا'
+            ];
+            if (femaleNames.includes(firstName) || firstName.endsWith('ة') || firstName.endsWith('ه')) {
+                return 'بنات';
+            }
+        }
+
+        return 'بنين';
+    }
+
+    function autoDetectGenderOnName(nameVal) {
+        const detected = normalizeGender('', nameVal);
+        const sel = document.getElementById('newCand_gender');
+        if (sel) sel.value = detected;
+    }
+
     function computeDecision(candidate) {
         if (!candidate.attended) {
             return { label: "غائب عن الامتحان 🔴", key: "rejected", class: "status-rejected" };
@@ -2428,8 +2493,12 @@
             // 2. فلترة قرار القبول
             if (statusVal !== 'all' && dec.key !== statusVal) return false;
 
-            // 3. فلترة النوع
-            if (genderVal !== 'all' && c.gender !== genderVal) return false;
+            // 3. فلترة النوع (Male & Female)
+            if (genderVal !== 'all') {
+                const isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+                if ((genderVal === 'بنين' || genderVal === 'male') && isF) return false;
+                if ((genderVal === 'بنات' || genderVal === 'female') && !isF) return false;
+            }
 
             // 4. فلترة الاعتراف
             if (confessionVal === 'clean' && !isConfClean) return false;
@@ -2596,6 +2665,10 @@
         document.getElementById('royal_studentName').textContent = candidate.name;
         document.getElementById('royal_studentMeta').textContent = 
             `كود: ${candidate.code} | هاتف: ${candidate.phone || 'غير مسجل'} | أب الاعتراف: ${candidate.confessor || 'لا يوجد'}`;
+        
+        const isRoyalF = (candidate.gender === 'بنات' || candidate.gender === 'female' || candidate.gender === 'أنثى');
+        const royalCboG = document.getElementById('royal_cboGender');
+        if (royalCboG) royalCboG.value = isRoyalF ? 'بنات' : 'بنين';
 
         document.getElementById('royal_txtG1').value = candidate.g1 ?? 0;
         document.getElementById('royal_txtG2').value = candidate.g2 ?? 0;
@@ -2637,6 +2710,17 @@
             `المجموع: ${total.toFixed(1)} / ${maxTotalScore} (${pct}%)`;
     }
 
+    
+    function royalOnGenderChange() {
+        const candidate = candidatesList[royalCurrentIndex];
+        if (candidate) {
+            const royalCboG = document.getElementById('royal_cboGender');
+            if (royalCboG) candidate.gender = royalCboG.value;
+            saveGradesLocal(false);
+            renderTable();
+        }
+    }
+
     function royalSaveCurrentStudent(showToast = true) {
         const candidate = candidatesList[royalCurrentIndex];
         if (!candidate) return;
@@ -2650,6 +2734,8 @@
         candidate.spiritualNotes = document.getElementById('royal_txtSpiritualNotes').value.trim();
         candidate.psychNotes = document.getElementById('royal_txtPsychNotes').value.trim();
         candidate.problemType = document.getElementById('royal_cboProblemType').value;
+        const royalCboG = document.getElementById('royal_cboGender');
+        if (royalCboG) candidate.gender = royalCboG.value;
 
         saveGradesLocal(false);
         renderTable();
@@ -2702,6 +2788,24 @@
         currentCertCandidate = candidate;
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
         const pct = ((total / maxTotalScore) * 100).toFixed(1);
+
+        const isCertF = (candidate.gender === 'بنات' || candidate.gender === 'female' || candidate.gender === 'أنثى');
+        const greetingEl = document.getElementById('certGreetingTitle');
+        if (greetingEl) {
+            greetingEl.textContent = isCertF 
+                ? 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابنة المباركة والخادمة الأمينة:' 
+                : 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابن المبارك والخادم الأمين:';
+        }
+        const admissionEl = document.getElementById('certAdmissionText');
+        if (admissionEl) {
+            const roleText = isCertF ? 'فصل إعداد خادمات — الفرقة الأولى' : 'فصل إعداد خدام — الفرقة الأولى';
+            const pronoun = isCertF ? 'بقبولها رسمياً في' : 'بقبوله رسمياً في';
+            admissionEl.innerHTML = `
+                ${pronoun} <strong>${roleText}</strong> بعد اجتياز امتحانات القبول التحريرية والشفوية بنجاح وتميز بمجموع:
+                <span style="color: #fde047; font-weight: 900;" id="certScoreDisplay">${total.toFixed(1)} / ${maxTotalScore}</span>
+                بنسبة: <span style="color: #6ee7b7; font-weight: 900;" id="certPctDisplay">${pct}%</span> 🎯
+            `;
+        }
 
         document.getElementById('certStudentName').textContent = candidate.name;
         document.getElementById('certCodeDisplay').textContent = `كود: ${candidate.code}`;
@@ -2785,9 +2889,13 @@
         ctx.font = 'bold 44px Tajawal, sans-serif';
         ctx.fillText('🏆 شهادة قبول والتحاق رسمية 🏆', canvas.width / 2, 310);
 
+        const isCertF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
         ctx.fillStyle = '#cbd5e1';
         ctx.font = '28px Tajawal, sans-serif';
-        ctx.fillText('يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابن المبارك / الابنة المباركة:', canvas.width / 2, 380);
+        const certGreeting = isCertF 
+            ? 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابنة المباركة والخادمة الأمينة:' 
+            : 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابن المبارك والخادم الأمين:';
+        ctx.fillText(certGreeting, canvas.width / 2, 380);
 
         // اسم المخدوم المذهب البارز
         ctx.fillStyle = '#fef08a';
@@ -2797,10 +2905,13 @@
         ctx.fillText(c.name, canvas.width / 2, 480);
         ctx.shadowBlur = 0; // reset shadow
 
-        // نص الالتحاق ومجموع الدرجات
+        // نص الالتحاق ومجموع الدرجات مع مراعاة صيغة المؤنث والمذكر
         ctx.fillStyle = '#ffffff';
         ctx.font = '30px Tajawal, sans-serif';
-        ctx.fillText('بقبوله رسمياً في فصل إعداد خدام — الفرقة الأولى (دفعة 2026 / 2027)', canvas.width / 2, 570);
+        const certAdmission = isCertF 
+            ? 'بقبولها رسمياً في فصل إعداد خادمات — الفرقة الأولى (دفعة 2026 / 2027)' 
+            : 'بقبوله رسمياً في فصل إعداد خدام — الفرقة الأولى (دفعة 2026 / 2027)';
+        ctx.fillText(certAdmission, canvas.width / 2, 570);
 
         ctx.fillStyle = '#e2e8f0';
         ctx.font = 'bold 32px Tajawal, sans-serif';
@@ -2979,20 +3090,26 @@
         const pct = ((total / maxTotalScore) * 100).toFixed(1);
         const dec = computeDecision(candidate);
 
-        // صياغة الرسالة حسب حالة القبول
+        // صياغة الرسالة حسب حالة القبول والنوع (Male / Female)
+        const isMsgF = (candidate.gender === 'بنات' || candidate.gender === 'female' || candidate.gender === 'أنثى');
+        const salutation = isMsgF ? `سلام ونعمة يا أختنا المباركة *${candidate.name}* ✝️` : `سلام ونعمة يا أخي الحبيب *${candidate.name}* ✝️`;
+        const familyTitle = isMsgF ? 'فصل إعداد خادمات' : 'فصل إعداد خدام';
+        const groupTitle = isMsgF ? 'جروب إعداد خادمات الفرقة الأولى' : 'جروب إعداد خدام الفرقة الأولى';
+        const acceptedPronoun = isMsgF ? 'لقد تم قبولكِ رسمياً' : 'لقد تم قبولك رسمياً';
+
         if (dec.key === 'interview') {
-            return `سلام ونعمة يا *${candidate.name}* ✝️\nبخصوص تقدمك لفصل إعداد خدام (اجتماع القديس بولس الرسول)، نود إعلامك بأنه تم تحديد موعد مقابلتك الشخصية يوم الجمعة القادمة بعد القداس الإلهي مباشرة في قاعة إعداد خدام.\nحضورك هام لمناقشة استكمال الالتحاق بالخدمة، الرب يباركك 🕊️`;
+            return `${salutation}\nبخصوص تقدمكِ لـ ${familyTitle} (اجتماع القديس بولس الرسول)، نود إعلامكِ بأنه تم تحديد موعد مقابلتك الشخصية يوم الجمعة القادمة بعد القداس الإلهي مباشرة في قاعة إعداد خدام.\nحضورك هام لمناقشة استكمال الالتحاق بالخدمة، الرب يبارك حياتك وخدمتك 🕊️`;
         }
 
         const isConfIssue = (dec.key === 'conditional');
 
-        let msg = `سلام ونعمة يا *${candidate.name}* ✝️\nلقد تم قبولك رسمياً للالتحاق بفصل إعداد خدام — كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية (دفعة 2026 / 2027).\nمجموعك في امتحانات القبول: *${total.toFixed(1)} / ${maxTotalScore}* (${pct}%) 🎯\n\nهذا هو رابط جروب إعداد خدام الفرقة الأولى، رجاء تقديم طلب انضمام ليتم قبولك في الجروب (الرابط شخصي رجاء عدم مشاركته):\n${groupUrl}\n\n*وهذا هو رابط ID الحضور والـ QR Code الخاص بك، احفظه على موبايلك هام جداً جداً للحضور الأسبوعي:*\n${idUrl}\n`;
+        let msg = `${salutation}\n${acceptedPronoun} للالتحاق بـ ${familyTitle} — كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية (دفعة 2026 / 2027).\nمجموعك في امتحانات القبول: *${total.toFixed(1)} / ${maxTotalScore}* (${pct}%) 🎯\n\nهذا هو رابط ${groupTitle}، رجاء تقديم طلب انضمام ليتم قبولك في الجروب (الرابط شخصي رجاء عدم مشاركته):\n${groupUrl}\n\n*وهذا هو رابط ID الحضور والـ QR Code الخاص بك، احفظه على موبايلك هام جداً للحضور الأسبوعي:*\n${idUrl}\n`;
 
         if (isConfIssue) {
-            msg += `\n⚠️ *تنبيه هام ومطلوب:* تم قبولك بشرط حل *مشكلة الاعتراف* والتواصل مع أب الاعتراف، وفي حالة عدم حل مشكلة الاعتراف في خلال حد أقصى أسبوع يعتبر قبولك لاغياً في الاجتماع.\n`;
+            msg += `\n⚠️ *تنبيه هام ومطلوب:* تم قبولكِ بشرط حل *مشكلة الاعتراف* والتواصل مع أب الاعتراف، وفي حالة عدم حل مشكلة الاعتراف خلال فترة السماح يعتبر القبول معلقاً بالاجتماع.\n`;
         }
 
-        msg += `\nميعادنا الجمعة القادمة بالقداس الإلهي، والرب يبارك خدمتك وحياتك 🕊️`;
+        msg += `\nميعادنا الجمعة القادمة بالقداس الإلهي، والرب يبارك حياتك وخدمتك 🕊️`;
         return msg;
     }
 
@@ -3161,7 +3278,12 @@
                             ${c.name} <i class="fa-solid fa-pen-to-square text-muted ms-1" style="font-size:0.75rem;"></i>
                         </a>
                     </td>
-                    <td><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender || 'بنين'}</span></td>
+                    <td class="text-center">
+                        ${(c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى')
+                            ? '<span class="badge" style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8; font-size:0.75rem; font-weight:800; padding:4px 8px;"><i class="fa-solid fa-venus me-1"></i> بنات (Female)</span>'
+                            : '<span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.75rem; font-weight:800; padding:4px 8px;"><i class="fa-solid fa-mars me-1"></i> بنين (Male)</span>'
+                        }
+                    </td>
                     <td class="text-end">${confBadge}</td>
                     <td><input type="number" step="0.5" min="0" max="${examMaxScores[0]}" class="grade-input" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
                     <td><input type="number" step="0.5" min="0" max="${examMaxScores[1]}" class="grade-input" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
@@ -3643,8 +3765,13 @@
             if (map.dobYear === -1 && (h.includes('سنة الميلاد') || (h.includes('سنة') && h.includes('ميلاد')))) {
                 map.dobYear = idx;
             }
-            // النوع / الجنس
-            if (map.gender === -1 && (h.includes('النوع') || h.includes('الجنس') || h.includes('gender'))) {
+            // النوع / الجنس / Gender (Male & Female)
+            if (map.gender === -1 && (
+                h.includes('النوع') || h.includes('الجنس') || h.includes('gender') || 
+                h.includes('sex') || h.includes('male') || h.includes('female') || 
+                h.includes('بنين') || h.includes('بنات') || h.includes('ذكر') || 
+                h.includes('أنثى') || h.includes('انثى') || h.includes('ولد') || h.includes('بنت')
+            )) {
                 map.gender = idx;
             }
             // البريد الإلكتروني
@@ -3725,15 +3852,9 @@
             let confVal = map.confessor !== -1 ? String(row[map.confessor] || '').trim() : '';
             if (!confVal) confVal = 'لا يوجد';
 
-            // النوع
-            let genderVal = map.gender !== -1 ? String(row[map.gender] || '').trim() : '';
-            if (!genderVal) {
-                genderVal = 'بنين';
-            } else if (genderVal.includes('بنت') || genderVal.includes('أنثى') || genderVal.includes('آنسة') || genderVal.includes('سيدة') || genderVal.includes('بنات')) {
-                genderVal = 'بنات';
-            } else {
-                genderVal = 'بنين';
-            }
+            // النوع (معالجة دقيقة وشاملة للـ Male والـ Female مع استنتاج الاسم)
+            let rawGender = map.gender !== -1 ? String(row[map.gender] || '').trim() : '';
+            let genderVal = normalizeGender(rawGender, nameVal);
 
             // تاريخ الميلاد
             let dobVal = map.dob !== -1 ? String(row[map.dob] || '').trim() : '';
@@ -3815,18 +3936,33 @@
         document.getElementById('previewCandidateCount').textContent = candidates.length;
         const tbody = document.getElementById('previewTableBody');
 
-        // عرض أول 10 صفوف للمعاينة السريعة
+        // إحصاء البنين والبنات
+        let prevBoys = 0, prevGirls = 0;
+        candidates.forEach(c => {
+            const isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+            if (isF) prevGirls++; else prevBoys++;
+        });
+        const elBoys = document.getElementById('previewBoysCount'); if (elBoys) elBoys.textContent = prevBoys;
+        const elGirls = document.getElementById('previewGirlsCount'); if (elGirls) elGirls.textContent = prevGirls;
+
+        // عرض أول 10 صفوف للمعاينة السريعة مع شارة النوع
         const sample = candidates.slice(0, 10);
-        tbody.innerHTML = sample.map(c => `
+        tbody.innerHTML = sample.map(c => {
+            const isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+            const gBadge = isF 
+                ? '<span class="badge" style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8; font-weight:700;"><i class="fa-solid fa-venus me-1"></i> بنات (Female)</span>'
+                : '<span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:700;"><i class="fa-solid fa-mars me-1"></i> بنين (Male)</span>';
+            return `
             <tr style="border-bottom: 1px solid #e2e8f0;">
                 <td style="padding: 6px 8px; font-weight: bold; text-align: center;">${c.code}</td>
                 <td style="padding: 6px 8px; text-align: right; font-weight: bold;">${c.name}</td>
-                <td style="padding: 6px 8px; text-align: center;"><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender}</span></td>
+                <td style="padding: 6px 8px; text-align: center;">${gBadge}</td>
                 <td style="padding: 6px 8px; text-align: center;">${c.phone || '-'}</td>
                 <td style="padding: 6px 8px; text-align: right;">${c.confessor || '-'}</td>
                 <td style="padding: 6px 8px; text-align: center;">${c.attended ? 'حاضر ✅' : 'غائب 🔴'}</td>
             </tr>
-        `).join('');
+        `;
+        }).join('');
 
         if (candidates.length > 10) {
             tbody.innerHTML += `<tr><td colspan="6" style="padding: 6px; text-align: center; color: #64748b; font-weight: bold; background: #f8fafc;">... و ${candidates.length - 10} مخدومين آخرين جاهزين للإدراج</td></tr>`;
