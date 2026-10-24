@@ -745,7 +745,15 @@
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
                 <h2>قائمة المسجلين ومؤشر التخرج والبونص</h2>
-                <button class="btn-danger admin-only" onclick="clearAllMembers()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">🗑️ حذف جميع المخدومين</button>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                    <a href="servant_followup.html" class="btn-mini" style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-handshake-angle"></i> الافتقاد الذكي وحصر الغياب 🤝
+                    </a>
+                    <a href="servant_spiritual_report.html" class="btn-mini" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
+                    </a>
+                    <button class="btn-danger admin-only" onclick="clearAllMembers()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">🗑️ حذف جميع المخدومين</button>
+                </div>
             </div>
             <div style="display:flex; gap:8px; margin-bottom:10px; align-items:center; flex-wrap:wrap;">
                 <input type="text" id="searchBox" placeholder="🔍 بحث بكود الامتحان، الاسم، أو الهاتف..." onkeyup="renderMembersList()" style="margin:0; flex:1; min-width:200px;">

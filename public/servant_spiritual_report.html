@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="auth-client.js"></script>
     <style>
         :root{--primary:#0f172a;--accent:#1e3a8a;--ok:#00b894;--warn:#f59e0b}
@@ -50,14 +51,19 @@
 
     <div class="topbar">
         <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
-            <i class="fa-solid fa-arrow-right me-1"></i> رجوع
+            <i class="fa-solid fa-arrow-right me-1"></i> لوحة الخادم
         </button>
-        <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="servant_followup.html" class="btn" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">
+                <i class="fa-solid fa-handshake-angle me-1"></i> الافتقاد الذكي وحصر الغياب 🤝
+            </a>
+            <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
+        </div>
     </div>
 
     <div class="header-card">
-        <h4>📈 متابعة السلوك الروحي والأكاديمي للمخدومين</h4>
-        <small>كشف شامل: حضور الجمعة، النوتة الروحية، قراءة الإنجيل، والنقاط</small><br>
+        <h4>📊 تقرير السلوك الروحي وحصاد وسائط النعمة</h4>
+        <small>كشف درجات وسائط النعمة الشامل: حضور الاجتماعات، أيام النوتة الروحية، قراءات الإنجيل، وإجمالي النقاط مع التصدير لإكسيل.</small><br>
         <span class="live-pill"><span class="dot" id="liveDot"></span><span id="liveTxt">جاري الاتصال...</span></span>
     </div>
 
@@ -111,30 +117,39 @@
     let attendanceRecord = readJSON('my_church_attendance', {});
     let sortKey = 'points', sortDir = -1;
 
-    // ---------- اتصال Firestore اختياري: استماع لحظي لسجل الحضور ----------
+    // ---------- اتصال Firestore: استماع لحظي ومزامنة سحابية ----------
     async function initLiveAttendance() {
-        let cfg, email, pass;
-        try {
-            cfg = JSON.parse(localStorage.getItem('my_firebase_config') || 'null');
-            email = localStorage.getItem('cloud_auth_email');
-            pass = localStorage.getItem('cloud_auth_pass');
-        } catch (e) {}
-        if (!cfg || typeof firebase === 'undefined' || !navigator.onLine) {
-            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز'; $('liveDot').className = 'dot off';
+        if (typeof firebase === 'undefined' || !navigator.onLine) {
+            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز';
+            $('liveDot').className = 'dot off';
             return;
         }
+
+        const fbConfig = window.FIREBASE_CONFIG || {
+            apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
+            authDomain: "khedmety-plus.firebaseapp.com",
+            projectId: "khedmety-plus",
+            storageBucket: "khedmety-plus.firebasestorage.app",
+            messagingSenderId: "25101228841",
+            appId: "1:25101228841:web:3164821d165014a1e2b538"
+        };
+
         try {
-            if (!firebase.apps.length) firebase.initializeApp(cfg);
-            if (!firebase.auth().currentUser) {
-                if (email && pass) {
-                    await firebase.auth().signInWithEmailAndPassword(email, pass);
-                } else if (!window.AuthClient || !AuthClient.isCloudAuthenticated()) {
-                    $('liveTxt').textContent = 'غير متصل — يلزم تسجيل دخول موثق للاتصال المباشر';
-                    $('liveDot').className = 'dot off';
-                    return;
-                }
-            }
+            if (!firebase.apps.length) firebase.initializeApp(fbConfig);
             const fsdb = firebase.firestore();
+
+            // مزامنة المخدومين إذا كانت القائمة فارغة محلياً
+            if (!members || members.length === 0) {
+                try {
+                    const mSnap = await fsdb.collection('members').get();
+                    if (!mSnap.empty) {
+                        members = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+                        localStorage.setItem('my_church_class', JSON.stringify(members));
+                        render();
+                    }
+                } catch(e){}
+            }
+
             const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
                 ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
@@ -145,23 +160,17 @@
                 snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
                 attendanceRecord = rec;
                 try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
-                $('liveDot').className = 'dot live'; $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
-                    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
-        const fromGroup = urlParams.get('group') || 'people';
-        const smartBackBtn = document.querySelector('[data-smart-back]');
-        if (smartBackBtn) {
-            smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
-        }
-    } catch (e) {}
-    render();
+                $('liveDot').className = 'dot live';
+                $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
+                render();
             }, err => {
-                $('liveDot').className = 'dot off'; $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
+                $('liveDot').className = 'dot off';
+                $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
                 console.warn(err.code || err.message);
             });
         } catch (e) {
-            $('liveDot').className = 'dot off'; $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
+            $('liveDot').className = 'dot off';
+            $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
         }
     }
 
