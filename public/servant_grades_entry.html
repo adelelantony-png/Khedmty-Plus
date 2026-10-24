@@ -600,6 +600,166 @@
             }
         }
 
+
+        /* منظومة الفلاتر الاحترافية المتقدمة */
+        .filters-toolbar-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .filter-row-top {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .filter-row-dropdowns {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .filter-select {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #1e293b;
+            background-color: #f8fafc;
+            transition: 0.2s ease;
+        }
+
+        .filter-select:focus {
+            border-color: var(--accent);
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 55, 153, 0.12);
+        }
+
+        .filter-status-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 700;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 10px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* نافذة فورم إدخال الدرجات الملكية الفاخرة */
+        .royal-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 36, 97, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 10002;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .royal-modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 660px;
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+            border: 2px solid #e2e8f0;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        .royal-modal-header {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #2563eb 100%);
+            color: #ffffff;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exam-input-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .exam-box-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px 14px;
+            border: 1.5px solid #e2e8f0;
+            transition: border-color 0.2s ease;
+        }
+
+        .exam-box-card:focus-within {
+            border-color: var(--accent);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(30, 55, 153, 0.08);
+        }
+
+        .exam-box-title {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* نافذة حملة رسائل الواتساب */
+        .wa-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 36, 97, 0.7);
+            backdrop-filter: blur(6px);
+            z-index: 10003;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .wa-modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 780px;
+            max-height: 94vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .wa-modal-header {
+            background: linear-gradient(135deg, #075e54 0%, #128c7e 50%, #25d366 100%);
+            color: #ffffff;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
@@ -615,7 +775,10 @@
                         <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
                 <i class="fa-solid fa-cloud-arrow-down text-success"></i> سحب البيانات من جوجل فورم / شيت 📥
             </button>
-                        <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background: linear-gradient(135deg, #b91c1c, #dc2626); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">
+                                    <button type="button" class="btn-custom" onclick="openWhatsappCampaignModal()" style="background: #25d366; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
+                <i class="fa-brands fa-whatsapp fs-5"></i> شيت رسائل الواتساب للقبول 📲
+            </button>
+            <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background: linear-gradient(135deg, #b91c1c, #dc2626); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">
                 <i class="fa-solid fa-file-pdf"></i> تصدير تقرير PDF رسمي 📄
             </button>
             <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
@@ -631,6 +794,162 @@
     <div class="header-card">
         <h2>🎓 رصد درجات امتحانات القبول وتحديد معيار القبول (الجو العام)</h2>
         <p>اجتماع القديس بولس الرسول لإعداد الخدام ✝️ — أدخل درجات الامتحانات الأربعة وتحكم في نسبة القبول المرنة في ثوانٍ</p>
+    </div>
+
+    <!-- لوحة معايير القبول المرنة والجو العام للدفعة (الامتحانات الأربعة والدرجات العظمى) -->
+    <div class="curve-panel-modern">
+        <div class="curve-panel-header">
+            <div>
+                <strong style="font-size: 1.15rem; color: var(--primary);">
+                    <i class="fa-solid fa-scale-balanced me-2"></i> معايير القبول المرنة للدفعة (2 تحريري + 2 شفوي | روحي ونفسي):
+                </strong>
+                <div style="font-size: 0.86rem; color: #64748b; margin-top: 3px;">
+                    الامتحانات الأربعة: ✍️🕊️ تحريري روحي | ✍️🧠 تحريري نفسي | 🗣️🕊️ شفوي روحي | 🗣️🧠 شفوي نفسي
+                </div>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn-custom" onclick="applyPresetThresholds(60, 50)" style="font-size: 0.82rem; padding: 6px 10px;">
+                    ⚖️ متوازن (60% / 50%)
+                </button>
+                <button type="button" class="btn-custom" onclick="applyPresetThresholds(50, 40)" style="font-size: 0.82rem; padding: 6px 10px;">
+                    🌟 تشجيعي (50% / 40%)
+                </button>
+                <button type="button" class="btn-custom" onclick="applyPresetThresholds(70, 60)" style="font-size: 0.82rem; padding: 6px 10px;">
+                    🎯 صارم (70% / 60%)
+                </button>
+                <button type="button" class="btn-custom" onclick="toggleScaleConfigPanel()" style="background:#f1f5f9; border-color:#94a3b8; font-size: 0.82rem; padding: 6px 10px;">
+                    <i class="fa-solid fa-sliders me-1"></i> ضبط الدرجة العظمى والدنيا
+                </button>
+                <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5; font-size: 0.82rem; padding: 6px 12px; font-weight:800;">
+                    <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF رسمي 📄
+                </button>
+                <button type="button" class="btn-custom" onclick="openWhatsappCampaignModal()" style="background:#dcfce7; color:#15803d; border-color:#86efac; font-size: 0.82rem; padding: 6px 12px; font-weight:800;">
+                    <i class="fa-brands fa-whatsapp me-1"></i> شيت رسائل الواتساب 📲
+                </button>
+            </div>
+        </div>
+
+        <!-- شريط الطيف البصري المتصل لتوزيع نسب الدفعة -->
+        <div class="spectrum-bar-wrapper">
+            <div class="spectrum-bar" id="spectrumBar">
+                <div class="spectrum-segment spectrum-seg-accepted" id="spectrumAccepted" style="width: 40%;" title="مقبول نهائياً"></div>
+                <div class="spectrum-segment spectrum-seg-conditional" id="spectrumConditional" style="width: 20%;" title="مقبول بشرط الاعتراف"></div>
+                <div class="spectrum-segment spectrum-seg-interview" id="spectrumInterview" style="width: 25%;" title="معلق للمقابلة"></div>
+                <div class="spectrum-segment spectrum-seg-rejected" id="spectrumRejected" style="width: 15%;" title="غير مجتاز"></div>
+            </div>
+            <div class="spectrum-legend">
+                <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> <span>مقبول نهائياً 🟢</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#eab308;"></span> <span>مقبول بشرط الاعتراف 🟡</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> <span>معلق للمقابلة الشخصية 🟠</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> <span>غير مجتاز / دور ثان 🔴</span></div>
+            </div>
+        </div>
+
+        <!-- شبكة البطاقات الأربعة التفاعلية للشرائح ومعاييرها -->
+        <div class="criteria-grid-4">
+            <!-- 1. مقبول نهائياً -->
+            <div class="criteria-card card-acc">
+                <div class="card-badge-title">
+                    <span>مقبول نهائياً 🟢</span>
+                    <i class="fa-solid fa-circle-check fs-6 text-success"></i>
+                </div>
+                <div class="card-rule-desc" id="cardAcceptedRange">>= 60% (60.0 - 100 درجة) + اعتراف سليم</div>
+                <div class="card-live-count" id="cardAcceptedCount">0</div>
+                <div class="card-sub-pct" id="cardAcceptedPct">0% من المتقدمين</div>
+            </div>
+
+            <!-- 2. مقبول بشرط الاعتراف -->
+            <div class="criteria-card card-cond">
+                <div class="card-badge-title">
+                    <span>مقبول بشرط الاعتراف 🟡</span>
+                    <i class="fa-solid fa-triangle-exclamation fs-6" style="color:#d97706;"></i>
+                </div>
+                <div class="card-rule-desc" id="cardConditionalRange">>= 60% (درجة ناجحة) + مهلة اعتراف أسبوع</div>
+                <div class="card-live-count" id="cardConditionalCount" style="color:#b45309;">0</div>
+                <div class="card-sub-pct" id="cardConditionalPct">0% من المتقدمين</div>
+            </div>
+
+            <!-- 3. معلق للمقابلة الشخصية -->
+            <div class="criteria-card card-int">
+                <div class="card-badge-title">
+                    <span>معلق للمقابلة 🟠</span>
+                    <i class="fa-solid fa-user-clock fs-6 text-warning"></i>
+                </div>
+                <div class="card-rule-desc" id="cardInterviewRange">50% - 59.9% (50.0 - 60.0 درجة)</div>
+                <div class="card-live-count" id="cardInterviewCount" style="color:#c2410c;">0</div>
+                <div class="card-sub-pct" id="cardInterviewPct">0% من المتقدمين</div>
+            </div>
+
+            <!-- 4. غير مجتاز / دور ثان -->
+            <div class="criteria-card card-rej">
+                <div class="card-badge-title">
+                    <span>غير مجتاز / دور ثان 🔴</span>
+                    <i class="fa-solid fa-circle-xmark fs-6 text-danger"></i>
+                </div>
+                <div class="card-rule-desc" id="cardRejectedRange">< 50% (< 50.0 درجة أو غائب)</div>
+                <div class="card-live-count" id="cardRejectedCount" style="color:#dc2626;">0</div>
+                <div class="card-sub-pct" id="cardRejectedPct">0% من المتقدمين</div>
+            </div>
+        </div>
+
+        <!-- مؤشرات السلايدر لضبط النسب اللحظية -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+            <div class="slider-box" style="background:#ffffff; flex:1; min-width:280px;">
+                <span style="font-weight: 800; font-size: 0.9rem; min-width: 130px;">
+                    <i class="fa-solid fa-circle-check text-success me-1"></i> نسبة القبول المباشر:
+                </span>
+                <input type="range" id="passThresholdSlider" min="35" max="85" step="1" value="60" oninput="handleThresholdChange(this.value)">
+                <span class="threshold-pill" id="thresholdDisplay">60%</span>
+                <span id="passScoreEquivalent" style="font-size:0.82rem; color:#64748b; font-weight:700;">(60.0 درجة)</span>
+            </div>
+
+            <div class="slider-box" style="background:#ffffff; flex:1; min-width:280px;">
+                <span style="font-weight: 800; font-size: 0.9rem; min-width: 130px;">
+                    <i class="fa-solid fa-user-clock text-warning me-1"></i> حد المقابلة الشخصية:
+                </span>
+                <input type="range" id="interviewThresholdSlider" min="20" max="80" step="1" value="50" oninput="handleInterviewThresholdChange(this.value)">
+                <span class="threshold-pill" id="interviewThresholdDisplay" style="color:#c2410c;">50%</span>
+                <span id="interviewScoreEquivalent" style="font-size:0.82rem; color:#64748b; font-weight:700;">(50.0 درجة)</span>
+            </div>
+        </div>
+
+        <!-- لوحة قابلة للطي لضبط الدرجات العظمى للأربعة امتحانات -->
+        <div id="scaleConfigDrawer" class="scale-config-drawer">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <strong style="color:var(--primary); font-size:0.95rem;">
+                    <i class="fa-solid fa-sliders me-1"></i> توزيع درجات الامتحانات الأربعة (2 تحريري + 2 شفوي):
+                </strong>
+                <button type="button" class="btn-custom" onclick="toggleScaleConfigPanel()" style="padding:4px 8px; font-size:0.8rem;">
+                    إغلاق اللوحة ✕
+                </button>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; align-items:flex-end;">
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#0c2461;">✍️🕊️ 1. تحريري روحي (عقيدة/طقس):</label>
+                    <input type="number" id="cfgMaxExam1" value="25" min="5" max="100" style="width:100%; padding:6px; font-weight:bold; text-align:center; border:1.5px solid #cbd5e1; border-radius:8px;" onchange="updateExamMaxScores()">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#0c2461;">✍️🧠 2. تحريري نفسي (سمات/سلوك):</label>
+                    <input type="number" id="cfgMaxExam2" value="25" min="5" max="100" style="width:100%; padding:6px; font-weight:bold; text-align:center; border:1.5px solid #cbd5e1; border-radius:8px;" onchange="updateExamMaxScores()">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#1e3799;">🗣️🕊️ 3. شفوي روحي (مقابلة إيمانية):</label>
+                    <input type="number" id="cfgMaxExam3" value="25" min="5" max="100" style="width:100%; padding:6px; font-weight:bold; text-align:center; border:1.5px solid #cbd5e1; border-radius:8px;" onchange="updateExamMaxScores()">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; margin-bottom:4px; color:#1e3799;">🗣️🧠 4. شفوي نفسي (مقابلة سلوكية):</label>
+                    <input type="number" id="cfgMaxExam4" value="25" min="5" max="100" style="width:100%; padding:6px; font-weight:bold; text-align:center; border:1.5px solid #cbd5e1; border-radius:8px;" onchange="updateExamMaxScores()">
+                </div>
+                <div style="background:#ffffff; border-radius:8px; padding:6px 12px; border:1.5px solid #0c2461; text-align:center;">
+                    <div style="font-size:0.75rem; color:#64748b; font-weight:700;">الدرجة العظمى الإجمالية:</div>
+                    <div style="font-size:1.25rem; font-weight:900; color:var(--primary);" id="cfgTotalMaxScoreDisplay">100</div>
+                </div>
+            </div>
+            <div style="margin-top:10px; font-size:0.8rem; color:#64748b;">
+                * يقسم مجموع درجات المخدوم في المواد الأربعة على الدرجة العظمى الإجمالية لحساب النسبة المئوية % بدقة.
+            </div>
+        </div>
+
     </div>
 
     <!-- بطاقات الـ KPIs ومؤشرات الجو العام -->
@@ -657,75 +976,120 @@
         </div>
     </div>
 
-    <!-- لوحة ضبط معيار القبول المرن (الجو العام) -->
-    <div class="curve-panel">
-        <div class="curve-panel-header">
-            <div>
-                <strong style="font-size: 1.05rem; color: var(--primary);">
-                    <i class="fa-solid fa-sliders me-1"></i> معيار القبول المرن وفق الجو العام للدرجات:
-                </strong>
-                <div style="font-size: 0.85rem; color: #64748b; margin-top: 2px;">
-                    حرك المؤشر لتعديل الحد الأدنى للقبول في لحظة وسيعاد تقييم كافة المخدومين فورياً
-                </div>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button type="button" class="btn-custom" onclick="resetToDefaultThresholds()">
-                    <i class="fa-solid fa-rotate-left"></i> استعادة الافتراضي (60%)
-                </button>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
-            <div class="slider-box">
-                <span style="font-weight: 800; font-size: 0.9rem;">نسبة القبول المباشر:</span>
-                <input type="range" id="passThresholdSlider" min="40" max="80" step="5" value="60" oninput="handleThresholdChange(this.value)">
-                <span class="threshold-pill" id="thresholdDisplay">60%</span>
-            </div>
-
-            <div class="slider-box">
-                <span style="font-weight: 800; font-size: 0.9rem;">حد المقابلة الشخصية:</span>
-                <input type="range" id="interviewThresholdSlider" min="30" max="70" step="5" value="50" oninput="handleInterviewThresholdChange(this.value)">
-                <span class="threshold-pill" id="interviewThresholdDisplay" style="color:#c2410c;">50%</span>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- شريط البحث والتصفية -->
-    <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="🔍 بحث باسم المخدوم، كود الامتحان، أو الهاتف..." style="flex: 1; min-width: 220px;" onkeyup="renderTable()">
-        <select id="statusFilter" onchange="renderTable()" style="min-width: 170px;">
-            <option value="all">كل حالات القبول</option>
-            <option value="accepted">مقبول نهائياً 🟢</option>
-            <option value="conditional">مقبول بشرط الاعتراف 🟡</option>
-            <option value="interview">معلق للمقابلة 🟠</option>
-            <option value="rejected">غير مجتاز / غائب 🔴</option>
-        </select>
-                        <button type="button" class="btn-custom" style="background:#fee2e2; color:#991b1b; border-color:#fecaca;" onclick="openPdfExportModal()"><i class="fa-solid fa-file-pdf me-1"></i> تصدير PDF 📄</button>
-        <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥</button>
-        <button type="button" class="btn-custom" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;" onclick="openUserFormModal()"><i class="fa-solid fa-window-restore me-1"></i> فتح فورم رصد الدرجات (VBA) 🪟</button>
-        <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
-            <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم جديد
-        </button>
+        <!-- منظومة الفلاتر الاحترافية المتقدمة لجميع بيانات المخدومين -->
+    <div class="filters-toolbar-box">
+        <div class="filter-row-top">
+            <div style="position:relative; flex: 1; min-width: 250px;">
+                <input type="text" id="searchInput" placeholder="🔍 بحث فوري باسم المخدوم، كود الامتحان، رقم الهاتف، أو أب الاعتراف..." style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-family: inherit; font-weight: 700; font-size: 0.9rem; box-sizing: border-box;" onkeyup="renderTable()">
+            </div>
+            <button type="button" class="btn-custom" style="background:#fee2e2; color:#991b1b; border-color:#fecaca;" onclick="openPdfExportModal()">
+                <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF 📄
+            </button>
+            <button type="button" class="btn-custom" style="background:#25d366; color:#ffffff; border:none;" onclick="openWhatsappCampaignModal()">
+                <i class="fa-brands fa-whatsapp me-1"></i> شيت الواتساب 📲
+            </button>
+            <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()">
+                <i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥
+            </button>
+            <button type="button" class="btn-custom btn-navy" onclick="openModernGradeEntryModal()">
+                <i class="fa-solid fa-pen-to-square me-1"></i> رصد الدرجات للمخدومين ✍️
+            </button>
+            <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
+                <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم
+            </button>
+            <button type="button" class="btn-custom" onclick="resetAllFilters()" style="background:#f1f5f9; color:#475569;" title="تفريغ كافة خيارات الفلترة">
+                <i class="fa-solid fa-rotate-left"></i> تفريغ الفلاتر
+            </button>
+        </div>
+
+        <!-- صف القوائم المنسدلة للفلترة متعددة الأبعاد -->
+        <div class="filter-row-dropdowns">
+            <!-- 1. فلترة قرار القبول -->
+            <select id="statusFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">🎯 كل قرارات القبول</option>
+                <option value="accepted">مقبول نهائياً 🟢</option>
+                <option value="conditional">مقبول بشرط الاعتراف 🟡</option>
+                <option value="interview">معلق للمقابلة الشخصية 🟠</option>
+                <option value="rejected">غير مجتاز / دور ثان 🔴</option>
+            </select>
+
+            <!-- 2. فلترة النوع -->
+            <select id="genderFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">👥 كل المخدومين (بنين وبنات)</option>
+                <option value="بنين">بنين فقط 👦</option>
+                <option value="بنات">بنات فقط 👧</option>
+            </select>
+
+            <!-- 3. فلترة حالة الاعتراف -->
+            <select id="confessionFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">🕊️ كل حالات الاعتراف</option>
+                <option value="clean">اعتراف سليم ومسجل ✅</option>
+                <option value="issue">مشكلة اعتراف (مهلة أسبوع) ⚠️</option>
+            </select>
+
+            <!-- 4. فلترة حضور الامتحان -->
+            <select id="attendanceFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">📋 كل حالات الحضور</option>
+                <option value="attended">حاضر الامتحان فعلياً ✅</option>
+                <option value="absent">غائب عن الامتحان 🔴</option>
+            </select>
+
+            <!-- 5. فلترة شريحة الدرجات -->
+            <select id="scoreBracketFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">📊 كل شرائح المجموع</option>
+                <option value="excellent">🌟 ممتاز (85% فأعلى)</option>
+                <option value="vgood">👍 جيد جداً (75% - 84%)</option>
+                <option value="good">😊 جيد (65% - 74%)</option>
+                <option value="pass">💡 مقبول (50% - 64%)</option>
+                <option value="fail">⚠️ دون المقبول (أقل من 50%)</option>
+            </select>
+
+            <!-- 6. فلترة تصنيف المشكلة الرعوية -->
+            <select id="problemFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">⚠️ كل التصنيفات الرعوية</option>
+                <option value="clean">لا توجد مشاكل (طبيعي) 🟢</option>
+                <option value="confession">مشكلة اعتراف 🟡</option>
+                <option value="psych">مشكلة نفسية / سلوكية 🟠</option>
+                <option value="discipline">مشكلة التزام ومواعيد ⏰</option>
+                <option value="family">مشكلة أسرية أو اجتماعية 🏠</option>
+                <option value="special">يحتاج مقابلة خاصة مع الكاهن ⚠️</option>
+            </select>
+        </div>
+
+        <!-- شريط حالة الفلترة النشطة والعداد -->
+        <div class="filter-status-summary">
+            <div>
+                <i class="fa-solid fa-filter text-primary me-1"></i>
+                <span id="filterCountLabel">يتم عرض كافة المخدومين: <strong>0</strong> مخدوم</span>
+            </div>
+            <div id="activeFilterTags" style="display:flex; gap:6px; flex-wrap:wrap;">
+                <!-- شارات الفلاتر النشطة تظهر ديناميكياً -->
+            </div>
+        </div>
     </div>
+
 
     <!-- جدول الرصد والتقييم -->
     <div class="table-card">
         <div style="overflow-x: auto;">
             <table id="gradesTable">
-                <thead>
+                                <thead>
                     <tr>
-                        <th style="width: 75px;">كود</th>
+                        <th style="width: 65px;">كود</th>
                         <th>اسم المخدوم</th>
-                        <th>النوع</th>
+                        <th style="width: 55px;">النوع</th>
                         <th>أب الاعتراف</th>
-                        <th style="width: 70px;">امتحان 1<br><small style="opacity:0.8;">(25)</small></th>
-                        <th style="width: 70px;">امتحان 2<br><small style="opacity:0.8;">(25)</small></th>
-                        <th style="width: 70px;">امتحان 3<br><small style="opacity:0.8;">(25)</small></th>
-                        <th style="width: 70px;">امتحان 4<br><small style="opacity:0.8;">(25)</small></th>
-                        <th style="width: 80px;">المجموع<br><small style="opacity:0.8;">(100)</small></th>
-                        <th style="width: 75px;">النسبة %</th>
-                        <th>الحالة الرعوية</th>
-                        <th>قرار القبول النهائي 🎯</th>
+                        <th style="width: 80px; background:#0a2558;">✍️ تحريري روحي<br><small style="opacity:0.85;" id="thMaxEx1">(25)</small></th>
+                        <th style="width: 80px; background:#0a2558;">✍️ تحريري نفسي<br><small style="opacity:0.85;" id="thMaxEx2">(25)</small></th>
+                        <th style="width: 80px; background:#1e3799;">🗣️ شفوي روحي<br><small style="opacity:0.85;" id="thMaxEx3">(25)</small></th>
+                        <th style="width: 80px; background:#1e3799;">🗣️ شفوي نفسي<br><small style="opacity:0.85;" id="thMaxEx4">(25)</small></th>
+                        <th style="width: 75px; background:#d97706;">المجموع<br><small style="opacity:0.9;" id="thMaxExTotal">(100)</small></th>
+                        <th style="width: 70px;">النسبة %</th>
+                        <th style="width: 130px;">الحالة والملاحظات</th>
+                        <th style="width: 140px;">القرار النهائي 🎯</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -738,6 +1102,106 @@
 </div>
 
 
+
+
+    <!-- نافذة توليد وتصدير شيت رسائل الواتساب للقبول (NewWhats 2027) -->
+    <div id="whatsappCampaignModal" class="wa-modal-overlay">
+        <div class="wa-modal-card">
+            <!-- رأس نافذة الواتساب -->
+            <div class="wa-modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-brands fa-whatsapp fs-3"></i>
+                    <div>
+                        <strong style="font-size: 1.15rem; display: block;">توليد رسائل الواتساب وشيت حملة القبول (NewWhats 2027)</strong>
+                        <span style="font-size: 0.82rem; opacity: 0.95;">إرسال رسائل القبول المخصصة + رابط الجروب + رابط ID الحضور والـ QR Code</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeWhatsappCampaignModal()" class="import-close-btn">&times;</button>
+            </div>
+
+            <div style="padding: 18px 22px; overflow-y: auto; flex: 1;">
+                
+                <!-- صندوق إعدادات الروابط للرسائل -->
+                <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;">
+                    <strong style="color: var(--primary); font-size: 0.95rem; display: block; margin-bottom: 10px;">
+                        🔗 1. روابط الحملة الرسمية:
+                    </strong>
+
+                    <!-- 1. رابط جروب إعداد خدام -->
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            رابط جروب واتساب إعداد خدام (الفرقة الأولى):
+                        </label>
+                        <input type="text" id="waGroupUrlInput" value="https://chat.whatsapp.com/JPBUaXh4qSMKyWAX95Pffe?mode=wwt" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;" oninput="renderWhatsappPreview()">
+                    </div>
+
+                    <!-- 2. رابط كارنيه الـ ID والـ QR Code مع توضيح كيف يستخرج -->
+                    <div>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 4px;">
+                            مصدر رابط كارنيه الحضور والـ QR Code لكل مخدوم:
+                        </label>
+                        <select id="waIdSourceSelect" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; font-weight: bold; box-sizing: border-box;" onchange="renderWhatsappPreview()">
+                            <option value="direct_web">🌟 (موصى به) الرابط الرقمي المباشر بكود المخدوم (barcode.html?code=XXXX)</option>
+                            <option value="custom_drive">📁 رابط مخصص / رابط مجلد جوجل درايف</option>
+                        </select>
+
+                        <div id="waCustomDriveBox" style="display: none; margin-top: 8px;">
+                            <input type="text" id="waCustomDriveUrlInput" placeholder="ضع رابط مجلد جوجل درايف أو رابط ثابت..." style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;" oninput="renderWhatsappPreview()">
+                        </div>
+
+                        <!-- توضيح ذكي كيف يستخرج رابط الـ ID QR Code -->
+                        <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 0.82rem; color: #3730a3; line-height: 1.6;">
+                            <i class="fa-solid fa-circle-info me-1 text-primary"></i>
+                            <strong>كيف يستخرج رابط الـ ID QR Code تلقائياً؟</strong><br>
+                            نظام <code>خدمتي بلس</code> مجهز بصفحة كارنيهات سحابية ذكية لكل مخدوم عبر كوده: <code>barcode.html?code=[الكود]</code>.<br>
+                            عندما يضغط المخدوم على الرابط من الواتساب، تفتح له شاشة كارنيهه الشخصي بالكامل متضمناً باركود الـ QR، ويستطيع حفظه فوراً على موبايله <strong>دون الحاجة لرفع 46 صورة يدوياً على جوجل درايف!</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- خيارات شريحة الإرسال -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                    <div style="display:flex; align-items:center; gap:8px; font-weight:bold; font-size:0.88rem;">
+                        <span>إرسال لمن؟</span>
+                        <select id="waTargetGroupSelect" style="padding:6px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-family:inherit; font-size:0.88rem; font-weight:bold;" onchange="renderWhatsappPreview()">
+                            <option value="all_accepted">المقبولون فقط (نهائي + بشرط الاعتراف) 🟢🟡</option>
+                            <option value="clean_accepted">المقبولون نهائياً فقط 🟢</option>
+                            <option value="conditional_only">المقبولون بشرط الاعتراف فقط (تنبيه مهلة أسبوع) 🟡</option>
+                            <option value="interview_only">المعلقون للمقابلة الشخصية 🟠</option>
+                            <option value="all_candidates">جميع المتقدمين في الكشف</option>
+                        </select>
+                    </div>
+                    <div style="font-weight:bold; font-size:0.85rem; color:#065f46;">
+                        عدد المستهدفين: <strong id="waTargetCountDisplay">0</strong> مخدوم
+                    </div>
+                </div>
+
+                <!-- معاينة الرسالة الحية لأحد المخدومين -->
+                <div style="background: #efeae2; border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; border: 1px solid #d1d7db;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:0.8rem; font-weight:bold; color:#54656f;">معاينة رسالة الواتساب الحية:</span>
+                        <span id="waPreviewStudentName" style="font-size:0.82rem; font-weight:bold; color:#0c2461;">(يوسف جورج عادل)</span>
+                    </div>
+                    <div id="waMessagePreviewBox" style="background:#ffffff; border-radius:8px; padding:12px; font-family:'Segoe UI', Tahoma, sans-serif; font-size:0.9rem; line-height:1.6; white-space:pre-wrap; border-right:4px solid #25d366; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                    </div>
+                </div>
+
+                <!-- أزرار الإجراءات والتصدير -->
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <button type="button" class="btn-custom" onclick="exportWhatsappCampaignExcel()" style="background:#25d366; color:#ffffff; border:none; padding:10px 18px; font-size:0.95rem; font-weight:900; box-shadow:0 4px 12px rgba(37,211,102,0.3); flex:1; min-width:240px;">
+                        <i class="fa-solid fa-file-excel me-1"></i> تنزيل شيت إكسيل جاهز لبرنامج NewWhats 2027 📥
+                    </button>
+                    <button type="button" class="btn-custom" onclick="copyWhatsappMessageToClipboard()" style="background:#ffffff; border-color:#25d366; color:#075e54; font-weight:bold;">
+                        <i class="fa-solid fa-copy me-1"></i> نسخ نص الرسالة
+                    </button>
+                    <button type="button" class="btn-custom" onclick="openDirectWhatsappWeb()" style="background:#075e54; color:#ffffff; border:none; font-weight:bold;">
+                        <i class="fa-brands fa-whatsapp me-1"></i> فتح واتساب ويب للمخدوم
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة معاينة وطباعة تقرير PDF الرسمي المعتمد -->
     <div id="pdfExportModal" class="pdf-modal-overlay">
@@ -1032,6 +1496,159 @@
                             إلغاء
                         </button>
                     </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- نافذة رصد وتعديل الدرجات الملكية الفاخرة (Modern Royal Grade Entry Modal) -->
+    <div id="royalGradeModalOverlay" class="royal-modal-overlay">
+        <div class="royal-modal-card">
+            <!-- رأس النافذة -->
+            <div class="royal-modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        ✍️
+                    </div>
+                    <div>
+                        <strong style="font-size: 1.1rem; display: block;">رصد درجات امتحانات القبول والملاحظات الرعوية</strong>
+                        <span style="font-size: 0.82rem; opacity: 0.9;">2 تحريري (روحي + نفسي) + 2 شفوي (روحي + نفسي)</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModernGradeEntryModal()" class="import-close-btn">&times;</button>
+            </div>
+
+            <!-- جسم النافذة -->
+            <div style="padding: 18px 22px; overflow-y: auto; flex: 1;">
+                
+                <!-- شريط اختيار والتنقل بين المخدومين -->
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
+                    <button type="button" class="btn-custom" onclick="royalPrevStudent()" style="padding:6px 12px; font-size:0.85rem;">
+                        ◀ السابق
+                    </button>
+                    <div style="flex:1;">
+                        <select id="royal_cboStudents" style="width:100%; padding:8px 12px; font-weight:800; font-size:0.95rem; border:1.5px solid #0c2461; border-radius:10px; color:#0c2461;" onchange="royalOnStudentSelect()">
+                        </select>
+                    </div>
+                    <button type="button" class="btn-custom btn-navy" onclick="royalNextStudent()" style="padding:6px 12px; font-size:0.85rem;">
+                        التالي ▶
+                    </button>
+                </div>
+
+                <!-- بطاقة بيانات المخدوم المختصرة والقرار اللحظي -->
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%); border: 1.5px solid #c7d2fe; border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <div style="font-size: 0.82rem; color: #64748b; font-weight: 700;">المخدوم المحدد:</div>
+                        <strong style="font-size: 1.05rem; color: #0c2461;" id="royal_studentName">----</strong>
+                        <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;" id="royal_studentMeta">
+                            كود: ---- | هاتف: ---- | أب الاعتراف: ----
+                        </div>
+                    </div>
+                    <div style="text-align: left;">
+                        <span id="royal_liveDecisionBadge" class="badge-status status-accepted" style="font-size: 0.9rem; padding: 6px 12px;">
+                            مقبول نهائياً 🟢
+                        </span>
+                        <div style="font-size: 0.82rem; font-weight: 800; color: #1e3799; margin-top: 4px;" id="royal_liveScoreText">
+                            المجموع: 0.0 / 100 (0.0%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شبكة إدخال الامتحانات الأربعة (2 تحريري + 2 شفوي) معاً في نفس الشاشة -->
+                <div class="exam-input-grid-4">
+                    <!-- 1. تحريري روحي -->
+                    <div class="exam-box-card">
+                        <div class="exam-box-title">
+                            <span>✍️🕊️ 1. تحريري روحي</span>
+                            <small id="royal_lblMax1" style="color:#64748b;">من 25</small>
+                        </div>
+                        <input type="number" step="0.5" min="0" max="100" id="royal_txtG1" placeholder="الدرجة" style="width: 100%; padding: 8px; font-size: 1.1rem; font-weight: 900; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;" oninput="royalRecalcLive()">
+                    </div>
+
+                    <!-- 2. تحريري نفسي -->
+                    <div class="exam-box-card">
+                        <div class="exam-box-title">
+                            <span>✍️🧠 2. تحريري نفسي</span>
+                            <small id="royal_lblMax2" style="color:#64748b;">من 25</small>
+                        </div>
+                        <input type="number" step="0.5" min="0" max="100" id="royal_txtG2" placeholder="الدرجة" style="width: 100%; padding: 8px; font-size: 1.1rem; font-weight: 900; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;" oninput="royalRecalcLive()">
+                    </div>
+
+                    <!-- 3. شفوي روحي -->
+                    <div class="exam-box-card">
+                        <div class="exam-box-title">
+                            <span>🗣️🕊️ 3. شفوي روحي</span>
+                            <small id="royal_lblMax3" style="color:#64748b;">من 25</small>
+                        </div>
+                        <input type="number" step="0.5" min="0" max="100" id="royal_txtG3" placeholder="الدرجة" style="width: 100%; padding: 8px; font-size: 1.1rem; font-weight: 900; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;" oninput="royalRecalcLive()">
+                    </div>
+
+                    <!-- 4. شفوي نفسي -->
+                    <div class="exam-box-card">
+                        <div class="exam-box-title">
+                            <span>🗣️🧠 4. شفوي نفسي</span>
+                            <small id="royal_lblMax4" style="color:#64748b;">من 25</small>
+                        </div>
+                        <input type="number" step="0.5" min="0" max="100" id="royal_txtG4" placeholder="الدرجة" style="width: 100%; padding: 8px; font-size: 1.1rem; font-weight: 900; text-align: center; border: 1.5px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;" oninput="royalRecalcLive()">
+                    </div>
+                </div>
+
+                <!-- نوع الامتحان: أساسي أم إعادة -->
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#f1f5f9; border-radius:8px; padding:6px 14px; margin-bottom:12px;">
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:bold; font-size:0.85rem; cursor:pointer;">
+                        <input type="radio" name="royal_examType" id="royal_optMain" value="main" checked>
+                        <span>امتحان أساسي رسمي</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:bold; font-size:0.85rem; cursor:pointer; color:#b91c1c;">
+                        <input type="radio" name="royal_examType" id="royal_optRetake" value="retake">
+                        <span>امتحان إعادة (دور ثانٍ) ⚠️</span>
+                    </label>
+                </div>
+
+                <!-- خانات الملاحظات الرعوية والنفسية وتصنيف التحدي -->
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#0c2461; margin-bottom:3px;">
+                            🕊️ ملاحظات الجانب الروحي (أب الاعتراف / التناول / صلاة الأجبية):
+                        </label>
+                        <input type="text" id="royal_txtSpiritualNotes" placeholder="اكتب حالة الاعتراف، كنيسة الكاهن، التناول، الصلاة..." style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#92400e; margin-bottom:3px;">
+                            🧠 ملاحظات الجانب النفسي والسلوكي (المشكلة أو التحدي):
+                        </label>
+                        <input type="text" id="royal_txtPsychNotes" placeholder="اكتب سمات الشخصية، السلوك الخدمي، أي تحفظ أو مشكلة أسرية..." style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;">
+                    </div>
+
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#1e293b; margin-bottom:3px;">
+                            ⚠️ تصنيف التحدي / المشكلة الرعوية:
+                        </label>
+                        <select id="royal_cboProblemType" style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; font-weight: bold; box-sizing: border-box;">
+                            <option value="لا توجد مشاكل (مقبول طبيعي) 🟢">لا توجد مشاكل (مقبول طبيعي) 🟢</option>
+                            <option value="مشكلة اعتراف (مهلة أسبوع) 🟡">مشكلة اعتراف (مهلة أسبوع) 🟡</option>
+                            <option value="مشكلة نفسية / سلوكية (انطواء - قلق - اندفاع) 🟠">مشكلة نفسية / سلوكية (انطواء - قلق - اندفاع) 🟠</option>
+                            <option value="مشكلة التزام ومواعيد ⏰">مشكلة التزام ومواعيد ⏰</option>
+                            <option value="مشكلة أسرية أو اجتماعية 🏠">مشكلة أسرية أو اجتماعية 🏠</option>
+                            <option value="يحتاج مقابلة خاصة مع أمين الخدمة أو الكاهن ⚠️">يحتاج مقابلة خاصة مع أمين الخدمة أو الكاهن ⚠️</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- أزرار الحفظ والتنقل في أسفل الفورم -->
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:16px; border-top:1.5px solid #e2e8f0; padding-top:14px;">
+                    <button type="button" class="btn-custom btn-navy" style="flex:1; padding:10px;" onclick="royalSaveCurrentStudent()">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> حفظ درجات المخدوم (Enter)
+                    </button>
+                    <button type="button" class="btn-custom" onclick="royalSaveAndNext()" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0; font-weight:800;">
+                        حفظ والانتقال للتالي ⏭️
+                    </button>
+                    <button type="button" class="btn-custom" onclick="closeModernGradeEntryModal()">
+                        إغلاق
+                    </button>
                 </div>
 
             </div>
@@ -1493,10 +2110,372 @@
         }
     }
 
-    function renderTable() {
-        const tbody = document.getElementById('tableBody');
+
+    // =========================================================================
+    // منظومة الفلترة الشاملة المتقدمة لجميع بيانات المخدومين
+    // =========================================================================
+    function resetAllFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('statusFilter').value = 'all';
+        document.getElementById('genderFilter').value = 'all';
+        document.getElementById('confessionFilter').value = 'all';
+        document.getElementById('attendanceFilter').value = 'all';
+        document.getElementById('scoreBracketFilter').value = 'all';
+        document.getElementById('problemFilter').value = 'all';
+        renderTable();
+    }
+
+    function getFilteredCandidates() {
         const searchVal = (document.getElementById('searchInput').value || '').trim().toLowerCase();
         const statusVal = document.getElementById('statusFilter').value;
+        const genderVal = document.getElementById('genderFilter').value;
+        const confessionVal = document.getElementById('confessionFilter').value;
+        const attendanceVal = document.getElementById('attendanceFilter').value;
+        const scoreVal = document.getElementById('scoreBracketFilter').value;
+        const problemVal = document.getElementById('problemFilter').value;
+
+        return candidatesList.filter(c => {
+            const name = String(c.name || '').toLowerCase();
+            const code = String(c.code || '').toLowerCase();
+            const phone = String(c.phone || '').toLowerCase();
+            const conf = String(c.confessor || '').toLowerCase();
+            const dec = computeDecision(c);
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const pct = (total / maxTotalScore) * 100;
+            const isConfClean = (c.confessor && c.confessor !== 'لا يوجد' && c.confessor !== 'none' && c.confessor !== 'لم يحدد');
+
+            // 1. بحث بالاسم، الكود، الهاتف، أو أب الاعتراف
+            if (searchVal) {
+                const match = name.includes(searchVal) || code.includes(searchVal) || phone.includes(searchVal) || conf.includes(searchVal);
+                if (!match) return false;
+            }
+
+            // 2. فلترة قرار القبول
+            if (statusVal !== 'all' && dec.key !== statusVal) return false;
+
+            // 3. فلترة النوع
+            if (genderVal !== 'all' && c.gender !== genderVal) return false;
+
+            // 4. فلترة الاعتراف
+            if (confessionVal === 'clean' && !isConfClean) return false;
+            if (confessionVal === 'issue' && isConfClean) return false;
+
+            // 5. فلترة الحضور
+            if (attendanceVal === 'attended' && !c.attended) return false;
+            if (attendanceVal === 'absent' && c.attended) return false;
+
+            // 6. فلترة شريحة الدرجات
+            if (scoreVal === 'excellent' && pct < 85) return false;
+            if (scoreVal === 'vgood' && (pct < 75 || pct >= 85)) return false;
+            if (scoreVal === 'good' && (pct < 65 || pct >= 75)) return false;
+            if (scoreVal === 'pass' && (pct < 50 || pct >= 65)) return false;
+            if (scoreVal === 'fail' && pct >= 50) return false;
+
+            // 7. فلترة تصنيف المشكلة
+            if (problemVal !== 'all') {
+                const prob = String(c.problemType || '');
+                if (problemVal === 'clean' && !prob.includes('لا توجد')) return false;
+                if (problemVal === 'confession' && !prob.includes('اعتراف')) return false;
+                if (problemVal === 'psych' && !prob.includes('نفسية')) return false;
+                if (problemVal === 'discipline' && !prob.includes('التزام')) return false;
+                if (problemVal === 'family' && !prob.includes('أسرية')) return false;
+                if (problemVal === 'special' && !prob.includes('خاصة')) return false;
+            }
+
+            return true;
+        });
+    }
+
+    // =========================================================================
+    // إدارة فورم رصد الدرجات الملكي المطور (All 4 Exams on 1 Screen)
+    // =========================================================================
+    let royalCurrentIndex = 0;
+
+    function openModernGradeEntryModal(selectedCode = null) {
+        const overlay = document.getElementById('royalGradeModalOverlay');
+        overlay.style.display = 'flex';
+
+        // تحديث مسميات الدرجات العظمى بالنافذة
+        document.getElementById('royal_lblMax1').textContent = `من ${examMaxScores[0]}`;
+        document.getElementById('royal_lblMax2').textContent = `من ${examMaxScores[1]}`;
+        document.getElementById('royal_lblMax3').textContent = `من ${examMaxScores[2]}`;
+        document.getElementById('royal_lblMax4').textContent = `من ${examMaxScores[3]}`;
+
+        populateRoyalDropdown();
+
+        if (selectedCode) {
+            const idx = candidatesList.findIndex(c => String(c.code) === String(selectedCode));
+            if (idx !== -1) royalCurrentIndex = idx;
+        }
+
+        document.getElementById('royal_cboStudents').selectedIndex = royalCurrentIndex;
+        royalOnStudentSelect();
+    }
+
+    function closeModernGradeEntryModal() {
+        document.getElementById('royalGradeModalOverlay').style.display = 'none';
+    }
+
+    function populateRoyalDropdown() {
+        const cbo = document.getElementById('royal_cboStudents');
+        cbo.innerHTML = '';
+        candidatesList.forEach((c, idx) => {
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.textContent = `${idx + 1}. ${c.name} (${c.code})`;
+            cbo.appendChild(opt);
+        });
+    }
+
+    function royalOnStudentSelect() {
+        const cbo = document.getElementById('royal_cboStudents');
+        royalCurrentIndex = Number(cbo.value) || 0;
+        const candidate = candidatesList[royalCurrentIndex];
+        if (!candidate) return;
+
+        document.getElementById('royal_studentName').textContent = candidate.name;
+        document.getElementById('royal_studentMeta').textContent = 
+            `كود: ${candidate.code} | هاتف: ${candidate.phone || 'غير مسجل'} | أب الاعتراف: ${candidate.confessor || 'لا يوجد'}`;
+
+        document.getElementById('royal_txtG1').value = candidate.g1 ?? 0;
+        document.getElementById('royal_txtG2').value = candidate.g2 ?? 0;
+        document.getElementById('royal_txtG3').value = candidate.g3 ?? 0;
+        document.getElementById('royal_txtG4').value = candidate.g4 ?? 0;
+
+        document.getElementById('royal_txtSpiritualNotes').value = candidate.spiritualNotes || '';
+        document.getElementById('royal_txtPsychNotes').value = candidate.psychNotes || '';
+        if (candidate.problemType) {
+            document.getElementById('royal_cboProblemType').value = candidate.problemType;
+        } else {
+            document.getElementById('royal_cboProblemType').selectedIndex = 0;
+        }
+
+        document.getElementById('royal_optMain').checked = true;
+        royalRecalcLive();
+    }
+
+    function royalRecalcLive() {
+        const candidate = candidatesList[royalCurrentIndex];
+        if (!candidate) return;
+
+        const g1 = Number(document.getElementById('royal_txtG1').value) || 0;
+        const g2 = Number(document.getElementById('royal_txtG2').value) || 0;
+        const g3 = Number(document.getElementById('royal_txtG3').value) || 0;
+        const g4 = Number(document.getElementById('royal_txtG4').value) || 0;
+
+        const total = g1 + g2 + g3 + g4;
+        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+
+        const tempCand = { ...candidate, g1, g2, g3, g4, attended: true };
+        const dec = computeDecision(tempCand);
+
+        const badge = document.getElementById('royal_liveDecisionBadge');
+        badge.className = `badge-status ${dec.class}`;
+        badge.textContent = dec.label;
+
+        document.getElementById('royal_liveScoreText').textContent = 
+            `المجموع: ${total.toFixed(1)} / ${maxTotalScore} (${pct}%)`;
+    }
+
+    function royalSaveCurrentStudent(showToast = true) {
+        const candidate = candidatesList[royalCurrentIndex];
+        if (!candidate) return;
+
+        candidate.g1 = Number(document.getElementById('royal_txtG1').value) || 0;
+        candidate.g2 = Number(document.getElementById('royal_txtG2').value) || 0;
+        candidate.g3 = Number(document.getElementById('royal_txtG3').value) || 0;
+        candidate.g4 = Number(document.getElementById('royal_txtG4').value) || 0;
+        candidate.attended = true;
+
+        candidate.spiritualNotes = document.getElementById('royal_txtSpiritualNotes').value.trim();
+        candidate.psychNotes = document.getElementById('royal_txtPsychNotes').value.trim();
+        candidate.problemType = document.getElementById('royal_cboProblemType').value;
+
+        saveGradesLocal(false);
+        renderTable();
+
+        if (showToast) {
+            alert(`تم حفظ درجات وملاحظات [${candidate.name}] بنجاح! ✅`);
+        }
+    }
+
+    function royalNextStudent() {
+        if (royalCurrentIndex < candidatesList.length - 1) {
+            royalCurrentIndex++;
+            document.getElementById('royal_cboStudents').selectedIndex = royalCurrentIndex;
+            royalOnStudentSelect();
+            document.getElementById('royal_txtG1').focus();
+        } else {
+            alert('وصلت إلى آخر مخدوم في الكشف.');
+        }
+    }
+
+    function royalPrevStudent() {
+        if (royalCurrentIndex > 0) {
+            royalCurrentIndex--;
+            document.getElementById('royal_cboStudents').selectedIndex = royalCurrentIndex;
+            royalOnStudentSelect();
+        }
+    }
+
+    function royalSaveAndNext() {
+        royalSaveCurrentStudent(false);
+        royalNextStudent();
+    }
+
+    // =========================================================================
+    // إدارة نافذة وتوليد شيت رسائل الواتساب للقبول (NewWhats 2027)
+    // =========================================================================
+    function openWhatsappCampaignModal() {
+        const overlay = document.getElementById('whatsappCampaignModal');
+        overlay.style.display = 'flex';
+        renderWhatsappPreview();
+    }
+
+    function closeWhatsappCampaignModal() {
+        document.getElementById('whatsappCampaignModal').style.display = 'none';
+    }
+
+    function getWhatsappTargetList() {
+        const targetType = document.getElementById('waTargetGroupSelect').value;
+        return candidatesList.filter(c => {
+            const dec = computeDecision(c);
+            if (targetType === 'all_accepted') return (dec.key === 'accepted' || dec.key === 'conditional');
+            if (targetType === 'clean_accepted') return dec.key === 'accepted';
+            if (targetType === 'conditional_only') return dec.key === 'conditional';
+            if (targetType === 'interview_only') return dec.key === 'interview';
+            return true;
+        });
+    }
+
+    function buildStudentWhatsappMessage(candidate) {
+        const groupUrl = (document.getElementById('waGroupUrlInput').value || '').trim();
+        const idSource = document.getElementById('waIdSourceSelect').value;
+        let idUrl = '';
+
+        if (idSource === 'direct_web') {
+            // توليد الرابط الرقمي الذكي المباشر بـ barcode.html
+            const origin = window.location.origin;
+            const path = window.location.pathname.replace('servant_grades_entry.html', 'barcode.html');
+            idUrl = `${origin}${path}?code=${candidate.code}`;
+        } else {
+            idUrl = (document.getElementById('waCustomDriveUrlInput').value || '').trim() || 'https://drive.google.com/';
+        }
+
+        const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
+        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const dec = computeDecision(candidate);
+
+        // صياغة الرسالة حسب حالة القبول
+        if (dec.key === 'interview') {
+            return `سلام ونعمة يا *${candidate.name}* ✝️\nبخصوص تقدمك لفصل إعداد خدام (اجتماع القديس بولس الرسول)، نود إعلامك بأنه تم تحديد موعد مقابلتك الشخصية يوم الجمعة القادمة بعد القداس الإلهي مباشرة في قاعة إعداد خدام.\nحضورك هام لمناقشة استكمال الالتحاق بالخدمة، الرب يباركك 🕊️`;
+        }
+
+        const isConfIssue = (dec.key === 'conditional');
+
+        let msg = `سلام ونعمة يا *${candidate.name}* ✝️\nلقد تم قبولك رسمياً للالتحاق بفصل إعداد خدام — كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية (دفعة 2026 / 2027).\nمجموعك في امتحانات القبول: *${total.toFixed(1)} / ${maxTotalScore}* (${pct}%) 🎯\n\nهذا هو رابط جروب إعداد خدام الفرقة الأولى، رجاء تقديم طلب انضمام ليتم قبولك في الجروب (الرابط شخصي رجاء عدم مشاركته):\n${groupUrl}\n\n*وهذا هو رابط ID الحضور والـ QR Code الخاص بك، احفظه على موبايلك هام جداً جداً للحضور الأسبوعي:*\n${idUrl}\n`;
+
+        if (isConfIssue) {
+            msg += `\n⚠️ *تنبيه هام ومطلوب:* تم قبولك بشرط حل *مشكلة الاعتراف* والتواصل مع أب الاعتراف، وفي حالة عدم حل مشكلة الاعتراف في خلال حد أقصى أسبوع يعتبر قبولك لاغياً في الاجتماع.\n`;
+        }
+
+        msg += `\nميعادنا الجمعة القادمة بالقداس الإلهي، والرب يبارك خدمتك وحياتك 🕊️`;
+        return msg;
+    }
+
+    function renderWhatsappPreview() {
+        const idSource = document.getElementById('waIdSourceSelect').value;
+        document.getElementById('waCustomDriveBox').style.display = (idSource === 'custom_drive') ? 'block' : 'none';
+
+        const list = getWhatsappTargetList();
+        document.getElementById('waTargetCountDisplay').textContent = list.length;
+
+        if (list.length === 0) {
+            document.getElementById('waPreviewStudentName').textContent = 'لا يوجد طلاب مطابقين للشريحة';
+            document.getElementById('waMessagePreviewBox').textContent = 'يرجى اختيار شريحة أخرى تحتوي على مخدومين.';
+            return;
+        }
+
+        const sample = list[0];
+        document.getElementById('waPreviewStudentName').textContent = `(${sample.name} - ${sample.code})`;
+        document.getElementById('waMessagePreviewBox').textContent = buildStudentWhatsappMessage(sample);
+    }
+
+    function copyWhatsappMessageToClipboard() {
+        const list = getWhatsappTargetList();
+        if (list.length === 0) return;
+        const msg = buildStudentWhatsappMessage(list[0]);
+        navigator.clipboard.writeText(msg).then(() => {
+            alert('تم نسخ نص الرسالة إلى الحافظة بنجاح! 📋');
+        });
+    }
+
+    function openDirectWhatsappWeb() {
+        const list = getWhatsappTargetList();
+        if (list.length === 0) return;
+        const s = list[0];
+        let p = (s.phone || '').replace(/[^0-9]/g, '');
+        if (p.startsWith('01')) p = '2' + p;
+        const msg = encodeURIComponent(buildStudentWhatsappMessage(s));
+        window.open(`https://wa.me/${p}?text=${msg}`, '_blank');
+    }
+
+    function exportWhatsappCampaignExcel() {
+        const list = getWhatsappTargetList();
+        if (list.length === 0) {
+            alert('لا يوجد مخدومين في الشريحة المحددة لتصديرهم.');
+            return;
+        }
+
+        const rows = [
+            ["الرقم", "الاسم", "الرسالة المخصصة", "كود الامتحان", "حالة القبول", "المجموع", "النسبة %"]
+        ];
+
+        list.forEach(c => {
+            let phone = (c.phone || '').replace(/[^0-9]/g, '');
+            if (phone.startsWith('01')) phone = '2' + phone;
+            const dec = computeDecision(c);
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const pct = ((total / maxTotalScore) * 100).toFixed(1);
+            const msg = buildStudentWhatsappMessage(c);
+
+            rows.push([
+                phone,
+                c.name,
+                msg,
+                c.code,
+                dec.label,
+                total.toFixed(1),
+                pct + '%'
+            ]);
+        });
+
+        // تصدير كـ XLSX عبر SheetJS
+        if (typeof XLSX !== 'undefined') {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, "حملة_رسائل_القبول_NewWhats");
+            XLSX.writeFile(wb, `شيت_حملة_رسائل_القبول_NewWhats_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        } else {
+            // تصدير CSV كخطة بديلة
+            const csvContent = '﻿' + rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `شيت_حملة_رسائل_القبول_NewWhats_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        alert(`تم تصدير شيت حملة الواتساب لـ ${list.length} مخدوم بنجاح! 🚀\nجاهز تماماً للاستيراد المباشر في NewWhats 2027.`);
+    }
+
+        function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const filtered = getFilteredCandidates();
 
         let totalCandidates = candidatesList.length;
         let sumTotal = 0;
@@ -1517,7 +2496,7 @@
             if (dec.key === 'interview') interviewCount++;
         });
 
-        // تحديث مؤشرات الـ KPIs والبطاقات الأربعة وشريط الطيف
+        // تحديث مؤشرات الـ KPIs
         document.getElementById('kpiTotal').textContent = totalCandidates;
         document.getElementById('kpiAvg').textContent = attendedCount > 0 ? (sumTotal / attendedCount).toFixed(1) : "0.0";
         document.getElementById('kpiMax').textContent = maxTotal.toFixed(1);
@@ -1535,28 +2514,21 @@
         updateCriteriaCards(totalCandidates, accClean, accCond, interviewCount, rejCount);
         updateScoreEquivalents();
 
-        // فلترة وعرض الصفوف
-        const filtered = candidatesList.filter(c => {
-            const name = String(c.name || '').toLowerCase();
-            const code = String(c.code || '').toLowerCase();
-            const phone = String(c.phone || '').toLowerCase();
-            const dec = computeDecision(c);
+        // تحديث تسميات الدرجات العظمى بالجدول
+        const th1 = document.getElementById('thMaxEx1'); if (th1) th1.textContent = `(${examMaxScores[0]})`;
+        const th2 = document.getElementById('thMaxEx2'); if (th2) th2.textContent = `(${examMaxScores[1]})`;
+        const th3 = document.getElementById('thMaxEx3'); if (th3) th3.textContent = `(${examMaxScores[2]})`;
+        const th4 = document.getElementById('thMaxEx4'); if (th4) th4.textContent = `(${examMaxScores[3]})`;
+        const thTot = document.getElementById('thMaxExTotal'); if (thTot) thTot.textContent = `(${maxTotalScore})`;
 
-            let matchSearch = true;
-            if (searchVal) {
-                matchSearch = name.includes(searchVal) || code.includes(searchVal) || phone.includes(searchVal);
-            }
-
-            let matchStatus = true;
-            if (statusVal !== 'all') {
-                matchStatus = (dec.key === statusVal);
-            }
-
-            return matchSearch && matchStatus;
-        });
+        // تحديث شريط حالة الفلاتر
+        const filterLabel = document.getElementById('filterCountLabel');
+        if (filterLabel) {
+            filterLabel.innerHTML = `يتم عرض: <strong>${filtered.length}</strong> من أصل <strong>${totalCandidates}</strong> مخدوم`;
+        }
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-muted fw-bold">لا يوجد مخدومين يطابقون خيارات البحث الحالية.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-muted fw-bold">لا يوجد مخدومين يطابقون خيارات الفلترة المحددة. <button type="button" class="btn-custom ms-2" onclick="resetAllFilters()">تفريغ الفلاتر</button></td></tr>`;
             return;
         }
 
@@ -1565,22 +2537,29 @@
             const pct = ((total / maxTotalScore) * 100).toFixed(1);
             const dec = computeDecision(c);
             const conf = String(c.confessor || '').trim();
-            const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none');
-            const confBadge = isConfClean ? `<span class="badge bg-light text-dark">${conf}</span>` : `<span class="badge bg-warning text-dark">مشكلة اعتراف ⚠️</span>`;
+            const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none' && conf !== 'لم يحدد');
+            const confBadge = isConfClean ? `<span class="badge bg-light text-dark border">${conf}</span>` : `<span class="badge bg-warning text-dark">مشكلة اعتراف ⚠️</span>`;
 
             return `
                 <tr>
                     <td class="fw-bold text-primary">${c.code}</td>
-                    <td class="text-end fw-bold">${c.name}</td>
-                    <td><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender}</span></td>
+                    <td class="text-end fw-bold">
+                        <a href="javascript:void(0)" onclick="openModernGradeEntryModal('${c.code}')" style="color:#0c2461; text-decoration:none;" title="اضغط لفتح فورم رصد الدرجات للمخدوم">
+                            ${c.name} <i class="fa-solid fa-pen-to-square text-muted ms-1" style="font-size:0.75rem;"></i>
+                        </a>
+                    </td>
+                    <td><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender || 'بنين'}</span></td>
                     <td class="text-end">${confBadge}</td>
-                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="25" class="grade-input" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[0]}" class="grade-input" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[1]}" class="grade-input" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[2]}" class="grade-input" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[3]}" class="grade-input" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
                     <td class="fw-bold fs-6" style="background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
                     <td class="fw-bold">${c.attended ? pct + '%' : '-'}</td>
-                    <td>${isConfClean ? '<span class="text-success fw-bold">سليم ✅</span>' : '<span class="text-danger fw-bold">يحتاج متابعة ⚠️</span>'}</td>
+                    <td class="text-end" style="font-size:0.8rem; line-height:1.3;">
+                        ${c.problemType ? `<div style="font-weight:bold; color:#b45309;">${c.problemType}</div>` : ''}
+                        ${c.spiritualNotes ? `<div style="color:#64748b; font-size:0.75rem;" title="${c.spiritualNotes}">🕊️ ${c.spiritualNotes.slice(0, 25)}...</div>` : ''}
+                    </td>
                     <td><span class="badge-status ${dec.class}">${dec.label}</span></td>
                 </tr>
             `;
