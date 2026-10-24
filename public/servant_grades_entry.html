@@ -358,6 +358,7 @@
             <option value="interview">معلق للمقابلة 🟠</option>
             <option value="rejected">غير مجتاز / غائب 🔴</option>
         </select>
+        <button type="button" class="btn-custom" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;" onclick="openUserFormModal()"><i class="fa-solid fa-window-restore me-1"></i> فتح فورم رصد الدرجات (VBA) 🪟</button>
         <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
             <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم جديد
         </button>
@@ -391,6 +392,111 @@
     </div>
 
 </div>
+
+    <!-- نافذة الفورم التفاعلية المطابقة لشاشة الفيجوال بيسك إكسيل (VBA UserForm) -->
+    <div id="vbaModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center; padding:15px;">
+        <div style="background:#d4d0c8; border:2px solid #ffffff; box-shadow:4px 4px 15px rgba(0,0,0,0.4); border-radius:4px; width:100%; max-width:580px; overflow:hidden; font-family:'Segoe UI', Tahoma, sans-serif;">
+            <!-- شريط العنوان الكلاسيكي للفورم -->
+            <div style="background:linear-gradient(90deg, #0a246a 0%, #a6caf0 100%); color:#ffffff; padding:6px 10px; display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:13px;">
+                <span>درجات المخدومين والملاحظات الرعوية والنفسية (VBA UserForm)</span>
+                <button type="button" onclick="closeUserFormModal()" style="background:#d4d0c8; border:1px outset #fff; font-weight:bold; font-size:12px; width:22px; height:22px; cursor:pointer; line-height:1; padding:0;">×</button>
+            </div>
+
+            <!-- خلفية الفورم بنمط النقاط المنقطة (Grid Dots) المميزة لـ VBA Designer -->
+            <div style="background-color:#ece9d8; background-image:radial-gradient(#999999 1px, transparent 1px); background-size:8px 8px; padding:16px 20px; display:flex; flex-direction:column; gap:10px;">
+                
+                <!-- 1. ادخل اسم المخدوم المطلوب البحث عنه -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#000; margin-bottom:2px;">ادخل اسم المخدوم المطلوب البحث عنه:</label>
+                    <input type="text" id="vba_txtSearch" placeholder="اكتب الاسم أو جزء منه..." style="width:100%; padding:6px 8px; font-size:13px; border:2px inset #fff; box-sizing:border-box;" onkeyup="vbaOnSearchChange()">
+                </div>
+
+                <!-- 2. اختار اسم المخدوم المطلوب -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#000; margin-bottom:2px;">اختار اسم المخدوم المطلوب:</label>
+                    <select id="vba_cboStudents" style="width:100%; padding:6px 8px; font-size:13px; border:2px inset #fff; box-sizing:border-box;" onchange="vbaOnStudentSelect()">
+                    </select>
+                </div>
+
+                <!-- بطاقة بيانات المخدوم المختصرة -->
+                <div id="vba_studentMeta" style="background:#fff; border:1px solid #7f9db9; padding:5px 8px; font-size:12px; font-weight:bold; color:#1e3799; border-radius:2px;">
+                    كود: ---- | هاتف: ---- | أب الاعتراف: ----
+                </div>
+
+                <!-- 3. اختار اسم الكورس / الامتحان -->
+                <div style="display:grid; grid-template-columns:1fr 130px; gap:10px;">
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:bold; color:#000; margin-bottom:2px;">اختار اسم الكورس / الامتحان:</label>
+                        <select id="vba_cboSubjects" style="width:100%; padding:6px 8px; font-size:13px; border:2px inset #fff; box-sizing:border-box;" onchange="vbaOnSubjectChange()">
+                            <option value="1">امتحان 1: كتاب مقدس وعقيدة تمهيدي</option>
+                            <option value="2">امتحان 2: طقس وتاريخ كنيسة تمهيدي</option>
+                            <option value="3">امتحان 3: حياة روحية وسلوك خدمي</option>
+                            <option value="4">امتحان 4: سمات شخصية وثقافة مسيحية</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. ادخل الدرجة -->
+                    <div>
+                        <label style="display:block; font-size:13px; font-weight:bold; color:#000; margin-bottom:2px;">ادخل الدرجة:</label>
+                        <input type="number" step="0.5" min="0" max="25" id="vba_txtGrade" placeholder="من 25" style="width:100%; padding:6px 8px; font-size:14px; font-weight:bold; text-align:center; border:2px inset #fff; box-sizing:border-box;">
+                    </div>
+                </div>
+
+                <!-- 5. خيارات امتحان اساسي / امتحان إعادة -->
+                <div style="display:flex; gap:20px; align-items:center; padding:2px 0;">
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:bold; font-size:13px; cursor:pointer;">
+                        <input type="radio" name="vba_examType" id="vba_optMain" value="main" checked>
+                        <span>إمتحان اساسي</span>
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; font-weight:bold; font-size:13px; cursor:pointer;">
+                        <input type="radio" name="vba_examType" id="vba_optRetake" value="retake">
+                        <span style="color:#b91c1c;">إمتحان إعادة (تمييز أصفر/أحمر)</span>
+                    </label>
+                </div>
+
+                <hr style="border:0; border-top:1px solid #c0c0c0; margin:2px 0;">
+
+                <!-- 6. الإضافات المطورة: الجانب الروحي والنفسي وتصنيف المشكلة -->
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#0c2461; margin-bottom:2px;">🕊️ ملاحظات الجانب الروحي (أب الاعتراف / التناول / الصلاة):</label>
+                    <textarea id="vba_txtSpiritualNotes" rows="2" placeholder="اكتب حالة الاعتراف، التناول، الصلاة بالأجبية، أو أي ملاحظة روحية..." style="width:100%; padding:6px 8px; font-size:12px; border:2px inset #fff; box-sizing:border-box;"></textarea>
+                </div>
+
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#92400e; margin-bottom:2px;">🧠 ملاحظات الجانب النفسي والسلوكي (المشكلة أو التحدي):</label>
+                    <textarea id="vba_txtPsychNotes" rows="2" placeholder="اكتب سمات الشخصية، السلوك، أي مشكلة نفسية أو أسرية أو تردد..." style="width:100%; padding:6px 8px; font-size:12px; border:2px inset #fff; box-sizing:border-box;"></textarea>
+                </div>
+
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#000; margin-bottom:2px;">⚠️ تصنيف المشكلة / التحدي الرعوي:</label>
+                    <select id="vba_cboProblemType" style="width:100%; padding:6px 8px; font-size:12px; font-weight:bold; border:2px inset #fff; box-sizing:border-box;">
+                        <option value="لا توجد مشاكل (مقبول طبيعي) 🟢">لا توجد مشاكل (مقبول طبيعي) 🟢</option>
+                        <option value="مشكلة اعتراف (مهلة أسبوع) 🟡">مشكلة اعتراف (مهلة أسبوع) 🟡</option>
+                        <option value="مشكلة نفسية / سلوكية (انطواء - قلق - اندفاع) 🟠">مشكلة نفسية / سلوكية (انطواء - قلق - اندفاع) 🟠</option>
+                        <option value="مشكلة التزام ومواعيد ⏰">مشكلة التزام ومواعيد ⏰</option>
+                        <option value="مشكلة أسرية أو اجتماعية 🏠">مشكلة أسرية أو اجتماعية 🏠</option>
+                        <option value="يحتاج مقابلة خاصة مع أمين الخدمة أو الكاهن ⚠️">يحتاج مقابلة خاصة مع أمين الخدمة أو الكاهن ⚠️</option>
+                    </select>
+                </div>
+
+                <!-- أزرار الإجراءات في أسفل الفورم -->
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:6px;">
+                    <button type="button" onclick="vbaSaveGrade()" style="background:#ece9d8; border:2px outset #fff; font-weight:bold; font-size:13px; padding:6px 20px; cursor:pointer; min-width:130px; box-shadow:1px 1px 3px rgba(0,0,0,0.2);">
+                        💾 حفظ الدرجات
+                    </button>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" onclick="vbaNextStudent()" style="background:#ece9d8; border:2px outset #fff; font-weight:bold; font-size:12px; padding:6px 12px; cursor:pointer;">
+                            المخدوم التالي ⏭️
+                        </button>
+                        <button type="button" onclick="closeUserFormModal()" style="background:#ece9d8; border:2px outset #fff; font-weight:bold; font-size:12px; padding:6px 12px; cursor:pointer;">
+                            إلغاء / إغلاق
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 <script>
     // بيانات أولية نموذجية متطابقة مع شيت جوجل فورم
@@ -672,6 +778,133 @@
     }
 
     // التهيئة عند التحميل
+    
+    // =========================================================================
+    // إدارة نافذة الفورم المنبثقة المطابقة للفيجوال بيسك (VBA UserForm)
+    // =========================================================================
+    let vbaCurrentStudentIndex = 0;
+
+    function openUserFormModal(selectedCode = null) {
+        const overlay = document.getElementById('vbaModalOverlay');
+        overlay.style.display = 'flex';
+        populateVbaStudentsDropdown();
+
+        if (selectedCode) {
+            const idx = candidatesList.findIndex(c => String(c.code) === String(selectedCode));
+            if (idx !== -1) {
+                document.getElementById('vba_cboStudents').selectedIndex = idx;
+            }
+        }
+        vbaOnStudentSelect();
+    }
+
+    function closeUserFormModal() {
+        document.getElementById('vbaModalOverlay').style.display = 'none';
+    }
+
+    function populateVbaStudentsDropdown(filterText = '') {
+        const cbo = document.getElementById('vba_cboStudents');
+        cbo.innerHTML = '';
+        const searchParts = filterText.trim().toLowerCase().split(' ').filter(Boolean);
+
+        candidatesList.forEach((c, idx) => {
+            const name = String(c.name || '').toLowerCase();
+            const code = String(c.code || '').toLowerCase();
+            let isMatch = true;
+
+            for (const part of searchParts) {
+                if (!name.includes(part) && !code.includes(part)) {
+                    isMatch = false;
+                    break;
+                }
+            }
+
+            if (isMatch) {
+                const opt = document.createElement('option');
+                opt.value = c.code;
+                opt.textContent = `${c.name} (${c.code})`;
+                cbo.appendChild(opt);
+            }
+        });
+    }
+
+    function vbaOnSearchChange() {
+        const txt = document.getElementById('vba_txtSearch').value;
+        populateVbaStudentsDropdown(txt);
+        vbaOnStudentSelect();
+    }
+
+    function vbaOnStudentSelect() {
+        const cbo = document.getElementById('vba_cboStudents');
+        const code = cbo.value;
+        const candidate = candidatesList.find(c => String(c.code) === String(code));
+        if (!candidate) return;
+
+        vbaCurrentStudentIndex = candidatesList.indexOf(candidate);
+
+        // تحديث بطاقة المعلومات السريعة
+        document.getElementById('vba_studentMeta').textContent = 
+            `كود: ${candidate.code} | هاتف: ${candidate.phone || 'غير مسجل'} | أب الاعتراف: ${candidate.confessor || 'لا يوجد'}`;
+
+        // تحديث الدرجة للمادة المحددة
+        vbaOnSubjectChange();
+
+        // تحديث ملاحظات الجانب الروحي والنفسي
+        document.getElementById('vba_txtSpiritualNotes').value = candidate.spiritualNotes || '';
+        document.getElementById('vba_txtPsychNotes').value = candidate.psychNotes || '';
+        if (candidate.problemType) {
+            document.getElementById('vba_cboProblemType').value = candidate.problemType;
+        } else {
+            document.getElementById('vba_cboProblemType').selectedIndex = 0;
+        }
+    }
+
+    function vbaOnSubjectChange() {
+        const code = document.getElementById('vba_cboStudents').value;
+        const subNum = document.getElementById('vba_cboSubjects').value;
+        const candidate = candidatesList.find(c => String(c.code) === String(code));
+        if (!candidate) return;
+
+        const g = candidate['g' + subNum];
+        document.getElementById('vba_txtGrade').value = (g !== undefined && g !== null) ? g : '';
+        document.getElementById('vba_optMain').checked = true;
+    }
+
+    function vbaSaveGrade() {
+        const code = document.getElementById('vba_cboStudents').value;
+        const subNum = document.getElementById('vba_cboSubjects').value;
+        const gradeVal = document.getElementById('vba_txtGrade').value;
+        const candidate = candidatesList.find(c => String(c.code) === String(code));
+        if (!candidate) {
+            alert('الرجاء اختيار اسم المخدوم.');
+            return;
+        }
+
+        candidate['g' + subNum] = gradeVal === '' ? 0 : Number(gradeVal);
+        candidate.attended = true;
+        candidate.spiritualNotes = document.getElementById('vba_txtSpiritualNotes').value.trim();
+        candidate.psychNotes = document.getElementById('vba_txtPsychNotes').value.trim();
+        candidate.problemType = document.getElementById('vba_cboProblemType').value;
+
+        saveGradesLocal(false);
+        renderTable();
+
+        alert(`تم حفظ الدرجة والملاحظات للمخدوم [${candidate.name}] بنجاح! ✅`);
+        vbaNextStudent();
+    }
+
+    function vbaNextStudent() {
+        if (vbaCurrentStudentIndex < candidatesList.length - 1) {
+            vbaCurrentStudentIndex++;
+            const nextCandidate = candidatesList[vbaCurrentStudentIndex];
+            document.getElementById('vba_cboStudents').value = nextCandidate.code;
+            vbaOnStudentSelect();
+            document.getElementById('vba_txtGrade').focus();
+        } else {
+            alert('وصلت إلى آخر مخدوم في الكشف.');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         loadSavedData();
         renderTable();
