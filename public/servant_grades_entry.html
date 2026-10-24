@@ -1503,6 +1503,61 @@
     </div>
 
 
+
+    <!-- نافذة إضافة مخدوم جديد يدوياً في الكشف -->
+    <div id="newCandidateModalOverlay" class="royal-modal-overlay">
+        <div class="royal-modal-card" style="max-width: 580px;">
+            <div class="royal-modal-header" style="background: linear-gradient(135deg, #0c2461, #0284c7);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-user-plus fs-5"></i>
+                    <strong style="font-size: 1.1rem;">إضافة مخدوم جديد في الكشف (يدوياً)</strong>
+                </div>
+                <button type="button" onclick="closeNewCandidateModal()" class="import-close-btn">&times;</button>
+            </div>
+            <div style="padding: 18px 22px; overflow-y: auto; flex: 1;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px; color:#0c2461;">اسم المخدوم الرباعي (مطلوب):</label>
+                        <input type="text" id="newCand_name" placeholder="الاسم رباعي باللغة العربية..." style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">النوع:</label>
+                            <select id="newCand_gender" style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px;">
+                                <option value="بنين">بنين 👦</option>
+                                <option value="بنات">بنات 👧</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">كود الامتحان التلقائي:</label>
+                            <input type="text" id="newCand_code" style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; background:#f1f5f9; text-align:center; color:#0c2461;">
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">رقم واتساب:</label>
+                            <input type="text" id="newCand_phone" placeholder="01xxxxxxxxx" style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">أب الاعتراف:</label>
+                            <input type="text" id="newCand_confessor" placeholder="أبونا... أو اتركه فارغاً" style="width:100%; padding:9px 12px; font-weight:bold; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">ملاحظات الجانب الروحي أو المشكلة:</label>
+                        <input type="text" id="newCand_notes" placeholder="أي ملاحظة روحية أو نفسية..." style="width:100%; padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                    </div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:18px; border-top:1px solid #e2e8f0; padding-top:14px;">
+                    <button type="button" class="btn-custom btn-navy" style="flex:1; padding:10px;" onclick="saveNewCandidate()">
+                        <i class="fa-solid fa-check-circle me-1"></i> إدراج المخدوم في المنظومة الآن ✅
+                    </button>
+                    <button type="button" class="btn-custom" onclick="closeNewCandidateModal()">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة رصد وتعديل الدرجات الملكية الفاخرة (Modern Royal Grade Entry Modal) -->
     <div id="royalGradeModalOverlay" class="royal-modal-overlay">
         <div class="royal-modal-card">
@@ -1523,6 +1578,12 @@
             <!-- جسم النافذة -->
             <div style="padding: 18px 22px; overflow-y: auto; flex: 1;">
                 
+                <!-- حقل البحث اللحظي بجزء من الاسم أو الكود داخل الفورم -->
+                <div style="position: relative; margin-bottom: 8px;">
+                    <input type="text" id="royal_txtSearchStudent" placeholder="🔍 اكتب جزءاً من الاسم للبحث السريع (مثلاً: جورج، يوسف، 2201)..." style="width: 100%; padding: 10px 14px; font-size: 0.95rem; font-weight: bold; border: 2px solid #2563eb; border-radius: 10px; box-sizing: border-box; background: #eff6ff; color: #0c2461; font-family: inherit;" oninput="royalFilterStudentsList(this.value)" onkeydown="royalOnSearchKeydown(event)">
+                    <span id="royal_searchMatchBadge" style="position: absolute; left: 10px; top: 9px; font-size: 0.8rem; font-weight: bold; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 6px; display: none;"></span>
+                </div>
+
                 <!-- شريط اختيار والتنقل بين المخدومين -->
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
                     <button type="button" class="btn-custom" onclick="royalPrevStudent()" style="padding:6px 12px; font-size:0.85rem;">
@@ -2201,6 +2262,12 @@
         document.getElementById('royal_lblMax3').textContent = `من ${examMaxScores[2]}`;
         document.getElementById('royal_lblMax4').textContent = `من ${examMaxScores[3]}`;
 
+        // تفريغ حقل البحث وتحديث القائمة
+        const searchInput = document.getElementById('royal_txtSearchStudent');
+        if (searchInput) searchInput.value = '';
+        const badge = document.getElementById('royal_searchMatchBadge');
+        if (badge) badge.style.display = 'none';
+
         populateRoyalDropdown();
 
         if (selectedCode) {
@@ -2216,7 +2283,86 @@
         document.getElementById('royalGradeModalOverlay').style.display = 'none';
     }
 
-    function populateRoyalDropdown() {
+
+    // =========================================================================
+    // إدارة البحث بجزء من الاسم والتنقل السريع داخل فورم الرصد الملكي
+    // =========================================================================
+    let royalFilteredIndices = [];
+
+    function populateRoyalDropdown(filteredList = null) {
+        const cbo = document.getElementById('royal_cboStudents');
+        cbo.innerHTML = '';
+        const list = filteredList || candidatesList;
+        royalFilteredIndices = [];
+
+        list.forEach((c) => {
+            const actualIdx = candidatesList.indexOf(c);
+            royalFilteredIndices.push(actualIdx);
+            const opt = document.createElement('option');
+            opt.value = actualIdx;
+            opt.textContent = `${c.code} - ${c.name} (${c.gender || 'بنين'} | ${c.phone || 'بدون هاتف'})`;
+            cbo.appendChild(opt);
+        });
+    }
+
+    function royalFilterStudentsList(query) {
+        const q = (query || '').trim().toLowerCase();
+        const badge = document.getElementById('royal_searchMatchBadge');
+
+        if (!q) {
+            if (badge) badge.style.display = 'none';
+            populateRoyalDropdown();
+            if (candidatesList.length > 0) {
+                document.getElementById('royal_cboStudents').value = royalCurrentIndex;
+            }
+            return;
+        }
+
+        const searchParts = q.split(' ').filter(Boolean);
+        const matched = candidatesList.filter(c => {
+            const name = String(c.name || '').toLowerCase();
+            const code = String(c.code || '').toLowerCase();
+            const phone = String(c.phone || '').toLowerCase();
+            const conf = String(c.confessor || '').toLowerCase();
+
+            return searchParts.every(part => 
+                name.includes(part) || code.includes(part) || phone.includes(part) || conf.includes(part)
+            );
+        });
+
+        if (badge) {
+            badge.style.display = 'inline-block';
+            badge.textContent = `${matched.length} مطابقة`;
+        }
+
+        populateRoyalDropdown(matched);
+
+        if (matched.length > 0) {
+            const firstActualIdx = candidatesList.indexOf(matched[0]);
+            document.getElementById('royal_cboStudents').value = firstActualIdx;
+            royalCurrentIndex = firstActualIdx;
+            royalOnStudentSelect();
+        }
+    }
+
+    function royalOnSearchKeydown(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const g1 = document.getElementById('royal_txtG1');
+            if (g1) {
+                g1.focus();
+                g1.select();
+            }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            royalNextStudent();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            royalPrevStudent();
+        }
+    }
+
+    function _old_populateRoyalDropdown() {
         const cbo = document.getElementById('royal_cboStudents');
         cbo.innerHTML = '';
         candidatesList.forEach((c, idx) => {
@@ -2300,21 +2446,24 @@
     }
 
     function royalNextStudent() {
-        if (royalCurrentIndex < candidatesList.length - 1) {
-            royalCurrentIndex++;
-            document.getElementById('royal_cboStudents').selectedIndex = royalCurrentIndex;
+        const cbo = document.getElementById('royal_cboStudents');
+        if (cbo.selectedIndex < cbo.options.length - 1) {
+            cbo.selectedIndex++;
             royalOnStudentSelect();
-            document.getElementById('royal_txtG1').focus();
+            const g1 = document.getElementById('royal_txtG1');
+            if (g1) { g1.focus(); g1.select(); }
         } else {
-            alert('وصلت إلى آخر مخدوم في الكشف.');
+            alert('وصلت إلى آخر مخدوم في القائمة الحالية.');
         }
     }
 
     function royalPrevStudent() {
-        if (royalCurrentIndex > 0) {
-            royalCurrentIndex--;
-            document.getElementById('royal_cboStudents').selectedIndex = royalCurrentIndex;
+        const cbo = document.getElementById('royal_cboStudents');
+        if (cbo.selectedIndex > 0) {
+            cbo.selectedIndex--;
             royalOnStudentSelect();
+            const g1 = document.getElementById('royal_txtG1');
+            if (g1) { g1.focus(); g1.select(); }
         }
     }
 
@@ -2576,29 +2725,70 @@
         }
     }
 
+    
     function addNewCandidateModal() {
-        const name = prompt('أدخل اسم المخدوم الجديد الرباعي:');
-        if (!name || !name.trim()) return;
-        const phone = prompt('أدخل رقم الهاتف:') || '';
-        const confessor = prompt('اسم أب الاعتراف (أو اتركه فارغاً إذا كان لا يوجد):') || 'لا يوجد';
+        const overlay = document.getElementById('newCandidateModalOverlay');
+        overlay.style.display = 'flex';
+
+        // حساب الكود التالي تلقائياً
         const nextCode = (candidatesList.length > 0) ? (Math.max(...candidatesList.map(c => Number(c.code) || 2200)) + 1).toString() : "2201";
 
-        candidatesList.push({
-            code: nextCode,
-            name: name.trim(),
-            gender: "بنين",
-            phone: phone.trim(),
+        document.getElementById('newCand_name').value = '';
+        document.getElementById('newCand_gender').value = 'بنين';
+        document.getElementById('newCand_code').value = nextCode;
+        document.getElementById('newCand_phone').value = '';
+        document.getElementById('newCand_confessor').value = '';
+        document.getElementById('newCand_notes').value = '';
+
+        setTimeout(() => document.getElementById('newCand_name').focus(), 100);
+    }
+
+    function closeNewCandidateModal() {
+        document.getElementById('newCandidateModalOverlay').style.display = 'none';
+    }
+
+    function saveNewCandidate() {
+        const name = (document.getElementById('newCand_name').value || '').trim();
+        if (!name || name.length < 3) {
+            alert('الرجاء إدخال اسم المخدوم الرباعي بشكل صحيح.');
+            return;
+        }
+
+        const code = (document.getElementById('newCand_code').value || '').trim();
+        const gender = document.getElementById('newCand_gender').value;
+        const phone = (document.getElementById('newCand_phone').value || '').trim();
+        const confessor = (document.getElementById('newCand_confessor').value || '').trim() || 'لا يوجد';
+        const notes = (document.getElementById('newCand_notes').value || '').trim();
+
+        const isConfClean = (confessor && confessor !== 'لا يوجد' && confessor !== 'none');
+        const probType = isConfClean ? 'لا توجد مشاكل (مقبول طبيعي) 🟢' : 'مشكلة اعتراف (مهلة أسبوع) 🟡';
+
+        const newStudent = {
+            code: code,
+            name: name,
+            gender: gender,
+            phone: phone,
             parentPhone: "",
             dob: "2004-01-01",
-            confessor: confessor.trim(),
+            confessor: confessor,
             attended: true,
             g1: 0, g2: 0, g3: 0, g4: 0,
-            email: "", address: ""
-        });
+            email: "", address: "",
+            spiritualNotes: notes,
+            psychNotes: "",
+            problemType: probType
+        };
 
+        candidatesList.push(newStudent);
         saveGradesLocal(true);
         renderTable();
+        closeNewCandidateModal();
+
+        alert(`تم تسجيل وإدراج المخدوم [${name}] بكود (${code}) بنجاح! 🎯
+يمكنك الآن رصد درجاته فوراً.`);
+        openModernGradeEntryModal(code);
     }
+
 
     function exportToExcelCSV() {
         if (!candidatesList || candidatesList.length === 0) {
@@ -3171,7 +3361,7 @@
         document.getElementById('importPreviewSection').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function applyImportCandidates() {
+        function applyImportCandidates() {
         if (!stagedImportCandidates || stagedImportCandidates.length === 0) {
             alert('لا توجد بيانات للاعتماد.');
             return;
@@ -3181,11 +3371,20 @@
 
         if (isReplace) {
             candidatesList = stagedImportCandidates;
+            saveGradesLocal(true);
+            renderTable();
+            closeImportModal();
+            alert(`تم استبدال الكشف واعتماد ${stagedImportCandidates.length} مخدوم بنجاح! 🎯`);
         } else {
-            // نمط الدمج مع تجنب التكرار بالاسم أو الهاتف
+            // نمط المزامنة الذكية: الحفاظ الكامل على درجات المخدومين السابقين وإضافة الجدد فقط
+            let addedCount = 0;
+            let updatedCount = 0;
+            let highestCode = (candidatesList.length > 0) ? Math.max(...candidatesList.map(c => Number(c.code) || 2200)) : 2200;
+
             stagedImportCandidates.forEach(newC => {
                 const normName = newC.name.toLowerCase().trim();
                 const normPhone = (newC.phone || '').trim();
+
                 const existingIdx = candidatesList.findIndex(c => {
                     const cName = (c.name || '').toLowerCase().trim();
                     const cPhone = (c.phone || '').trim();
@@ -3193,18 +3392,33 @@
                 });
 
                 if (existingIdx !== -1) {
-                    // تحديث المخدوم الحالي
-                    candidatesList[existingIdx] = { ...candidatesList[existingIdx], ...newC, code: candidatesList[existingIdx].code };
+                    // مخدوم سابق: نحدث بيانات الاتصال والاعتراف دون مساس بدرجاته المسجلة
+                    const old = candidatesList[existingIdx];
+                    candidatesList[existingIdx] = {
+                        ...newC,
+                        ...old, // الحفاظ على درجات g1, g2, g3, g4 والملاحظات
+                        phone: newC.phone || old.phone,
+                        confessor: (newC.confessor && newC.confessor !== 'لا يوجد') ? newC.confessor : old.confessor,
+                        code: old.code
+                    };
+                    updatedCount++;
                 } else {
+                    // مخدوم جديد سجل لاحقاً في جوجل فورم: نضيفه بكود تسلسلي جديد
+                    highestCode++;
+                    newC.code = highestCode.toString();
                     candidatesList.push(newC);
+                    addedCount++;
                 }
             });
-        }
 
-        saveGradesLocal(true);
-        renderTable();
-        closeImportModal();
-        alert(`تم اعتماد وإدراج ${stagedImportCandidates.length} مخدوم بنجاح وتحديث الكشف! 🎯`);
+            saveGradesLocal(true);
+            renderTable();
+            closeImportModal();
+            alert(`✅ تمت المزامنة الذكية بنجاح!
+
+🎉 تمت إضافة (${addedCount}) مخدومين جدد سجلوا لاحقاً.
+🔄 تم تحديث (${updatedCount}) مخدوماً سابقاً مع الحفاظ على درجاتهم السابقة بالكامل!`);
+        }
     }
 
     // التهيئة عند التحميل
