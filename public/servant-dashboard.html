@@ -387,7 +387,7 @@
             <div class="tab-btn admin-only" onclick="switchTab('servantsTab', this)">إدارة الخدام ⚙️</div>
             <div class="tab-btn admin-only" onclick="switchTab('rolloverTab', this)">أرشفة وتخريج 🎓</div>
            <!-- استبدال التقييم الروحي بنوتة الخادم الروحية -->
-<a href="servant_spiritual_note.html?from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل العمليات 🛡️</div>
+<a href="servant_spiritual_note.html?from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html?from=servant&group=spirit" onclick="this.href='bible.html?from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل العمليات 🛡️</div>
             <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
 <a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">ترحيل الحضور لـFirestore 🔄</a>
             <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
@@ -7316,13 +7316,22 @@ function checkSession() {
         'settingsTab', 'dataTab', 'followupTab', 'reflectionsTab'
     ];
     if (!wantTab) {
-        wantTab = sessionStorage.getItem('khedmety_tab_' + userKey);
+        const savedTab = sessionStorage.getItem('khedmety_tab_' + userKey);
+        // لا نسترجع تبويب الجلسة القديمة إذا كان يتعارض مع المجموعة المحددة صراحة في الرابط (مثل group=spirit)
+        if (savedTab && (!urlParams.get('group') || TAB_GROUP[savedTab] === urlParams.get('group'))) {
+            wantTab = savedTab;
+        }
     }
     if (wantTab && (!VALID_TABS.includes(wantTab) || !document.getElementById(wantTab))) {
         wantTab = 'dashTab'; // ردع التبويبات غير الصحيحة
     }
     if (typeof currentPermission !== 'undefined' && (currentPermission === 'attend_only' || currentPermission === 'scanner_only')) {
         wantTab = 'attendanceTab';
+    }
+    // إذا كانت المجموعة المطلوبة هي "الروحيات" (spirit)، نضمن بقاءه في مجموعة الروحيات ونمنع القفز لتبويب خارجها
+    if (initialGroup === 'spirit' || urlParams.get('group') === 'spirit') {
+        showGroup('spirit');
+        wantTab = null;
     }
     if (wantTab && wantTab !== 'dashTab') {
         setTimeout(() => {

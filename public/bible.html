@@ -32,7 +32,7 @@
     <div class="reader-card">
         
         <div class="d-flex justify-content-between align-items-center reader-header">
-            <button type="button" id="btn-home" class="btn-smart-back btn-sm" data-smart-back data-fallback="student.html">
+            <button type="button" id="btn-home" class="btn-smart-back btn-sm" data-smart-back data-fallback="servant-dashboard.html?group=spirit" onclick="handleBibleBack(event)">
                 <i class="fa-solid fa-arrow-right me-1"></i> رجوع
             </button>
             <h4 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-book-bible me-2"></i>الكتاب المقدس</h4>
@@ -499,22 +499,56 @@ window.onload = async function() {
     await loadBibleData();
 };
 
+function handleBibleBack(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromParam = urlParams.get('from') || urlParams.get('fromTab');
+        const groupParam = urlParams.get('group');
+        const userRole = (window.AuthClient && typeof AuthClient.getUserRole === 'function' && AuthClient.getUserRole()) ||
+                         (typeof currentUser !== 'undefined' && currentUser && currentUser.role) ||
+                         localStorage.getItem('user_role') ||
+                         sessionStorage.getItem('khedmety_role') || '';
+        const isServant = fromParam === 'servant' || groupParam === 'spirit' || userRole === 'servant' || userRole === 'admin' || userRole === 'developer';
+
+        if (fromParam === 'spiritual_note') {
+            window.location.href = 'spiritual_note.html';
+            return;
+        }
+        if (isServant) {
+            window.location.href = 'servant-dashboard.html?group=spirit';
+            return;
+        }
+        if (window.AuthClient && typeof AuthClient.navigateBack === 'function') {
+            AuthClient.navigateBack('student.html', e);
+        } else {
+            window.location.href = 'student.html';
+        }
+    } catch (err) {
+        window.location.href = 'servant-dashboard.html?group=spirit';
+    }
+}
+window.handleBibleBack = handleBibleBack;
+
 // ضبط مسار العودة الذكي بناءً على دور المستخدم أو سياق الوصول
 (function () {
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const fromParam = urlParams.get('from') || urlParams.get('fromTab');
+        const groupParam = urlParams.get('group');
         const userRole = (window.AuthClient && typeof AuthClient.getUserRole === 'function' && AuthClient.getUserRole()) ||
                          (typeof currentUser !== 'undefined' && currentUser && currentUser.role) ||
                          localStorage.getItem('user_role') ||
                          sessionStorage.getItem('khedmety_role') || '';
-        const isServant = fromParam === 'servant' || userRole === 'servant' || userRole === 'admin' || userRole === 'developer';
+        const isServant = fromParam === 'servant' || groupParam === 'spirit' || userRole === 'servant' || userRole === 'admin' || userRole === 'developer';
         const smartBackBtn = document.querySelector('[data-smart-back]');
         if (smartBackBtn) {
             if (fromParam === 'spiritual_note') {
                 smartBackBtn.setAttribute('data-fallback', 'spiritual_note.html');
+            } else if (isServant) {
+                smartBackBtn.setAttribute('data-fallback', 'servant-dashboard.html?group=spirit');
             } else {
-                smartBackBtn.setAttribute('data-fallback', isServant ? 'servant-dashboard.html?group=spirit' : 'student.html');
+                smartBackBtn.setAttribute('data-fallback', 'student.html');
             }
         }
     } catch (e) {
