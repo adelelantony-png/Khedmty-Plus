@@ -157,8 +157,13 @@ module.exports = async (req, res) => {
             });
         }
 
-        // 5. جلب بيانات المخدومين والحضور والخدام والخطة لمزامنة الإكسيل الشاملة
+        // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء لمزامنة الإكسيل الشاملة
         if (action === 'get_sync_data') {
+            let fbSnap = { forEach: () => {} };
+            try {
+                fbSnap = await db.collection('feedback').limit(300).get();
+            } catch (e) {}
+
             const [mSnap, aSnap, sSnap, pDoc] = await Promise.all([
                 db.collection('members').get(),
                 db.collection('attendance').get(),
@@ -185,13 +190,31 @@ module.exports = async (req, res) => {
 
             const plan = (pDoc.exists && pDoc.data()) ? (pDoc.data().list || []) : [];
 
+            const feedback = [];
+            fbSnap.forEach(doc => {
+                feedback.push(Object.assign({ id: doc.id }, doc.data() || {}));
+            });
+
             return res.status(200).json({
                 success: true,
                 members: members,
                 attendance: attendance,
                 servants: servants,
-                plan: plan
+                plan: plan,
+                feedback: feedback
             });
+        }
+
+        // 5b. جلب آراء وتقييمات المخدومين فقط للوحة الخدمة
+        if (action === 'get_feedback') {
+            const list = [];
+            try {
+                const fbSnap = await db.collection('feedback').limit(400).get();
+                fbSnap.forEach(doc => {
+                    list.push(Object.assign({ id: doc.id }, doc.data() || {}));
+                });
+            } catch (e) {}
+            return res.status(200).json({ success: true, feedback: list });
         }
 
         // 6. حفظ واعتماد خطة السنة السحابية من كشف الإكسيل

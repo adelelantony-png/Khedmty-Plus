@@ -55,6 +55,12 @@ service cloud.firestore {
         allow read: if isStaff() || isMe(code);
         allow write: if isMe(code) || isFull();
       }
+
+      // تقييم لقاء الجمعة والمقترحات
+      match /feedback/{fridayDate} {
+        allow read: if isStaff() || isMe(code);
+        allow write: if isMe(code) || isFull();
+      }
     }
 
     // ---- 2. مجموعة المخدومين البديلة members المستخدمة في الواجهة الحالية ----
@@ -118,6 +124,13 @@ service cloud.firestore {
       allow create: if isStaff();
       allow read: if isAdmin();
       allow update, delete: if false;
+    }
+
+    // ---- 10. آراء وتقييمات المخدومين للقاء الجمعة ----
+    match /feedback/{feedbackId} {
+      allow create: if signedIn();
+      allow read: if isStaff();
+      allow update, delete: if isFull();
     }
 
     // منع أي مسار خارجي غير مصرح به

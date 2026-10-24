@@ -649,10 +649,13 @@ document.addEventListener('DOMContentLoaded', function () {
             localStorage.setItem(`khedmty_feedback_${fridayStr}_${code}`, JSON.stringify(payload));
         } catch(e) {}
 
-        // 2. الحفظ السحابي في Firestore تحت وثيقة المخدوم (ضمن صلاحية isMe)
+        // 2. الحفظ السحابي في Firestore تحت وثيقة المخدوم والمجموعة العامة للخدام
         if (fsdb) {
             try {
-                await fsdb.collection('students').doc(code).collection('feedback').doc(fridayStr).set(payload, { merge: true });
+                await Promise.all([
+                    fsdb.collection('students').doc(code).collection('feedback').doc(fridayStr).set(payload, { merge: true }),
+                    fsdb.collection('feedback').doc(`${fridayStr}_${code}`).set(payload, { merge: true })
+                ]);
             } catch(err) {
                 console.warn('Feedback cloud sync warning:', err);
             }
