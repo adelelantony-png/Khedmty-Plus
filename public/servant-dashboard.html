@@ -2575,6 +2575,12 @@ function exportFollowupToExcel() {
                 fsdb.collection('members').doc(String(members[mIndex].id)).update(updatedFields)
                     .then(() => updateLastSyncTimestamp())
                     .catch(() => syncToCloud('members', members));
+
+                // جسر المزامنة المزدوجة مع مجموعة students لضمان تطابق بوابة المخدوم ولوحة الخادم
+                const memberCode = String(members[mIndex].code || members[mIndex].id || '').trim();
+                if (memberCode) {
+                    fsdb.collection('students').doc(memberCode).set(updatedFields, { merge: true }).catch(() => {});
+                }
             } else {
                 syncToCloud('members', members);
             }
@@ -4969,7 +4975,11 @@ function exportFollowupToExcel() {
                     let deletedName = m.name;
                     members = members.filter(x => x.id.toString() !== m.id.toString());
                     localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
-                    if (isFirebaseActive && fsdb) fsdb.collection('members').doc(String(m.id)).delete().catch(() => {});
+                    if (isFirebaseActive && fsdb) {
+                        fsdb.collection('members').doc(String(m.id)).delete().catch(() => {});
+                        const memberCode = String(m.code || m.id || '').trim();
+                        if (memberCode) fsdb.collection('students').doc(memberCode).delete().catch(() => {});
+                    }
                     if (typeof logActivity === 'function') logActivity("حذف مخدوم", deletedName, "حذف نهائي للملف");
                     closeProfile();
                     renderMembersList();
@@ -6444,6 +6454,10 @@ function checkSession() {
 
             if (isFirebaseActive && fsdb) {
                 fsdb.collection('members').doc(String(newMember.id)).set(newMember).catch(() => syncToCloud('members', members));
+                const memberCode = String(newMember.code || newMember.id || '').trim();
+                if (memberCode) {
+                    fsdb.collection('students').doc(memberCode).set(newMember, { merge: true }).catch(() => {});
+                }
             }
 
             logActivity("إضافة دارس جديد", name, `كود: ${examCode} - مرحلة: ${newMember.stage}`);

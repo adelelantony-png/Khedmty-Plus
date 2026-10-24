@@ -384,9 +384,9 @@
                 } catch (e) {}
             }
 
-            // 1. إذا تم تحديد وجهة صريحة مخصصة بتبويب أو معلمات استعلام أو صفحة محددة (مثل servant-dashboard.html?tab=membersTab)
+            // 1. إذا تم تحديد وجهة صريحة مخصصة بتبويب أو معلمات استعلام (مثل servant-dashboard.html?tab=membersTab)
             // ننتقل إليها فوراً منعاً للضياع أو الخروج من اللوحة
-            if (fallbackUrl && (fallbackUrl.includes('?') || fallbackUrl.includes('servant-dashboard.html') || fallbackUrl !== homeUrl)) {
+            if (fallbackUrl && fallbackUrl.includes('?')) {
                 doRedirect(targetFallback);
                 return;
             }
@@ -451,13 +451,16 @@
     // ==========================================
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
         // 1. تعطيل زر الفأرة الأيمن لمنع القوائم وفحص العناصر Inspect
-        document.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-            return false;
-        }, { capture: true });
+        if (typeof document.addEventListener === 'function') {
+            document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                return false;
+            }, { capture: true });
+        }
 
         // 2. حظر مفاتيح المطورين F12 واختصارات لوحة المفاتيح
-        window.addEventListener('keydown', function (e) {
+        if (typeof window.addEventListener === 'function') {
+            window.addEventListener('keydown', function (e) {
             // F12
             if (e.key === 'F12' || e.keyCode === 123) {
                 e.preventDefault();
@@ -483,6 +486,7 @@
                 return false;
             }
         }, { capture: true });
+        }
     }
 
     if (root) {

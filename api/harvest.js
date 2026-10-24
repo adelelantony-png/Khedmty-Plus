@@ -27,25 +27,39 @@ module.exports = async (req, res) => {
         const db = getDb();
         const studentCode = String(code).trim();
 
-        // 1. جلب نقاط المخدوم
-        const studentDoc = await db.collection('students').doc(studentCode).get();
-        const points = studentDoc.exists ? (studentDoc.data().points || 0) : 0;
-
-        // 2. حساب عدد أيام قراءة الكتاب المقدس المنجزة
+        // 1. حساب عدد أيام قراءة الكتاب المقدس المنجزة
         const readingsSnapshot = await db.collection('students').doc(studentCode).collection('reading_logs').get();
         const bibleCount = readingsSnapshot.size;
 
-        // 3. حساب عدد الشيتات المسلمة
+        // 2. حساب عدد الشيتات المسلمة
         const sheetsSnapshot = await db.collection('students').doc(studentCode).collection('sheet_submissions').get();
         const submittedSheets = sheetsSnapshot.size;
 
-        // 4. حساب إجمالي عدد الشيتات المطلوبة لهذه الفرقة
+        // 3. حساب إجمالي عدد الشيتات المطلوبة لهذه الفرقة
         const totalSubjectsSnapshot = await db.collection('subjects').where('level', '==', level).get();
         const totalSubjects = totalSubjectsSnapshot.size;
 
-        // 5. حساب عدد أيام النوتة الروحية المسجلة
+        // 4. حساب عدد أيام النوتة الروحية المسجلة
         const spiritualSnapshot = await db.collection('students').doc(studentCode).collection('daily_logs').get();
         const spiritualCount = spiritualSnapshot.size;
+
+        // 5. جلب بيانات ونقاط المخدوم مع دعم المجموعتين (students و members)
+        let studentDoc = await db.collection('students').doc(studentCode).get();
+        let memberDoc = null;
+        if (!studentDoc.exists) {
+            const mSnap = await db.collection('members').where('code', '==', studentCode).limit(1).get();
+            if (!mSnap.empty) {
+                memberDoc = mSnap.docs[0];
+            } else {
+                const directDoc = await db.collection('members').doc(studentCode).get();
+                if (directDoc.exists) memberDoc = directDoc;
+            }
+        }
+
+        const baseBonus = (studentDoc.exists ? (studentDoc.data().bonus || 0) : (memberDoc ? (memberDoc.data().bonus || 0) : 0));
+        const storedPoints = (studentDoc.exists ? (studentDoc.data().points || 0) : (memberDoc ? (memberDoc.data().points || 0) : 0));
+        // حساب النقاط التراكمية الموحدة: (أيام النوتة * 5) + (قراءات الإنجيل * 5) + البونص والدرجات المسجلة
+        const points = Math.max(storedPoints, baseBonus + (spiritualCount * 5) + (bibleCount * 5));
 
         return res.status(200).json({
             success: true,
