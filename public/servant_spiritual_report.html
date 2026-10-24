@@ -1,258 +1,330 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متابعة السلوك الروحي والأكاديمي | خدمتي برو</title>
-    <meta name="theme-color" content="#1e3799">
-    <link rel="icon" type="image/png" href="icons/favicon-48.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/app-theme.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="auth-client.js"></script>
-    <style>
-        :root{--primary:#0f172a;--accent:#1e3a8a;--ok:#00b894;--warn:#f59e0b}
-        *{box-sizing:border-box}
-        body { margin:0; font-family: 'Tajawal','Segoe UI',Tahoma,sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
-        .main-container { max-width: 980px; margin: 20px auto; padding: 0 15px; }
-        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap}
-        .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:8px 16px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none}
-        .btn:hover{border-color:var(--accent);color:var(--accent)}
-        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(30,58,138,.3)}
-        .btn.primary:hover{color:#fff;filter:brightness(1.1)}
-        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 16px; }
-        .header-card h4{margin:0 0 4px} .header-card small{opacity:.8}
-        .live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 12px;font-size:.78rem;font-weight:700;margin-top:8px}
-        .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
-        .dot.live{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)} .dot.off{background:#fbbf24}
-        .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-        .toolbar select, .toolbar input{border:2px solid #e2e8f0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem}
-        .table-card { background: #fff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        table{width:100%;border-collapse:collapse;font-size:.92rem}
-        thead { background: #1e3a8a; color: #fff; }
-        th, td { vertical-align: middle; text-align: center; padding: 12px 8px; }
-        tbody tr:nth-child(even){background:#f8fafc}
-        tbody tr:hover{background:#eef2ff}
-        th.sortable{cursor:pointer;user-select:none}
-        th.sortable:hover{background:#15306b}
-        .badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800}
-        .b-light{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
-        .empty{text-align:center;color:#64748b;padding:40px 0}
-    </style>
-</head>
-<body>
-<div class="main-container" id="app" style="display:none;">
-
-    <div class="topbar">
-        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
-            <i class="fa-solid fa-arrow-right me-1"></i> لوحة الخادم
-        </button>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="servant_followup.html" class="btn" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">
-                <i class="fa-solid fa-handshake-angle me-1"></i> الافتقاد الذكي وحصر الغياب 🤝
-            </a>
-            <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
-        </div>
-    </div>
-
-    <div class="header-card">
-        <h4>📊 تقرير السلوك الروحي وحصاد وسائط النعمة</h4>
-        <small>كشف درجات وسائط النعمة الشامل: حضور الاجتماعات، أيام النوتة الروحية، قراءات الإنجيل، وإجمالي النقاط مع التصدير لإكسيل.</small><br>
-        <span class="live-pill"><span class="dot" id="liveDot"></span><span id="liveTxt">جاري الاتصال...</span></span>
-    </div>
-
-    <div class="toolbar">
-        <input type="search" id="q" placeholder="🔍 ابحث بالاسم أو الكود" style="flex:1;min-width:160px">
-        <select id="fStage"><option value="">كل الفرق</option></select>
-    </div>
-
-    <div class="table-card">
-        <div style="overflow-x:auto">
-            <table id="followupTable">
-                <thead>
-                    <tr>
-                        <th>كود الدارس</th>
-                        <th>اسم المخدوم</th>
-                        <th>الفرقة / المرحلة</th>
-                        <th class="sortable" data-k="friday">حضور الجمعة ▾</th>
-                        <th class="sortable" data-k="spiritual">أيام النوتة ▾</th>
-                        <th class="sortable" data-k="bible">قراءات الإنجيل ▾</th>
-                        <th class="sortable" data-k="points">إجمالي النقاط ⭐ ▾</th>
-                    </tr>
-                </thead>
-                <tbody id="followupTbody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="auth-client.js"></script>
-<script>
-(function () {
-    'use strict';
-    const $ = id => document.getElementById(id);
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-
-    if (window.AuthClient) {
-        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
-    } else {
-        function getUser() {
-            try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
-        }
-        const user = getUser();
-        if (!user || (user.role !== 'servant' && user.role !== 'admin')) { location.replace('index.html'); return; }
-    }
-    $('app').style.display = '';
-
-    const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
-    const toList = v => { if (!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v).filter(Boolean); };
-
-    let members = toList(readJSON('my_church_class', []));
-    let attendanceRecord = readJSON('my_church_attendance', {});
-    let sortKey = 'points', sortDir = -1;
-
-    // ---------- اتصال Firestore: استماع لحظي ومزامنة سحابية ----------
-    async function initLiveAttendance() {
-        if (typeof firebase === 'undefined' || !navigator.onLine) {
-            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز';
-            $('liveDot').className = 'dot off';
-            return;
-        }
-
-        const fbConfig = window.FIREBASE_CONFIG || {
-            apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
-            authDomain: "khedmety-plus.firebaseapp.com",
-            projectId: "khedmety-plus",
-            storageBucket: "khedmety-plus.firebasestorage.app",
-            messagingSenderId: "25101228841",
-            appId: "1:25101228841:web:3164821d165014a1e2b538"
-        };
-
-        try {
-            if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-            const fsdb = firebase.firestore();
-
-            // مزامنة المخدومين إذا كانت القائمة فارغة محلياً
-            if (!members || members.length === 0) {
-                try {
-                    const mSnap = await fsdb.collection('members').get();
-                    if (!mSnap.empty) {
-                        members = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
-                        localStorage.setItem('my_church_class', JSON.stringify(members));
-                        render();
-                    }
-                } catch(e){}
-            }
-
-            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
-                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
-                : fsdb.collection('attendance');
-
-            attQuery.onSnapshot(snap => {
-                let rec = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-                snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
-                attendanceRecord = rec;
-                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
-                $('liveDot').className = 'dot live';
-                $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
-                render();
-            }, err => {
-                $('liveDot').className = 'dot off';
-                $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
-                console.warn(err.code || err.message);
-            });
-        } catch (e) {
-            $('liveDot').className = 'dot off';
-            $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
-        }
-    }
-
-    // ---------- الحساب ----------
-    function computeRows() {
-        const spiritualLogs = readJSON('khedmety_student_spiritual', {});
-        const bibleReadings = readJSON('khedmety_bible_readings', {});
-
-        return members.map(st => {
-            const code = (st.code ?? st.id ?? '').toString();
-            const name = st.name || 'مخدوم';
-            const stage = st.stage || st.level || 'الفرقة الأولى';
-
-            let friday = 0;
-            Object.keys(attendanceRecord).forEach(dateKey => {
-                if (new Date(dateKey + 'T00:00:00').getDay() !== 5) return;
-                const found = (attendanceRecord[dateKey] || []).find(a =>
-                    ((a.code != null && a.code.toString() === code) || (a.id != null && a.id.toString() === code)) && !a.isAbsentDueToDelay);
-                if (found) friday++;
-            });
-
-            let spiritual = Object.keys(spiritualLogs).filter(k => k.endsWith('_' + code)).length;
-
-            let bible = Object.keys(bibleReadings).filter(k =>
-                k.endsWith('_' + code) || String((bibleReadings[k] || {}).code || '') === code).length;
-
-            const points = friday * 5 + spiritual * 5 + bible * 2;
-            return { code, name, stage, friday, spiritual, bible, points };
-        });
-    }
-
-    function render() {
-        let rows = computeRows();
-
-        const stages = [...new Set(rows.map(r => r.stage).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
-        const keepStage = $('fStage').value;
-        $('fStage').innerHTML = '<option value="">كل الفرق</option>' + stages.map(s => `<option${s === keepStage ? ' selected' : ''}>${esc(s)}</option>`).join('');
-
-        const q = $('q').value.trim().toLowerCase();
-        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q) || r.code.includes(q));
-        if ($('fStage').value) rows = rows.filter(r => r.stage === $('fStage').value);
-
-        rows.sort((a, b) => (b[sortKey] - a[sortKey]) * -sortDir || a.name.localeCompare(b.name, 'ar'));
-
-        $('followupTbody').innerHTML = rows.length ? rows.map(r => `
-            <tr>
-                <td style="font-weight:800;color:${'var(--accent)'}">${esc(r.code)}</td>
-                <td style="font-weight:800">${esc(r.name)}</td>
-                <td><span class="badge b-light">${esc(r.stage)}</span></td>
-                <td style="color:#16a34a;font-weight:800">${r.friday} اجتماع</td>
-                <td style="color:#dc2626;font-weight:800">${r.spiritual} يوم</td>
-                <td style="color:#b45309;font-weight:800">${r.bible} إصحاح</td>
-                <td style="font-weight:800;color:var(--accent)">${r.points} ⭐</td>
-            </tr>`).join('') : `<tr><td colspan="7" class="empty">لا توجد نتائج مطابقة.</td></tr>`;
-    }
-
-    document.querySelectorAll('#followupTable th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            const k = th.dataset.k;
-            sortDir = (sortKey === k) ? -sortDir : -1;
-            sortKey = k;
-            render();
-        });
-    });
-    $('q').addEventListener('input', render);
-    $('fStage').addEventListener('change', render);
-
-    function csvCell(v) { let s = String(v ?? ''); if (/^[=@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
-    $('btnExport').addEventListener('click', () => {
-        const rows = computeRows();
-        const header = ['كود الدارس', 'اسم المخدوم', 'الفرقة/المرحلة', 'حضور الجمعة', 'أيام النوتة', 'قراءات الإنجيل', 'إجمالي النقاط'];
-        const csv = '\uFEFF' + [header, ...rows.map(r => [r.code, r.name, r.stage, r.friday, r.spiritual, r.bible, r.points])]
-            .map(r => r.map(csvCell).join(',')).join('\n');
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-        a.download = `Khedmety_Followup_Report_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a); a.click(); a.remove();
-    });
-
-    render();
-    initLiveAttendance();
-})();
-</script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متابعة السلوك الروحي والأكاديمي | خدمتي برو</title>
+    <meta name="theme-color" content="#1e3799">
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="auth-client.js"></script>
+    <style>
+        :root{--primary:#0f172a;--accent:#1e3a8a;--ok:#00b894;--warn:#f59e0b}
+        *{box-sizing:border-box}
+        body { margin:0; font-family: 'Tajawal','Segoe UI',Tahoma,sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+        .main-container { max-width: 980px; margin: 20px auto; padding: 0 15px; }
+        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:8px 16px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none}
+        .btn:hover{border-color:var(--accent);color:var(--accent)}
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(30,58,138,.3)}
+        .btn.primary:hover{color:#fff;filter:brightness(1.1)}
+        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 16px; }
+        .header-card h4{margin:0 0 4px} .header-card small{opacity:.8}
+        .live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 12px;font-size:.78rem;font-weight:700;margin-top:8px}
+        .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+        .dot.live{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)} .dot.off{background:#fbbf24}
+        .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+        .toolbar select, .toolbar input{border:2px solid #e2e8f0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem}
+        .table-card { background: #fff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        table{width:100%;border-collapse:collapse;font-size:.92rem}
+        thead { background: #1e3a8a; color: #fff; }
+        th, td { vertical-align: middle; text-align: center; padding: 12px 8px; }
+        tbody tr:nth-child(even){background:#f8fafc}
+        tbody tr:hover{background:#eef2ff}
+        th.sortable{cursor:pointer;user-select:none}
+        th.sortable:hover{background:#15306b}
+        .badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800}
+        .b-light{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+        .empty{text-align:center;color:#64748b;padding:40px 0}
+    </style>
+</head>
+<body>
+<div class="main-container" id="app" style="display:none;">
+
+    <div class="topbar">
+        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
+            <i class="fa-solid fa-arrow-right me-1"></i> لوحة الخادم
+        </button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a href="servant_followup.html" class="btn" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">
+                <i class="fa-solid fa-handshake-angle me-1"></i> الافتقاد الذكي وحصر الغياب 🤝
+            </a>
+            <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
+            <button class="btn" id="btnExportWa" style="background:#25D366; color:#ffffff; border:1px solid #128C7E; font-weight:700;">
+                <i class="fa-brands fa-whatsapp"></i> تقرير الواتساب (New Whats 2027)
+            </button>
+        </div>
+    </div>
+
+    <div class="header-card">
+        <h4>📊 تقرير السلوك الروحي وحصاد وسائط النعمة</h4>
+        <small>كشف درجات وسائط النعمة الشامل: حضور الاجتماعات، أيام النوتة الروحية، قراءات الإنجيل، وإجمالي النقاط مع التصدير لإكسيل.</small><br>
+        <span class="live-pill"><span class="dot" id="liveDot"></span><span id="liveTxt">جاري الاتصال...</span></span>
+    </div>
+
+    <div class="toolbar">
+        <input type="search" id="q" placeholder="🔍 ابحث بالاسم أو الكود" style="flex:1;min-width:160px">
+        <select id="fStage"><option value="">كل الفرق</option></select>
+    </div>
+
+    <div class="table-card">
+        <div style="overflow-x:auto">
+            <table id="followupTable">
+                <thead>
+                    <tr>
+                        <th>كود الدارس</th>
+                        <th>اسم المخدوم</th>
+                        <th>الفرقة / المرحلة</th>
+                        <th class="sortable" data-k="friday">حضور الجمعة ▾</th>
+                        <th class="sortable" data-k="spiritual">أيام النوتة ▾</th>
+                        <th class="sortable" data-k="bible">قراءات الإنجيل ▾</th>
+                        <th class="sortable" data-k="points">إجمالي النقاط ⭐ ▾</th>
+                    </tr>
+                </thead>
+                <tbody id="followupTbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="auth-client.js"></script>
+<script>
+(function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+    if (window.AuthClient) {
+        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
+    } else {
+        function getUser() {
+            try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
+        }
+        const user = getUser();
+        if (!user || (user.role !== 'servant' && user.role !== 'admin')) { location.replace('index.html'); return; }
+    }
+    $('app').style.display = '';
+
+    const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
+    const toList = v => { if (!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v).filter(Boolean); };
+
+    let members = toList(readJSON('my_church_class', []));
+    let attendanceRecord = readJSON('my_church_attendance', {});
+    let sortKey = 'points', sortDir = -1;
+
+    // ---------- اتصال Firestore: استماع لحظي ومزامنة سحابية ----------
+    async function initLiveAttendance() {
+        if (typeof firebase === 'undefined' || !navigator.onLine) {
+            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز';
+            $('liveDot').className = 'dot off';
+            return;
+        }
+
+        const fbConfig = window.FIREBASE_CONFIG || {
+            apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
+            authDomain: "khedmety-plus.firebaseapp.com",
+            projectId: "khedmety-plus",
+            storageBucket: "khedmety-plus.firebasestorage.app",
+            messagingSenderId: "25101228841",
+            appId: "1:25101228841:web:3164821d165014a1e2b538"
+        };
+
+        try {
+            if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+            const fsdb = firebase.firestore();
+
+            // مزامنة المخدومين إذا كانت القائمة فارغة محلياً
+            if (!members || members.length === 0) {
+                try {
+                    const mSnap = await fsdb.collection('members').get();
+                    if (!mSnap.empty) {
+                        members = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+                        localStorage.setItem('my_church_class', JSON.stringify(members));
+                        render();
+                    }
+                } catch(e){}
+            }
+
+            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                : fsdb.collection('attendance');
+
+            attQuery.onSnapshot(snap => {
+                let rec = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+                snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
+                attendanceRecord = rec;
+                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
+                $('liveDot').className = 'dot live';
+                $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
+                render();
+            }, err => {
+                $('liveDot').className = 'dot off';
+                $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
+                console.warn(err.code || err.message);
+            });
+        } catch (e) {
+            $('liveDot').className = 'dot off';
+            $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
+        }
+    }
+
+    // ---------- الحساب ----------
+    function computeRows() {
+        const spiritualLogs = readJSON('khedmety_student_spiritual', {});
+        const bibleReadings = readJSON('khedmety_bible_readings', {});
+
+        return members.map(st => {
+            const code = (st.code ?? st.id ?? '').toString();
+            const name = st.name || 'مخدوم';
+            const stage = st.stage || st.level || 'الفرقة الأولى';
+
+            let friday = 0;
+            Object.keys(attendanceRecord).forEach(dateKey => {
+                if (new Date(dateKey + 'T00:00:00').getDay() !== 5) return;
+                const found = (attendanceRecord[dateKey] || []).find(a =>
+                    ((a.code != null && a.code.toString() === code) || (a.id != null && a.id.toString() === code)) && !a.isAbsentDueToDelay);
+                if (found) friday++;
+            });
+
+            let spiritual = Object.keys(spiritualLogs).filter(k => k.endsWith('_' + code)).length;
+
+            let bible = Object.keys(bibleReadings).filter(k =>
+                k.endsWith('_' + code) || String((bibleReadings[k] || {}).code || '') === code).length;
+
+            const points = friday * 5 + spiritual * 5 + bible * 2;
+            const phone = st.phone || '';
+            const parent_phone = st.parent_phone || '';
+            return { code, name, stage, friday, spiritual, bible, points, phone, parent_phone };
+        });
+    }
+
+    function render() {
+        let rows = computeRows();
+
+        const stages = [...new Set(rows.map(r => r.stage).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
+        const keepStage = $('fStage').value;
+        $('fStage').innerHTML = '<option value="">كل الفرق</option>' + stages.map(s => `<option${s === keepStage ? ' selected' : ''}>${esc(s)}</option>`).join('');
+
+        const q = $('q').value.trim().toLowerCase();
+        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q) || r.code.includes(q));
+        if ($('fStage').value) rows = rows.filter(r => r.stage === $('fStage').value);
+
+        rows.sort((a, b) => (b[sortKey] - a[sortKey]) * -sortDir || a.name.localeCompare(b.name, 'ar'));
+
+        $('followupTbody').innerHTML = rows.length ? rows.map(r => `
+            <tr>
+                <td style="font-weight:800;color:${'var(--accent)'}">${esc(r.code)}</td>
+                <td style="font-weight:800">${esc(r.name)}</td>
+                <td><span class="badge b-light">${esc(r.stage)}</span></td>
+                <td style="color:#16a34a;font-weight:800">${r.friday} اجتماع</td>
+                <td style="color:#dc2626;font-weight:800">${r.spiritual} يوم</td>
+                <td style="color:#b45309;font-weight:800">${r.bible} إصحاح</td>
+                <td style="font-weight:800;color:var(--accent)">${r.points} ⭐</td>
+            </tr>`).join('') : `<tr><td colspan="7" class="empty">لا توجد نتائج مطابقة.</td></tr>`;
+    }
+
+    document.querySelectorAll('#followupTable th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const k = th.dataset.k;
+            sortDir = (sortKey === k) ? -sortDir : -1;
+            sortKey = k;
+            render();
+        });
+    });
+    $('q').addEventListener('input', render);
+    $('fStage').addEventListener('change', render);
+
+    function csvCell(v) { let s = String(v ?? ''); if (/^[=@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
+    $('btnExport').addEventListener('click', () => {
+        const rows = computeRows();
+        const header = ['كود الدارس', 'اسم المخدوم', 'الفرقة/المرحلة', 'حضور الجمعة', 'أيام النوتة', 'قراءات الإنجيل', 'إجمالي النقاط'];
+        const csv = '\uFEFF' + [header, ...rows.map(r => [r.code, r.name, r.stage, r.friday, r.spiritual, r.bible, r.points])]
+            .map(r => r.map(csvCell).join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = `Khedmety_Followup_Report_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    $('btnExportWa').addEventListener('click', () => {
+        const rows = computeRows();
+        if (!rows || rows.length === 0) {
+            alert('لا توجد بيانات للتصدير.');
+            return;
+        }
+
+        const headers = [
+            "الاسم",
+            "رقم الواتساب",
+            "الفرقة / المرحلة",
+            "كود الدارس",
+            "حضور الجمعة",
+            "أيام النوتة",
+            "قراءات الإنجيل",
+            "إجمالي النقاط",
+            "تليفون ولي الأمر",
+            "رسالة تقرير الدرجات"
+        ];
+
+        const dataRows = rows.map(r => {
+            let targetPhone = String(r.phone || r.parent_phone || '').trim();
+            if (targetPhone.startsWith('01') && targetPhone.length === 11) {
+                targetPhone = '20' + targetPhone.slice(1);
+            }
+            const msg = `سلام ونعمة يا ${r.name}، تقرير جهادك الروحي ونقاطك في إعداد خدام: حضور الجمعة (${r.friday} لقاءات)، أيام النوتة الروحية (${r.spiritual} أيام)، قراءات الإنجيل (${r.bible} إصحاح)، وإجمالي رصيد نقاطك (${r.points} نقطة) ⭐ استمر في جهادك وصلواتنا معك دائماً ❤️`;
+
+            return [
+                r.name,
+                targetPhone,
+                r.stage,
+                r.code,
+                r.friday,
+                r.spiritual,
+                r.bible,
+                r.points,
+                r.parent_phone || '',
+                msg
+            ];
+        });
+
+        const aoa = [headers, ...dataRows];
+        const fileName = `تقرير_الدرجات_للواتساب_NewWhats_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        if (typeof XLSX !== 'undefined') {
+            try {
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "الدرجات_والحصاد");
+                XLSX.writeFile(wb, fileName);
+                return;
+            } catch(e) {
+                console.warn("تعذر تصدير xlsx، جاري تصدير CSV بديل:", e);
+            }
+        }
+
+        let csv = '\uFEFF' + headers.map(csvCell).join(',') + '\n';
+        dataRows.forEach(row => {
+            csv += row.map(csvCell).join(',') + '\n';
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = fileName.replace('.xlsx', '.csv');
+        document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    render();
+    initLiveAttendance();
+})();
+</script>
+</body>
+</html>

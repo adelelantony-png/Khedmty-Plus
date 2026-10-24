@@ -1,1513 +1,1614 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الافتقاد الذكي ورصد الغياب | خدمتي برو</title>
-    <meta name="theme-color" content="#1e3799">
-    <link rel="icon" type="image/png" href="icons/favicon-48.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/app-theme.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="auth-client.js"></script>
-    <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #1e3a8a;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-            padding-bottom: 50px;
-            margin: 0;
-        }
-        .main-container {
-            max-width: 1200px;
-            margin: 15px auto;
-            padding: 0 16px;
-        }
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
-        .btn-smart-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #fff;
-            color: #334155;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 8px 18px;
-            font-weight: 700;
-            font-size: 0.92rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-        }
-        .btn-smart-back:hover {
-            border-color: #1e3a8a;
-            color: #1e3a8a;
-            background: #eff6ff;
-        }
-        .btn-action-top {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border-radius: 12px;
-            padding: 8px 18px;
-            font-weight: 700;
-            font-size: 0.92rem;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-        }
-        .btn-export {
-            background: #10b981;
-            color: #fff;
-        }
-        .btn-export:hover {
-            background: #059669;
-            color: #fff;
-        }
-        .btn-refresh {
-            background: #fff;
-            color: #1e3a8a;
-            border: 2px solid #bfdbfe;
-        }
-        .btn-refresh:hover {
-            background: #eff6ff;
-        }
-        .header-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1e40af 100%);
-            color: #fff;
-            border-radius: 20px;
-            padding: 22px 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.25);
-            position: relative;
-            overflow: hidden;
-        }
-        .header-card::after {
-            content: '🤝';
-            position: absolute;
-            left: 20px;
-            bottom: -15px;
-            font-size: 6rem;
-            opacity: 0.12;
-            pointer-events: none;
-        }
-        .header-card h3 {
-            font-weight: 800;
-            margin: 0 0 6px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.45rem;
-        }
-        .header-card p {
-            margin: 0 0 10px 0;
-            opacity: 0.88;
-            font-size: 0.92rem;
-            line-height: 1.5;
-        }
-        .sync-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.18);
-            border-radius: 999px;
-            padding: 4px 12px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #94a3b8;
-            display: inline-block;
-        }
-        .dot.live {
-            background: #4ade80;
-            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35);
-        }
-        .dot.warn {
-            background: #fbbf24;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
-            cursor: pointer;
-            transition: transform 0.18s ease, border-color 0.18s ease;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: #cbd5e1;
-        }
-        .stat-card.active-filter {
-            border-color: #1e3a8a;
-            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
-            background: #f0f7ff;
-        }
-        .stat-info h6 {
-            margin: 0 0 4px 0;
-            font-size: 0.84rem;
-            color: #64748b;
-            font-weight: 700;
-        }
-        .stat-info .stat-num {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1;
-        }
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-        }
-        .stat-card.c-all .stat-num { color: #1e3a8a; }
-        .stat-card.c-all .stat-icon { background: #eff6ff; color: #1e3a8a; }
-
-        .stat-card.c-danger .stat-num { color: #ef4444; }
-        .stat-card.c-danger .stat-icon { background: #fef2f2; color: #ef4444; }
-
-        .stat-card.c-warn .stat-num { color: #f59e0b; }
-        .stat-card.c-warn .stat-icon { background: #fffbeb; color: #f59e0b; }
-
-        .stat-card.c-recent .stat-num { color: #10b981; }
-        .stat-card.c-recent .stat-icon { background: #ecfdf5; color: #10b981; }
-
-        /* Filter Toolbar */
-        .filter-panel {
-            background: #fff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-        }
-        .filter-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .filter-search {
-            flex: 2;
-            min-width: 220px;
-            position: relative;
-        }
-        .filter-search input {
-            width: 100%;
-            padding: 10px 14px 10px 38px;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-            font-family: inherit;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .filter-search input:focus {
-            border-color: #1e3a8a;
-        }
-        .filter-search i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
-        .filter-select {
-            flex: 1;
-            min-width: 160px;
-            padding: 10px 12px;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-            font-family: inherit;
-            font-size: 0.88rem;
-            font-weight: 600;
-            outline: none;
-            background-color: #fff;
-            cursor: pointer;
-        }
-        .filter-select:focus {
-            border-color: #1e3a8a;
-        }
-
-        /* Table Card */
-        .table-card {
-            background: #fff;
-            border-radius: 18px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        }
-        .table {
-            margin-bottom: 0;
-            font-size: 0.92rem;
-            width: 100%;
-        }
-        .table thead {
-            background: #0f172a;
-            color: #fff;
-        }
-        .table thead th {
-            padding: 14px 10px;
-            font-weight: 700;
-            text-align: center;
-            border-bottom: none;
-            white-space: nowrap;
-        }
-        .table tbody td {
-            padding: 14px 10px;
-            vertical-align: middle;
-            text-align: center;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .table tbody tr:hover {
-            background-color: #f8fafc;
-        }
-
-        /* Badges */
-        .badge-streak {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-weight: 800;
-            font-size: 0.82rem;
-            white-space: nowrap;
-        }
-        .streak-danger {
-            background: #fee2e2;
-            color: #b91c1c;
-            border: 1px solid #fca5a5;
-            animation: pulse-danger 2s infinite;
-        }
-        @keyframes pulse-danger {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        .streak-warn {
-            background: #fef3c7;
-            color: #b45309;
-            border: 1px solid #fde68a;
-        }
-        .streak-info {
-            background: #e0f2fe;
-            color: #0369a1;
-            border: 1px solid #bae6fd;
-        }
-        .streak-ok {
-            background: #dcfce7;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
-        }
-
-        /* Action Buttons */
-        .btn-call {
-            background: #eff6ff;
-            color: #1d4ed8;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.15s ease;
-        }
-        .btn-call:hover {
-            background: #1d4ed8;
-            color: #fff;
-        }
-        .btn-wa {
-            background: #ecfdf5;
-            color: #047857;
-            border: 1px solid #a7f3d0;
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.15s ease;
-        }
-        .btn-wa:hover {
-            background: #047857;
-            color: #fff;
-        }
-        .btn-record-visit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 7px 14px;
-            font-size: 0.84rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.25);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-        .btn-record-visit:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 12px rgba(16, 185, 129, 0.35);
-        }
-        .btn-history {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 5px 8px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 4px;
-            display: inline-block;
-        }
-        .btn-history:hover {
-            background: #e2e8f0;
-            color: #1e293b;
-        }
-
-        /* Modal Styles */
-        .custom-modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(4px);
-            z-index: 1050;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.25s ease;
-        }
-        .custom-modal-backdrop.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .custom-modal-content {
-            background: #fff;
-            border-radius: 20px;
-            max-width: 580px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            transform: translateY(20px);
-            transition: transform 0.25s ease;
-        }
-        .custom-modal-backdrop.show .custom-modal-content {
-            transform: translateY(0);
-        }
-        .modal-header-styled {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-            color: #fff;
-            padding: 18px 22px;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-header-styled h5 {
-            margin: 0;
-            font-weight: 800;
-            font-size: 1.15rem;
-        }
-        .modal-close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-        }
-        .modal-close-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-        }
-        .modal-body-styled {
-            padding: 22px;
-        }
-
-        /* Capsule Chips */
-        .capsule-chips-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 8px 0 16px 0;
-        }
-        .capsule-chip {
-            background: #f1f5f9;
-            border: 1px solid #cbd5e1;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #334155;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            user-select: none;
-        }
-        .capsule-chip:hover {
-            background: #e0e7ff;
-            border-color: #818cf8;
-            color: #3730a3;
-        }
-        .type-selector {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .type-btn {
-            flex: 1;
-            padding: 8px 6px;
-            border-radius: 10px;
-            border: 2px solid #e2e8f0;
-            background: #fff;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
-            color: #475569;
-            transition: all 0.15s ease;
-        }
-        .type-btn.active {
-            border-color: #1e3a8a;
-            background: #eff6ff;
-            color: #1e3a8a;
-        }
-
-        /* History Timeline */
-        .history-item {
-            border-right: 3px solid #1e3a8a;
-            padding-right: 14px;
-            margin-bottom: 14px;
-            position: relative;
-        }
-        .history-item::before {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 4px;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #1e3a8a;
-        }
-        .history-date {
-            font-size: 0.78rem;
-            color: #64748b;
-            font-weight: 700;
-        }
-        .history-servant {
-            font-size: 0.84rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-        .history-text {
-            font-size: 0.88rem;
-            color: #334155;
-            margin-top: 3px;
-            background: #f8fafc;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        /* Toast */
-        #toastContainer {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 2000;
-        }
-        .custom-toast {
-            background: #0f172a;
-            color: #fff;
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slide-up 0.3s ease;
-            margin-top: 8px;
-        }
-        @keyframes slide-up {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @media (max-width: 768px) {
-            .table thead { display: none; }
-            .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
-            .table tr {
-                background: #fff;
-                border: 1px solid #e2e8f0;
-                border-radius: 14px;
-                margin-bottom: 12px;
-                padding: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            }
-            .table td {
-                text-align: right;
-                border-bottom: 1px dashed #f1f5f9;
-                padding: 8px 4px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .table td::before {
-                content: attr(data-label);
-                font-weight: 700;
-                color: #64748b;
-                font-size: 0.82rem;
-            }
-            .table td:last-child {
-                border-bottom: none;
-                justify-content: center;
-                padding-top: 12px;
-            }
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<div class="main-container">
-    <!-- Topbar -->
-    <div class="topbar">
-        <button type="button" class="btn-smart-back" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
-            <i class="fa-solid fa-arrow-right"></i> لوحة الخادم
-        </button>
-        <div class="d-flex gap-2 flex-wrap">
-            <a href="servant_spiritual_report.html" class="btn-action-top" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
-            </a>
-            <button class="btn-action-top btn-refresh" onclick="loadDataFromCloud(true)">
-                <i class="fa-solid fa-arrows-rotate"></i> تحديث
-            </button>
-            <button class="btn-action-top btn-export" onclick="exportVisitationExcel()">
-                <i class="fa-solid fa-file-excel"></i> تصدير Excel
-            </button>
-        </div>
-    </div>
-
-    <!-- Header Card -->
-    <div class="header-card">
-        <h3><i class="fa-solid fa-handshake-angle"></i> منظومة الافتقاد الذكي ورصد الغياب</h3>
-        <p>حصر ومتابعة المخدومين الغائبين والمنقطعين، مع أرقام هواتفهم، والتواصل المباشر، وتوثيق سجل الافتقاد والكبسولات الميدانية.</p>
-        <span class="sync-badge">
-            <span class="dot" id="syncDot"></span>
-            <span id="syncText">جاري فحص الاتصال...</span>
-        </span>
-    </div>
-
-    <!-- Quick Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card c-all active-filter" id="cardFilterAll" onclick="applyQuickFilter('all')">
-            <div class="stat-info">
-                <h6>إجمالي المخدومين</h6>
-                <div class="stat-num" id="statTotalMembers">0</div>
-            </div>
-            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-        </div>
-
-        <div class="stat-card c-danger" id="cardFilterDisconnected" onclick="applyQuickFilter('disconnected')">
-            <div class="stat-info">
-                <h6>منقطعون (3+ جمعات) 🚨</h6>
-                <div class="stat-num" id="statDisconnected">0</div>
-            </div>
-            <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        </div>
-
-        <div class="stat-card c-warn" id="cardFilterWarning" onclick="applyQuickFilter('warning')">
-            <div class="stat-info">
-                <h6>إنذار غياب (جمعتين) ⚠️</h6>
-                <div class="stat-num" id="statWarning">0</div>
-            </div>
-            <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
-        </div>
-
-        <div class="stat-card c-recent" id="cardFilterVisited" onclick="applyQuickFilter('visited')">
-            <div class="stat-info">
-                <h6>تم افتقادهم هذا الشهر ✔️</h6>
-                <div class="stat-num" id="statVisitedThisMonth">0</div>
-            </div>
-            <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
-        </div>
-    </div>
-
-    <!-- Filter & Search Toolbar -->
-    <div class="filter-panel">
-        <div class="filter-row">
-            <div class="filter-search">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="search" id="searchInput" placeholder="بحث بالاسم، كود الامتحان، الهاتف، أو المنطقة..." oninput="handleSearch()">
-            </div>
-
-            <select class="filter-select" id="statusFilter" onchange="filterAndRender()">
-                <option value="all">كل حالات الغياب</option>
-                <option value="disconnected">🚨 المنقطعون فقط (3+ جمعات)</option>
-                <option value="warning">⚠️ غائب جمعتين فأكثر</option>
-                <option value="last_friday">🔔 غائب الجمعة الماضية</option>
-                <option value="unvisited">⏳ لم يُفتقد قط / يحتاج افتقاد</option>
-                <option value="regular">✔️ منتظم (حاضر آخر جمعة)</option>
-            </select>
-
-            <select class="filter-select" id="stageFilter" onchange="filterAndRender()">
-                <option value="all">كل الفرق والمراحل</option>
-            </select>
-
-            <select class="filter-select" id="sortBy" onchange="filterAndRender()">
-                <option value="streak_desc">الأكثر غياباً أولاً 🚨</option>
-                <option value="name_asc">الاسم (أبجدياً)</option>
-                <option value="code_asc">كود الامتحان</option>
-                <option value="last_visit_desc">أحدث افتقاد</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Table Card -->
-    <div class="table-card">
-        <div class="table-responsive">
-            <table class="table" id="visitationTable">
-                <thead>
-                    <tr>
-                        <th style="width: 80px;">كود الدارس</th>
-                        <th>اسم المخدوم</th>
-                        <th>الفرقة / المرحلة</th>
-                        <th>حالة الغياب المتتالي</th>
-                        <th>التواصل السريع</th>
-                        <th>آخر افتقاد مسجل</th>
-                        <th style="width: 140px;">إجراء الافتقاد</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">
-                            <i class="fa-solid fa-spinner fa-spin fa-2x mb-3 text-primary"></i>
-                            <div>جاري قراءة المخدومين وسجلات الغياب من السحابة...</div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: تسجيل افتقاد جديد -->
-<div class="custom-modal-backdrop" id="visitModalBackdrop">
-    <div class="custom-modal-content">
-        <div class="modal-header-styled">
-            <h5><i class="fa-solid fa-pen-to-square me-2"></i> تسجيل كبسولة افتقاد</h5>
-            <button class="modal-close-btn" onclick="closeVisitModal()">&times;</button>
-        </div>
-        <div class="modal-body-styled">
-            <div class="p-3 bg-light rounded-3 mb-3 border">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <strong class="fs-6 text-primary" id="mStudentName">-</strong>
-                    <span class="badge bg-secondary" id="mStudentCode">-</span>
-                </div>
-                <div class="d-flex gap-2 text-muted small">
-                    <span id="mStudentStage">-</span> •
-                    <span id="mStudentStreak">-</span>
-                </div>
-            </div>
-
-            <label class="form-label fw-bold small text-muted">نوع وسيلة الافتقاد:</label>
-            <div class="type-selector">
-                <button type="button" class="type-btn active" onclick="selectVisitType('اتصال هاتفي', this)">📞 اتصال هاتفي</button>
-                <button type="button" class="type-btn" onclick="selectVisitType('واتساب', this)">💬 واتساب</button>
-                <button type="button" class="type-btn" onclick="selectVisitType('زيارة منزلية', this)">🏠 زيارة منزلية</button>
-                <button type="button" class="type-btn" onclick="selectVisitType('لقاء في الكنيسة', this)">⛪ لقاء كنسي</button>
-            </div>
-
-            <label class="form-label fw-bold small text-muted">كبسولات سريعة (انقر للإضافة الفورية):</label>
-            <div class="capsule-chips-container">
-                <span class="capsule-chip" onclick="applyCapsule('اطمئنان على الغياب ووعد بالحضور الجمعة القادمة 🤝')">🤝 وعد بالحضور</span>
-                <span class="capsule-chip" onclick="applyCapsule('ظروف امتحانات ومذاكرة ودراسة 📚')">📚 امتحانات ودراسة</span>
-                <span class="capsule-chip" onclick="applyCapsule('وعكة صحية وطلب صلاة من أجل الشفاء 🩺')">🩺 وعكة صحية</span>
-                <span class="capsule-chip" onclick="applyCapsule('سفر خارج المحافظة ✈️')">✈️ سفر مؤقت</span>
-                <span class="capsule-chip" onclick="applyCapsule('ظروف خاصة وانشغال بالعمل 💼')">💼 ظروف عمل</span>
-                <span class="capsule-chip" onclick="applyCapsule('الهاتف مغلق أو لم يتم الرد 📵')">📵 لم يتم الرد</span>
-                <span class="capsule-chip" onclick="applyCapsule('زيارة منزلية مباركة وصلاة مع الأسرة 🕊️')">🕊️ زيارة وبركة مع الأسرة</span>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label fw-bold small text-muted">ملاحظات وتقرير الافتقاد:</label>
-                <textarea id="mVisitNotes" class="form-control" rows="3" placeholder="اكتب ملاحظتك أو اختر من الكبسولات السريعة أعلاه..."></textarea>
-            </div>
-
-            <div class="row g-2 mb-3">
-                <div class="col-6">
-                    <label class="form-label fw-bold small text-muted">اسم الخادم المفتقد:</label>
-                    <input type="text" id="mServantName" class="form-control form-control-sm" placeholder="اسم الخادم">
-                </div>
-                <div class="col-6">
-                    <label class="form-label fw-bold small text-muted">تاريخ الافتقاد:</label>
-                    <input type="date" id="mVisitDate" class="form-control form-control-sm">
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                <button type="button" class="btn btn-light fw-bold" onclick="closeVisitModal()">إلغاء</button>
-                <button type="button" class="btn btn-success fw-bold px-4" id="btnSaveVisit" onclick="saveCurrentVisitation()">
-                    <i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal: عرض سجل وتاريخ الافتقادات -->
-<div class="custom-modal-backdrop" id="historyModalBackdrop">
-    <div class="custom-modal-content">
-        <div class="modal-header-styled">
-            <h5><i class="fa-solid fa-clock-rotate-left me-2"></i> سجل افتقادات المخدوم</h5>
-            <button class="modal-close-btn" onclick="closeHistoryModal()">&times;</button>
-        </div>
-        <div class="modal-body-styled">
-            <div class="p-3 bg-light rounded-3 mb-3 border">
-                <strong class="fs-6 text-primary" id="hStudentName">-</strong>
-                <div class="small text-muted" id="hStudentCodeStage">-</div>
-            </div>
-            <div id="historyTimelineContainer" style="max-height: 380px; overflow-y: auto; padding-right: 8px;">
-                <!-- Timeline items injected here -->
-            </div>
-            <div class="text-end pt-3 border-top mt-3">
-                <button type="button" class="btn btn-secondary fw-bold px-4" onclick="closeHistoryModal()">إغلاق</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div id="toastContainer"></div>
-
-<script>
-    'use strict';
-
-    // 1. فحص الصلاحية عبر العميل الموحد
-    if (window.AuthClient) {
-        AuthClient.enforceAuth(['servant', 'admin']);
-    }
-
-    // 2. إعداد Firebase Firestore
-    const FB_CONFIG = window.FIREBASE_CONFIG || {
-        "apiKey": "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
-        "authDomain": "khedmety-plus.firebaseapp.com",
-        "projectId": "khedmety-plus",
-        "storageBucket": "khedmety-plus.firebasestorage.app",
-        "messagingSenderId": "25101228841",
-        "appId": "1:25101228841:web:3164821d165014a1e2b538"
-    };
-
-    let fsdb = null;
-    let isCloudOnline = false;
-    try {
-        if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-        fsdb = firebase.firestore();
-    } catch (e) {
-        console.warn("Firebase init warning in followup:", e);
-    }
-
-    // المتغيرات العامة
-    let allMembers = [];
-    let attendanceRecord = {};
-    let activeQuickFilter = 'all';
-    let currentSelectedMemberId = null;
-    let activeVisitType = 'اتصال هاتفي';
-
-    // مساعدة: فحص جلسة الجمعة
-    function isFridaySession(dateStr) {
-        if (!dateStr) return false;
-        const d = new Date(dateStr);
-        return !isNaN(d.getTime()) && d.getDay() === 5;
-    }
-
-    // حساب عدد الجمعات المتتالية التي غابها الدارس
-    function calculateConsecutiveAbsences(sCode) {
-        const codeStr = String(sCode || '').trim();
-        const fridays = Object.keys(attendanceRecord || {})
-            .filter(d => isFridaySession(d) && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
-            .sort()
-            .reverse();
-
-        let streak = 0;
-        for (const fDate of fridays) {
-            const attendees = attendanceRecord[fDate] || [];
-            const attended = attendees.some(a => {
-                const aCode = String(a.code || a.id || a.studentCode || '').trim();
-                return aCode === codeStr && !a.isAbsentDueToDelay;
-            });
-            if (attended) break;
-            streak++;
-        }
-        return streak;
-    }
-
-    // فحص هل افتُقد هذا الشهر (خلال آخر 30 يوماً)
-    function isVisitedWithinDays(visitations, days = 30) {
-        if (!Array.isArray(visitations) || visitations.length === 0) return false;
-        const now = Date.now();
-        const limit = days * 24 * 60 * 60 * 1000;
-        return visitations.some(v => {
-            if (!v || !v.date) return false;
-            const t = new Date(v.date).getTime();
-            return !isNaN(t) && (now - t) <= limit;
-        });
-    }
-
-    // جلب اسم المستخدم الحالي
-    function getCurrentServantName() {
-        try {
-            if (window.AuthClient && AuthClient.getUser()) {
-                const u = AuthClient.getUser();
-                return u.name || u.displayName || u.username || 'خادم';
-            }
-            const localU = JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user'));
-            if (localU && localU.name) return localU.name;
-        } catch (e) {}
-        return 'خادم الافتقاد';
-    }
-
-    // مؤشر المزامنة
-    function updateSyncStatus(online, text) {
-        const dot = document.getElementById('syncDot');
-        const txt = document.getElementById('syncText');
-        if (!dot || !txt) return;
-        dot.className = 'dot ' + (online ? 'live' : 'warn');
-        txt.textContent = text || (online ? 'السحابة متصلة ومحدثة' : 'بيانات محلية');
-    }
-
-    // إشعار Toast
-    function showToast(message) {
-        const container = document.getElementById('toastContainer');
-        if (!container) return;
-        const toast = document.createElement('div');
-        toast.className = 'custom-toast';
-        toast.innerHTML = `<i class="fa-solid fa-circle-check text-success"></i> <span>${message}</span>`;
-        container.appendChild(toast);
-        setTimeout(() => {
-            toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3200);
-    }
-
-    // تحميل البيانات من السحابة أو التخزين المحلي
-    async function loadDataFromCloud(isManualRefresh = false) {
-        if (isManualRefresh) {
-            updateSyncStatus(false, 'جاري التحديث من السحابة...');
-        }
-
-        try {
-            let membersFromCloud = [];
-            let attFromCloud = {};
-
-            if (fsdb) {
-                const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-                const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
-                    ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
-                    : fsdb.collection('attendance');
-
-                const [mSnap, aSnap] = await Promise.all([
-                    fsdb.collection('members').get(),
-                    attQuery.get()
-                ]);
-
-                membersFromCloud = mSnap.docs.map(doc => {
-                    const data = doc.data() || {};
-                    return Object.assign({ id: doc.id }, data);
-                });
-
-                let localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-                aSnap.forEach(doc => {
-                    localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
-                });
-                attFromCloud = localAtt;
-
-                isCloudOnline = true;
-                updateSyncStatus(true, `السحابة متصلة (${membersFromCloud.length} مخدوم)`);
-            }
-
-            if (membersFromCloud.length > 0) {
-                allMembers = membersFromCloud;
-                try { localStorage.setItem('my_church_class', JSON.stringify(allMembers)); } catch(e){}
-            } else {
-                allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
-                updateSyncStatus(false, 'تم التحميل من الذاكرة المحلية');
-            }
-
-            if (Object.keys(attFromCloud).length > 0) {
-                attendanceRecord = attFromCloud;
-                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch(e){}
-            } else {
-                attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-            }
-
-            populateStageFilter();
-            renderStats();
-            filterAndRender();
-
-            if (isManualRefresh) {
-                showToast('✅ تم تحديث بيانات المخدومين والافتقاد بنجاح!');
-            }
-        } catch (err) {
-            console.error("Cloud load error:", err);
-            allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
-            attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-            updateSyncStatus(false, 'وضع عدم الاتصال (بيانات محلية)');
-            populateStageFilter();
-            renderStats();
-            filterAndRender();
-        }
-    }
-
-    // ملء قائمة الفرق ديناميكياً
-    function populateStageFilter() {
-        const stageSelect = document.getElementById('stageFilter');
-        if (!stageSelect) return;
-        const currentVal = stageSelect.value;
-        const stages = new Set();
-        allMembers.forEach(m => {
-            const stg = (m.stage || m.level || '').trim();
-            if (stg) stages.add(stg);
-        });
-
-        let html = '<option value="all">كل الفرق والمراحل</option>';
-        Array.from(stages).sort().forEach(s => {
-            html += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
-        });
-        stageSelect.innerHTML = html;
-        if (stages.has(currentVal)) {
-            stageSelect.value = currentVal;
-        }
-    }
-
-    // حساب وتحديث الإحصائيات في الأعلى
-    function renderStats() {
-        let total = allMembers.length;
-        let disconnectedCount = 0;
-        let warningCount = 0;
-        let visitedCount = 0;
-
-        allMembers.forEach(m => {
-            const sCode = m.code || m.id;
-            const streak = calculateConsecutiveAbsences(sCode);
-            if (streak >= 3) disconnectedCount++;
-            else if (streak === 2) warningCount++;
-
-            if (isVisitedWithinDays(m.visitations, 30)) {
-                visitedCount++;
-            }
-        });
-
-        document.getElementById('statTotalMembers').textContent = total;
-        document.getElementById('statDisconnected').textContent = disconnectedCount;
-        document.getElementById('statWarning').textContent = warningCount;
-        document.getElementById('statVisitedThisMonth').textContent = visitedCount;
-    }
-
-    // تبديل الفلتر السريع
-    function applyQuickFilter(type) {
-        activeQuickFilter = type;
-        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
-        
-        const cardMap = {
-            'all': 'cardFilterAll',
-            'disconnected': 'cardFilterDisconnected',
-            'warning': 'cardFilterWarning',
-            'visited': 'cardFilterVisited'
-        };
-        const activeCard = document.getElementById(cardMap[type]);
-        if (activeCard) activeCard.classList.add('active-filter');
-
-        const statusSelect = document.getElementById('statusFilter');
-        if (statusSelect) {
-            if (type === 'all') statusSelect.value = 'all';
-            else if (type === 'disconnected') statusSelect.value = 'disconnected';
-            else if (type === 'warning') statusSelect.value = 'warning';
-            else if (type === 'visited') statusSelect.value = 'all'; // handled in filter logic
-        }
-
-        filterAndRender();
-    }
-
-    function handleSearch() {
-        filterAndRender();
-    }
-
-    // فلترة وترتيب وعرض الجدول
-    function filterAndRender() {
-        const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-        const statusVal = document.getElementById('statusFilter').value;
-        const stageVal = document.getElementById('stageFilter').value;
-        const sortBy = document.getElementById('sortBy').value;
-        const tbody = document.getElementById('tableBody');
-
-        if (!allMembers || allMembers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">لا يوجد مخدومين مسجلين في النظام حتى الآن.</td></tr>';
-            return;
-        }
-
-        // 1. حساب بيانات كل مخدوم
-        let enriched = allMembers.map(m => {
-            const sCode = String(m.code || m.id || '').trim();
-            const sName = String(m.name || 'مخدوم').trim();
-            const sStage = String(m.stage || m.level || 'غير محدد').trim();
-            const sPhone = String(m.phone || '').trim();
-            const sParentPhone = String(m.parent_phone || '').trim();
-            const sArea = String(m.area || m.address || '').trim();
-            const streak = calculateConsecutiveAbsences(sCode);
-            const visitations = Array.isArray(m.visitations) ? m.visitations : [];
-            const lastVisit = visitations.length > 0 ? visitations[0] : null;
-            const visitedRecently = isVisitedWithinDays(visitations, 30);
-
-            return {
-                raw: m,
-                id: m.id,
-                code: sCode,
-                name: sName,
-                stage: sStage,
-                phone: sPhone,
-                parentPhone: sParentPhone,
-                area: sArea,
-                streak: streak,
-                visitations: visitations,
-                lastVisit: lastVisit,
-                visitedRecently: visitedRecently
-            };
-        });
-
-        // 2. تطبيق البحث
-        if (query) {
-            enriched = enriched.filter(item => {
-                return item.name.toLowerCase().includes(query) ||
-                       item.code.toLowerCase().includes(query) ||
-                       item.phone.includes(query) ||
-                       item.parentPhone.includes(query) ||
-                       item.area.toLowerCase().includes(query);
-            });
-        }
-
-        // 3. تطبيق فلتر الحالة
-        if (activeQuickFilter === 'visited') {
-            enriched = enriched.filter(item => item.visitedRecently);
-        } else if (statusVal === 'disconnected') {
-            enriched = enriched.filter(item => item.streak >= 3);
-        } else if (statusVal === 'warning') {
-            enriched = enriched.filter(item => item.streak >= 2);
-        } else if (statusVal === 'last_friday') {
-            enriched = enriched.filter(item => item.streak >= 1);
-        } else if (statusVal === 'unvisited') {
-            enriched = enriched.filter(item => item.visitations.length === 0 || !item.visitedRecently);
-        } else if (statusVal === 'regular') {
-            enriched = enriched.filter(item => item.streak === 0);
-        }
-
-        // 4. تطبيق فلتر المرحلة
-        if (stageVal && stageVal !== 'all') {
-            enriched = enriched.filter(item => item.stage === stageVal);
-        }
-
-        // 5. الترتيب
-        enriched.sort((a, b) => {
-            if (sortBy === 'streak_desc') {
-                if (b.streak !== a.streak) return b.streak - a.streak;
-                return a.name.localeCompare(b.name, 'ar');
-            } else if (sortBy === 'name_asc') {
-                return a.name.localeCompare(b.name, 'ar');
-            } else if (sortBy === 'code_asc') {
-                return a.code.localeCompare(b.code, undefined, { numeric: true });
-            } else if (sortBy === 'last_visit_desc') {
-                const dateA = a.lastVisit ? new Date(a.lastVisit.date).getTime() : 0;
-                const dateB = b.lastVisit ? new Date(b.lastVisit.date).getTime() : 0;
-                return dateB - dateA;
-            }
-            return 0;
-        });
-
-        if (enriched.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-filter-circle-xmark fa-2x mb-2 text-secondary"></i><br>لا توجد نتائج مطابقة لخيارات البحث والفلترة.</td></tr>';
-            return;
-        }
-
-        // 6. توليد صفوف الجدول
-        let html = '';
-        enriched.forEach(item => {
-            // شارة الغياب
-            let streakBadge = '';
-            if (item.streak >= 3) {
-                streakBadge = `<span class="badge-streak streak-danger"><i class="fa-solid fa-triangle-exclamation"></i> منقطع (${item.streak} جمعات)</span>`;
-            } else if (item.streak === 2) {
-                streakBadge = `<span class="badge-streak streak-warn"><i class="fa-solid fa-bell"></i> غائب جمعتين</span>`;
-            } else if (item.streak === 1) {
-                streakBadge = `<span class="badge-streak streak-info"><i class="fa-solid fa-clock"></i> غائب جمعة</span>`;
-            } else {
-                streakBadge = `<span class="badge-streak streak-ok"><i class="fa-solid fa-circle-check"></i> منتظم</span>`;
-            }
-
-            // أزرار التواصل
-            let callButtons = [];
-            if (item.phone) {
-                callButtons.push(`<a href="tel:${escapeHtml(item.phone)}" class="btn-call" title="اتصال بالدارس"><i class="fa-solid fa-phone"></i> اتصال</a>`);
-                callButtons.push(`<button type="button" class="btn-wa" onclick="openStudentWhatsApp('${escapeHtml(item.phone)}', '${escapeHtml(item.name)}')" title="واتساب مباشر"><i class="fa-brands fa-whatsapp"></i> واتساب</button>`);
-            }
-            if (item.parentPhone && item.parentPhone !== item.phone) {
-                callButtons.push(`<a href="tel:${escapeHtml(item.parentPhone)}" class="btn-call" style="background:#fdf2f8; color:#be185d; border-color:#fbcfe8;" title="اتصال بولي الأمر"><i class="fa-solid fa-user-group"></i> ولي الأمر</a>`);
-            }
-            if (callButtons.length === 0) {
-                callButtons.push('<span class="text-muted small">لا يوجد هاتف</span>');
-            }
-
-            // آخر افتقاد
-            let lastVisitHtml = '';
-            if (item.lastVisit) {
-                const vDate = escapeHtml(item.lastVisit.date || '');
-                const vBy = escapeHtml(item.lastVisit.by || 'خادم');
-                const vText = escapeHtml(item.lastVisit.text || 'تم الافتقاد');
-                const vType = escapeHtml(item.lastVisit.type || 'اتصال');
-                lastVisitHtml = `
-                    <div style="font-size:0.82rem; line-height:1.35; max-width:240px; margin:0 auto;">
-                        <div><strong class="text-primary">${vDate}</strong> <span class="badge bg-light text-dark border">${vType}</span></div>
-                        <div class="text-truncate text-dark fw-bold" title="${vText}">${vText}</div>
-                        <div class="text-muted" style="font-size:0.75rem;">بواسطة: ${vBy}</div>
-                        ${item.visitations.length > 1 ? `<button class="btn-history" onclick="viewVisitationHistory('${escapeHtml(String(item.id))}')"><i class="fa-solid fa-list-ul"></i> كل السجل (${item.visitations.length})</button>` : ''}
-                    </div>
-                `;
-            } else {
-                lastVisitHtml = '<span class="badge bg-light text-muted border">لم يُفتقد بعد ⚠️</span>';
-            }
-
-            html += `
-                <tr>
-                    <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
-                    <td data-label="اسم المخدوم" class="text-start">
-                        <div class="fw-bold text-dark fs-6">${item.name}</div>
-                        ${item.area ? `<div class="text-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.area}</div>` : ''}
-                    </td>
-                    <td data-label="المرحلة">
-                        <span class="badge bg-light text-dark border fw-bold">${item.stage}</span>
-                    </td>
-                    <td data-label="حالة الغياب">${streakBadge}</td>
-                    <td data-label="التواصل السريع">
-                        <div class="d-flex gap-1 justify-content-center flex-wrap">
-                            ${callButtons.join('')}
-                        </div>
-                    </td>
-                    <td data-label="آخر افتقاد">${lastVisitHtml}</td>
-                    <td data-label="إجراء الافتقاد">
-                        <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
-                            <i class="fa-solid fa-plus"></i> تسجيل افتقاد
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        tbody.innerHTML = html;
-    }
-
-    // فتح واتساب برسالة اطمئنان مخصصة
-    function openStudentWhatsApp(phone, studentName) {
-        if (!phone) return alert('لا يوجد رقم هاتف مسجل');
-        let clean = phone.replace(/[^0-9]/g, '');
-        if (clean.startsWith('0')) clean = '20' + clean.slice(1);
-        else if (!clean.startsWith('20')) clean = '20' + clean;
-
-        const firstName = (studentName || 'حبيبي').trim().split(' ')[0];
-        const msg = `سلام ونعمة يا ${firstName} الغالي، بنطمن عليك من كنيستك وأسرة إعداد خدام كنيسة القديس بولس الرسول. مفتقدينك جداً وبنصلي تكون بكل خير وسلام، ومنتظرينك الجمعة القادمة تفرحنا بوجودك ❤️🕊️`;
-        const url = `https://wa.me/${clean}?text=${encodeURIComponent(msg)}`;
-        window.open(url, '_blank');
-    }
-
-    // فتح نافذة تسجيل افتقاد
-    function openRecordVisitModal(memberId) {
-        currentSelectedMemberId = memberId;
-        const member = allMembers.find(m => String(m.id) === String(memberId));
-        if (!member) return;
-
-        const streak = calculateConsecutiveAbsences(member.code || member.id);
-        document.getElementById('mStudentName').textContent = member.name || 'مخدوم';
-        document.getElementById('mStudentCode').textContent = `#${member.code || member.id}`;
-        document.getElementById('mStudentStage').textContent = member.stage || member.level || 'المرحلة';
-        document.getElementById('mStudentStreak').textContent = streak > 0 ? `غائب ${streak} جمعات` : 'حاضر ومنتظم';
-        
-        document.getElementById('mVisitNotes').value = '';
-        document.getElementById('mServantName').value = getCurrentServantName();
-        document.getElementById('mVisitDate').value = new Date().toISOString().split('T')[0];
-
-        // Reset type to first
-        activeVisitType = 'اتصال هاتفي';
-        const typeBtns = document.querySelectorAll('.type-btn');
-        typeBtns.forEach((b, idx) => {
-            if (idx === 0) b.classList.add('active');
-            else b.classList.remove('active');
-        });
-
-        document.getElementById('visitModalBackdrop').classList.add('show');
-    }
-
-    function closeVisitModal() {
-        document.getElementById('visitModalBackdrop').classList.remove('show');
-        currentSelectedMemberId = null;
-    }
-
-    function selectVisitType(type, btn) {
-        activeVisitType = type;
-        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
-
-    function applyCapsule(text) {
-        const textarea = document.getElementById('mVisitNotes');
-        if (!textarea) return;
-        if (textarea.value.trim()) {
-            textarea.value = textarea.value.trim() + ' | ' + text;
-        } else {
-            textarea.value = text;
-        }
-        textarea.focus();
-    }
-
-    // حفظ كبسولة الافتقاد
-    async function saveCurrentVisitation() {
-        if (!currentSelectedMemberId) return;
-        const notes = document.getElementById('mVisitNotes').value.trim();
-        const servantName = document.getElementById('mServantName').value.trim() || getCurrentServantName();
-        const visitDate = document.getElementById('mVisitDate').value || new Date().toISOString().split('T')[0];
-        const saveBtn = document.getElementById('btnSaveVisit');
-
-        if (!notes) {
-            alert('يرجى كتابة الملاحظة أو اختيار إحدى الكبسولات السريعة أولاً.');
-            return;
-        }
-
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحفظ...';
-
-        const memberIndex = allMembers.findIndex(m => String(m.id) === String(currentSelectedMemberId));
-        if (memberIndex === -1) {
-            alert('تعذر العثور على المخدوم في النظام.');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد';
-            return;
-        }
-
-        const newVisit = {
-            date: visitDate,
-            by: servantName,
-            type: activeVisitType,
-            text: notes,
-            createdAt: new Date().toISOString()
-        };
-
-        if (!Array.isArray(allMembers[memberIndex].visitations)) {
-            allMembers[memberIndex].visitations = [];
-        }
-        allMembers[memberIndex].visitations.unshift(newVisit);
-
-        // 1. الحفظ في الذاكرة المحلية
-        try {
-            localStorage.setItem('my_church_class', JSON.stringify(allMembers));
-        } catch (e) {
-            console.warn("Local storage save warning:", e);
-        }
-
-        // 2. الحفظ في Firestore
-        if (fsdb) {
-            try {
-                await fsdb.collection('members').doc(String(allMembers[memberIndex].id)).update({
-                    visitations: allMembers[memberIndex].visitations
-                });
-            } catch (err) {
-                console.warn("Firestore update error:", err);
-            }
-        }
-
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد';
-        closeVisitModal();
-
-        renderStats();
-        filterAndRender();
-        showToast('✅ تم تسجيل كبسولة الافتقاد بنجاح في السحابة!');
-    }
-
-    // عرض سجل الافتقادات
-    function viewVisitationHistory(memberId) {
-        const member = allMembers.find(m => String(m.id) === String(memberId));
-        if (!member) return;
-
-        document.getElementById('hStudentName').textContent = member.name || 'مخدوم';
-        document.getElementById('hStudentCodeStage').textContent = `#${member.code || member.id} • ${member.stage || member.level || ''}`;
-
-        const container = document.getElementById('historyTimelineContainer');
-        const visits = Array.isArray(member.visitations) ? member.visitations : [];
-
-        if (visits.length === 0) {
-            container.innerHTML = '<div class="text-center py-4 text-muted">لا توجد افتقادات سابقة مسجلة لهذا المخدوم.</div>';
-        } else {
-            let html = '';
-            visits.forEach(v => {
-                html += `
-                    <div class="history-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="history-date">${escapeHtml(v.date || '')}</span>
-                            <span class="badge bg-light text-dark border">${escapeHtml(v.type || 'اتصال')}</span>
-                        </div>
-                        <div class="history-servant">${escapeHtml(v.by || 'خادم')}</div>
-                        <div class="history-text">${escapeHtml(v.text || '')}</div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        document.getElementById('historyModalBackdrop').classList.add('show');
-    }
-
-    function closeHistoryModal() {
-        document.getElementById('historyModalBackdrop').classList.remove('show');
-    }
-
-    // تصدير إكسيل
-    function exportVisitationExcel() {
-        if (!allMembers || allMembers.length === 0) {
-            alert('لا توجد بيانات للتصدير.');
-            return;
-        }
-
-        let csv = '\uFEFF';
-        csv += 'كود الدارس,اسم المخدوم,المرحلة,النوع,رقم الهاتف,هاتف ولي الأمر,المنطقة والعنوان,عدد جمعات الغياب المتتالية,حالة الغياب,تاريخ آخر افتقاد,خادم آخر افتقاد,نوع آخر افتقاد,ملاحظة آخر افتقاد,إجمالي الافتقادات المسجلة\n';
-
-        allMembers.forEach(m => {
-            const sCode = String(m.code || m.id || '').replace(/"/g, '""');
-            const sName = String(m.name || '').replace(/"/g, '""');
-            const sStage = String(m.stage || m.level || '').replace(/"/g, '""');
-            const sGender = String(m.gender || 'بنين').replace(/"/g, '""');
-            const sPhone = String(m.phone || '').replace(/"/g, '""');
-            const sParentPhone = String(m.parent_phone || '').replace(/"/g, '""');
-            const sArea = String(m.area || m.address || '').replace(/"/g, '""');
-            const streak = calculateConsecutiveAbsences(sCode);
-            const statusLabel = streak >= 3 ? `منقطع (${streak} جمعات)` : (streak === 2 ? 'غائب جمعتين' : (streak === 1 ? 'غائب جمعة' : 'منتظم'));
-            const visits = Array.isArray(m.visitations) ? m.visitations : [];
-            const last = visits.length > 0 ? visits[0] : null;
-
-            const lDate = last ? String(last.date || '').replace(/"/g, '""') : 'لا يوجد';
-            const lBy = last ? String(last.by || '').replace(/"/g, '""') : '';
-            const lType = last ? String(last.type || '').replace(/"/g, '""') : '';
-            const lText = last ? String(last.text || '').replace(/"/g, '""') : '';
-
-            csv += `"${sCode}","${sName}","${sStage}","${sGender}","${sPhone}","${sParentPhone}","${sArea}","${streak}","${statusLabel}","${lDate}","${lBy}","${lType}","${lText}","${visits.length}"\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `كشف_الافتقاد_الذكي_والغياب_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
-
-    // إغلاق المودالات عند النقر على الخلفية
-    window.addEventListener('click', function(e) {
-        const vModal = document.getElementById('visitModalBackdrop');
-        const hModal = document.getElementById('historyModalBackdrop');
-        if (e.target === vModal) closeVisitModal();
-        if (e.target === hModal) closeHistoryModal();
-    });
-
-    // التهيئة عند تحميل الصفحة
-    window.addEventListener('DOMContentLoaded', () => {
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
-            const fromGroup = urlParams.get('group') || 'people';
-            const smartBackBtn = document.querySelector('[data-smart-back]');
-            if (smartBackBtn) {
-                smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
-            }
-        } catch (e) {}
-
-        loadDataFromCloud();
-    });
-</script>
-</body>
-</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الافتقاد الذكي ورصد الغياب | خدمتي برو</title>
+    <meta name="theme-color" content="#1e3799">
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="auth-client.js"></script>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #1e3a8a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding-bottom: 50px;
+            margin: 0;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 15px auto;
+            padding: 0 16px;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .btn-smart-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            color: #334155;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 8px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .btn-smart-back:hover {
+            border-color: #1e3a8a;
+            color: #1e3a8a;
+            background: #eff6ff;
+        }
+        .btn-action-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 12px;
+            padding: 8px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-export {
+            background: #10b981;
+            color: #fff;
+        }
+        .btn-export:hover {
+            background: #059669;
+            color: #fff;
+        }
+        .btn-refresh {
+            background: #fff;
+            color: #1e3a8a;
+            border: 2px solid #bfdbfe;
+        }
+        .btn-refresh:hover {
+            background: #eff6ff;
+        }
+        .header-card {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #1e40af 100%);
+            color: #fff;
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .header-card::after {
+            content: '🤝';
+            position: absolute;
+            left: 20px;
+            bottom: -15px;
+            font-size: 6rem;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+        .header-card h3 {
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.45rem;
+        }
+        .header-card p {
+            margin: 0 0 10px 0;
+            opacity: 0.88;
+            font-size: 0.92rem;
+            line-height: 1.5;
+        }
+        .sync-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+            display: inline-block;
+        }
+        .dot.live {
+            background: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35);
+        }
+        .dot.warn {
+            background: #fbbf24;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
+            cursor: pointer;
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #cbd5e1;
+        }
+        .stat-card.active-filter {
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.2);
+            background: #f0f7ff;
+        }
+        .stat-info h6 {
+            margin: 0 0 4px 0;
+            font-size: 0.84rem;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .stat-info .stat-num {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+        }
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        .stat-card.c-all .stat-num { color: #1e3a8a; }
+        .stat-card.c-all .stat-icon { background: #eff6ff; color: #1e3a8a; }
+
+        .stat-card.c-danger .stat-num { color: #ef4444; }
+        .stat-card.c-danger .stat-icon { background: #fef2f2; color: #ef4444; }
+
+        .stat-card.c-warn .stat-num { color: #f59e0b; }
+        .stat-card.c-warn .stat-icon { background: #fffbeb; color: #f59e0b; }
+
+        .stat-card.c-recent .stat-num { color: #10b981; }
+        .stat-card.c-recent .stat-icon { background: #ecfdf5; color: #10b981; }
+
+        /* Filter Toolbar */
+        .filter-panel {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-search {
+            flex: 2;
+            min-width: 220px;
+            position: relative;
+        }
+        .filter-search input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-search input:focus {
+            border-color: #1e3a8a;
+        }
+        .filter-search i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .filter-select {
+            flex: 1;
+            min-width: 160px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            outline: none;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .filter-select:focus {
+            border-color: #1e3a8a;
+        }
+
+        /* Table Card */
+        .table-card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+        }
+        .table {
+            margin-bottom: 0;
+            font-size: 0.92rem;
+            width: 100%;
+        }
+        .table thead {
+            background: #0f172a;
+            color: #fff;
+        }
+        .table thead th {
+            padding: 14px 10px;
+            font-weight: 700;
+            text-align: center;
+            border-bottom: none;
+            white-space: nowrap;
+        }
+        .table tbody td {
+            padding: 14px 10px;
+            vertical-align: middle;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Badges */
+        .badge-streak {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .streak-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            animation: pulse-danger 2s infinite;
+        }
+        @keyframes pulse-danger {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .streak-warn {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .streak-info {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        .streak-ok {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Action Buttons */
+        .btn-call {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-call:hover {
+            background: #1d4ed8;
+            color: #fff;
+        }
+        .btn-wa {
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-wa:hover {
+            background: #047857;
+            color: #fff;
+        }
+        .btn-record-visit {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 7px 14px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn-record-visit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(16, 185, 129, 0.35);
+        }
+        .btn-history {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 5px 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        .btn-history:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Modal Styles */
+        .custom-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 1050;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+        .custom-modal-backdrop.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-modal-content {
+            background: #fff;
+            border-radius: 20px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+            transition: transform 0.25s ease;
+        }
+        .custom-modal-backdrop.show .custom-modal-content {
+            transform: translateY(0);
+        }
+        .modal-header-styled {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: #fff;
+            padding: 18px 22px;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header-styled h5 {
+            margin: 0;
+            font-weight: 800;
+            font-size: 1.15rem;
+        }
+        .modal-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        .modal-body-styled {
+            padding: 22px;
+        }
+
+        /* Capsule Chips */
+        .capsule-chips-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 16px 0;
+        }
+        .capsule-chip {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .capsule-chip:hover {
+            background: #e0e7ff;
+            border-color: #818cf8;
+            color: #3730a3;
+        }
+        .type-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .type-btn {
+            flex: 1;
+            padding: 8px 6px;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            color: #475569;
+            transition: all 0.15s ease;
+        }
+        .type-btn.active {
+            border-color: #1e3a8a;
+            background: #eff6ff;
+            color: #1e3a8a;
+        }
+
+        /* History Timeline */
+        .history-item {
+            border-right: 3px solid #1e3a8a;
+            padding-right: 14px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .history-item::before {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: 4px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #1e3a8a;
+        }
+        .history-date {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 700;
+        }
+        .history-servant {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .history-text {
+            font-size: 0.88rem;
+            color: #334155;
+            margin-top: 3px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Toast */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 2000;
+        }
+        .custom-toast {
+            background: #0f172a;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slide-up 0.3s ease;
+            margin-top: 8px;
+        }
+        @keyframes slide-up {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .table thead { display: none; }
+            .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+            .table tr {
+                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: 14px;
+                margin-bottom: 12px;
+                padding: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            }
+            .table td {
+                text-align: right;
+                border-bottom: 1px dashed #f1f5f9;
+                padding: 8px 4px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .table td::before {
+                content: attr(data-label);
+                font-weight: 700;
+                color: #64748b;
+                font-size: 0.82rem;
+            }
+            .table td:last-child {
+                border-bottom: none;
+                justify-content: center;
+                padding-top: 12px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- Topbar -->
+    <div class="topbar">
+        <button type="button" class="btn-smart-back" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
+            <i class="fa-solid fa-arrow-right"></i> لوحة الخادم
+        </button>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="servant_spiritual_report.html" class="btn-action-top" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
+            </a>
+            <button class="btn-action-top btn-refresh" onclick="loadDataFromCloud(true)">
+                <i class="fa-solid fa-arrows-rotate"></i> تحديث
+            </button>
+            <button class="btn-action-top btn-export" onclick="exportVisitationExcel()">
+                <i class="fa-solid fa-file-excel"></i> تصدير Excel
+            </button>
+            <button class="btn-action-top" onclick="exportWhatsAppFollowupSheet()" style="background:#25D366; color:#ffffff; border:1px solid #128C7E; font-weight:700;">
+                <i class="fa-brands fa-whatsapp"></i> شيت الواتساب (New Whats 2027)
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Card -->
+    <div class="header-card">
+        <h3><i class="fa-solid fa-handshake-angle"></i> منظومة الافتقاد الذكي ورصد الغياب</h3>
+        <p>حصر ومتابعة المخدومين الغائبين والمنقطعين، مع أرقام هواتفهم، والتواصل المباشر، وتوثيق سجل الافتقاد والكبسولات الميدانية.</p>
+        <span class="sync-badge">
+            <span class="dot" id="syncDot"></span>
+            <span id="syncText">جاري فحص الاتصال...</span>
+        </span>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card c-all active-filter" id="cardFilterAll" onclick="applyQuickFilter('all')">
+            <div class="stat-info">
+                <h6>إجمالي المخدومين</h6>
+                <div class="stat-num" id="statTotalMembers">0</div>
+            </div>
+            <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        </div>
+
+        <div class="stat-card c-danger" id="cardFilterDisconnected" onclick="applyQuickFilter('disconnected')">
+            <div class="stat-info">
+                <h6>منقطعون (3+ جمعات) 🚨</h6>
+                <div class="stat-num" id="statDisconnected">0</div>
+            </div>
+            <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        </div>
+
+        <div class="stat-card c-warn" id="cardFilterWarning" onclick="applyQuickFilter('warning')">
+            <div class="stat-info">
+                <h6>إنذار غياب (جمعتين) ⚠️</h6>
+                <div class="stat-num" id="statWarning">0</div>
+            </div>
+            <div class="stat-icon"><i class="fa-solid fa-bell"></i></div>
+        </div>
+
+        <div class="stat-card c-recent" id="cardFilterVisited" onclick="applyQuickFilter('visited')">
+            <div class="stat-info">
+                <h6>تم افتقادهم هذا الشهر ✔️</h6>
+                <div class="stat-num" id="statVisitedThisMonth">0</div>
+            </div>
+            <div class="stat-icon"><i class="fa-solid fa-check-double"></i></div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="filter-panel">
+        <div class="filter-row">
+            <div class="filter-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="searchInput" placeholder="بحث بالاسم، كود الامتحان، الهاتف، أو المنطقة..." oninput="handleSearch()">
+            </div>
+
+            <select class="filter-select" id="statusFilter" onchange="filterAndRender()">
+                <option value="all">كل حالات الغياب</option>
+                <option value="disconnected">🚨 المنقطعون فقط (3+ جمعات)</option>
+                <option value="warning">⚠️ غائب جمعتين فأكثر</option>
+                <option value="last_friday">🔔 غائب الجمعة الماضية</option>
+                <option value="unvisited">⏳ لم يُفتقد قط / يحتاج افتقاد</option>
+                <option value="regular">✔️ منتظم (حاضر آخر جمعة)</option>
+            </select>
+
+            <select class="filter-select" id="stageFilter" onchange="filterAndRender()">
+                <option value="all">كل الفرق والمراحل</option>
+            </select>
+
+            <select class="filter-select" id="sortBy" onchange="filterAndRender()">
+                <option value="streak_desc">الأكثر غياباً أولاً 🚨</option>
+                <option value="name_asc">الاسم (أبجدياً)</option>
+                <option value="code_asc">كود الامتحان</option>
+                <option value="last_visit_desc">أحدث افتقاد</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table" id="visitationTable">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">كود الدارس</th>
+                        <th>اسم المخدوم</th>
+                        <th>الفرقة / المرحلة</th>
+                        <th>حالة الغياب المتتالي</th>
+                        <th>التواصل السريع</th>
+                        <th>آخر افتقاد مسجل</th>
+                        <th style="width: 140px;">إجراء الافتقاد</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin fa-2x mb-3 text-primary"></i>
+                            <div>جاري قراءة المخدومين وسجلات الغياب من السحابة...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: تسجيل افتقاد جديد -->
+<div class="custom-modal-backdrop" id="visitModalBackdrop">
+    <div class="custom-modal-content">
+        <div class="modal-header-styled">
+            <h5><i class="fa-solid fa-pen-to-square me-2"></i> تسجيل كبسولة افتقاد</h5>
+            <button class="modal-close-btn" onclick="closeVisitModal()">&times;</button>
+        </div>
+        <div class="modal-body-styled">
+            <div class="p-3 bg-light rounded-3 mb-3 border">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="fs-6 text-primary" id="mStudentName">-</strong>
+                    <span class="badge bg-secondary" id="mStudentCode">-</span>
+                </div>
+                <div class="d-flex gap-2 text-muted small">
+                    <span id="mStudentStage">-</span> •
+                    <span id="mStudentStreak">-</span>
+                </div>
+            </div>
+
+            <label class="form-label fw-bold small text-muted">نوع وسيلة الافتقاد:</label>
+            <div class="type-selector">
+                <button type="button" class="type-btn active" onclick="selectVisitType('اتصال هاتفي', this)">📞 اتصال هاتفي</button>
+                <button type="button" class="type-btn" onclick="selectVisitType('واتساب', this)">💬 واتساب</button>
+                <button type="button" class="type-btn" onclick="selectVisitType('زيارة منزلية', this)">🏠 زيارة منزلية</button>
+                <button type="button" class="type-btn" onclick="selectVisitType('لقاء في الكنيسة', this)">⛪ لقاء كنسي</button>
+            </div>
+
+            <label class="form-label fw-bold small text-muted">كبسولات سريعة (انقر للإضافة الفورية):</label>
+            <div class="capsule-chips-container">
+                <span class="capsule-chip" onclick="applyCapsule('اطمئنان على الغياب ووعد بالحضور الجمعة القادمة 🤝')">🤝 وعد بالحضور</span>
+                <span class="capsule-chip" onclick="applyCapsule('ظروف امتحانات ومذاكرة ودراسة 📚')">📚 امتحانات ودراسة</span>
+                <span class="capsule-chip" onclick="applyCapsule('وعكة صحية وطلب صلاة من أجل الشفاء 🩺')">🩺 وعكة صحية</span>
+                <span class="capsule-chip" onclick="applyCapsule('سفر خارج المحافظة ✈️')">✈️ سفر مؤقت</span>
+                <span class="capsule-chip" onclick="applyCapsule('ظروف خاصة وانشغال بالعمل 💼')">💼 ظروف عمل</span>
+                <span class="capsule-chip" onclick="applyCapsule('الهاتف مغلق أو لم يتم الرد 📵')">📵 لم يتم الرد</span>
+                <span class="capsule-chip" onclick="applyCapsule('زيارة منزلية مباركة وصلاة مع الأسرة 🕊️')">🕊️ زيارة وبركة مع الأسرة</span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold small text-muted">ملاحظات وتقرير الافتقاد:</label>
+                <textarea id="mVisitNotes" class="form-control" rows="3" placeholder="اكتب ملاحظتك أو اختر من الكبسولات السريعة أعلاه..."></textarea>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label fw-bold small text-muted">اسم الخادم المفتقد:</label>
+                    <input type="text" id="mServantName" class="form-control form-control-sm" placeholder="اسم الخادم">
+                </div>
+                <div class="col-6">
+                    <label class="form-label fw-bold small text-muted">تاريخ الافتقاد:</label>
+                    <input type="date" id="mVisitDate" class="form-control form-control-sm">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                <button type="button" class="btn btn-light fw-bold" onclick="closeVisitModal()">إلغاء</button>
+                <button type="button" class="btn btn-success fw-bold px-4" id="btnSaveVisit" onclick="saveCurrentVisitation()">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: عرض سجل وتاريخ الافتقادات -->
+<div class="custom-modal-backdrop" id="historyModalBackdrop">
+    <div class="custom-modal-content">
+        <div class="modal-header-styled">
+            <h5><i class="fa-solid fa-clock-rotate-left me-2"></i> سجل افتقادات المخدوم</h5>
+            <button class="modal-close-btn" onclick="closeHistoryModal()">&times;</button>
+        </div>
+        <div class="modal-body-styled">
+            <div class="p-3 bg-light rounded-3 mb-3 border">
+                <strong class="fs-6 text-primary" id="hStudentName">-</strong>
+                <div class="small text-muted" id="hStudentCodeStage">-</div>
+            </div>
+            <div id="historyTimelineContainer" style="max-height: 380px; overflow-y: auto; padding-right: 8px;">
+                <!-- Timeline items injected here -->
+            </div>
+            <div class="text-end pt-3 border-top mt-3">
+                <button type="button" class="btn btn-secondary fw-bold px-4" onclick="closeHistoryModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<script>
+    'use strict';
+
+    // 1. فحص الصلاحية عبر العميل الموحد
+    if (window.AuthClient) {
+        AuthClient.enforceAuth(['servant', 'admin']);
+    }
+
+    // 2. إعداد Firebase Firestore
+    const FB_CONFIG = window.FIREBASE_CONFIG || {
+        "apiKey": "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
+        "authDomain": "khedmety-plus.firebaseapp.com",
+        "projectId": "khedmety-plus",
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+        "messagingSenderId": "25101228841",
+        "appId": "1:25101228841:web:3164821d165014a1e2b538"
+    };
+
+    let fsdb = null;
+    let isCloudOnline = false;
+    try {
+        if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+        fsdb = firebase.firestore();
+    } catch (e) {
+        console.warn("Firebase init warning in followup:", e);
+    }
+
+    // المتغيرات العامة
+    let allMembers = [];
+    let attendanceRecord = {};
+    let activeQuickFilter = 'all';
+    let currentSelectedMemberId = null;
+    let activeVisitType = 'اتصال هاتفي';
+
+    // مساعدة: فحص جلسة الجمعة
+    function isFridaySession(dateStr) {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        return !isNaN(d.getTime()) && d.getDay() === 5;
+    }
+
+    // حساب عدد الجمعات المتتالية التي غابها الدارس
+    function calculateConsecutiveAbsences(sCode) {
+        const codeStr = String(sCode || '').trim();
+        const fridays = Object.keys(attendanceRecord || {})
+            .filter(d => isFridaySession(d) && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
+            .sort()
+            .reverse();
+
+        let streak = 0;
+        for (const fDate of fridays) {
+            const attendees = attendanceRecord[fDate] || [];
+            const attended = attendees.some(a => {
+                const aCode = String(a.code || a.id || a.studentCode || '').trim();
+                return aCode === codeStr && !a.isAbsentDueToDelay;
+            });
+            if (attended) break;
+            streak++;
+        }
+        return streak;
+    }
+
+    // فحص هل افتُقد هذا الشهر (خلال آخر 30 يوماً)
+    function isVisitedWithinDays(visitations, days = 30) {
+        if (!Array.isArray(visitations) || visitations.length === 0) return false;
+        const now = Date.now();
+        const limit = days * 24 * 60 * 60 * 1000;
+        return visitations.some(v => {
+            if (!v || !v.date) return false;
+            const t = new Date(v.date).getTime();
+            return !isNaN(t) && (now - t) <= limit;
+        });
+    }
+
+    // جلب اسم المستخدم الحالي
+    function getCurrentServantName() {
+        try {
+            if (window.AuthClient && AuthClient.getUser()) {
+                const u = AuthClient.getUser();
+                return u.name || u.displayName || u.username || 'خادم';
+            }
+            const localU = JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user'));
+            if (localU && localU.name) return localU.name;
+        } catch (e) {}
+        return 'خادم الافتقاد';
+    }
+
+    // مؤشر المزامنة
+    function updateSyncStatus(online, text) {
+        const dot = document.getElementById('syncDot');
+        const txt = document.getElementById('syncText');
+        if (!dot || !txt) return;
+        dot.className = 'dot ' + (online ? 'live' : 'warn');
+        txt.textContent = text || (online ? 'السحابة متصلة ومحدثة' : 'بيانات محلية');
+    }
+
+    // إشعار Toast
+    function showToast(message) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast';
+        toast.innerHTML = `<i class="fa-solid fa-circle-check text-success"></i> <span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3200);
+    }
+
+    // تحميل البيانات من السحابة أو التخزين المحلي
+    async function loadDataFromCloud(isManualRefresh = false) {
+        if (isManualRefresh) {
+            updateSyncStatus(false, 'جاري التحديث من السحابة...');
+        }
+
+        try {
+            let membersFromCloud = [];
+            let attFromCloud = {};
+
+            if (fsdb) {
+                const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+                    ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+                    : fsdb.collection('attendance');
+
+                const [mSnap, aSnap] = await Promise.all([
+                    fsdb.collection('members').get(),
+                    attQuery.get()
+                ]);
+
+                membersFromCloud = mSnap.docs.map(doc => {
+                    const data = doc.data() || {};
+                    return Object.assign({ id: doc.id }, data);
+                });
+
+                let localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+                aSnap.forEach(doc => {
+                    localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+                });
+                attFromCloud = localAtt;
+
+                isCloudOnline = true;
+                updateSyncStatus(true, `السحابة متصلة (${membersFromCloud.length} مخدوم)`);
+            }
+
+            if (membersFromCloud.length > 0) {
+                allMembers = membersFromCloud;
+                try { localStorage.setItem('my_church_class', JSON.stringify(allMembers)); } catch(e){}
+            } else {
+                allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
+                updateSyncStatus(false, 'تم التحميل من الذاكرة المحلية');
+            }
+
+            if (Object.keys(attFromCloud).length > 0) {
+                attendanceRecord = attFromCloud;
+                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch(e){}
+            } else {
+                attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+            }
+
+            populateStageFilter();
+            renderStats();
+            filterAndRender();
+
+            if (isManualRefresh) {
+                showToast('✅ تم تحديث بيانات المخدومين والافتقاد بنجاح!');
+            }
+        } catch (err) {
+            console.error("Cloud load error:", err);
+            allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
+            attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+            updateSyncStatus(false, 'وضع عدم الاتصال (بيانات محلية)');
+            populateStageFilter();
+            renderStats();
+            filterAndRender();
+        }
+    }
+
+    // ملء قائمة الفرق ديناميكياً
+    function populateStageFilter() {
+        const stageSelect = document.getElementById('stageFilter');
+        if (!stageSelect) return;
+        const currentVal = stageSelect.value;
+        const stages = new Set();
+        allMembers.forEach(m => {
+            const stg = (m.stage || m.level || '').trim();
+            if (stg) stages.add(stg);
+        });
+
+        let html = '<option value="all">كل الفرق والمراحل</option>';
+        Array.from(stages).sort().forEach(s => {
+            html += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`;
+        });
+        stageSelect.innerHTML = html;
+        if (stages.has(currentVal)) {
+            stageSelect.value = currentVal;
+        }
+    }
+
+    // حساب وتحديث الإحصائيات في الأعلى
+    function renderStats() {
+        let total = allMembers.length;
+        let disconnectedCount = 0;
+        let warningCount = 0;
+        let visitedCount = 0;
+
+        allMembers.forEach(m => {
+            const sCode = m.code || m.id;
+            const streak = calculateConsecutiveAbsences(sCode);
+            if (streak >= 3) disconnectedCount++;
+            else if (streak === 2) warningCount++;
+
+            if (isVisitedWithinDays(m.visitations, 30)) {
+                visitedCount++;
+            }
+        });
+
+        document.getElementById('statTotalMembers').textContent = total;
+        document.getElementById('statDisconnected').textContent = disconnectedCount;
+        document.getElementById('statWarning').textContent = warningCount;
+        document.getElementById('statVisitedThisMonth').textContent = visitedCount;
+    }
+
+    // تبديل الفلتر السريع
+    function applyQuickFilter(type) {
+        activeQuickFilter = type;
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'));
+        
+        const cardMap = {
+            'all': 'cardFilterAll',
+            'disconnected': 'cardFilterDisconnected',
+            'warning': 'cardFilterWarning',
+            'visited': 'cardFilterVisited'
+        };
+        const activeCard = document.getElementById(cardMap[type]);
+        if (activeCard) activeCard.classList.add('active-filter');
+
+        const statusSelect = document.getElementById('statusFilter');
+        if (statusSelect) {
+            if (type === 'all') statusSelect.value = 'all';
+            else if (type === 'disconnected') statusSelect.value = 'disconnected';
+            else if (type === 'warning') statusSelect.value = 'warning';
+            else if (type === 'visited') statusSelect.value = 'all'; // handled in filter logic
+        }
+
+        filterAndRender();
+    }
+
+    function handleSearch() {
+        filterAndRender();
+    }
+
+    // فلترة وترتيب وعرض الجدول
+    function filterAndRender() {
+        const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+        const statusVal = document.getElementById('statusFilter').value;
+        const stageVal = document.getElementById('stageFilter').value;
+        const sortBy = document.getElementById('sortBy').value;
+        const tbody = document.getElementById('tableBody');
+
+        if (!allMembers || allMembers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">لا يوجد مخدومين مسجلين في النظام حتى الآن.</td></tr>';
+            return;
+        }
+
+        // 1. حساب بيانات كل مخدوم
+        let enriched = allMembers.map(m => {
+            const sCode = String(m.code || m.id || '').trim();
+            const sName = String(m.name || 'مخدوم').trim();
+            const sStage = String(m.stage || m.level || 'غير محدد').trim();
+            const sPhone = String(m.phone || '').trim();
+            const sParentPhone = String(m.parent_phone || '').trim();
+            const sArea = String(m.area || m.address || '').trim();
+            const streak = calculateConsecutiveAbsences(sCode);
+            const visitations = Array.isArray(m.visitations) ? m.visitations : [];
+            const lastVisit = visitations.length > 0 ? visitations[0] : null;
+            const visitedRecently = isVisitedWithinDays(visitations, 30);
+
+            return {
+                raw: m,
+                id: m.id,
+                code: sCode,
+                name: sName,
+                stage: sStage,
+                phone: sPhone,
+                parentPhone: sParentPhone,
+                area: sArea,
+                streak: streak,
+                visitations: visitations,
+                lastVisit: lastVisit,
+                visitedRecently: visitedRecently
+            };
+        });
+
+        // 2. تطبيق البحث
+        if (query) {
+            enriched = enriched.filter(item => {
+                return item.name.toLowerCase().includes(query) ||
+                       item.code.toLowerCase().includes(query) ||
+                       item.phone.includes(query) ||
+                       item.parentPhone.includes(query) ||
+                       item.area.toLowerCase().includes(query);
+            });
+        }
+
+        // 3. تطبيق فلتر الحالة
+        if (activeQuickFilter === 'visited') {
+            enriched = enriched.filter(item => item.visitedRecently);
+        } else if (statusVal === 'disconnected') {
+            enriched = enriched.filter(item => item.streak >= 3);
+        } else if (statusVal === 'warning') {
+            enriched = enriched.filter(item => item.streak >= 2);
+        } else if (statusVal === 'last_friday') {
+            enriched = enriched.filter(item => item.streak >= 1);
+        } else if (statusVal === 'unvisited') {
+            enriched = enriched.filter(item => item.visitations.length === 0 || !item.visitedRecently);
+        } else if (statusVal === 'regular') {
+            enriched = enriched.filter(item => item.streak === 0);
+        }
+
+        // 4. تطبيق فلتر المرحلة
+        if (stageVal && stageVal !== 'all') {
+            enriched = enriched.filter(item => item.stage === stageVal);
+        }
+
+        // 5. الترتيب
+        enriched.sort((a, b) => {
+            if (sortBy === 'streak_desc') {
+                if (b.streak !== a.streak) return b.streak - a.streak;
+                return a.name.localeCompare(b.name, 'ar');
+            } else if (sortBy === 'name_asc') {
+                return a.name.localeCompare(b.name, 'ar');
+            } else if (sortBy === 'code_asc') {
+                return a.code.localeCompare(b.code, undefined, { numeric: true });
+            } else if (sortBy === 'last_visit_desc') {
+                const dateA = a.lastVisit ? new Date(a.lastVisit.date).getTime() : 0;
+                const dateB = b.lastVisit ? new Date(b.lastVisit.date).getTime() : 0;
+                return dateB - dateA;
+            }
+            return 0;
+        });
+
+        if (enriched.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-filter-circle-xmark fa-2x mb-2 text-secondary"></i><br>لا توجد نتائج مطابقة لخيارات البحث والفلترة.</td></tr>';
+            return;
+        }
+
+        // 6. توليد صفوف الجدول
+        let html = '';
+        enriched.forEach(item => {
+            // شارة الغياب
+            let streakBadge = '';
+            if (item.streak >= 3) {
+                streakBadge = `<span class="badge-streak streak-danger"><i class="fa-solid fa-triangle-exclamation"></i> منقطع (${item.streak} جمعات)</span>`;
+            } else if (item.streak === 2) {
+                streakBadge = `<span class="badge-streak streak-warn"><i class="fa-solid fa-bell"></i> غائب جمعتين</span>`;
+            } else if (item.streak === 1) {
+                streakBadge = `<span class="badge-streak streak-info"><i class="fa-solid fa-clock"></i> غائب جمعة</span>`;
+            } else {
+                streakBadge = `<span class="badge-streak streak-ok"><i class="fa-solid fa-circle-check"></i> منتظم</span>`;
+            }
+
+            // أزرار التواصل
+            let callButtons = [];
+            if (item.phone) {
+                callButtons.push(`<a href="tel:${escapeHtml(item.phone)}" class="btn-call" title="اتصال بالدارس"><i class="fa-solid fa-phone"></i> اتصال</a>`);
+                callButtons.push(`<button type="button" class="btn-wa" onclick="openStudentWhatsApp('${escapeHtml(item.phone)}', '${escapeHtml(item.name)}')" title="واتساب مباشر"><i class="fa-brands fa-whatsapp"></i> واتساب</button>`);
+            }
+            if (item.parentPhone && item.parentPhone !== item.phone) {
+                callButtons.push(`<a href="tel:${escapeHtml(item.parentPhone)}" class="btn-call" style="background:#fdf2f8; color:#be185d; border-color:#fbcfe8;" title="اتصال بولي الأمر"><i class="fa-solid fa-user-group"></i> ولي الأمر</a>`);
+            }
+            if (callButtons.length === 0) {
+                callButtons.push('<span class="text-muted small">لا يوجد هاتف</span>');
+            }
+
+            // آخر افتقاد
+            let lastVisitHtml = '';
+            if (item.lastVisit) {
+                const vDate = escapeHtml(item.lastVisit.date || '');
+                const vBy = escapeHtml(item.lastVisit.by || 'خادم');
+                const vText = escapeHtml(item.lastVisit.text || 'تم الافتقاد');
+                const vType = escapeHtml(item.lastVisit.type || 'اتصال');
+                lastVisitHtml = `
+                    <div style="font-size:0.82rem; line-height:1.35; max-width:240px; margin:0 auto;">
+                        <div><strong class="text-primary">${vDate}</strong> <span class="badge bg-light text-dark border">${vType}</span></div>
+                        <div class="text-truncate text-dark fw-bold" title="${vText}">${vText}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">بواسطة: ${vBy}</div>
+                        ${item.visitations.length > 1 ? `<button class="btn-history" onclick="viewVisitationHistory('${escapeHtml(String(item.id))}')"><i class="fa-solid fa-list-ul"></i> كل السجل (${item.visitations.length})</button>` : ''}
+                    </div>
+                `;
+            } else {
+                lastVisitHtml = '<span class="badge bg-light text-muted border">لم يُفتقد بعد ⚠️</span>';
+            }
+
+            html += `
+                <tr>
+                    <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
+                    <td data-label="اسم المخدوم" class="text-start">
+                        <div class="fw-bold text-dark fs-6">${item.name}</div>
+                        ${item.area ? `<div class="text-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.area}</div>` : ''}
+                    </td>
+                    <td data-label="المرحلة">
+                        <span class="badge bg-light text-dark border fw-bold">${item.stage}</span>
+                    </td>
+                    <td data-label="حالة الغياب">${streakBadge}</td>
+                    <td data-label="التواصل السريع">
+                        <div class="d-flex gap-1 justify-content-center flex-wrap">
+                            ${callButtons.join('')}
+                        </div>
+                    </td>
+                    <td data-label="آخر افتقاد">${lastVisitHtml}</td>
+                    <td data-label="إجراء الافتقاد">
+                        <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
+                            <i class="fa-solid fa-plus"></i> تسجيل افتقاد
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    // فتح واتساب برسالة اطمئنان مخصصة
+    function openStudentWhatsApp(phone, studentName) {
+        if (!phone) return alert('لا يوجد رقم هاتف مسجل');
+        let clean = phone.replace(/[^0-9]/g, '');
+        if (clean.startsWith('0')) clean = '20' + clean.slice(1);
+        else if (!clean.startsWith('20')) clean = '20' + clean;
+
+        const firstName = (studentName || 'حبيبي').trim().split(' ')[0];
+        const msg = `سلام ونعمة يا ${firstName} الغالي، بنطمن عليك من كنيستك وأسرة إعداد خدام كنيسة القديس بولس الرسول. مفتقدينك جداً وبنصلي تكون بكل خير وسلام، ومنتظرينك الجمعة القادمة تفرحنا بوجودك ❤️🕊️`;
+        const url = `https://wa.me/${clean}?text=${encodeURIComponent(msg)}`;
+        window.open(url, '_blank');
+    }
+
+    // فتح نافذة تسجيل افتقاد
+    function openRecordVisitModal(memberId) {
+        currentSelectedMemberId = memberId;
+        const member = allMembers.find(m => String(m.id) === String(memberId));
+        if (!member) return;
+
+        const streak = calculateConsecutiveAbsences(member.code || member.id);
+        document.getElementById('mStudentName').textContent = member.name || 'مخدوم';
+        document.getElementById('mStudentCode').textContent = `#${member.code || member.id}`;
+        document.getElementById('mStudentStage').textContent = member.stage || member.level || 'المرحلة';
+        document.getElementById('mStudentStreak').textContent = streak > 0 ? `غائب ${streak} جمعات` : 'حاضر ومنتظم';
+        
+        document.getElementById('mVisitNotes').value = '';
+        document.getElementById('mServantName').value = getCurrentServantName();
+        document.getElementById('mVisitDate').value = new Date().toISOString().split('T')[0];
+
+        // Reset type to first
+        activeVisitType = 'اتصال هاتفي';
+        const typeBtns = document.querySelectorAll('.type-btn');
+        typeBtns.forEach((b, idx) => {
+            if (idx === 0) b.classList.add('active');
+            else b.classList.remove('active');
+        });
+
+        document.getElementById('visitModalBackdrop').classList.add('show');
+    }
+
+    function closeVisitModal() {
+        document.getElementById('visitModalBackdrop').classList.remove('show');
+        currentSelectedMemberId = null;
+    }
+
+    function selectVisitType(type, btn) {
+        activeVisitType = type;
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function applyCapsule(text) {
+        const textarea = document.getElementById('mVisitNotes');
+        if (!textarea) return;
+        if (textarea.value.trim()) {
+            textarea.value = textarea.value.trim() + ' | ' + text;
+        } else {
+            textarea.value = text;
+        }
+        textarea.focus();
+    }
+
+    // حفظ كبسولة الافتقاد
+    async function saveCurrentVisitation() {
+        if (!currentSelectedMemberId) return;
+        const notes = document.getElementById('mVisitNotes').value.trim();
+        const servantName = document.getElementById('mServantName').value.trim() || getCurrentServantName();
+        const visitDate = document.getElementById('mVisitDate').value || new Date().toISOString().split('T')[0];
+        const saveBtn = document.getElementById('btnSaveVisit');
+
+        if (!notes) {
+            alert('يرجى كتابة الملاحظة أو اختيار إحدى الكبسولات السريعة أولاً.');
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحفظ...';
+
+        const memberIndex = allMembers.findIndex(m => String(m.id) === String(currentSelectedMemberId));
+        if (memberIndex === -1) {
+            alert('تعذر العثور على المخدوم في النظام.');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد';
+            return;
+        }
+
+        const newVisit = {
+            date: visitDate,
+            by: servantName,
+            type: activeVisitType,
+            text: notes,
+            createdAt: new Date().toISOString()
+        };
+
+        if (!Array.isArray(allMembers[memberIndex].visitations)) {
+            allMembers[memberIndex].visitations = [];
+        }
+        allMembers[memberIndex].visitations.unshift(newVisit);
+
+        // 1. الحفظ في الذاكرة المحلية
+        try {
+            localStorage.setItem('my_church_class', JSON.stringify(allMembers));
+        } catch (e) {
+            console.warn("Local storage save warning:", e);
+        }
+
+        // 2. الحفظ في Firestore
+        if (fsdb) {
+            try {
+                await fsdb.collection('members').doc(String(allMembers[memberIndex].id)).update({
+                    visitations: allMembers[memberIndex].visitations
+                });
+            } catch (err) {
+                console.warn("Firestore update error:", err);
+            }
+        }
+
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> حفظ الافتقاد';
+        closeVisitModal();
+
+        renderStats();
+        filterAndRender();
+        showToast('✅ تم تسجيل كبسولة الافتقاد بنجاح في السحابة!');
+    }
+
+    // عرض سجل الافتقادات
+    function viewVisitationHistory(memberId) {
+        const member = allMembers.find(m => String(m.id) === String(memberId));
+        if (!member) return;
+
+        document.getElementById('hStudentName').textContent = member.name || 'مخدوم';
+        document.getElementById('hStudentCodeStage').textContent = `#${member.code || member.id} • ${member.stage || member.level || ''}`;
+
+        const container = document.getElementById('historyTimelineContainer');
+        const visits = Array.isArray(member.visitations) ? member.visitations : [];
+
+        if (visits.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-muted">لا توجد افتقادات سابقة مسجلة لهذا المخدوم.</div>';
+        } else {
+            let html = '';
+            visits.forEach(v => {
+                html += `
+                    <div class="history-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="history-date">${escapeHtml(v.date || '')}</span>
+                            <span class="badge bg-light text-dark border">${escapeHtml(v.type || 'اتصال')}</span>
+                        </div>
+                        <div class="history-servant">${escapeHtml(v.by || 'خادم')}</div>
+                        <div class="history-text">${escapeHtml(v.text || '')}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        document.getElementById('historyModalBackdrop').classList.add('show');
+    }
+
+    function closeHistoryModal() {
+        document.getElementById('historyModalBackdrop').classList.remove('show');
+    }
+
+    // تصدير إكسيل
+    function exportVisitationExcel() {
+        if (!allMembers || allMembers.length === 0) {
+            alert('لا توجد بيانات للتصدير.');
+            return;
+        }
+
+        let csv = '\uFEFF';
+        csv += 'كود الدارس,اسم المخدوم,المرحلة,النوع,رقم الهاتف,هاتف ولي الأمر,المنطقة والعنوان,عدد جمعات الغياب المتتالية,حالة الغياب,تاريخ آخر افتقاد,خادم آخر افتقاد,نوع آخر افتقاد,ملاحظة آخر افتقاد,إجمالي الافتقادات المسجلة\n';
+
+        allMembers.forEach(m => {
+            const sCode = String(m.code || m.id || '').replace(/"/g, '""');
+            const sName = String(m.name || '').replace(/"/g, '""');
+            const sStage = String(m.stage || m.level || '').replace(/"/g, '""');
+            const sGender = String(m.gender || 'بنين').replace(/"/g, '""');
+            const sPhone = String(m.phone || '').replace(/"/g, '""');
+            const sParentPhone = String(m.parent_phone || '').replace(/"/g, '""');
+            const sArea = String(m.area || m.address || '').replace(/"/g, '""');
+            const streak = calculateConsecutiveAbsences(sCode);
+            const statusLabel = streak >= 3 ? `منقطع (${streak} جمعات)` : (streak === 2 ? 'غائب جمعتين' : (streak === 1 ? 'غائب جمعة' : 'منتظم'));
+            const visits = Array.isArray(m.visitations) ? m.visitations : [];
+            const last = visits.length > 0 ? visits[0] : null;
+
+            const lDate = last ? String(last.date || '').replace(/"/g, '""') : 'لا يوجد';
+            const lBy = last ? String(last.by || '').replace(/"/g, '""') : '';
+            const lType = last ? String(last.type || '').replace(/"/g, '""') : '';
+            const lText = last ? String(last.text || '').replace(/"/g, '""') : '';
+
+            csv += `"${sCode}","${sName}","${sStage}","${sGender}","${sPhone}","${sParentPhone}","${sArea}","${streak}","${statusLabel}","${lDate}","${lBy}","${lType}","${lText}","${visits.length}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `كشف_الافتقاد_الذكي_والغياب_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // تصدير شيت مخصص متوافق 100% مع برنامج الواتساب New whats 2027
+    function exportWhatsAppFollowupSheet() {
+        if (!allMembers || allMembers.length === 0) {
+            alert('لا توجد بيانات للتصدير.');
+            return;
+        }
+
+        // استهداف المخدومين الغائبين (جمعية فأكثر) أو كامل القائمة إذا لم يوجد غياب
+        let targets = allMembers.filter(m => {
+            const streak = calculateConsecutiveAbsences(m.code || m.id);
+            return streak >= 1;
+        });
+
+        if (targets.length === 0) {
+            if (!confirm('لم يتم رصد غياب متتالي للمخدومين، هل ترغب في تصدير كل المخدومين لشيت الواتساب؟')) {
+                return;
+            }
+            targets = allMembers;
+        }
+
+        const headers = [
+            "الاسم",
+            "رقم الواتساب",
+            "المرحلة",
+            "كود الامتحان",
+            "عدد جمعات الغياب",
+            "حالة الغياب",
+            "تليفون ولي الأمر",
+            "أب الاعتراف",
+            "نص رسالة الافتقاد"
+        ];
+
+        const rows = targets.map(m => {
+            const name = String(m.name || '').trim();
+            const rawPhone = String(m.phone || '').trim();
+            const parentPhone = String(m.parent_phone || '').trim();
+            let targetPhone = rawPhone || parentPhone;
+            if (targetPhone.startsWith('01') && targetPhone.length === 11) {
+                targetPhone = '20' + targetPhone.slice(1);
+            }
+            const stage = String(m.stage || m.level || 'الفرقة الأولى').trim();
+            const code = String(m.code || m.id || '').trim();
+            const streak = calculateConsecutiveAbsences(m.code || m.id);
+            const statusLabel = streak >= 3 ? `منقطع (${streak} جمعات)` : (streak === 2 ? 'غائب جمعتين' : (streak === 1 ? 'غائب جمعة' : 'منتظم'));
+            const confFather = String(m.confessor || m.confession_father || '').trim();
+
+            const customMsg = streak >= 3
+                ? `سلام ومحبة يا ${name}، مفتقدينك جداً في الكنيسة وإعداد خدام بقالك ${streak} جمعات. حابين نطمن عليك وبنصلي لك دايماً تكون بخير ❤️🕊️`
+                : (streak >= 1
+                    ? `سلام ونعمة يا ${name}، افتقدناك في اجتماع إعداد خدام الجمعة الماضية. طمنا عليك وكل سنة وأنت طيب وبخير 🕊️`
+                    : `سلام ومحبة يا ${name}، بنفكرك بميعاد اجتماع إعداد خدام والقداس القادم. في انتظارك وربنا يباركك 🙏`);
+
+            return [
+                name,
+                targetPhone,
+                stage,
+                code,
+                streak,
+                statusLabel,
+                parentPhone,
+                confFather,
+                customMsg
+            ];
+        });
+
+        const aoa = [headers, ...rows];
+        const fileName = `شيت_افتقاد_الواتساب_NewWhats_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        if (typeof XLSX !== 'undefined') {
+            try {
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "الافتقاد_الذكي");
+                XLSX.writeFile(wb, fileName);
+                return;
+            } catch(e) {
+                console.warn("تعذر تصدير xlsx، جاري التصدير كـ CSV بديل:", e);
+            }
+        }
+
+        let csv = '﻿' + headers.map(h => `"${h}"`).join(',') + '
+';
+        rows.forEach(r => {
+            csv += r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',') + '
+';
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.replace('.xlsx', '.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // إغلاق المودالات عند النقر على الخلفية
+    window.addEventListener('click', function(e) {
+        const vModal = document.getElementById('visitModalBackdrop');
+        const hModal = document.getElementById('historyModalBackdrop');
+        if (e.target === vModal) closeVisitModal();
+        if (e.target === hModal) closeHistoryModal();
+    });
+
+    // التهيئة عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
+            const fromGroup = urlParams.get('group') || 'people';
+            const smartBackBtn = document.querySelector('[data-smart-back]');
+            if (smartBackBtn) {
+                smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
+            }
+        } catch (e) {}
+
+        loadDataFromCloud();
+    });
+</script>
+</body>
+</html>
