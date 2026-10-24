@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="auth-client.js"></script>
+    <script src="js/xlsx.full.min.js"></script>
+    <script>if (typeof XLSX === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>'); }</script>
     <style>
         :root {
             --primary: #0c2461;
@@ -264,6 +266,120 @@
             font-weight: 700;
             font-size: 0.88rem;
         }
+
+        /* نافذة استيراد بيانات جوجل فورم / جوجل شيت */
+        .import-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(12, 36, 97, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        .import-modal-content {
+            background: #ffffff;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid #cbd5e1;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .import-modal-header {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .import-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #ffffff;
+            font-size: 1.3rem;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: 0.2s ease;
+        }
+
+        .import-close-btn:hover {
+            background: rgba(239, 68, 68, 0.8);
+        }
+
+        .import-tabs-bar {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid #cbd5e1;
+            overflow-x: auto;
+        }
+
+        .import-tab-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 10px;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .import-tab-btn:hover {
+            color: #0c2461;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .import-tab-btn.active {
+            color: #0c2461;
+            border-bottom-color: #0c2461;
+            background: #ffffff;
+        }
+
+        .dropzone-box {
+            border: 2.5px dashed #94a3b8;
+            border-radius: 14px;
+            padding: 32px 20px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .dropzone-box:hover, .dropzone-box.dragover {
+            border-color: #1e3799;
+            background: #eef2ff;
+        }
+
     </style>
 </head>
 <body>
@@ -276,6 +392,9 @@
             <i class="fa-solid fa-arrow-right"></i> العودة للوحة الخدمة
         </a>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
+                <i class="fa-solid fa-cloud-arrow-down text-success"></i> سحب البيانات من جوجل فورم / شيت 📥
+            </button>
             <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
                 <i class="fa-solid fa-file-excel text-success"></i> تصدير شيت خدمتي برو (CSV)
             </button>
@@ -358,6 +477,7 @@
             <option value="interview">معلق للمقابلة 🟠</option>
             <option value="rejected">غير مجتاز / غائب 🔴</option>
         </select>
+                <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()"><i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥</button>
         <button type="button" class="btn-custom" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe;" onclick="openUserFormModal()"><i class="fa-solid fa-window-restore me-1"></i> فتح فورم رصد الدرجات (VBA) 🪟</button>
         <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
             <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم جديد
@@ -392,6 +512,175 @@
     </div>
 
 </div>
+
+
+    <!-- نافذة استيراد وسحب البيانات من جوجل فورم / جوجل شيت / إكسيل -->
+    <div id="importModalOverlay" class="import-modal-overlay">
+        <div class="import-modal-content">
+            <!-- رأس النافذة -->
+            <div class="import-modal-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-cloud-arrow-down fs-5"></i>
+                    <strong style="font-size: 1.05rem;">سحب واستيراد بيانات المخدومين الجدد</strong>
+                </div>
+                <button type="button" onclick="closeImportModal()" class="import-close-btn">&times;</button>
+            </div>
+
+            <!-- تبويبات طرق الاستيراد -->
+            <div class="import-tabs-bar">
+                <button type="button" class="import-tab-btn active" id="btnTabSheetLink" onclick="switchImportTab('link')">
+                    <i class="fa-solid fa-link"></i> رابط شيت جوجل السحابي
+                </button>
+                <button type="button" class="import-tab-btn" id="btnTabFileUpload" onclick="switchImportTab('file')">
+                    <i class="fa-solid fa-file-arrow-up"></i> رفع ملف إكسيل / CSV
+                </button>
+                <button type="button" class="import-tab-btn" id="btnTabClipboard" onclick="switchImportTab('paste')">
+                    <i class="fa-solid fa-paste"></i> نسخ ولصق مباشر
+                </button>
+                <button type="button" class="import-tab-btn" id="btnTabFormHelp" onclick="switchImportTab('help')">
+                    <i class="fa-brands fa-google"></i> مساعدة جوجل فورم
+                </button>
+            </div>
+
+            <!-- محتوى التبويبات -->
+            <div style="padding: 18px 20px; overflow-y: auto; flex: 1;">
+                
+                <!-- 1. تبويب رابط جوجل شيت -->
+                <div id="panelTabLink" class="import-tab-panel">
+                    <label style="display: block; font-weight: 800; margin-bottom: 6px; color: var(--primary);">
+                        🔗 ضع رابط شيت جوجل (Google Sheets URL) أو رابط الردود:
+                    </label>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <input type="text" id="googleSheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.9rem;" oninput="onGoogleUrlInputChange()">
+                        <button type="button" class="btn-custom btn-navy" onclick="handleFetchGoogleSheet()" id="btnFetchSheet">
+                            <i class="fa-solid fa-cloud-arrow-down"></i> سحب البيانات
+                        </button>
+                    </div>
+
+                    <!-- تنبيه ذكي عند وضع رابط جوجل فورم viewform -->
+                    <div id="googleFormWarningBox" style="display: none; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <i class="fa-solid fa-triangle-exclamation text-warning fs-5" style="margin-top: 2px;"></i>
+                            <div style="font-size: 0.88rem; color: #92400e; line-height: 1.6;">
+                                <strong>تنبيه: لقد قمت بوضع رابط استمارة التقديم (viewform)!</strong><br>
+                                جوجل تمنع سحب الردود من رابط الاستمارة مباشرة لحماية الخصوصية. لسحب البيانات في ثوانٍ:
+                                <ol style="margin: 6px 0 6px 18px; padding: 0;">
+                                    <li>افتح استمارتك كمسؤول بحسابك في جوجل.</li>
+                                    <li>اضغط على تبويب <strong>"الردود" (Responses)</strong> بالأعلى.</li>
+                                    <li>اضغط على أيقونة الإكسيل الخضراء <strong>"الربط بجداول البيانات" (Link to Sheets)</strong>.</li>
+                                    <li>انسخ رابط جدول الإكسيل الذي سيفتح وضعه هنا، أو نزله كملف إكسيل (.xlsx) وارفعه في تبويب "رفع ملف"!</li>
+                                </ol>
+                                <button type="button" class="btn-custom" style="padding: 4px 10px; font-size: 0.8rem; background: #fff; border-color: #f59e0b; color: #b45309;" onclick="switchImportTab('help')">
+                                    <i class="fa-solid fa-circle-question me-1"></i> شاهد الشرح المصور خطوة بخطوة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-size: 0.84rem; color: #64748b; line-height: 1.5;">
+                        <i class="fa-solid fa-circle-info text-info me-1"></i>
+                        <strong>ملاحظة:</strong> يجب أن يكون شيت جوجل متاحاً للمشاهدة عبر الرابط ("أي شخص لديه الرابط يمكنه العرض" - Anyone with link).
+                    </div>
+                </div>
+
+                <!-- 2. تبويب رفع ملف إكسيل / CSV -->
+                <div id="panelTabFile" class="import-tab-panel" style="display: none;">
+                    <div class="dropzone-box" id="dropzone" onclick="document.getElementById('fileInput').click()">
+                        <i class="fa-solid fa-file-excel fa-3x" style="color: #10b981; margin-bottom: 10px;"></i>
+                        <h4 style="margin: 0 0 6px; font-size: 1.05rem; color: #1e293b;">اضغط لاختيار ملف الإكسيل أو اسحبه هنا</h4>
+                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">يدعم ملفات إكسيل من جوجل فورم (.xlsx, .xls) أو ملفات (.csv)</p>
+                        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelected(event)">
+                    </div>
+                    <div id="fileInfoBox" style="display: none; margin-top: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; color: #065f46;">
+                        <i class="fa-solid fa-check-circle me-1"></i> تم قراءة الملف: <strong id="selectedFileName"></strong>
+                    </div>
+                </div>
+
+                <!-- 3. تبويب النسخ واللصق المباشر -->
+                <div id="panelTabPaste" class="import-tab-panel" style="display: none;">
+                    <label style="display: block; font-weight: 800; margin-bottom: 6px; color: var(--primary);">
+                        📋 الصق محتويات الشيت مباشرة (من إكسيل أو جوجل شيت):
+                    </label>
+                    <textarea id="pasteDataInput" rows="6" placeholder="حدد الخلايا من شيت جوجل أو الإكسيل، اضغط Ctrl+C، ثم الصقها هنا (Ctrl+V)..." style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 0.85rem; box-sizing: border-box; resize: vertical;"></textarea>
+                    <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+                        <button type="button" class="btn-custom btn-navy" onclick="handlePasteImport()">
+                            <i class="fa-solid fa-table me-1"></i> فحص ومعاينة البيانات الملصوقة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4. تبويب شرح ربط جوجل فورم -->
+                <div id="panelTabHelp" class="import-tab-panel" style="display: none;">
+                    <div style="background: #eef2ff; border-radius: 12px; padding: 16px; border: 1px solid #c7d2fe;">
+                        <h4 style="margin: 0 0 10px; color: #1e3799; font-size: 1.05rem;">
+                            <i class="fa-brands fa-google me-1"></i> كيف تستخرج رابط شيت إكسيل من استمارة جوجل فورم في 4 خطوات؟
+                        </h4>
+                        <ol style="margin: 0; padding-right: 20px; font-size: 0.9rem; line-height: 1.8; color: #1e293b;">
+                            <li>افتح استمارتك على Google Forms وأنت مسجل دخول بحسابك.</li>
+                            <li>اضغط على تبويب <strong>الردود (Responses)</strong> في أعلى الصفحة.</li>
+                            <li>اضغط على أيقونة الإكسيل الخضراء <strong>"الربط بجداول البيانات" (Link to Sheets)</strong>.</li>
+                            <li>سيفتح لك Google Sheets في تبويب جديد. انسخ رابط هذا الشيت من شريط المتصفح وضعه في تبويب <strong>"رابط شيت جوجل"</strong> هنا!</li>
+                        </ol>
+                        <div style="margin-top: 14px; text-align: center;">
+                            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfbj_vp6ILH9EOarz_Hv0gNn52mh-ii1FpJdKh2IO116OiEvQ/viewform?usp=header" target="_blank" class="btn-custom" style="background: #ffffff; border-color: #3b82f6; color: #1d4ed8;">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> فتح استمارة إعداد الخدام
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قسم المعاينة والاعتماد (يظهر تلقائياً بمجرد استخراج البيانات) -->
+                <div id="importPreviewSection" style="display: none; margin-top: 18px; border-top: 1.5px dashed #cbd5e1; padding-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span class="badge bg-success" style="font-size: 0.9rem; padding: 6px 12px;">
+                                <i class="fa-solid fa-users me-1"></i> تم العثور على: <strong id="previewCandidateCount">0</strong> مخدوم
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 14px; font-size: 0.88rem; font-weight: 700;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="importMode" id="importModeReplace" value="replace" checked>
+                                <span>استبدال الكشف الحالي</span>
+                            </label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <input type="radio" name="importMode" id="importModeMerge" value="merge">
+                                <span>دمج وتخطي المكرر</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- جدول المعاينة المصغر -->
+                    <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 14px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+                            <thead style="background: #1e293b; color: #fff; position: sticky; top: 0;">
+                                <tr>
+                                    <th style="padding: 6px 8px;">كود</th>
+                                    <th style="padding: 6px 8px; text-align: right;">اسم المخدوم</th>
+                                    <th style="padding: 6px 8px;">النوع</th>
+                                    <th style="padding: 6px 8px;">الهاتف</th>
+                                    <th style="padding: 6px 8px; text-align: right;">أب الاعتراف</th>
+                                    <th style="padding: 6px 8px;">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- زر الاعتماد النهائي -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                        <button type="button" class="btn-custom btn-navy" style="flex: 1; padding: 10px;" onclick="applyImportCandidates()">
+                            <i class="fa-solid fa-circle-check me-1"></i> اعتماد وإدراج المخدومين في الكشف الآن ✅
+                        </button>
+                        <button type="button" class="btn-custom" onclick="closeImportModal()">
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة الفورم التفاعلية المطابقة لشاشة الفيجوال بيسك إكسيل (VBA UserForm) -->
     <div id="vbaModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center; padding:15px;">
@@ -775,6 +1064,545 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+
+    // =========================================================================
+    // محرك استيراد وسحب البيانات الذكي (Google Sheets / Google Forms / Excel)
+    // =========================================================================
+    let stagedImportCandidates = [];
+
+    function openImportModal() {
+        const overlay = document.getElementById('importModalOverlay');
+        overlay.style.display = 'flex';
+        switchImportTab('link');
+        resetImportPreview();
+        initDropzoneEvents();
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModalOverlay').style.display = 'none';
+    }
+
+    function switchImportTab(tabKey) {
+        const tabs = ['link', 'file', 'paste', 'help'];
+        tabs.forEach(t => {
+            const btn = document.getElementById(t === 'link' ? 'btnTabSheetLink' : (t === 'file' ? 'btnTabFileUpload' : (t === 'paste' ? 'btnTabClipboard' : 'btnTabFormHelp')));
+            const panel = document.getElementById(t === 'link' ? 'panelTabLink' : (t === 'file' ? 'panelTabFile' : (t === 'paste' ? 'panelTabPaste' : 'panelTabHelp')));
+            if (btn && panel) {
+                if (t === tabKey) {
+                    btn.classList.add('active');
+                    panel.style.display = 'block';
+                } else {
+                    btn.classList.remove('active');
+                    panel.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    function resetImportPreview() {
+        stagedImportCandidates = [];
+        const previewSec = document.getElementById('importPreviewSection');
+        if (previewSec) previewSec.style.display = 'none';
+        const fileInfo = document.getElementById('fileInfoBox');
+        if (fileInfo) fileInfo.style.display = 'none';
+        const warnBox = document.getElementById('googleFormWarningBox');
+        if (warnBox) warnBox.style.display = 'none';
+    }
+
+    function onGoogleUrlInputChange() {
+        const val = (document.getElementById('googleSheetUrlInput').value || '').trim();
+        const warnBox = document.getElementById('googleFormWarningBox');
+        if (/docs\.google\.com\/forms/i.test(val)) {
+            warnBox.style.display = 'block';
+        } else {
+            warnBox.style.display = 'none';
+        }
+    }
+
+    async function handleFetchGoogleSheet() {
+        const inputUrl = (document.getElementById('googleSheetUrlInput').value || '').trim();
+        if (!inputUrl) {
+            alert('الرجاء إدخال رابط شيت جوجل أولاً.');
+            return;
+        }
+
+        if (/docs\.google\.com\/forms/i.test(inputUrl)) {
+            document.getElementById('googleFormWarningBox').style.display = 'block';
+            alert('تنبيه: الرابط المدخل هو رابط استمارة التقديم (Google Form). يرجى فتح تبويب "الردود" في الفورم ثم "الربط بجداول البيانات" ونسخ رابط الشيت!');
+            return;
+        }
+
+        const btn = document.getElementById('btnFetchSheet');
+        const origText = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري السحب...';
+        btn.disabled = true;
+
+        try {
+            // استخراج معرف الشيت ورقم الصفحة gid
+            const idMatch = inputUrl.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            const gidMatch = inputUrl.match(/gid=([0-9]+)/);
+            const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : '';
+
+            let targetUrl = inputUrl;
+            if (idMatch && idMatch[1]) {
+                const sheetId = idMatch[1];
+                targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv${gidParam}`;
+            }
+
+            let resp;
+            try {
+                resp = await fetch(targetUrl);
+            } catch(e) {
+                // محاولة أخرى بالرابط التصديري المباشر
+                if (idMatch && idMatch[1]) {
+                    const fallbackUrl = `https://docs.google.com/spreadsheets/d/${idMatch[1]}/export?format=csv${gidParam}`;
+                    resp = await fetch(fallbackUrl);
+                } else {
+                    throw e;
+                }
+            }
+
+            if (!resp.ok) {
+                throw new Error(`تعذر تحميل الملف من جوجل (رمز الخطأ: ${resp.status})`);
+            }
+
+            const csvText = await resp.text();
+            if (!csvText || csvText.length < 10) {
+                throw new Error('الملف المسترجع فارغ.');
+            }
+
+            const rows = parseCSV(csvText);
+            const candidates = convertRowsToCandidates(rows);
+
+            if (candidates.length === 0) {
+                alert('لم يتم العثور على مخدومين في هذا الشيت. تأكد من أن الشيت يحتوي على أسماء مخدومين.');
+                return;
+            }
+
+            renderImportPreview(candidates);
+
+        } catch (err) {
+            console.error('Fetch Google Sheet Error:', err);
+            alert(`⚠️ تعذر الوصول المباشر لشيت جوجل.\nالسبب: الشيت قد يكون خاصاً، أو يمنع المتصفح الوصول له.\n\nالحل السهل جداً:\n1. افتح الشيت في متصفحك واضغط "ملف" -> "تنزيل" -> Microsoft Excel (.xlsx).\n2. انتقل لتبويب "رفع ملف إكسيل" هنا وارفع الملف في ثانية واحدة!\n\nأو اضغط "مشاركة" في الشيت واجعله: "أي شخص لديه الرابط يمكنه العرض".`);
+        } finally {
+            btn.innerHTML = origText;
+            btn.disabled = false;
+        }
+    }
+
+    function initDropzoneEvents() {
+        const dropzone = document.getElementById('dropzone');
+        if (!dropzone || dropzone._hasEvents) return;
+        dropzone._hasEvents = true;
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropzone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(evt => {
+            dropzone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            });
+        });
+
+        dropzone.addEventListener('drop', e => {
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                processUploadedFile(files[0]);
+            }
+        });
+    }
+
+    function handleFileSelected(event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) processUploadedFile(file);
+    }
+
+    function processUploadedFile(file) {
+        const fileName = file.name;
+        document.getElementById('selectedFileName').textContent = fileName;
+        document.getElementById('fileInfoBox').style.display = 'block';
+
+        const isXlsx = /\.xlsx?$/i.test(fileName);
+        const reader = new FileReader();
+
+        if (isXlsx) {
+            reader.onload = function(e) {
+                try {
+                    if (typeof XLSX === 'undefined') {
+                        alert('مكتبة قراءة الإكسيل غير محملة. يرجى تجربة حفظ الملف بصيغة CSV أو لصق البيانات.');
+                        return;
+                    }
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    const candidates = convertRowsToCandidates(rows);
+                    if (candidates.length === 0) {
+                        alert('لم يتم العثور على مخدومين في ملف الإكسيل.');
+                        return;
+                    }
+                    renderImportPreview(candidates);
+                } catch(err) {
+                    console.error('Error parsing XLSX:', err);
+                    alert('حدث خطأ أثناء قراءة ملف الإكسيل: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const rows = parseCSV(text);
+                    const candidates = convertRowsToCandidates(rows);
+                    if (candidates.length === 0) {
+                        alert('لم يتم العثور على مخدومين في ملف الـ CSV.');
+                        return;
+                    }
+                    renderImportPreview(candidates);
+                } catch(err) {
+                    console.error('Error parsing CSV:', err);
+                    alert('حدث خطأ أثناء قراءة ملف CSV: ' + err.message);
+                }
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+    }
+
+    function handlePasteImport() {
+        const raw = (document.getElementById('pasteDataInput').value || '').trim();
+        if (!raw) {
+            alert('الرجاء لصق البيانات في المربع أولاً.');
+            return;
+        }
+
+        let rows;
+        if (raw.includes('\t')) {
+            rows = parseTSV(raw);
+        } else {
+            rows = parseCSV(raw);
+        }
+
+        const candidates = convertRowsToCandidates(rows);
+        if (candidates.length === 0) {
+            alert('لم يتم العثور على أسماء مخدومين في النص الملصوق.');
+            return;
+        }
+
+        renderImportPreview(candidates);
+    }
+
+    // محلل CSV نقي يدعم الفواصل والنصوص المقتبسة والأقواس والأسطر المكسورة
+    function parseCSV(text) {
+        const lines = [];
+        let row = [""];
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+            const c = text[i];
+            const next = text[i + 1];
+            if (c === '"') {
+                if (inQuotes && next === '"') {
+                    row[row.length - 1] += '"';
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c === ',' && !inQuotes) {
+                row.push("");
+            } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                if (c === '\r' && next === '\n') i++;
+                lines.push(row);
+                row = [""];
+            } else {
+                row[row.length - 1] += c;
+            }
+        }
+        if (row.length > 1 || row[0] !== "") lines.push(row);
+        return lines;
+    }
+
+    function parseTSV(text) {
+        return text.split(/\r?\n/).filter(l => l.trim().length > 0).map(l => l.split('\t'));
+    }
+
+    // اكتشاف أعمدة جوجل فورم الـ 30 تلقائياً
+    function detectColumnIndexes(headers) {
+        const map = {
+            name: -1, phone: -1, parentPhone: -1, confessor: -1, confessorChurch: -1,
+            dob: -1, dobYear: -1, gender: -1, email: -1, address: -1, attended: -1,
+            code: -1, g1: -1, g2: -1, g3: -1, g4: -1,
+            spiritualPray: -1, lastConfDates: -1, lastCommunionDate: -1,
+            spiritualNotes: -1, psychNotes: -1, problemType: -1
+        };
+
+        headers.forEach((hRaw, idx) => {
+            const h = String(hRaw || '').trim().toLowerCase();
+            if (!h) return;
+
+            // الاسم الثلاثي أو الرباعي
+            if (map.name === -1 && (h.includes('الأسم') || h.includes('الاسم') || h.includes('name') || h.includes('المخدوم') || h.includes('الطالب'))) {
+                if (!h.includes('اعتراف') && !h.includes('كنيسة') && !h.includes('ولي')) {
+                    map.name = idx;
+                }
+            }
+            // هاتف واتساب
+            if (map.phone === -1 && (h.includes('واتساب') || (h.includes('تليفون') && !h.includes('آخر') && !h.includes('ولي')) || h.includes('موبايل') || h.includes('phone') || h.includes('mobile'))) {
+                map.phone = idx;
+            }
+            // هاتف آخر أو ولي الأمر
+            if (map.parentPhone === -1 && (h.includes('آخر') || h.includes('ولي') || h.includes('والد') || h.includes('parent'))) {
+                map.parentPhone = idx;
+            }
+            // أب الاعتراف
+            if (map.confessor === -1 && (h.includes('اعتراف') || h.includes('كاهن') || h.includes('confessor')) && !h.includes('كنيسة') && !h.includes('تاريخ') && !h.includes('تذكية')) {
+                map.confessor = idx;
+            }
+            // كنيسة أب الاعتراف
+            if (map.confessorChurch === -1 && (h.includes('كنيسة') || h.includes('church'))) {
+                map.confessorChurch = idx;
+            }
+            // تاريخ الميلاد
+            if (map.dob === -1 && (h.includes('تاريخ الميلاد') || h.includes('ميلاد') || h.includes('dob') || h.includes('birth'))) {
+                if (!h.includes('سنة')) map.dob = idx;
+            }
+            // سنة الميلاد
+            if (map.dobYear === -1 && (h.includes('سنة الميلاد') || (h.includes('سنة') && h.includes('ميلاد')))) {
+                map.dobYear = idx;
+            }
+            // النوع / الجنس
+            if (map.gender === -1 && (h.includes('النوع') || h.includes('الجنس') || h.includes('gender'))) {
+                map.gender = idx;
+            }
+            // البريد الإلكتروني
+            if (map.email === -1 && (h.includes('email') || h.includes('gmail') || h.includes('بريد') || h.includes('إيميل'))) {
+                map.email = idx;
+            }
+            // العنوان
+            if (map.address === -1 && (h.includes('عنوان') || h.includes('سكن') || h.includes('address'))) {
+                map.address = idx;
+            }
+            // هل حضرت الامتحان
+            if (map.attended === -1 && (h.includes('حضرت') || h.includes('حضور') || h.includes('attended'))) {
+                map.attended = idx;
+            }
+            // الكود
+            if (map.code === -1 && (h.includes('كود') || h.includes('code') || h.includes('رقم الجلوس') || h === 'id')) {
+                map.code = idx;
+            }
+
+            // أسئلة الجانب الروحي من جوجل فورم
+            if (h.includes('اجبية') || h.includes('أجبية')) map.spiritualPray = idx;
+            if (h.includes('تاريخين') && h.includes('اعتراف')) map.lastConfDates = idx;
+            if (h.includes('تناول')) map.lastCommunionDate = idx;
+
+            // الامتحانات
+            if (h.includes('امتحان 1') || h.includes('مادة 1') || h === 'g1') map.g1 = idx;
+            if (h.includes('امتحان 2') || h.includes('مادة 2') || h === 'g2') map.g2 = idx;
+            if (h.includes('امتحان 3') || h.includes('مادة 3') || h === 'g3') map.g3 = idx;
+            if (h.includes('امتحان 4') || h.includes('مادة 4') || h === 'g4') map.g4 = idx;
+
+            // الملاحظات
+            if (h.includes('جانب روحي') || h.includes('ملاحظات روحية')) map.spiritualNotes = idx;
+            if (h.includes('جانب نفسي') || h.includes('ملاحظات نفسية') || h.includes('سلوك')) map.psychNotes = idx;
+            if (h.includes('تصنيف') || h.includes('مشكلة')) map.problemType = idx;
+        });
+
+        return map;
+    }
+
+    function convertRowsToCandidates(rows, startCode = 2201) {
+        if (!rows || rows.length < 2) return [];
+        const headers = rows[0];
+        const map = detectColumnIndexes(headers);
+
+        // خط دفاع احتياطي لاكتشاف عمود الاسم
+        if (map.name === -1) {
+            for (let c = 0; c < headers.length; c++) {
+                const h = String(headers[c] || '');
+                if (!h.includes('طابع') && !h.includes('Timestamp') && !h.includes('أوافق') && !h.includes('28')) {
+                    map.name = c;
+                    break;
+                }
+            }
+        }
+
+        let currentCode = startCode;
+        const candidates = [];
+
+        for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || row.length === 0) continue;
+
+            const nameVal = map.name !== -1 ? String(row[map.name] || '').trim() : '';
+            if (!nameVal || nameVal.length < 3) continue;
+
+            // أرقام الهواتف
+            let phoneVal = map.phone !== -1 ? String(row[map.phone] || '').trim() : '';
+            phoneVal = phoneVal.replace(/[^0-9+]/g, '');
+            if (phoneVal.startsWith('+2')) phoneVal = phoneVal.slice(2);
+            if (phoneVal.startsWith('20') && phoneVal.length === 12) phoneVal = phoneVal.slice(1);
+
+            let parentPhoneVal = map.parentPhone !== -1 ? String(row[map.parentPhone] || '').trim() : '';
+            parentPhoneVal = parentPhoneVal.replace(/[^0-9+]/g, '');
+            if (parentPhoneVal.startsWith('+2')) parentPhoneVal = parentPhoneVal.slice(2);
+            if (parentPhoneVal.startsWith('20') && parentPhoneVal.length === 12) parentPhoneVal = parentPhoneVal.slice(1);
+
+            // أب الاعتراف
+            let confVal = map.confessor !== -1 ? String(row[map.confessor] || '').trim() : '';
+            if (!confVal) confVal = 'لا يوجد';
+
+            // النوع
+            let genderVal = map.gender !== -1 ? String(row[map.gender] || '').trim() : '';
+            if (!genderVal) {
+                genderVal = 'بنين';
+            } else if (genderVal.includes('بنت') || genderVal.includes('أنثى') || genderVal.includes('آنسة') || genderVal.includes('سيدة') || genderVal.includes('بنات')) {
+                genderVal = 'بنات';
+            } else {
+                genderVal = 'بنين';
+            }
+
+            // تاريخ الميلاد
+            let dobVal = map.dob !== -1 ? String(row[map.dob] || '').trim() : '';
+            if (!dobVal && map.dobYear !== -1) {
+                const y = String(row[map.dobYear] || '').trim();
+                if (y) dobVal = `${y}-01-01`;
+            }
+            if (!dobVal) dobVal = '2004-01-01';
+
+            // حضور الامتحان
+            let attendedVal = true;
+            if (map.attended !== -1) {
+                const att = String(row[map.attended] || '').trim().toLowerCase();
+                if (att === 'لا' || att === 'غائب' || att === 'no' || att === 'false' || att === '0') {
+                    attendedVal = false;
+                }
+            }
+
+            // الكود
+            let codeVal = map.code !== -1 ? String(row[map.code] || '').trim() : '';
+            if (!codeVal || isNaN(Number(codeVal))) {
+                codeVal = String(currentCode++);
+            } else {
+                const num = Number(codeVal);
+                if (num >= currentCode) currentCode = num + 1;
+            }
+
+            // الملاحظات الروحية والنفسية
+            let spNotes = map.spiritualNotes !== -1 ? String(row[map.spiritualNotes] || '').trim() : '';
+            if (!spNotes) {
+                const parts = [];
+                if (map.spiritualPray !== -1 && row[map.spiritualPray]) parts.push(`صلاة الأجبية: ${row[map.spiritualPray]}`);
+                if (map.lastConfDates !== -1 && row[map.lastConfDates]) parts.push(`آخر اعتراف: ${row[map.lastConfDates]}`);
+                if (map.lastCommunionDate !== -1 && row[map.lastCommunionDate]) parts.push(`آخر تناول: ${row[map.lastCommunionDate]}`);
+                if (map.confessorChurch !== -1 && row[map.confessorChurch]) parts.push(`كنيسة أب الاعتراف: ${row[map.confessorChurch]}`);
+                spNotes = parts.join(' | ');
+            }
+
+            let psNotes = map.psychNotes !== -1 ? String(row[map.psychNotes] || '').trim() : '';
+            let probType = map.problemType !== -1 ? String(row[map.problemType] || '').trim() : '';
+            if (!probType) {
+                const confNorm = confVal.toLowerCase();
+                if (!confVal || confNorm === 'لا يوجد' || confNorm === 'none' || confNorm === 'لم يحدد') {
+                    probType = 'مشكلة اعتراف (مهلة أسبوع) 🟡';
+                } else {
+                    probType = 'لا توجد مشاكل (مقبول طبيعي) 🟢';
+                }
+            }
+
+            // درجات الامتحانات
+            const g1 = (map.g1 !== -1 && row[map.g1] !== '' && !isNaN(Number(row[map.g1]))) ? Number(row[map.g1]) : 0;
+            const g2 = (map.g2 !== -1 && row[map.g2] !== '' && !isNaN(Number(row[map.g2]))) ? Number(row[map.g2]) : 0;
+            const g3 = (map.g3 !== -1 && row[map.g3] !== '' && !isNaN(Number(row[map.g3]))) ? Number(row[map.g3]) : 0;
+            const g4 = (map.g4 !== -1 && row[map.g4] !== '' && !isNaN(Number(row[map.g4]))) ? Number(row[map.g4]) : 0;
+
+            candidates.push({
+                code: codeVal,
+                name: nameVal,
+                gender: genderVal,
+                phone: phoneVal,
+                parentPhone: parentPhoneVal,
+                dob: dobVal,
+                confessor: confVal,
+                attended: attendedVal,
+                g1: g1, g2: g2, g3: g3, g4: g4,
+                email: map.email !== -1 ? String(row[map.email] || '').trim() : '',
+                address: map.address !== -1 ? String(row[map.address] || '').trim() : '',
+                spiritualNotes: spNotes,
+                psychNotes: psNotes,
+                problemType: probType
+            });
+        }
+
+        return candidates;
+    }
+
+    function renderImportPreview(candidates) {
+        stagedImportCandidates = candidates;
+        document.getElementById('previewCandidateCount').textContent = candidates.length;
+        const tbody = document.getElementById('previewTableBody');
+
+        // عرض أول 10 صفوف للمعاينة السريعة
+        const sample = candidates.slice(0, 10);
+        tbody.innerHTML = sample.map(c => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 6px 8px; font-weight: bold; text-align: center;">${c.code}</td>
+                <td style="padding: 6px 8px; text-align: right; font-weight: bold;">${c.name}</td>
+                <td style="padding: 6px 8px; text-align: center;"><span class="badge ${c.gender === 'بنين' ? 'bg-primary' : 'bg-danger'}">${c.gender}</span></td>
+                <td style="padding: 6px 8px; text-align: center;">${c.phone || '-'}</td>
+                <td style="padding: 6px 8px; text-align: right;">${c.confessor || '-'}</td>
+                <td style="padding: 6px 8px; text-align: center;">${c.attended ? 'حاضر ✅' : 'غائب 🔴'}</td>
+            </tr>
+        `).join('');
+
+        if (candidates.length > 10) {
+            tbody.innerHTML += `<tr><td colspan="6" style="padding: 6px; text-align: center; color: #64748b; font-weight: bold; background: #f8fafc;">... و ${candidates.length - 10} مخدومين آخرين جاهزين للإدراج</td></tr>`;
+        }
+
+        document.getElementById('importPreviewSection').style.display = 'block';
+        document.getElementById('importPreviewSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function applyImportCandidates() {
+        if (!stagedImportCandidates || stagedImportCandidates.length === 0) {
+            alert('لا توجد بيانات للاعتماد.');
+            return;
+        }
+
+        const isReplace = document.getElementById('importModeReplace').checked;
+
+        if (isReplace) {
+            candidatesList = stagedImportCandidates;
+        } else {
+            // نمط الدمج مع تجنب التكرار بالاسم أو الهاتف
+            stagedImportCandidates.forEach(newC => {
+                const normName = newC.name.toLowerCase().trim();
+                const normPhone = (newC.phone || '').trim();
+                const existingIdx = candidatesList.findIndex(c => {
+                    const cName = (c.name || '').toLowerCase().trim();
+                    const cPhone = (c.phone || '').trim();
+                    return (normName && cName === normName) || (normPhone && cPhone && normPhone === cPhone);
+                });
+
+                if (existingIdx !== -1) {
+                    // تحديث المخدوم الحالي
+                    candidatesList[existingIdx] = { ...candidatesList[existingIdx], ...newC, code: candidatesList[existingIdx].code };
+                } else {
+                    candidatesList.push(newC);
+                }
+            });
+        }
+
+        saveGradesLocal(true);
+        renderTable();
+        closeImportModal();
+        alert(`تم اعتماد وإدراج ${stagedImportCandidates.length} مخدوم بنجاح وتحديث الكشف! 🎯`);
     }
 
     // التهيئة عند التحميل
