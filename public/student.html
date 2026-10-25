@@ -1489,6 +1489,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderSpiritualHabitsDashboard() {
+        try { renderSpiritualJourney(); } catch(e){ console.warn(e); }
         const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
         if (!code) return;
 
@@ -1683,6 +1684,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // تشغيل التهيئة عند تحميل الصفحة
     setTimeout(() => {
         renderSpiritualHabitsDashboard();
+        try { renderSpiritualJourney(); } catch(e){}
         initFeedbackSection();
     }, 400);
 

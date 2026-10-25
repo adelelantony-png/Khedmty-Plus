@@ -2264,6 +2264,24 @@ window.BIBLE_PLAN_DATA = {
             var diffMs = targetClean.getTime() - startDate.getTime();
             var diffDays = Math.floor(diffMs / 86400000);
 
+            // تحصين الأمان للتواريخ المستقبلية: إذا كانت الخدمة لم تبدأ بعد
+            if (diffDays < 0) {
+                var firstKey = keys[0];
+                var firstItem = plan[firstKey];
+                var daysUntil = Math.abs(diffDays);
+                return Object.assign({}, firstItem, {
+                    dayNumber: 1,
+                    totalDays: keys.length,
+                    planKey: firstKey,
+                    serviceStartDate: serviceStartStr,
+                    diffDaysFromStart: diffDays,
+                    isPreService: true,
+                    daysUntilStart: daysUntil,
+                    preServiceNotice: 'الخدمة تنطلق رسمياً في ' + serviceStartStr + ' (متبقي ' + daysUntil + ' أيام) — تبدأ الخطة مع التكوين 1',
+                    mode: 'service_year'
+                });
+            }
+
             var planIndex = ((diffDays % keys.length) + keys.length) % keys.length;
             var chosenKey = keys[planIndex];
             var chosenItem = plan[chosenKey];
@@ -2275,6 +2293,7 @@ window.BIBLE_PLAN_DATA = {
                     planKey: chosenKey,
                     serviceStartDate: serviceStartStr,
                     diffDaysFromStart: diffDays,
+                    isPreService: false,
                     mode: 'service_year'
                 });
             }
