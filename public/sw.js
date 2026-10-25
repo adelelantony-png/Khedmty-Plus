@@ -8,7 +8,7 @@
  * 4. الكاش مخصص فقط للأصول الثابتة وواجهات التطبيق (App Shell) لتمكين الفتح في أي وقت بدون إنترنت.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v2.2'; // upgraded from khedmety-ultra-v2.0
+const CACHE_NAME = 'khedmety-ultra-v2.5'; // upgraded from khedmety-ultra-v2.0
 
 // الأصول الثابتة المسموح بتخزينها محلياً فقط لتمكين الفتح أوفلاين على الموبايل
 const PRECACHE_ASSETS = [
