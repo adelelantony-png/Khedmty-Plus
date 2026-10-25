@@ -4366,16 +4366,25 @@
 
                     <!-- 1.2 شرائح مكافآت التفوق الدراسي -->
                     <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
-                        <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
-                            <i class="fa-solid fa-graduation-cap text-success"></i> 2. شرائح مكافآت التفوق الدراسي (حسب الفرقة وعدد الامتحانات):
+                        <h5 style="margin:0 0 4px 0; font-size:0.95rem; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-graduation-cap text-success"></i> 2. شرائح مكافآت التفوق الدراسي (مرنة حسب عدد الامتحانات المقررة لكل مرحلة):
                         </h5>
+                        <p style="font-size:0.79rem; color:#64748b; margin:0 0 12px 0;">
+                            💡 عدد الامتحانات غير مقيد بقيمة ثابتة؛ يمكنك تحديد عدد الامتحانات المقررة لأي فرقة وسيتم احتساب الخصم ديناميكياً لكل امتحان أو حسب المجموع العام.
+                        </p>
                         
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
                             <!-- الفرقة الأولى -->
                             <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
                                 <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
-                                    <span>📚 الفرقة الأولى (٣ امتحانات)</span>
-                                    <span class="badge" style="background:#dbeafe; color:#1e40af;">سنة أولى</span>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span>📚 الفرقة الأولى</span>
+                                        <span class="badge" style="background:#dbeafe; color:#1e40af;">سنة أولى</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:3px 8px;">
+                                        <label for="confStage1ExamCount" style="font-size:0.75rem; color:#475569; margin:0; font-weight:700;">عدد الامتحانات:</label>
+                                        <input type="number" id="confStage1ExamCount" value="3" min="1" max="10" style="width:48px; padding:2px 4px; border:1px solid #94a3b8; border-radius:4px; font-weight:800; text-align:center; font-size:0.85rem;">
+                                    </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                                     <div>
@@ -4396,8 +4405,14 @@
                             <!-- الفرقة الثانية -->
                             <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
                                 <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
-                                    <span>🌟 الفرقة الثانية (امتحانين)</span>
-                                    <span class="badge" style="background:#fef3c7; color:#92400e;">سنة ثانية</span>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <span>🌟 الفرقة الثانية</span>
+                                        <span class="badge" style="background:#fef3c7; color:#92400e;">سنة ثانية</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:6px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:3px 8px;">
+                                        <label for="confStage2ExamCount" style="font-size:0.75rem; color:#475569; margin:0; font-weight:700;">عدد الامتحانات:</label>
+                                        <input type="number" id="confStage2ExamCount" value="2" min="1" max="10" style="width:48px; padding:2px 4px; border:1px solid #94a3b8; border-radius:4px; font-weight:800; text-align:center; font-size:0.85rem;">
+                                    </div>
                                 </div>
                                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                                     <div>
@@ -32162,7 +32177,7 @@ function calculateStudentConferenceDiscount(student, attendanceRecord, candidate
     const isStage2 = rawStage.includes('ثانية') || rawStage.includes('ثانيه') || rawStage.includes('2') || rawStage.includes('second');
     const stageName = isStage2 ? 'الفرقة الثانية' : 'الفرقة الأولى';
     const tierConfig = isStage2 ? settings.examRules.stage2 : settings.examRules.stage1;
-    const expectedExamCount = isStage2 ? 2 : 3;
+    const expectedExamCount = Math.max(1, parseInt(tierConfig.examCount) || (isStage2 ? 2 : 3));
 
     // 2. احتساب الحضور والالتزام
     let fridayCount = 0;
@@ -32322,11 +32337,13 @@ function saveConferenceSettingsAction() {
     settings.attendanceRules.minimumAttendanceDiscount = Math.max(0, parseInt(document.getElementById('confMinAttendanceFloor').value) || 100);
     settings.attendanceRules.applyMultiplier = document.getElementById('confApplyMultiplier').checked;
 
-    settings.examRules.stage1.tier90 = Math.max(0, parseInt(document.getElementById('confStage1Tier90').value) || 100);
+    const elSt1Count = document.getElementById('confStage1ExamCount'); if (elSt1Count) settings.examRules.stage1.examCount = Math.max(1, parseInt(elSt1Count.value) || 3);
+        settings.examRules.stage1.tier90 = Math.max(0, parseInt(document.getElementById('confStage1Tier90').value) || 100);
     settings.examRules.stage1.tier80 = Math.max(0, parseInt(document.getElementById('confStage1Tier80').value) || 50);
     settings.examRules.stage1.tier65 = Math.max(0, parseInt(document.getElementById('confStage1Tier65').value) || 30);
 
-    settings.examRules.stage2.tier90 = Math.max(0, parseInt(document.getElementById('confStage2Tier90').value) || 150);
+    const elSt2Count = document.getElementById('confStage2ExamCount'); if (elSt2Count) settings.examRules.stage2.examCount = Math.max(1, parseInt(elSt2Count.value) || 2);
+        settings.examRules.stage2.tier90 = Math.max(0, parseInt(document.getElementById('confStage2Tier90').value) || 150);
     settings.examRules.stage2.tier80 = Math.max(0, parseInt(document.getElementById('confStage2Tier80').value) || 75);
     settings.examRules.stage2.tier65 = Math.max(0, parseInt(document.getElementById('confStage2Tier65').value) || 45);
 
@@ -32365,11 +32382,13 @@ function renderConferenceSettingsUI() {
     const chk = document.getElementById('confApplyMultiplier');
     if (chk) chk.checked = settings.attendanceRules.applyMultiplier !== false;
 
-    setVal('confStage1Tier90', settings.examRules.stage1.tier90);
+    setVal('confStage1ExamCount', settings.examRules.stage1.examCount || 3);
+        setVal('confStage1Tier90', settings.examRules.stage1.tier90);
     setVal('confStage1Tier80', settings.examRules.stage1.tier80);
     setVal('confStage1Tier65', settings.examRules.stage1.tier65);
 
-    setVal('confStage2Tier90', settings.examRules.stage2.tier90);
+    setVal('confStage2ExamCount', settings.examRules.stage2.examCount || 2);
+        setVal('confStage2Tier90', settings.examRules.stage2.tier90);
     setVal('confStage2Tier80', settings.examRules.stage2.tier80);
     setVal('confStage2Tier65', settings.examRules.stage2.tier65);
 }

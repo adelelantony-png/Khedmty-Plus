@@ -1845,7 +1845,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tier80: isStage2 ? 75 : 50,
             tier65: isStage2 ? 45 : 30
         };
-        const expectedExamCount = isStage2 ? 2 : 3;
+        const expectedExamCount = Math.max(1, parseInt(stageRules.examCount) || (isStage2 ? 2 : 3));
 
         const cand = candidatesGrades.find(c => String(c.code || c.id || '').trim() === code);
         let examDiscount = 0;
@@ -1860,9 +1860,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (cand) {
             const gScores = [];
-            if (cand.g1 != null && cand.g1 !== '') gScores.push(Number(cand.g1));
-            if (cand.g2 != null && cand.g2 !== '') gScores.push(Number(cand.g2));
-            if (cand.g3 != null && cand.g3 !== '' && !isStage2) gScores.push(Number(cand.g3));
+            for (let i = 1; i <= Math.max(expectedExamCount, 8); i++) {
+                const val = cand['g' + i];
+                if (val != null && val !== '') {
+                    gScores.push(Number(val));
+                }
+            }
 
             if (gScores.length > 0) {
                 const maxSc = Number(cand.examMax) || 100;
