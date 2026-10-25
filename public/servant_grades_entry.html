@@ -1023,6 +1023,82 @@ body {
             </div>
         </div>
 
+        <!-- 🎯 لوحة معايير نسب النجاح التفصيلية للمواد الأربعة (شرط اجتياز كافة النسب الأربعة) -->
+        <div class="detailed-criteria-panel" style="background:#ffffff; border:1.5px solid #3b82f6; border-radius:14px; padding:16px 20px; margin-top:14px; box-shadow:0 4px 14px rgba(59,130,246,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1.5px dashed #bfdbfe; padding-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="background:#eff6ff; color:#1d4ed8; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                        🎯
+                    </div>
+                    <div>
+                        <strong style="color:#1e3a8a; font-size:0.96rem;">معايير نسب الاجتياز التفصيلية للمواد الأربعة (شرط إلزامي للقبول):</strong>
+                        <div style="font-size:0.76rem; color:#64748b; margin-top:2px;">
+                            يشترط لاجتياز المخدوم تخطي النسبة المحددة في <strong>كافة المواد الأربعة معاً</strong>، ويُحدد سبب عدم النجاح بدقة بحسب أي عنصر لم يتخطاه.
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" class="btn-custom" onclick="applyUniformPassPct(50)" style="padding:4px 10px; font-size:0.78rem; background:#f1f5f9; color:#1e293b; border-color:#cbd5e1;">
+                        تطبيق 50% للكل
+                    </button>
+                    <button type="button" class="btn-custom" onclick="applyUniformPassPct(60)" style="padding:4px 10px; font-size:0.78rem; background:#f1f5f9; color:#1e293b; border-color:#cbd5e1;">
+                        تطبيق 60% للكل
+                    </button>
+                </div>
+            </div>
+
+            <!-- شبكة مدخلات النسب الأربعة -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px;">
+                <!-- 1. تحريري روحي -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; border-top:3.5px solid #0c2461;">
+                    <label style="display:block; font-size:0.8rem; font-weight:800; color:#0c2461; margin-bottom:6px;">
+                        ✍️🕊️ 1. تحريري روحي (عقيدة/طقس):
+                    </label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="cfgPassPct1" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(1, this.value)">
+                        <span style="font-weight:900; font-size:0.95rem; color:#0c2461;">%</span>
+                        <span id="examScoreEq1" style="font-size:0.78rem; color:#64748b; font-weight:700;">(12.5 / 25)</span>
+                    </div>
+                </div>
+
+                <!-- 2. تحريري نفسي -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; border-top:3.5px solid #0c2461;">
+                    <label style="display:block; font-size:0.8rem; font-weight:800; color:#0c2461; margin-bottom:6px;">
+                        ✍️🧠 2. تحريري نفسي (سمات/سلوك):
+                    </label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="cfgPassPct2" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(2, this.value)">
+                        <span style="font-weight:900; font-size:0.95rem; color:#0c2461;">%</span>
+                        <span id="examScoreEq2" style="font-size:0.78rem; color:#64748b; font-weight:700;">(12.5 / 25)</span>
+                    </div>
+                </div>
+
+                <!-- 3. شفوي روحي -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; border-top:3.5px solid #1e3799;">
+                    <label style="display:block; font-size:0.8rem; font-weight:800; color:#1e3799; margin-bottom:6px;">
+                        🗣️🕊️ 3. شفوي روحي (مقابلة إيمانية):
+                    </label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="cfgPassPct3" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(3, this.value)">
+                        <span style="font-weight:900; font-size:0.95rem; color:#1e3799;">%</span>
+                        <span id="examScoreEq3" style="font-size:0.78rem; color:#64748b; font-weight:700;">(12.5 / 25)</span>
+                    </div>
+                </div>
+
+                <!-- 4. شفوي نفسي -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 12px; border-top:3.5px solid #1e3799;">
+                    <label style="display:block; font-size:0.8rem; font-weight:800; color:#1e3799; margin-bottom:6px;">
+                        🗣️🧠 4. شفوي نفسي (مقابلة سلوكية):
+                    </label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="cfgPassPct4" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(4, this.value)">
+                        <span style="font-weight:900; font-size:0.95rem; color:#1e3799;">%</span>
+                        <span id="examScoreEq4" style="font-size:0.78rem; color:#64748b; font-weight:700;">(12.5 / 25)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- لوحة قابلة للطي لضبط الدرجات العظمى للأربعة امتحانات -->
         <div id="scaleConfigDrawer" class="scale-config-drawer">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -1098,6 +1174,9 @@ body {
             <button type="button" class="btn-custom" style="background:#fee2e2; color:#991b1b; border-color:#fecaca;" onclick="openPdfExportModal()">
                 <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF 📄
             </button>
+            <button type="button" class="btn-custom" style="background:#047857; color:#ffffff; border:none; font-weight:800;" onclick="exportDetailedCriteriaExcel()">
+                <i class="fa-solid fa-file-excel me-1"></i> تقرير المعايير التفصيلي (Excel) 📊
+            </button>
             <button type="button" class="btn-custom" style="background:#25d366; color:#ffffff; border:none;" onclick="openWhatsappCampaignModal()">
                 <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
             </button>
@@ -1158,6 +1237,17 @@ body {
             </select>
 
             <!-- 6. فلترة تصنيف المشكلة الرعوية -->
+            <!-- فلترة المعايير الأربعة وسبب عدم الاجتياز -->
+            <select id="criteriaFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">🎯 كل حالات المعايير الأربعة</option>
+                <option value="all_passed">✅ مستوفٍ لكافة النسب الأربعة</option>
+                <option value="failed_any">⚠️ غير مستوفٍ لأي عنصر من الأربعة</option>
+                <option value="failed_ex1">✍️ لم يتخطَ: تحريري روحي</option>
+                <option value="failed_ex2">✍️ لم يتخطَ: تحريري نفسي</option>
+                <option value="failed_ex3">🗣️ لم يتخطَ: شفوي روحي</option>
+                <option value="failed_ex4">🗣️ لم يتخطَ: شفوي نفسي</option>
+            </select>
+
             <select id="problemFilter" class="filter-select" onchange="renderTable()">
                 <option value="all">⚠️ كل التصنيفات الرعوية</option>
                 <option value="clean">لا توجد مشاكل (طبيعي) 🟢</option>
@@ -1470,6 +1560,7 @@ body {
                             <div>الدرجة العظمى: <strong id="pdfHeaderMaxScore">100</strong></div>
                             <div>نسبة القبول: <strong id="pdfHeaderPassPct" style="color:#065f46;">60%</strong></div>
                             <div>حد المقابلة: <strong id="pdfHeaderIntPct" style="color:#c2410c;">50%</strong></div>
+                            <div id="pdfHeaderExamCriteria" style="font-size:7.5pt; color:#1e3a8a; font-weight:bold; margin-top:2px;"></div>
                         </div>
                     </div>
 
@@ -1516,7 +1607,7 @@ body {
                                 <th style="border: 1px solid #000; padding: 5px 3px; width: 40px;" id="pdfThEx4">م 4</th>
                                 <th style="border: 1px solid #000; padding: 5px 4px; width: 45px; background:#1e3799;">المجموع</th>
                                 <th style="border: 1px solid #000; padding: 5px 4px; width: 45px; background:#1e3799;">النسبة %</th>
-                                <th style="border: 1px solid #000; padding: 5px 6px; width: 130px;">القرار النهائي 🎯</th>
+                                <th style="border: 1px solid #000; padding: 5px 6px; width: 175px;">القرار النهائي وسبب عدم النجاح 🎯</th>
                             </tr>
                         </thead>
                         <tbody id="pdfReportTableBody">
@@ -2083,6 +2174,7 @@ body {
 
         document.getElementById('cfgTotalMaxScoreDisplay').textContent = maxTotalScore;
         updateScoreEquivalents();
+        updateExamPassScoreEquivalents();
         saveGradesLocal(false);
         renderTable();
     }
@@ -2197,6 +2289,10 @@ body {
         document.getElementById('pdfHeaderMaxScore').textContent = maxTotalScore;
         document.getElementById('pdfHeaderPassPct').textContent = `${passThreshold}%`;
         document.getElementById('pdfHeaderIntPct').textContent = `${interviewThreshold}%`;
+        const elPdfCrit = document.getElementById('pdfHeaderExamCriteria');
+        if (elPdfCrit) {
+            elPdfCrit.textContent = 'معايير المواد: تحريري روحي ' + examMinPassPercentages[0] + '% | تحريري نفسي ' + examMinPassPercentages[1] + '% | شفوي روحي ' + examMinPassPercentages[2] + '% | شفوي نفسي ' + examMinPassPercentages[3] + '%';
+        }
 
         document.getElementById('pdfThEx1').textContent = `م 1 (${examMaxScores[0]})`;
         document.getElementById('pdfThEx2').textContent = `م 2 (${examMaxScores[1]})`;
@@ -2262,6 +2358,10 @@ body {
                         <span style="display:inline-block; padding: 2px 6px; border-radius: 4px; font-weight:bold; font-size: 7.5pt; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid rgba(0,0,0,0.1);">
                             ${dec.label}
                         </span>
+                        ${(!dec.allPassed && c.attended && dec.failReason) 
+                            ? '<div style="font-size:6.8pt; color:#991b1b; font-weight:bold; margin-top:2px; line-height:1.2;">⚠️ ' + dec.failReason + '</div>' 
+                            : (dec.allPassed && c.attended ? '<div style="font-size:6.8pt; color:#065f46; font-weight:bold; margin-top:2px;">✅ اجتاز المعايير الأربعة</div>' : '')
+                        }
                     </td>
                 </tr>
             `;
@@ -2300,6 +2400,7 @@ body {
 
     let passThreshold = 60;
     let interviewThreshold = 50;
+    let examMinPassPercentages = [50, 50, 50, 50]; // [تحريري روحي, تحريري نفسي, شفوي روحي, شفوي نفسي]
 
     // استرجاع البيانات المحفوظة محلياً
     function loadSavedData() {
@@ -2325,6 +2426,20 @@ body {
                 const elCfg = document.getElementById('cfgTotalMaxScoreDisplay');
                 if (elCfg) elCfg.textContent = maxTotalScore;
             }
+            const sExamMinPct = localStorage.getItem('khedmety_exam_min_percentages');
+            if (sExamMinPct) {
+                try {
+                    const parsed = JSON.parse(sExamMinPct);
+                    if (Array.isArray(parsed) && parsed.length === 4) {
+                        examMinPassPercentages = parsed.map(v => Number(v) || 50);
+                    }
+                } catch(e) {}
+            }
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('cfgPassPct' + i);
+                if (el) el.value = examMinPassPercentages[i - 1];
+            }
+            updateExamPassScoreEquivalents();
             const sExamMax = localStorage.getItem('khedmety_exam_max_scores');
             if (sExamMax) {
                 examMaxScores = JSON.parse(sExamMax);
@@ -2346,6 +2461,7 @@ body {
             localStorage.setItem('khedmety_pass_threshold', passThreshold);
             localStorage.setItem('khedmety_interview_threshold', interviewThreshold);
             localStorage.setItem('khedmety_max_total_score', maxTotalScore);
+            localStorage.setItem('khedmety_exam_min_percentages', JSON.stringify(examMinPassPercentages));
             localStorage.setItem('khedmety_exam_max_scores', JSON.stringify(examMaxScores));
             if (showAlert) alert('تم حفظ درجات المخدومين وإعدادات القبول محلياً بنجاح ✅');
         } catch(e) {
@@ -2377,6 +2493,81 @@ body {
         saveGradesLocal(false);
         renderTable();
     }
+
+    // =========================================================================
+    // 🎯 معالجة نسب النجاح التفصيلية للمواد الأربعة
+    // =========================================================================
+    function handleExamPassPctChange(examNum, val) {
+        const num = Math.max(0, Math.min(100, Number(val) || 0));
+        examMinPassPercentages[examNum - 1] = num;
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function applyUniformPassPct(pct) {
+        examMinPassPercentages = [pct, pct, pct, pct];
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById('cfgPassPct' + i);
+            if (el) el.value = pct;
+        }
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function updateExamPassScoreEquivalents() {
+        for (let i = 1; i <= 4; i++) {
+            const max = examMaxScores[i - 1] > 0 ? examMaxScores[i - 1] : 25;
+            const pct = examMinPassPercentages[i - 1] || 50;
+            const eqScore = ((pct / 100) * max).toFixed(1);
+            const el = document.getElementById('examScoreEq' + i);
+            if (el) el.textContent = '(' + eqScore + ' / ' + max + ')';
+        }
+    }
+
+    function getCandidateExamDetails(candidate) {
+        const grades = [
+            Number(candidate.g1) || 0,
+            Number(candidate.g2) || 0,
+            Number(candidate.g3) || 0,
+            Number(candidate.g4) || 0
+        ];
+        const examNames = [
+            'تحريري روحي',
+            'تحريري نفسي',
+            'شفوي روحي',
+            'شفوي نفسي'
+        ];
+        
+        const details = [];
+        const failedExams = [];
+
+        for (let i = 0; i < 4; i++) {
+            const score = grades[i];
+            const max = examMaxScores[i] > 0 ? examMaxScores[i] : 25;
+            const pct = (score / max) * 100;
+            const reqPct = examMinPassPercentages[i] || 50;
+            const isPassed = pct >= reqPct;
+
+            const info = {
+                index: i + 1,
+                name: examNames[i],
+                score: score,
+                max: max,
+                pct: pct,
+                reqPct: reqPct,
+                isPassed: isPassed
+            };
+            details.push(info);
+            if (!isPassed) {
+                failedExams.push(info);
+            }
+        }
+
+        return { details, failedExams, allPassed: failedExams.length === 0 };
+    }
+
 
     // ==========================================
     // 🧬 منظومة معالجة النوع الدقيقة (Male & Female Normalizer)
@@ -2432,22 +2623,71 @@ body {
 
     function computeDecision(candidate) {
         if (!candidate.attended) {
-            return { label: "غائب عن الامتحان 🔴", key: "rejected", class: "status-rejected" };
+            return {
+                label: "غائب عن الامتحان 🔴",
+                key: "rejected",
+                class: "status-rejected",
+                failReason: "غائب عن الامتحان",
+                failedExams: [],
+                allPassed: false
+            };
         }
+
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
-        const pct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
+        const overallPct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
         const conf = String(candidate.confessor || '').trim().toLowerCase();
         const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none');
 
-        if (pct >= passThreshold) {
+        const evalResult = getCandidateExamDetails(candidate);
+        const failedExams = evalResult.failedExams;
+        const allPassed = evalResult.allPassed;
+
+        // صياغة سبب عدم النجاح بدقة بحسب أي عنصر لم يتخطاه
+        let failReason = "";
+        if (!allPassed) {
+            failReason = "لم يتخطَ نسبة: " + failedExams.map(f => f.name + ' (' + f.pct.toFixed(1) + '% < ' + f.reqPct + '%)').join('، ');
+        } else if (overallPct < passThreshold) {
+            failReason = 'المجموع الكلي (' + overallPct.toFixed(1) + '%) أقل من نسبة القبول (' + passThreshold + '%)';
+        }
+
+        // شرط القبول: اجتياز النسب الأربعة معاً + تجاوز نسبة القبول المباشر الكلية
+        if (allPassed && overallPct >= passThreshold) {
             if (hasConfIssue) {
-                return { label: "مقبول بشرط حل الاعتراف 🟡", key: "conditional", class: "status-conditional" };
+                return {
+                    label: "مقبول بشرط حل الاعتراف 🟡",
+                    key: "conditional",
+                    class: "status-conditional",
+                    failReason: "مشكلة اعتراف (مهلة أسبوع)",
+                    failedExams: [],
+                    allPassed: true
+                };
             }
-            return { label: "مقبول نهائياً 🟢", key: "accepted", class: "status-accepted" };
-        } else if (pct >= interviewThreshold) {
-            return { label: "معلق للمقابلة الشخصية 🟠", key: "interview", class: "status-interview" };
+            return {
+                label: "مقبول نهائياً 🟢",
+                key: "accepted",
+                class: "status-accepted",
+                failReason: "لا يوجد (اجتاز كافة المعايير الأربعة بنجاح ✅)",
+                failedExams: [],
+                allPassed: true
+            };
+        } else if (overallPct >= interviewThreshold) {
+            return {
+                label: "معلق للمقابلة الشخصية 🟠",
+                key: "interview",
+                class: "status-interview",
+                failReason: failReason || "في نطاق المقابلة الشخصية",
+                failedExams: failedExams,
+                allPassed: allPassed
+            };
         } else {
-            return { label: "غير مجتاز - دور ثانٍ 🔴", key: "rejected", class: "status-rejected" };
+            return {
+                label: "غير مجتاز - دور ثانٍ 🔴",
+                key: "rejected",
+                class: "status-rejected",
+                failReason: failReason || ('أقل من حد المقابلة (' + interviewThreshold + '%)'),
+                failedExams: failedExams,
+                allPassed: allPassed
+            };
         }
     }
 
@@ -2463,6 +2703,7 @@ body {
         document.getElementById('attendanceFilter').value = 'all';
         document.getElementById('scoreBracketFilter').value = 'all';
         document.getElementById('problemFilter').value = 'all';
+        if (document.getElementById('criteriaFilter')) document.getElementById('criteriaFilter').value = 'all';
         renderTable();
     }
 
@@ -2474,6 +2715,7 @@ body {
         const attendanceVal = document.getElementById('attendanceFilter').value;
         const scoreVal = document.getElementById('scoreBracketFilter').value;
         const problemVal = document.getElementById('problemFilter').value;
+        const criteriaVal = (document.getElementById('criteriaFilter') ? document.getElementById('criteriaFilter').value : 'all');
 
         return candidatesList.filter(c => {
             const name = String(c.name || '').toLowerCase();
@@ -2493,6 +2735,17 @@ body {
 
             // 2. فلترة قرار القبول
             if (statusVal !== 'all' && dec.key !== statusVal) return false;
+
+            // 2.1 فلترة المعايير الأربعة
+            if (criteriaVal !== 'all') {
+                const evalRes = getCandidateExamDetails(c);
+                if (criteriaVal === 'all_passed' && !evalRes.allPassed) return false;
+                if (criteriaVal === 'failed_any' && evalRes.allPassed) return false;
+                if (criteriaVal === 'failed_ex1' && evalRes.details[0].isPassed) return false;
+                if (criteriaVal === 'failed_ex2' && evalRes.details[1].isPassed) return false;
+                if (criteriaVal === 'failed_ex3' && evalRes.details[2].isPassed) return false;
+                if (criteriaVal === 'failed_ex4' && evalRes.details[3].isPassed) return false;
+            }
 
             // 3. فلترة النوع (Male & Female)
             if (genderVal !== 'all') {
@@ -3267,6 +3520,15 @@ body {
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
             const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
             const dec = computeDecision(c);
+            const evalRes = getCandidateExamDetails(c);
+            let reasonBadgeHtml = '';
+            if (c.attended) {
+                if (!dec.allPassed && dec.failReason) {
+                    reasonBadgeHtml = '<div style="margin-top:4px; font-size:0.72rem; background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; border-radius:6px; padding:3px 6px; text-align:right; line-height:1.3;"><i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>السبب:</strong> ' + dec.failReason + '</div>';
+                } else if (dec.allPassed) {
+                    reasonBadgeHtml = '<div style="margin-top:4px; font-size:0.71rem; color:#15803d; font-weight:800;"><i class="fa-solid fa-circle-check me-1"></i> اجتاز المعايير الأربعة ✅</div>';
+                }
+            }
             const conf = String(c.confessor || '').trim();
             const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none' && conf !== 'لم يحدد');
             const confBadge = isConfClean ? `<span class="badge bg-light text-dark border">${conf}</span>` : `<span class="badge bg-warning text-dark">مشكلة اعتراف ⚠️</span>`;
@@ -3286,10 +3548,10 @@ body {
                         }
                     </td>
                     <td class="text-end">${confBadge}</td>
-                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[0]}" class="grade-input" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[1]}" class="grade-input" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[2]}" class="grade-input" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[3]}" class="grade-input" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[0]}" class="grade-input" style="${(c.attended && !evalRes.details[0].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[0].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[0].reqPct + '%)' : ''}" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[1]}" class="grade-input" style="${(c.attended && !evalRes.details[1].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[1].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[1].reqPct + '%)' : ''}" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[2]}" class="grade-input" style="${(c.attended && !evalRes.details[2].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[2].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[2].reqPct + '%)' : ''}" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
+                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[3]}" class="grade-input" style="${(c.attended && !evalRes.details[3].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[3].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[3].reqPct + '%)' : ''}" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
                     <td class="fw-bold fs-6" style="background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
                     <td class="fw-bold">${c.attended ? pct + '%' : '-'}</td>
                     <td class="text-end" style="font-size:0.8rem; line-height:1.3;">
@@ -3299,7 +3561,7 @@ body {
                         ${dec.key === 'conditional' ? `<button type="button" class="btn-custom" onclick="quickResolveConfession('${c.code}')" style="padding:2px 6px; font-size:0.72rem; background:#ecfdf5; color:#047857; border-color:#a7f3d0; margin-top:3px;" title="تسجيل حل مشكلة الاعتراف وترقية المخدوم لمقبول نهائي"><i class="fa-solid fa-check-double text-success me-1"></i> حل الاعتراف</button>` : ''}
                     </td>
                     <td>
-                        <span class="badge-status ${dec.class}">${dec.label}</span>
+                        <span class="badge-status ${dec.class}">${dec.label}</span>${reasonBadgeHtml}
                         ${(dec.key === 'accepted' || dec.key === 'conditional') ? `
                             <div style="margin-top: 4px;">
                                 <button type="button" class="btn-custom" onclick="openAcceptanceCardModal('${c.code}')" style="padding: 2px 6px; font-size: 0.72rem; background: #fefce8; color: #854d0e; border-color: #fde047;" title="استخراج بطاقة تهنئة القبول الرقمية الرسمية">
@@ -3385,6 +3647,94 @@ body {
         alert(`تم تسجيل وإدراج المخدوم [${name}] بكود (${code}) بنجاح! 🎯
 يمكنك الآن رصد درجاته فوراً.`);
         openModernGradeEntryModal(code);
+    }
+
+
+    
+    // =========================================================================
+    // 📊 تصدير تقرير المعايير والنتائج التفصيلي (Excel)
+    // =========================================================================
+    function exportDetailedCriteriaExcel() {
+        if (!candidatesList || candidatesList.length === 0) {
+            alert('لا توجد بيانات مخدومين لتصديرها.');
+            return;
+        }
+
+        const headers = [
+            "م",
+            "كود المخدوم",
+            "اسم المخدوم",
+            "النوع",
+            "رقم الهاتف",
+            "أب الاعتراف",
+            "تحريري روحي (" + examMaxScores[0] + ")",
+            "تحريري روحي %",
+            "حالة التحريري الروحي (≥" + examMinPassPercentages[0] + "%)",
+            "تحريري نفسي (" + examMaxScores[1] + ")",
+            "تحريري نفسي %",
+            "حالة التحريري النفسي (≥" + examMinPassPercentages[1] + "%)",
+            "شفوي روحي (" + examMaxScores[2] + ")",
+            "شفوي روحي %",
+            "حالة الشفوي الروحي (≥" + examMinPassPercentages[2] + "%)",
+            "شفوي نفسي (" + examMaxScores[3] + ")",
+            "شفوي نفسي %",
+            "حالة الشفوي النفسي (≥" + examMinPassPercentages[3] + "%)",
+            "المجموع الكلي (" + maxTotalScore + ")",
+            "النسبة الكلية %",
+            "استيفاء شرط النسب الأربعة",
+            "القرار النهائي",
+            "سبب عدم النجاح / الملاحظات"
+        ];
+
+        const rows = candidatesList.map((c, idx) => {
+            const evalRes = getCandidateExamDetails(c);
+            const dec = computeDecision(c);
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
+
+            return [
+                idx + 1,
+                c.code,
+                c.name,
+                c.gender || 'بنين',
+                c.phone || '-',
+                c.confessor || 'لا يوجد',
+                c.attended ? (c.g1 ?? 0) : 'غائب',
+                c.attended ? evalRes.details[0].pct.toFixed(1) + '%' : '-',
+                c.attended ? (evalRes.details[0].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
+                c.attended ? (c.g2 ?? 0) : 'غائب',
+                c.attended ? evalRes.details[1].pct.toFixed(1) + '%' : '-',
+                c.attended ? (evalRes.details[1].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
+                c.attended ? (c.g3 ?? 0) : 'غائب',
+                c.attended ? evalRes.details[2].pct.toFixed(1) + '%' : '-',
+                c.attended ? (evalRes.details[2].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
+                c.attended ? (c.g4 ?? 0) : 'غائب',
+                c.attended ? evalRes.details[3].pct.toFixed(1) + '%' : '-',
+                c.attended ? (evalRes.details[3].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
+                c.attended ? total.toFixed(1) : 'غائب',
+                c.attended ? pct + '%' : '-',
+                c.attended ? (evalRes.allPassed ? 'نعم (اجتاز كافة المواد)' : 'لا (لم يتخطَ عناصر)') : 'غائب',
+                dec.label,
+                dec.failReason || 'لا يوجد'
+            ];
+        });
+
+        const fileName = "تقرير_نتائج_ومعايير_القبول_المفصلة_" + new Date().toISOString().slice(0, 10) + ".xlsx";
+
+        if (typeof XLSX !== 'undefined') {
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "نتائج_المعايير_الأربعة");
+            XLSX.writeFile(wb, fileName);
+            alert("تم تصدير تقرير المعايير والنتائج التفصيلي بنجاح! 📊✅");
+        } else {
+            let csv = '\uFEFF' + [headers, ...rows].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName.replace('.xlsx', '.csv');
+            link.click();
+        }
     }
 
 
