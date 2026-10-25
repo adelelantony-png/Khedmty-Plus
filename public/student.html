@@ -223,47 +223,53 @@
             <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" style="font-size: 0.72rem;" id="ui-coptic-date-tag">الطقس الكنسي</span>
         </div>
 
-        <!-- 3. مفكرتك الروحية الخاصة (Zero-Knowledge Privacy) -->
+        <!-- 2. شريط الصيام والطقس الكنسي الذكي حسب الكنيسة القبطية الأرثوذكسية -->
+        <div class="mb-3 p-2 px-3 rounded-4 d-flex align-items-center justify-content-between" style="background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center gap-2">
+                <span id="ui-fast-icon" style="font-size: 1.35rem;">🥖</span>
+                <div>
+                    <div class="fw-bold text-dark small" id="ui-fast-title">جاري تحديد طقس وصوم اليوم...</div>
+                    <div style="font-size: 0.72rem; color: #64748b;" id="ui-fast-desc">بحسب طقس الكنيسة القبطية الأرثوذكسية</div>
+                </div>
+            </div>
+            <span class="badge rounded-pill bg-light text-dark border px-2 py-1" style="font-size: 0.75rem; font-weight: 800;" id="ui-coptic-date-display">...</span>
+        </div>
+
+        <!-- 3. متابعة وسائط النعمة والتأهيل الروحي لخادم المسيح (متابعة رعوية للتأهيل) -->
         <div class="private-diary-box p-3 text-white mb-3">
-            
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="d-flex align-items-center gap-2">
-                    <span>📖</span>
-                    <strong style="color: #fde047; font-size: 0.98rem;">مفكرتك الروحية</strong>
+                    <span>🕊️</span>
+                    <strong style="color: #fde047; font-size: 0.98rem;">متابعة التأهيل والنمو الروحي</strong>
                 </div>
-                <span class="badge" style="background: rgba(255,255,255,0.12); color: #fde047; border: 1px solid rgba(253, 224, 71, 0.4); font-size: 0.72rem;">
-                    <i class="fa-solid fa-lock me-1"></i> خاص تماماً
+                <span class="badge" style="background: rgba(253, 224, 71, 0.2); color: #fde047; border: 1px solid rgba(253, 224, 71, 0.5); font-size: 0.72rem; font-weight: 800;">
+                    <i class="fa-solid fa-cross me-1"></i> تأهيل الخدام
                 </span>
             </div>
             
-            <p style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.4;">
-                بينك وبين ربنا فقط — سرّي ومخزن على جهازك ولا يراه أي خادم 🔒
+            <p style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.4;">
+                رعاية وتأهيل أمين — لمساعدة خادمك ومشرفك في تشجيعك وبناء حياتك للخدمة ✝️
             </p>
 
-            <!-- بطاقتي آخر اعتراف وتناول -->
-            <div class="row g-2 mb-3 text-center">
-                <div class="col-6">
-                    <div class="p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);">
-                        <div style="font-size: 0.72rem; color: #94a3b8; font-weight: bold;">آخر اعتراف</div>
-                        <div class="fw-bold mt-1" id="ui-last-confession-date" style="font-size: 0.85rem; color: #ffffff;">لم يُسجَّل بعد</div>
-                    </div>
+            <!-- بطاقة متابعة سر الاعتراف الفردية دون تكرار التناول -->
+            <div class="p-2 px-3 rounded-3 mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="background: rgba(255, 255, 255, 0.08); border: 1.5px solid rgba(255, 255, 255, 0.14);">
+                <div class="text-end">
+                    <div style="font-size: 0.74rem; color: #94a3b8; font-weight: bold;">آخر جلسة اعتراف مسجلة:</div>
+                    <div class="fw-bold mt-1" id="ui-last-confession-date" style="font-size: 0.92rem; color: #86efac;">لم تُسجَّل بعد</div>
                 </div>
-                <div class="col-6">
-                    <div class="p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);">
-                        <div style="font-size: 0.72rem; color: #94a3b8; font-weight: bold;">آخر تناول</div>
-                        <div class="fw-bold mt-1" id="ui-last-communion-date" style="font-size: 0.85rem; color: #ffffff;">لم يُسجَّل بعد</div>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-sm text-white fw-bold py-2 px-3 rounded-3" onclick="recordServantConfession()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 2px 8px rgba(16,185,129,0.3); cursor: pointer;">
+                    <span class="me-1">🙇‍♂️</span> سجّلت جلسة اعترافي اليوم
+                </button>
             </div>
 
-            <!-- أزرار التسجيل اللحظي بنقرة واحدة -->
-            <div class="d-grid gap-2">
-                <button type="button" class="btn btn-sm text-white fw-bold py-2 rounded-3" onclick="recordPrivateConfession()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);">
-                    <span class="me-1">🙇‍♂️</span> سجّلت اعترافي اليوم
-                </button>
-                <button type="button" class="btn btn-sm text-white fw-bold py-2 rounded-3" onclick="recordPrivateCommunion()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);">
-                    <span class="me-1">🍞</span> تناولت اليوم
-                </button>
+            <!-- إشعار التناول المسجل بالنوتة الروحية -->
+            <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.76rem; color: #cbd5e1;">
+                <div>
+                    <span>🍞</span> التناول والقداس الإلهي يُسجّلان بالتفصيل في النوتة:
+                </div>
+                <a href="spiritual_note.html" class="fw-bold" style="color: #fde047; text-decoration: none;">
+                    فتح النوتة الروحية ◀
+                </a>
             </div>
         </div>
 
@@ -299,12 +305,12 @@
                         <div class="small text-muted mt-1" id="badge-century-progress" style="font-size: 0.7rem;">0 / 100 يوم</div>
                     </div>
                 </div>
-                <!-- وسام حامي وسائط النعمة -->
+                <!-- وسام أمانة الاعتراف -->
                 <div class="col-6 col-md-3">
-                    <div class="badge-achievement-card" id="badge-grace">
+                    <div class="badge-achievement-card" id="badge-confession">
                         <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🕊️</div>
-                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">وسائط النعمة</div>
-                        <div class="small text-muted mt-1" id="badge-grace-progress" style="font-size: 0.7rem;">اعتراف وتناول</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أمانة الاعتراف</div>
+                        <div class="small text-muted mt-1" id="badge-confession-progress" style="font-size: 0.7rem;">سر التوبة والاعتراف</div>
                     </div>
                 </div>
             </div>
@@ -1176,58 +1182,214 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function renderPrivateSpiritualDiary(studentCode) {
+
+    // ==========================================
+    // ⛪ محرك التقويم القبطي والصيام الكنسي الذكي
+    // ==========================================
+    const CopticLiturgicalCalendar = {
+        easterDates: {
+            2024: new Date(2024, 4, 5),
+            2025: new Date(2025, 3, 20),
+            2026: new Date(2026, 3, 12),
+            2027: new Date(2027, 4, 2),
+            2028: new Date(2028, 3, 16),
+            2029: new Date(2029, 3, 8),
+            2030: new Date(2030, 3, 28)
+        },
+
+        getCopticDate: function(date = new Date()) {
+            try {
+                const parts = new Intl.DateTimeFormat('en-US-u-ca-coptic', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                }).formatToParts(date);
+
+                let day = 1, month = 1, year = 1740;
+                for (const p of parts) {
+                    if (p.type === 'day') day = parseInt(p.value, 10);
+                    if (p.type === 'month') month = parseInt(p.value, 10);
+                    if (p.type === 'year') year = parseInt(p.value, 10);
+                }
+
+                const monthNames = [
+                    '', 'توت', 'بابه', 'هاتور', 'كيهك', 'طوبة', 'أمشير',
+                    'برمهات', 'برمودة', 'بشنس', 'بؤونة', 'أبيب', 'مسرى', 'النسئ'
+                ];
+                const monthName = monthNames[month] || '';
+                const formatted = `${day} ${monthName} ${year} ش`;
+                return { day, month, monthName, year, formatted };
+            } catch(e) {
+                return { day: 1, month: 1, monthName: '', year: 1740, formatted: '' };
+            }
+        },
+
+        getFastingStatus: function(date = new Date()) {
+            const c = this.getCopticDate(date);
+            const dayOfWeek = date.getDay(); // 0: Sun, ..., 3: Wed, 5: Fri
+            const isWedOrFri = (dayOfWeek === 3 || dayOfWeek === 5);
+            const y = date.getFullYear();
+
+            // 1. حساب القيامة والخمسين والصوم الكبير
+            const easter = this.easterDates[y] || new Date(y, 3, 15);
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDaysToEaster = Math.round((date - easter) / msPerDay);
+
+            // أ) فترة الخمسين المقدسة: من القيامة (0) حتى العنصرة (49)
+            if (diffDaysToEaster >= 0 && diffDaysToEaster <= 49) {
+                if (diffDaysToEaster === 0) {
+                    return { isFast: false, name: "عيد القيامة المجيد 👑", icon: "🎉", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بالقيامة المجيدة" };
+                }
+                if (diffDaysToEaster === 49) {
+                    return { isFast: false, name: "عيد العنصرة المجيد (حلول الروح القدس) 🔥", icon: "🕊️", desc: "عيد سيدي كبير - فطر وحل دائم" };
+                }
+                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🎉", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
+            }
+
+            // ب) أسبوع الآلام: (-7 حتى -1)
+            if (diffDaysToEaster >= -7 && diffDaysToEaster <= -1) {
+                if (diffDaysToEaster === -7) {
+                    return { isFast: true, name: "أحد الشعانين (أحد السعف) 🌿", icon: "🌿", desc: "عيد سيدي - صوم انقطاعي بطقس فرايحي (بدون سمك)" };
+                }
+                if (diffDaysToEaster === -2) {
+                    return { isFast: true, name: "الجمعة العظيمة (صلبوت مخلصنا) ☦️", icon: "✝️", desc: "أقدس أيام السنة - صوم نسكي حازم وانقطاع كامل" };
+                }
+                if (diffDaysToEaster === -1) {
+                    return { isFast: true, name: "سبت الفرح (سبت النور) 🕯️", icon: "🕯️", desc: "صوم انقطاعي بدون سمك انتظاراً لإشراق القيامة" };
+                }
+                return { isFast: true, name: "أسبوع الآلام المقدس (البصخة) ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
+            }
+
+            // ج) الصوم الكبير (الأربعين المقدسة): (-55 حتى -8)
+            if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
+                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع (لا يُسمح فيه بالسمك)" };
+            }
+
+            // د) صوم يونان / نينوى: (-69 حتى -67)
+            if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
+                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى (بدون سمك 3 أيام)" };
+            }
+
+            // هـ) صوم الرسل: بعد العنصرة (diff >= 50) حتى 5 أبيب (شهر 11)
+            if (diffDaysToEaster >= 50 && c.month >= 9 && (c.month < 11 || (c.month === 11 && c.day <= 5))) {
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم الرسل الأطهار ✝️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+            }
+
+            // 2. صوم الميلاد المجيد: 16 هاتور (شهر 3) إلى 28 كيهك (شهر 4)
+            if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
+                if (c.month === 4 && c.day === 28) {
+                    return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للميلاد" };
+                }
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+            }
+
+            // 3. عيد الميلاد المجيد (29 كيهك): فطر دائم
+            if (c.month === 4 && c.day === 29) {
+                return { isFast: false, name: "عيد الميلاد المجيد 🎄", icon: "🎉", desc: "عيد سيدي كبير - فطر وابتهاج بميلاد مخلصنا" };
+            }
+
+            // 4. برمون الغطاس: 10 طوبة
+            if (c.month === 5 && c.day === 10) {
+                return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للغطاس" };
+            }
+
+            // 5. عيد الغطاس المجيد: 11 طوبة
+            if (c.month === 5 && c.day === 11) {
+                return { isFast: false, name: "عيد الغطاس المجيد (الثيؤفانيا) 🕊️", icon: "🎉", desc: "عيد سيدي كبير - فطر بميلاد الماء والروح" };
+            }
+
+            // 6. صوم السيدة العذراء: 1 مسرى إلى 15 مسرى (16 مسرى عيدها)
+            if (c.month === 12 && c.day >= 1 && c.day <= 15) {
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
+            }
+
+            // 7. صوم الأربعاء والجمعة الأسبوعي
+            if (isWedOrFri) {
+                const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
+                const reason = (dayOfWeek === 3) ? "تذكار التآمر على مخلصنا وتسليمه" : "تذكار صلب وفداء رب المجد";
+                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
+            }
+
+            // 8. أيام الفطر العادية
+            return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
+        }
+    };
+
+    function renderFastingStatus() {
+        const now = new Date();
+        const f = CopticLiturgicalCalendar.getFastingStatus(now);
+        const c = CopticLiturgicalCalendar.getCopticDate(now);
+
+        const iconEl = document.getElementById('ui-fast-icon');
+        const titleEl = document.getElementById('ui-fast-title');
+        const descEl = document.getElementById('ui-fast-desc');
+        const dateEl = document.getElementById('ui-coptic-date-display');
+
+        if (iconEl) iconEl.textContent = f.icon;
+        if (titleEl) titleEl.textContent = f.name;
+        if (descEl) descEl.textContent = f.desc;
+        if (dateEl) dateEl.textContent = c.formatted || 'التقويم القبطي';
+    }
+
+    function renderServantConfessionDiary(studentCode) {
         if (!studentCode) return;
 
-        const confKey = `khedmety_private_confession_${studentCode}`;
-        const commKey = `khedmety_private_communion_${studentCode}`;
-
-        let confData = null, commData = null;
-        try { confData = JSON.parse(localStorage.getItem(confKey)); } catch(e){}
-        try { commData = JSON.parse(localStorage.getItem(commKey)); } catch(e){}
+        let confData = null;
+        try { confData = JSON.parse(localStorage.getItem(`khedmety_student_confession_${studentCode}`)) || JSON.parse(localStorage.getItem(`khedmety_private_confession_${studentCode}`)); } catch(e){}
 
         const confEl = document.getElementById('ui-last-confession-date');
-        const commEl = document.getElementById('ui-last-communion-date');
-
         if (confEl) {
             confEl.textContent = confData ? confData.dateStr : 'لم يُسجَّل بعد';
             if (confData) confEl.style.color = '#86efac';
         }
-        if (commEl) {
-            commEl.textContent = commData ? commData.dateStr : 'لم يُسجَّل بعد';
-            if (commData) commEl.style.color = '#86efac';
-        }
     }
 
-    function recordPrivateConfession() {
+    function recordServantConfession() {
         const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || 'guest';
         const now = new Date();
         const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
         const isoStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-        localStorage.setItem(`khedmety_private_confession_${code}`, JSON.stringify({
-            dateStr: dateStr,
-            isoStr: isoStr,
-            timestamp: Date.now()
-        }));
+        const record = { dateStr, isoStr, timestamp: Date.now() };
 
-        alert('طوباك يا بطل! 🕊️ تم تسجيل اعترافك في مفكرتك الخاصة في سرية تامة بينك وبين ربنا فقط.');
-        renderSpiritualJourney();
-    }
+        // 1. الحفظ في سجل المخدوم
+        localStorage.setItem(`khedmety_student_confession_${code}`, JSON.stringify(record));
+        localStorage.setItem(`khedmety_private_confession_${code}`, JSON.stringify(record));
 
-    function recordPrivateCommunion() {
-        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || 'guest';
-        const now = new Date();
-        const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-        const isoStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        // 2. مزامنة الحالة مع قاعدة بيانات المخدومين والخدام (my_church_class)
+        try {
+            let classList = JSON.parse(localStorage.getItem('my_church_class')) || [];
+            let mem = classList.find(m => String(m.code || m.id) === String(code));
+            if (mem) {
+                mem.lastConfession = dateStr;
+                mem.lastConfessionIso = isoStr;
+                mem.confessionStatus = 'منتظم بالاعتراف';
+                localStorage.setItem('my_church_class', JSON.stringify(classList));
+            }
+        } catch(e){}
 
-        localStorage.setItem(`khedmety_private_communion_${code}`, JSON.stringify({
-            dateStr: dateStr,
-            isoStr: isoStr,
-            timestamp: Date.now()
-        }));
+        // 3. مزامنة الحالة مع كشف الدرجات ورادار أمين الخدمة (khedmety_candidates_grades)
+        try {
+            let candList = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || [];
+            let cand = candList.find(c => String(c.code) === String(code));
+            if (cand) {
+                cand.lastConfession = dateStr;
+                cand.confessor = (cand.confessor && cand.confessor !== 'لا يوجد') ? cand.confessor : 'منتظم بالاعتراف';
+                cand.problemType = 'لا توجد مشاكل (مقبول طبيعي) 🟢';
+                localStorage.setItem('khedmety_candidates_grades', JSON.stringify(candList));
+            }
+        } catch(e){}
 
-        alert('بركة التناول المقدس تثبت فيك وتثمر في حياتك! 🍞 تم تسجيل التناول في مفكرتك الخاصة.');
+        alert('طوباك يا خادم ربنا! 🕊️\nتم تسجيل جلسة اعترافك بنجاح، وتحديث ملف تأهيلك الروحي لدى خادمك المشرف للمتابعة والتشجيع.');
         renderSpiritualJourney();
     }
 
@@ -1270,23 +1432,19 @@ document.addEventListener('DOMContentLoaded', function () {
             if (bCentProg) bCentProg.textContent = `${Math.min(streak, 100)} / 100 يوم`;
         }
 
-        // 4. وسام وسائط النعمة (تناول واعتراف)
-        const bGrace = document.getElementById('badge-grace');
-        const bGraceProg = document.getElementById('badge-grace-progress');
-        let confData = null, commData = null;
-        try { confData = JSON.parse(localStorage.getItem(`khedmety_private_confession_${studentCode}`)); } catch(e){}
-        try { commData = JSON.parse(localStorage.getItem(`khedmety_private_communion_${studentCode}`)); } catch(e){}
+        // 4. وسام أمانة الاعتراف (سر التوبة والاعتراف)
+        const bConf = document.getElementById('badge-confession');
+        const bConfProg = document.getElementById('badge-confession-progress');
+        let confData = null;
+        try { confData = JSON.parse(localStorage.getItem(`khedmety_student_confession_${studentCode}`)) || JSON.parse(localStorage.getItem(`khedmety_private_confession_${studentCode}`)); } catch(e){}
 
-        if (confData && commData) {
+        if (confData) {
             unlockedCount++;
-            if (bGrace) bGrace.classList.add('unlocked');
-            if (bGraceProg) bGraceProg.innerHTML = '<span class="text-success fw-bold">أمين في الوسائط 🕊️</span>';
-        } else if (confData || commData) {
-            if (bGrace) bGrace.classList.remove('unlocked');
-            if (bGraceProg) bGraceProg.textContent = 'نصف المسافة 1/2';
+            if (bConf) bConf.classList.add('unlocked');
+            if (bConfProg) bConfProg.innerHTML = '<span class="text-success fw-bold">منتظم بالاعتراف 🕊️</span>';
         } else {
-            if (bGrace) bGrace.classList.remove('unlocked');
-            if (bGraceProg) bGraceProg.textContent = 'سجّل التناول والاعتراف';
+            if (bConf) bConf.classList.remove('unlocked');
+            if (bConfProg) bConfProg.textContent = 'سجّل جلسة اعترافك';
         }
 
         const countLabel = document.getElementById('ui-unlocked-badges-count');
@@ -1317,11 +1475,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // 2. تحديث العد التنازلي للأعياد
+        // 2. تحديث الصيام والطقس الكنسي الذكي
+        renderFastingStatus();
+
+        // 3. تحديث العد التنازلي للأعياد
         renderFeastCountdown();
 
-        // 3. تحديث المفكرة السرية
-        renderPrivateSpiritualDiary(code);
+        // 4. تحديث متابعة الاعتراف والتأهيل الخدمي
+        renderServantConfessionDiary(code);
 
         // 4. تحديث الأوسمة
         renderBadgesAndGamification(streak, code);

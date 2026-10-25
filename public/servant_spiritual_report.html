@@ -1,330 +1,780 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متابعة السلوك الروحي والأكاديمي | خدمتي برو</title>
-    <meta name="theme-color" content="#1e3799">
-    <link rel="icon" type="image/png" href="icons/favicon-48.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/app-theme.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="auth-client.js"></script>
-    <style>
-        :root{--primary:#0f172a;--accent:#1e3a8a;--ok:#00b894;--warn:#f59e0b}
-        *{box-sizing:border-box}
-        body { margin:0; font-family: 'Tajawal','Segoe UI',Tahoma,sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
-        .main-container { max-width: 980px; margin: 20px auto; padding: 0 15px; }
-        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap}
-        .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:8px 16px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none}
-        .btn:hover{border-color:var(--accent);color:var(--accent)}
-        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(30,58,138,.3)}
-        .btn.primary:hover{color:#fff;filter:brightness(1.1)}
-        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 16px; }
-        .header-card h4{margin:0 0 4px} .header-card small{opacity:.8}
-        .live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 12px;font-size:.78rem;font-weight:700;margin-top:8px}
-        .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
-        .dot.live{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)} .dot.off{background:#fbbf24}
-        .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-        .toolbar select, .toolbar input{border:2px solid #e2e8f0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem}
-        .table-card { background: #fff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        table{width:100%;border-collapse:collapse;font-size:.92rem}
-        thead { background: #1e3a8a; color: #fff; }
-        th, td { vertical-align: middle; text-align: center; padding: 12px 8px; }
-        tbody tr:nth-child(even){background:#f8fafc}
-        tbody tr:hover{background:#eef2ff}
-        th.sortable{cursor:pointer;user-select:none}
-        th.sortable:hover{background:#15306b}
-        .badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800}
-        .b-light{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
-        .empty{text-align:center;color:#64748b;padding:40px 0}
-    </style>
-</head>
-<body>
-<div class="main-container" id="app" style="display:none;">
-
-    <div class="topbar">
-        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
-            <i class="fa-solid fa-arrow-right me-1"></i> لوحة الخادم
-        </button>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="servant_followup.html" class="btn" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">
-                <i class="fa-solid fa-handshake-angle me-1"></i> الافتقاد الذكي وحصر الغياب 🤝
-            </a>
-            <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
-            <button class="btn" id="btnExportWa" style="background:#25D366; color:#ffffff; border:1px solid #128C7E; font-weight:700;">
-                <i class="fa-brands fa-whatsapp"></i> تقرير الواتساب (New Whats 2027)
-            </button>
-        </div>
-    </div>
-
-    <div class="header-card">
-        <h4>📊 تقرير السلوك الروحي وحصاد وسائط النعمة</h4>
-        <small>كشف درجات وسائط النعمة الشامل: حضور الاجتماعات، أيام النوتة الروحية، قراءات الإنجيل، وإجمالي النقاط مع التصدير لإكسيل.</small><br>
-        <span class="live-pill"><span class="dot" id="liveDot"></span><span id="liveTxt">جاري الاتصال...</span></span>
-    </div>
-
-    <div class="toolbar">
-        <input type="search" id="q" placeholder="🔍 ابحث بالاسم أو الكود" style="flex:1;min-width:160px">
-        <select id="fStage"><option value="">كل الفرق</option></select>
-    </div>
-
-    <div class="table-card">
-        <div style="overflow-x:auto">
-            <table id="followupTable">
-                <thead>
-                    <tr>
-                        <th>كود الدارس</th>
-                        <th>اسم المخدوم</th>
-                        <th>الفرقة / المرحلة</th>
-                        <th class="sortable" data-k="friday">حضور الجمعة ▾</th>
-                        <th class="sortable" data-k="spiritual">أيام النوتة ▾</th>
-                        <th class="sortable" data-k="bible">قراءات الإنجيل ▾</th>
-                        <th class="sortable" data-k="points">إجمالي النقاط ⭐ ▾</th>
-                    </tr>
-                </thead>
-                <tbody id="followupTbody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<script src="auth-client.js"></script>
-<script>
-(function () {
-    'use strict';
-    const $ = id => document.getElementById(id);
-    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-
-    if (window.AuthClient) {
-        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
-    } else {
-        function getUser() {
-            try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
-        }
-        const user = getUser();
-        if (!user || (user.role !== 'servant' && user.role !== 'admin')) { location.replace('index.html'); return; }
-    }
-    $('app').style.display = '';
-
-    const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
-    const toList = v => { if (!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v).filter(Boolean); };
-
-    let members = toList(readJSON('my_church_class', []));
-    let attendanceRecord = readJSON('my_church_attendance', {});
-    let sortKey = 'points', sortDir = -1;
-
-    // ---------- اتصال Firestore: استماع لحظي ومزامنة سحابية ----------
-    async function initLiveAttendance() {
-        if (typeof firebase === 'undefined' || !navigator.onLine) {
-            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز';
-            $('liveDot').className = 'dot off';
-            return;
-        }
-
-        const fbConfig = window.FIREBASE_CONFIG || {
-            apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
-            authDomain: "khedmety-plus.firebaseapp.com",
-            projectId: "khedmety-plus",
-            storageBucket: "khedmety-plus.firebasestorage.app",
-            messagingSenderId: "25101228841",
-            appId: "1:25101228841:web:3164821d165014a1e2b538"
-        };
-
-        try {
-            if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-            const fsdb = firebase.firestore();
-
-            // مزامنة المخدومين إذا كانت القائمة فارغة محلياً
-            if (!members || members.length === 0) {
-                try {
-                    const mSnap = await fsdb.collection('members').get();
-                    if (!mSnap.empty) {
-                        members = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
-                        localStorage.setItem('my_church_class', JSON.stringify(members));
-                        render();
-                    }
-                } catch(e){}
-            }
-
-            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
-                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
-                : fsdb.collection('attendance');
-
-            attQuery.onSnapshot(snap => {
-                let rec = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-                snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
-                attendanceRecord = rec;
-                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
-                $('liveDot').className = 'dot live';
-                $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
-                render();
-            }, err => {
-                $('liveDot').className = 'dot off';
-                $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
-                console.warn(err.code || err.message);
-            });
-        } catch (e) {
-            $('liveDot').className = 'dot off';
-            $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
-        }
-    }
-
-    // ---------- الحساب ----------
-    function computeRows() {
-        const spiritualLogs = readJSON('khedmety_student_spiritual', {});
-        const bibleReadings = readJSON('khedmety_bible_readings', {});
-
-        return members.map(st => {
-            const code = (st.code ?? st.id ?? '').toString();
-            const name = st.name || 'مخدوم';
-            const stage = st.stage || st.level || 'الفرقة الأولى';
-
-            let friday = 0;
-            Object.keys(attendanceRecord).forEach(dateKey => {
-                if (new Date(dateKey + 'T00:00:00').getDay() !== 5) return;
-                const found = (attendanceRecord[dateKey] || []).find(a =>
-                    ((a.code != null && a.code.toString() === code) || (a.id != null && a.id.toString() === code)) && !a.isAbsentDueToDelay);
-                if (found) friday++;
-            });
-
-            let spiritual = Object.keys(spiritualLogs).filter(k => k.endsWith('_' + code)).length;
-
-            let bible = Object.keys(bibleReadings).filter(k =>
-                k.endsWith('_' + code) || String((bibleReadings[k] || {}).code || '') === code).length;
-
-            const points = friday * 5 + spiritual * 5 + bible * 2;
-            const phone = st.phone || '';
-            const parent_phone = st.parent_phone || '';
-            return { code, name, stage, friday, spiritual, bible, points, phone, parent_phone };
-        });
-    }
-
-    function render() {
-        let rows = computeRows();
-
-        const stages = [...new Set(rows.map(r => r.stage).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
-        const keepStage = $('fStage').value;
-        $('fStage').innerHTML = '<option value="">كل الفرق</option>' + stages.map(s => `<option${s === keepStage ? ' selected' : ''}>${esc(s)}</option>`).join('');
-
-        const q = $('q').value.trim().toLowerCase();
-        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q) || r.code.includes(q));
-        if ($('fStage').value) rows = rows.filter(r => r.stage === $('fStage').value);
-
-        rows.sort((a, b) => (b[sortKey] - a[sortKey]) * -sortDir || a.name.localeCompare(b.name, 'ar'));
-
-        $('followupTbody').innerHTML = rows.length ? rows.map(r => `
-            <tr>
-                <td style="font-weight:800;color:${'var(--accent)'}">${esc(r.code)}</td>
-                <td style="font-weight:800">${esc(r.name)}</td>
-                <td><span class="badge b-light">${esc(r.stage)}</span></td>
-                <td style="color:#16a34a;font-weight:800">${r.friday} اجتماع</td>
-                <td style="color:#dc2626;font-weight:800">${r.spiritual} يوم</td>
-                <td style="color:#b45309;font-weight:800">${r.bible} إصحاح</td>
-                <td style="font-weight:800;color:var(--accent)">${r.points} ⭐</td>
-            </tr>`).join('') : `<tr><td colspan="7" class="empty">لا توجد نتائج مطابقة.</td></tr>`;
-    }
-
-    document.querySelectorAll('#followupTable th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            const k = th.dataset.k;
-            sortDir = (sortKey === k) ? -sortDir : -1;
-            sortKey = k;
-            render();
-        });
-    });
-    $('q').addEventListener('input', render);
-    $('fStage').addEventListener('change', render);
-
-    function csvCell(v) { let s = String(v ?? ''); if (/^[=@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
-    $('btnExport').addEventListener('click', () => {
-        const rows = computeRows();
-        const header = ['كود الدارس', 'اسم المخدوم', 'الفرقة/المرحلة', 'حضور الجمعة', 'أيام النوتة', 'قراءات الإنجيل', 'إجمالي النقاط'];
-        const csv = '\uFEFF' + [header, ...rows.map(r => [r.code, r.name, r.stage, r.friday, r.spiritual, r.bible, r.points])]
-            .map(r => r.map(csvCell).join(',')).join('\n');
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-        a.download = `Khedmety_Followup_Report_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a); a.click(); a.remove();
-    });
-
-    $('btnExportWa').addEventListener('click', () => {
-        const rows = computeRows();
-        if (!rows || rows.length === 0) {
-            alert('لا توجد بيانات للتصدير.');
-            return;
-        }
-
-        const headers = [
-            "الاسم",
-            "رقم الواتساب",
-            "الفرقة / المرحلة",
-            "كود الدارس",
-            "حضور الجمعة",
-            "أيام النوتة",
-            "قراءات الإنجيل",
-            "إجمالي النقاط",
-            "تليفون ولي الأمر",
-            "رسالة تقرير الدرجات"
-        ];
-
-        const dataRows = rows.map(r => {
-            let targetPhone = String(r.phone || r.parent_phone || '').trim();
-            if (targetPhone.startsWith('01') && targetPhone.length === 11) {
-                targetPhone = '20' + targetPhone.slice(1);
-            }
-            const msg = `سلام ونعمة يا ${r.name}، تقرير جهادك الروحي ونقاطك في إعداد خدام: حضور الجمعة (${r.friday} لقاءات)، أيام النوتة الروحية (${r.spiritual} أيام)، قراءات الإنجيل (${r.bible} إصحاح)، وإجمالي رصيد نقاطك (${r.points} نقطة) ⭐ استمر في جهادك وصلواتنا معك دائماً ❤️`;
-
-            return [
-                r.name,
-                targetPhone,
-                r.stage,
-                r.code,
-                r.friday,
-                r.spiritual,
-                r.bible,
-                r.points,
-                r.parent_phone || '',
-                msg
-            ];
-        });
-
-        const aoa = [headers, ...dataRows];
-        const fileName = `تقرير_الدرجات_للواتساب_NewWhats_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-        if (typeof XLSX !== 'undefined') {
-            try {
-                const ws = XLSX.utils.aoa_to_sheet(aoa);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "الدرجات_والحصاد");
-                XLSX.writeFile(wb, fileName);
-                return;
-            } catch(e) {
-                console.warn("تعذر تصدير xlsx، جاري تصدير CSV بديل:", e);
-            }
-        }
-
-        let csv = '\uFEFF' + headers.map(csvCell).join(',') + '\n';
-        dataRows.forEach(row => {
-            csv += row.map(csvCell).join(',') + '\n';
-        });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-        a.download = fileName.replace('.xlsx', '.csv');
-        document.body.appendChild(a); a.click(); a.remove();
-    });
-
-    render();
-    initLiveAttendance();
-})();
-</script>
-</body>
-</html>
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>متابعة السلوك الروحي والأكاديمي | خدمتي برو</title>
+
+    <meta name="theme-color" content="#1e3799">
+
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="css/app-theme.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+
+    <script src="js/firebase-config.js"></script>
+
+    <script src="auth-client.js"></script>
+
+    <style>
+
+        :root{--primary:#0f172a;--accent:#1e3a8a;--ok:#00b894;--warn:#f59e0b}
+
+        *{box-sizing:border-box}
+
+        body { margin:0; font-family: 'Tajawal','Segoe UI',Tahoma,sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+
+        .main-container { max-width: 980px; margin: 20px auto; padding: 0 15px; }
+
+        .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+
+        .btn{display:inline-flex;align-items:center;gap:6px;border:2px solid #cbd5e1;background:#fff;color:#334155;border-radius:12px;padding:8px 16px;font:inherit;font-weight:700;font-size:.88rem;cursor:pointer;text-decoration:none}
+
+        .btn:hover{border-color:var(--accent);color:var(--accent)}
+
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:0;color:#fff;box-shadow:0 6px 14px rgba(30,58,138,.3)}
+
+        .btn.primary:hover{color:#fff;filter:brightness(1.1)}
+
+        .header-card { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; border-radius: 20px; padding: 22px; margin-bottom: 16px; }
+
+        .header-card h4{margin:0 0 4px} .header-card small{opacity:.8}
+
+        .live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);border-radius:999px;padding:4px 12px;font-size:.78rem;font-weight:700;margin-top:8px}
+
+        .dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+
+        .dot.live{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.25)} .dot.off{background:#fbbf24}
+
+        .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+
+        .toolbar select, .toolbar input{border:2px solid #e2e8f0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:700;font-size:.85rem}
+
+        .table-card { background: #fff; border-radius: 18px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+
+        table{width:100%;border-collapse:collapse;font-size:.92rem}
+
+        thead { background: #1e3a8a; color: #fff; }
+
+        th, td { vertical-align: middle; text-align: center; padding: 12px 8px; }
+
+        tbody tr:nth-child(even){background:#f8fafc}
+
+        tbody tr:hover{background:#eef2ff}
+
+        th.sortable{cursor:pointer;user-select:none}
+
+        th.sortable:hover{background:#15306b}
+
+        .badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800}
+
+        .b-light{background:#f1f5f9;color:#334155;border:1px solid #e2e8f0}
+
+        .empty{text-align:center;color:#64748b;padding:40px 0}
+
+
+        .badge-conf-ok { background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-weight: 800; border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-conf-warn { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-weight: 800; border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-conf-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-weight: 800; border-radius: 999px; padding: 3px 10px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-coaching-ready { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight: 800; border-radius: 999px; padding: 3px 12px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-coaching-progress { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-weight: 800; border-radius: 999px; padding: 3px 12px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-coaching-confession { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; font-weight: 800; border-radius: 999px; padding: 3px 12px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .badge-coaching-followup { background: #f8fafc; color: #64748b; border: 1px solid #cbd5e1; font-weight: 800; border-radius: 999px; padding: 3px 12px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; }
+        .coptic-fasting-banner { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #fff; border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+    </style>
+
+</head>
+
+<body>
+
+<div class="main-container" id="app" style="display:none;">
+
+
+
+    <div class="topbar">
+
+        <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
+
+            <i class="fa-solid fa-arrow-right me-1"></i> لوحة الخادم
+
+        </button>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+
+            <a href="servant_followup.html" class="btn" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">
+
+                <i class="fa-solid fa-handshake-angle me-1"></i> الافتقاد الذكي وحصر الغياب 🤝
+
+            </a>
+
+            <button class="btn primary" id="btnExport">⬇️ تحميل Excel</button>
+
+            <button class="btn" id="btnExportWa" style="background:#25D366; color:#ffffff; border:1px solid #128C7E; font-weight:700;">
+
+                <i class="fa-brands fa-whatsapp"></i> تقرير الواتساب (New Whats 2027)
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="header-card">
+
+        <h4>📊 تقرير السلوك الروحي وحصاد وسائط النعمة</h4>
+
+        <small>كشف درجات وسائط النعمة الشامل: حضور الاجتماعات، أيام النوتة الروحية، قراءات الإنجيل، وإجمالي النقاط مع التصدير لإكسيل.</small><br>
+
+        <span class="live-pill"><span class="dot" id="liveDot"></span><span id="liveTxt">جاري الاتصال...</span></span>
+
+    </div>
+
+
+
+
+    <!-- بطاقة طقس الكنيسة القبطية والأصوام الذكية -->
+    <div class="coptic-fasting-banner" id="copticFastingBanner">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div id="ui-fast-icon" style="font-size:2rem; width:46px; height:46px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.12); border-radius:12px;">🥖</div>
+            <div>
+                <div style="font-weight:800; font-size:1.05rem;" id="ui-fast-title">طقس الكنيسة القبطية الأرثوذكسية اليوم</div>
+                <div style="font-size:0.8rem; opacity:0.88;" id="ui-fast-desc">متابعة مواسم الأصوام والأعياد الكنسية لتوجيه مخدومي إعداد الخدام في حياتهم الروحية</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge" style="background:rgba(255,255,255,0.2); color:#fff; padding:6px 14px; font-size:0.85rem;" id="ui-coptic-date-display">التقويم القبطي</span>
+        </div>
+    </div>
+
+    <div class="toolbar">
+
+        <input type="search" id="q" placeholder="🔍 ابحث بالاسم أو الكود" style="flex:1;min-width:160px">
+
+        <select id="fStage"><option value="">كل الفرق</option></select>
+
+    </div>
+
+
+
+    <div class="table-card">
+
+        <div style="overflow-x:auto">
+
+            <table id="followupTable">
+
+                <thead>
+                    <tr>
+                        <th>كود الدارس</th>
+                        <th>اسم المخدوم</th>
+                        <th>الفرقة / المرحلة</th>
+                        <th class="sortable" data-k="friday">حضور الجمعة ▾</th>
+                        <th class="sortable" data-k="liturgies">القداس والتناول 🍞 ▾</th>
+                        <th class="sortable" data-k="spiritual">أيام النوتة ▾</th>
+                        <th class="sortable" data-k="bible">قراءات الإنجيل ▾</th>
+                        <th class="sortable" data-k="confessionSort">الاعتراف 🕊️ ▾</th>
+                        <th>مؤشر التأهيل الخدمي 🎯</th>
+                        <th class="sortable" data-k="points">إجمالي النقاط ⭐ ▾</th>
+                    </tr>
+                </thead>
+
+                <tbody id="followupTbody"></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script src="auth-client.js"></script>
+
+<script>
+
+(function () {
+
+    'use strict';
+
+    const $ = id => document.getElementById(id);
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+
+
+    if (window.AuthClient) {
+
+        if (!AuthClient.enforceAuth(['servant', 'admin'])) return;
+
+    } else {
+
+        function getUser() {
+
+            try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
+
+        }
+
+        const user = getUser();
+
+        if (!user || (user.role !== 'servant' && user.role !== 'admin')) { location.replace('index.html'); return; }
+
+    }
+
+    $('app').style.display = '';
+
+
+
+    const readJSON = (k, fb) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? fb; } catch (e) { return fb; } };
+
+    const toList = v => { if (!v) return []; return Array.isArray(v) ? v.filter(Boolean) : Object.values(v).filter(Boolean); };
+
+
+
+    let members = toList(readJSON('my_church_class', []));
+
+    let attendanceRecord = readJSON('my_church_attendance', {});
+
+    let sortKey = 'points', sortDir = -1;
+
+
+
+    // ---------- اتصال Firestore: استماع لحظي ومزامنة سحابية ----------
+
+    async function initLiveAttendance() {
+
+        if (typeof firebase === 'undefined' || !navigator.onLine) {
+
+            $('liveTxt').textContent = 'غير متصل — البيانات من آخر مزامنة على هذا الجهاز';
+
+            $('liveDot').className = 'dot off';
+
+            return;
+
+        }
+
+
+
+        const fbConfig = window.FIREBASE_CONFIG || {
+
+            apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
+
+            authDomain: "khedmety-plus.firebaseapp.com",
+
+            projectId: "khedmety-plus",
+
+            storageBucket: "khedmety-plus.firebasestorage.app",
+
+            messagingSenderId: "25101228841",
+
+            appId: "1:25101228841:web:3164821d165014a1e2b538"
+
+        };
+
+
+
+        try {
+
+            if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+
+            const fsdb = firebase.firestore();
+
+
+
+            // مزامنة المخدومين إذا كانت القائمة فارغة محلياً
+
+            if (!members || members.length === 0) {
+
+                try {
+
+                    const mSnap = await fsdb.collection('members').get();
+
+                    if (!mSnap.empty) {
+
+                        members = mSnap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+
+                        localStorage.setItem('my_church_class', JSON.stringify(members));
+
+                        render();
+
+                    }
+
+                } catch(e){}
+
+            }
+
+
+
+            const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+            const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+
+                ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+
+                : fsdb.collection('attendance');
+
+
+
+            attQuery.onSnapshot(snap => {
+
+                let rec = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+
+                snap.forEach(doc => { rec[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
+
+                attendanceRecord = rec;
+
+                try { localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord)); } catch (e) {}
+
+                $('liveDot').className = 'dot live';
+
+                $('liveTxt').textContent = 'حضور مباشر من السحابة (Firestore)';
+
+                render();
+
+            }, err => {
+
+                $('liveDot').className = 'dot off';
+
+                $('liveTxt').textContent = 'تعذّر الاتصال اللحظي — بيانات محلية';
+
+                console.warn(err.code || err.message);
+
+            });
+
+        } catch (e) {
+
+            $('liveDot').className = 'dot off';
+
+            $('liveTxt').textContent = 'تعذّر الاتصال بالسحابة — بيانات محلية';
+
+        }
+
+    }
+
+
+
+    
+    // ---------- محرك التقويم القبطي والأصوام الطقسية الذكي ----------
+    const CopticLiturgicalCalendar = {
+        easterDates: {
+            2024: new Date(2024, 4, 5),
+            2025: new Date(2025, 3, 20),
+            2026: new Date(2026, 3, 12),
+            2027: new Date(2027, 4, 2),
+            2028: new Date(2028, 3, 16),
+            2029: new Date(2029, 3, 8),
+            2030: new Date(2030, 3, 28)
+        },
+
+        getCopticDate: function(date = new Date()) {
+            try {
+                const parts = new Intl.DateTimeFormat('en-US-u-ca-coptic', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                }).formatToParts(date);
+
+                let day = 1, month = 1, year = 1740;
+                for (const p of parts) {
+                    if (p.type === 'day') day = parseInt(p.value, 10);
+                    if (p.type === 'month') month = parseInt(p.value, 10);
+                    if (p.type === 'year') year = parseInt(p.value, 10);
+                }
+
+                const monthNames = [
+                    '', 'توت', 'بابه', 'هاتور', 'كيهك', 'طوبة', 'أمشير',
+                    'برمهات', 'برمودة', 'بشنس', 'بؤونة', 'أبيب', 'مسرى', 'النسئ'
+                ];
+                const monthName = monthNames[month] || '';
+                const formatted = `${day} ${monthName} ${year} ش`;
+                return { day, month, monthName, year, formatted };
+            } catch(e) {
+                return { day: 1, month: 1, monthName: '', year: 1740, formatted: '' };
+            }
+        },
+
+        getFastingStatus: function(date = new Date()) {
+            const c = this.getCopticDate(date);
+            const dayOfWeek = date.getDay(); // 0: Sun, ..., 3: Wed, 5: Fri
+            const isWedOrFri = (dayOfWeek === 3 || dayOfWeek === 5);
+            const y = date.getFullYear();
+
+            // 1. حساب القيامة والخمسين والصوم الكبير
+            const easter = this.easterDates[y] || new Date(y, 3, 15);
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDaysToEaster = Math.round((date - easter) / msPerDay);
+
+            // أ) فترة الخمسين المقدسة: من القيامة (0) حتى العنصرة (49)
+            if (diffDaysToEaster >= 0 && diffDaysToEaster <= 49) {
+                if (diffDaysToEaster === 0) {
+                    return { isFast: false, name: "عيد القيامة المجيد 👑", icon: "🎉", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بالقيامة المجيدة" };
+                }
+                if (diffDaysToEaster === 49) {
+                    return { isFast: false, name: "عيد العنصرة المجيد (حلول الروح القدس) 🔥", icon: "🕊️", desc: "عيد سيدي كبير - فطر وحل دائم" };
+                }
+                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🎉", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
+            }
+
+            // ب) أسبوع الآلام: (-7 حتى -1)
+            if (diffDaysToEaster >= -7 && diffDaysToEaster <= -1) {
+                if (diffDaysToEaster === -7) {
+                    return { isFast: true, name: "أحد الشعانين (أحد السعف) 🌿", icon: "🌿", desc: "عيد سيدي - صوم انقطاعي بطقس فرايحي (بدون سمك)" };
+                }
+                if (diffDaysToEaster === -2) {
+                    return { isFast: true, name: "الجمعة العظيمة (صلبوت مخلصنا) ☦️", icon: "✝️", desc: "أقدس أيام السنة - صوم نسكي حازم وانقطاع كامل" };
+                }
+                if (diffDaysToEaster === -1) {
+                    return { isFast: true, name: "سبت الفرح (سبت النور) 🕯️", icon: "🕯️", desc: "صوم انقطاعي بدون سمك انتظاراً لإشراق القيامة" };
+                }
+                return { isFast: true, name: "أسبوع الآلام المقدس (البصخة) ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
+            }
+
+            // ج) الصوم الكبير (الأربعين المقدسة): (-55 حتى -8)
+            if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
+                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع (لا يُسمح فيه بالسمك)" };
+            }
+
+            // د) صوم يونان / نينوى: (-69 حتى -67)
+            if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
+                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى (بدون سمك 3 أيام)" };
+            }
+
+            // هـ) صوم الرسل: بعد العنصرة (diff >= 50) حتى 5 أبيب (شهر 11)
+            if (diffDaysToEaster >= 50 && c.month >= 9 && (c.month < 11 || (c.month === 11 && c.day <= 5))) {
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم الرسل الأطهار ✝️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+            }
+
+            // 2. صوم الميلاد المجيد: 16 هاتور (شهر 3) إلى 28 كيهك (شهر 4)
+            if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
+                if (c.month === 4 && c.day === 28) {
+                    return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للميلاد" };
+                }
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+            }
+
+            // 3. عيد الميلاد المجيد (29 كيهك): فطر دائم
+            if (c.month === 4 && c.day === 29) {
+                return { isFast: false, name: "عيد الميلاد المجيد 🎄", icon: "🎉", desc: "عيد سيدي كبير - فطر وابتهاج بميلاد مخلصنا" };
+            }
+
+            // 4. برمون الغطاس: 10 طوبة
+            if (c.month === 5 && c.day === 10) {
+                return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للغطاس" };
+            }
+
+            // 5. عيد الغطاس المجيد: 11 طوبة
+            if (c.month === 5 && c.day === 11) {
+                return { isFast: false, name: "عيد الغطاس المجيد (الثيؤفانيا) 🕊️", icon: "🎉", desc: "عيد سيدي كبير - فطر بميلاد الماء والروح" };
+            }
+
+            // 6. صوم السيدة العذراء: 1 مسرى إلى 15 مسرى (16 مسرى عيدها)
+            if (c.month === 12 && c.day >= 1 && c.day <= 15) {
+                if (isWedOrFri) {
+                    return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء (بدون سمك)" };
+                }
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
+            }
+
+            // 7. صوم الأربعاء والجمعة الأسبوعي
+            if (isWedOrFri) {
+                const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
+                const reason = (dayOfWeek === 3) ? "تذكار التآمر على مخلصنا وتسليمه" : "تذكار صلب وفداء رب المجد";
+                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
+            }
+
+            // 8. أيام الفطر العادية
+            return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
+        }
+    };
+
+    function renderFastingStatus() {
+        const now = new Date();
+        const f = CopticLiturgicalCalendar.getFastingStatus(now);
+        const c = CopticLiturgicalCalendar.getCopticDate(now);
+
+        const iconEl = $('ui-fast-icon');
+        const titleEl = $('ui-fast-title');
+        const descEl = $('ui-fast-desc');
+        const dateEl = $('ui-coptic-date-display');
+
+        if (iconEl) iconEl.textContent = f.icon;
+        if (titleEl) titleEl.textContent = f.name;
+        if (descEl) descEl.textContent = f.desc;
+        if (dateEl) dateEl.textContent = c.formatted || 'التقويم القبطي';
+    }
+
+
+    // ---------- الحساب الشامل للتأهيل الروحي والخدمي ----------
+    function computeRows() {
+        const spiritualLogs = readJSON('khedmety_student_spiritual', {});
+        const bibleReadings = readJSON('khedmety_bible_readings', {});
+        let candidatesGrades = [];
+        try { candidatesGrades = readJSON('khedmety_candidates_grades', []); } catch(e){}
+
+        const now = new Date();
+
+        return members.map(st => {
+            const code = (st.code ?? st.id ?? '').toString();
+            const name = st.name || 'مخدوم';
+            const stage = st.stage || st.level || 'الفرقة الأولى';
+
+            // 1. حضور الجمعة والقداسات والتناول
+            let friday = 0;
+            let liturgies = 0;
+            Object.keys(attendanceRecord).forEach(dateKey => {
+                const dt = new Date(dateKey + 'T00:00:00');
+                const dayOfWeek = dt.getDay();
+                const found = (attendanceRecord[dateKey] || []).find(a =>
+                    ((a.code != null && a.code.toString() === code) || (a.id != null && a.id.toString() === code)) && !a.isAbsentDueToDelay);
+                if (found) {
+                    if (dayOfWeek === 5) friday++;
+                    if (dayOfWeek === 0 || found.mass || found.communion || found.type === 'liturgy') liturgies++;
+                }
+            });
+
+            // أيام النوتة الروحية والتناول المسجل بها
+            let spiritual = 0;
+            let communionInNote = 0;
+            Object.keys(spiritualLogs).forEach(k => {
+                if (k.endsWith('_' + code)) {
+                    spiritual++;
+                    const entry = spiritualLogs[k];
+                    if (entry && (entry.communion || entry.mass || entry.eucharist)) {
+                        communionInNote++;
+                    }
+                }
+            });
+            const totalLiturgies = Math.max(liturgies, communionInNote);
+
+            // قراءات الإنجيل
+            let bible = Object.keys(bibleReadings).filter(k =>
+                k.endsWith('_' + code) || String((bibleReadings[k] || {}).code || '') === code).length;
+
+            // 2. جلسة الاعتراف (متابعة التأهيل الخدمي)
+            let confDate = st.lastConfession || null;
+            if (!confDate) {
+                const rawConf = localStorage.getItem('khedmety_student_confession_' + code) ||
+                                localStorage.getItem('khedmety_private_confession_' + code);
+                if (rawConf) {
+                    try {
+                        const p = JSON.parse(rawConf);
+                        confDate = (typeof p === 'string') ? p : (p.date || p.lastConfession || null);
+                    } catch(e) {
+                        confDate = rawConf;
+                    }
+                }
+            }
+            if (!confDate) {
+                const cand = candidatesGrades.find(cg => String(cg.code) === code);
+                if (cand && cand.lastConfession) confDate = cand.lastConfession;
+            }
+
+            let confessionStatus = { label: 'لم يسجل بعد ⏳', badgeClass: 'badge b-light', daysAgo: 999, sortVal: 999 };
+            if (confDate) {
+                const cDate = new Date(confDate);
+                if (!isNaN(cDate.getTime())) {
+                    const diffDays = Math.floor((now - cDate) / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 30) {
+                        confessionStatus = { label: `منذ ${diffDays} يوم 🟢`, badgeClass: 'badge-conf-ok', daysAgo: diffDays, sortVal: diffDays, date: confDate };
+                    } else if (diffDays <= 45) {
+                        confessionStatus = { label: `منذ ${diffDays} يوم 🟡`, badgeClass: 'badge-conf-warn', daysAgo: diffDays, sortVal: diffDays, date: confDate };
+                    } else {
+                        confessionStatus = { label: `تأخر (${diffDays} يوم) ⚠️`, badgeClass: 'badge-conf-danger', daysAgo: diffDays, sortVal: diffDays, date: confDate };
+                    }
+                } else {
+                    confessionStatus = { label: 'مسجل 🕊️', badgeClass: 'badge-conf-ok', daysAgo: 0, sortVal: 0, date: confDate };
+                }
+            }
+
+            // 3. مؤشر التأهيل الخدمي (Coaching Readiness)
+            let coachingStatus = { text: 'في مسار التأهيل 🟡', badgeClass: 'badge-coaching-progress' };
+            if (confessionStatus.daysAgo <= 40 && (friday >= 2 || spiritual >= 3 || totalLiturgies >= 2)) {
+                coachingStatus = { text: 'مؤهل ومجتهد 🟢', badgeClass: 'badge-coaching-ready' };
+            } else if (confessionStatus.daysAgo > 45 || !confDate) {
+                coachingStatus = { text: 'يحتاج متابعة اعتراف ⚠️', badgeClass: 'badge-coaching-confession' };
+            } else if (friday === 0 && spiritual === 0) {
+                coachingStatus = { text: 'يحتاج تشجيع وافتقاد 🤝', badgeClass: 'badge-coaching-followup' };
+            }
+
+            // إجمالي النقاط
+            const points = friday * 5 + totalLiturgies * 4 + spiritual * 5 + bible * 2 + (confessionStatus.daysAgo <= 35 ? 10 : 0);
+            const phone = st.phone || '';
+            const parent_phone = st.parent_phone || '';
+
+            return {
+                code, name, stage, friday, liturgies: totalLiturgies,
+                spiritual, bible, confessionDate: confDate, confessionStatus,
+                confessionSort: confessionStatus.sortVal, coachingStatus,
+                points, phone, parent_phone
+            };
+        });
+    }
+
+    function render() {
+        let rows = computeRows();
+
+        const stages = [...new Set(rows.map(r => r.stage).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ar'));
+        const keepStage = $('fStage').value;
+        $('fStage').innerHTML = '<option value="">كل الفرق</option>' + stages.map(s => `<option${s === keepStage ? ' selected' : ''}>${esc(s)}</option>`).join('');
+
+        const q = $('q').value.trim().toLowerCase();
+        if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q) || r.code.includes(q));
+        if ($('fStage').value) rows = rows.filter(r => r.stage === $('fStage').value);
+
+        rows.sort((a, b) => {
+            const va = a[sortKey] ?? 0;
+            const vb = b[sortKey] ?? 0;
+            if (typeof va === 'number' && typeof vb === 'number') {
+                return (vb - va) * -sortDir || a.name.localeCompare(b.name, 'ar');
+            }
+            return String(va).localeCompare(String(vb), 'ar') * -sortDir || a.name.localeCompare(b.name, 'ar');
+        });
+
+        $('followupTbody').innerHTML = rows.length ? rows.map(r => `
+            <tr>
+                <td style="font-weight:800;color:var(--accent)">${esc(r.code)}</td>
+                <td style="font-weight:800">${esc(r.name)}</td>
+                <td><span class="badge b-light">${esc(r.stage)}</span></td>
+                <td style="color:#16a34a;font-weight:800">${r.friday} لقاء</td>
+                <td style="color:#7c3aed;font-weight:800">${r.liturgies} قداس</td>
+                <td style="color:#dc2626;font-weight:800">${r.spiritual} يوم</td>
+                <td style="color:#b45309;font-weight:800">${r.bible} إصحاح</td>
+                <td><span class="${r.confessionStatus.badgeClass}">${esc(r.confessionStatus.label)}</span></td>
+                <td><span class="${r.coachingStatus.badgeClass}">${esc(r.coachingStatus.text)}</span></td>
+                <td style="font-weight:800;color:var(--accent)">${r.points} ⭐</td>
+            </tr>`).join('') : `<tr><td colspan="10" class="empty">لا توجد نتائج مطابقة.</td></tr>`;
+    }
+
+    document.querySelectorAll('#followupTable th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const k = th.dataset.k;
+            sortDir = (sortKey === k) ? -sortDir : -1;
+            sortKey = k;
+            render();
+        });
+    });
+    $('q').addEventListener('input', render);
+    $('fStage').addEventListener('change', render);
+
+    function csvCell(v) { let s = String(v ?? ''); if (/^[=@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
+    $('btnExport').addEventListener('click', () => {
+        const rows = computeRows();
+        const header = ['كود الدارس', 'اسم المخدوم', 'الفرقة/المرحلة', 'حضور الجمعة', 'القداس والتناول', 'أيام النوتة', 'قراءات الإنجيل', 'حالة الاعتراف', 'مؤشر التأهيل الخدمي', 'إجمالي النقاط'];
+        const csv = '\uFEFF' + [header, ...rows.map(r => [
+            r.code, r.name, r.stage, r.friday, r.liturgies, r.spiritual, r.bible,
+            r.confessionStatus.label, r.coachingStatus.text, r.points
+        ])]
+            .map(r => r.map(csvCell).join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = `Khedmety_Followup_Report_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    $('btnExportWa').addEventListener('click', () => {
+        const rows = computeRows();
+        if (!rows || rows.length === 0) {
+            alert('لا توجد بيانات للتصدير.');
+            return;
+        }
+
+        const headers = [
+            "الاسم",
+            "رقم الواتساب",
+            "الفرقة / المرحلة",
+            "كود الدارس",
+            "حضور الجمعة",
+            "القداس والتناول",
+            "أيام النوتة",
+            "قراءات الإنجيل",
+            "حالة الاعتراف",
+            "مؤشر التأهيل الخدمي",
+            "إجمالي النقاط",
+            "تليفون ولي الأمر",
+            "رسالة تقرير التأهيل الروحي"
+        ];
+
+        const dataRows = rows.map(r => {
+            let targetPhone = String(r.phone || r.parent_phone || '').trim();
+            if (targetPhone.startsWith('01') && targetPhone.length === 11) {
+                targetPhone = '20' + targetPhone.slice(1);
+            }
+            const msg = `سلام ونعمة يا ${r.name}، تقرير جهادك وتأهيلك الروحي في إعداد خدام: حضور اللقاءات (${r.friday})، القداس والتناول (${r.liturgies})، أيام النوتة الروحية (${r.spiritual})، قراءات الإنجيل (${r.bible} إصحاح)، حالة الاعتراف (${r.confessionStatus.label})، مؤشر التأهيل: [${r.coachingStatus.text}]. إجمالي رصيد نقاطك (${r.points} نقطة) ⭐ استمر في جهادك وصلواتنا معك دائماً لبنائك خادماً أميناً ومؤثراً ❤️`;
+
+            return [
+                r.name,
+                targetPhone,
+                r.stage,
+                r.code,
+                r.friday,
+                r.liturgies,
+                r.spiritual,
+                r.bible,
+                r.confessionStatus.label,
+                r.coachingStatus.text,
+                r.points,
+                r.parent_phone || '',
+                msg
+            ];
+        });
+
+        const aoa = [headers, ...dataRows];
+        const fileName = `تقرير_التأهيل_الروحي_للواتساب_NewWhats_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        if (typeof XLSX !== 'undefined') {
+            try {
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "التأهيل_الروحي_والحصاد");
+                XLSX.writeFile(wb, fileName);
+                return;
+            } catch(e) {
+                console.warn("تعذر تصدير xlsx، جاري تصدير CSV بديل:", e);
+            }
+        }
+
+        let csv = '\uFEFF' + headers.map(csvCell).join(',') + '\n';
+        dataRows.forEach(row => {
+            csv += row.map(csvCell).join(',') + '\n';
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+        a.download = fileName.replace('.xlsx', '.csv');
+        document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    renderFastingStatus();
+    render();
+    initLiveAttendance();
+})();
+</script>
+</body>
+</html>

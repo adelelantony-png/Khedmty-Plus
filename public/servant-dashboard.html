@@ -1917,6 +1917,20 @@
                 </div>
             </div>
 
+            <!-- شريط طقس الكنيسة القبطية والأصوام الذكي للرادار -->
+            <div id="radar_copticBanner" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff; border-radius: 14px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid rgba(255,255,255,0.12);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="radar_fastIcon" style="font-size: 1.6rem;">🥖</span>
+                    <div>
+                        <strong id="radar_fastTitle" style="font-size: 0.95rem; color: #fde047;">طقس الكنيسة اليوم</strong>
+                        <span style="font-size: 0.8rem; opacity: 0.9; margin-right: 8px;" id="radar_fastDesc">حساب تلقائي بحسب الطقس القبطي الأرثوذكسي</span>
+                    </div>
+                </div>
+                <div>
+                    <span id="radar_copticDate" style="background: rgba(255,255,255,0.18); padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 800;">التقويم القبطي</span>
+                </div>
+            </div>
+
             <!-- بطاقات النبض الرباعية (Radar Pulse KPIs) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px;">
                 <!-- 1. غياب متتالي -->
@@ -22254,8 +22268,101 @@ async function exportTodayAbsenteesForWhatsApp() {
     // 📡 رادار أمين الخدمة الشامل وشيت الإكسيل الأسبوعي
     // ==========================================
 
+    
+    // ---------- محرك التقويم القبطي والأصوام الطقسية لرادار أمين الخدمة ----------
+    const CopticLiturgicalCalendar = {
+        easterDates: {
+            2024: new Date(2024, 4, 5),
+            2025: new Date(2025, 3, 20),
+            2026: new Date(2026, 3, 12),
+            2027: new Date(2027, 4, 2),
+            2028: new Date(2028, 3, 16),
+            2029: new Date(2029, 3, 8),
+            2030: new Date(2030, 3, 28)
+        },
+        getCopticDate: function(date = new Date()) {
+            try {
+                const parts = new Intl.DateTimeFormat('en-US-u-ca-coptic', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(date);
+                let day = 1, month = 1, year = 1740;
+                for (const p of parts) {
+                    if (p.type === 'day') day = parseInt(p.value, 10);
+                    if (p.type === 'month') month = parseInt(p.value, 10);
+                    if (p.type === 'year') year = parseInt(p.value, 10);
+                }
+                const monthNames = ['', 'توت', 'بابه', 'هاتور', 'كيهك', 'طوبة', 'أمشير', 'برمهات', 'برمودة', 'بشنس', 'بؤونة', 'أبيب', 'مسرى', 'النسئ'];
+                return { day, month, monthName: monthNames[month] || '', year, formatted: `${day} ${monthNames[month] || ''} ${year} ش` };
+            } catch(e) {
+                return { day: 1, month: 1, monthName: '', year: 1740, formatted: '' };
+            }
+        },
+        getFastingStatus: function(date = new Date()) {
+            const c = this.getCopticDate(date);
+            const dayOfWeek = date.getDay();
+            const isWedOrFri = (dayOfWeek === 3 || dayOfWeek === 5);
+            const y = date.getFullYear();
+            const easter = this.easterDates[y] || new Date(y, 3, 15);
+            const msPerDay = 1000 * 60 * 60 * 24;
+            const diffDaysToEaster = Math.round((date - easter) / msPerDay);
+
+            if (diffDaysToEaster >= 0 && diffDaysToEaster <= 49) {
+                if (diffDaysToEaster === 0) return { isFast: false, name: "عيد القيامة المجيد 👑", icon: "🎉", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بالقيامة" };
+                if (diffDaysToEaster === 49) return { isFast: false, name: "عيد العنصرة المجيد 🔥", icon: "🕊️", desc: "عيد سيدي كبير - فطر وحل دائم" };
+                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🎉", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
+            }
+            if (diffDaysToEaster >= -7 && diffDaysToEaster <= -1) {
+                if (diffDaysToEaster === -7) return { isFast: true, name: "أحد الشعانين (أحد السعف) 🌿", icon: "🌿", desc: "عيد سيدي - صوم انقطاعي فرايحي" };
+                if (diffDaysToEaster === -2) return { isFast: true, name: "الجمعة العظيمة ☦️", icon: "✝️", desc: "أقدس أيام السنة - صوم نسكي حازم وانقطاع" };
+                if (diffDaysToEaster === -1) return { isFast: true, name: "سبت الفرح 🕯️", icon: "🕯️", desc: "صوم انقطاعي بدون سمك انتظاراً للقيامة" };
+                return { isFast: true, name: "أسبوع الآلام المقدس ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
+            }
+            if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
+                return { isFast: true, name: "الصوم الكبير (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع بدون سمك" };
+            }
+            if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
+                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى بدون سمك 3 أيام" };
+            }
+            if (diffDaysToEaster >= 50 && c.month >= 9 && (c.month < 11 || (c.month === 11 && c.day <= 5))) {
+                if (isWedOrFri) return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل" };
+                return { isFast: true, name: "صوم الرسل الأطهار ✝️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بالسمك)" };
+            }
+            if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
+                if (c.month === 4 && c.day === 28) return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك" };
+                if (isWedOrFri) return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد" };
+                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بالسمك)" };
+            }
+            if (c.month === 4 && c.day === 29) return { isFast: false, name: "عيد الميلاد المجيد 🎄", icon: "🎉", desc: "عيد سيدي كبير - فطر وابتهاج بميلاد مخلصنا" };
+            if (c.month === 5 && c.day === 10) return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك" };
+            if (c.month === 5 && c.day === 11) return { isFast: false, name: "عيد الغطاس المجيد (الثيؤفانيا) 🕊️", icon: "🎉", desc: "عيد سيدي كبير - فطر بميلاد الماء والروح" };
+            if (c.month === 12 && c.day >= 1 && c.day <= 15) {
+                if (isWedOrFri) return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء" };
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
+            }
+            if (isWedOrFri) {
+                const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
+                const reason = (dayOfWeek === 3) ? "تذكار التآمر على مخلصنا وتسليمه" : "تذكار صلب وفداء رب المجد";
+                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
+            }
+            return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
+        }
+    };
+
+    function renderRadarCopticFasting() {
+        const now = new Date();
+        const f = CopticLiturgicalCalendar.getFastingStatus(now);
+        const c = CopticLiturgicalCalendar.getCopticDate(now);
+        const iconEl = document.getElementById('radar_fastIcon');
+        const titleEl = document.getElementById('radar_fastTitle');
+        const descEl = document.getElementById('radar_fastDesc');
+        const dateEl = document.getElementById('radar_copticDate');
+        if (iconEl) iconEl.textContent = f.icon;
+        if (titleEl) titleEl.textContent = f.name;
+        if (descEl) descEl.textContent = f.desc;
+        if (dateEl) dateEl.textContent = c.formatted || 'التقويم القبطي';
+    }
+
     function renderRadarDashboard() {
         if (!members || members.length === 0) return;
+        renderRadarCopticFasting();
 
         // 1. تحديد التواريخ الخاصة بالاجتماعات
         const allDates = Object.keys(attendanceRecord || {}).sort().reverse();
@@ -22361,22 +22468,74 @@ async function exportTodayAbsenteesForWhatsApp() {
         renderRadarConfessionSection();
     }
 
-    function renderRadarConfessionSection() {
+        function renderRadarConfessionSection() {
         let candidates = [];
         try {
             candidates = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || [];
         } catch (e) { candidates = []; }
 
+        const now = new Date();
         const pendingConf = [];
+
         candidates.forEach(c => {
-            const conf = String(c.confessor || '').trim();
+            const code = String(c.code || '');
+            let conf = String(c.confessor || '').trim();
+            let lastConf = c.lastConfession || null;
+
+            if (!lastConf) {
+                const rawConf = localStorage.getItem('khedmety_student_confession_' + code) || localStorage.getItem('khedmety_private_confession_' + code);
+                if (rawConf) {
+                    try {
+                        const p = JSON.parse(rawConf);
+                        lastConf = (typeof p === 'string') ? p : (p.date || p.lastConfession || null);
+                    } catch(e) {
+                        lastConf = rawConf;
+                    }
+                }
+            }
+
+            let daysAgo = 999;
+            if (lastConf) {
+                const dt = new Date(lastConf);
+                if (!isNaN(dt.getTime())) {
+                    daysAgo = Math.floor((now - dt) / (1000 * 60 * 60 * 24));
+                }
+            }
+
             const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none' && conf !== 'لم يحدد');
             const hasProb = c.problemType && c.problemType.includes('اعتراف');
 
-            if (!isConfClean || hasProb) {
-                pendingConf.push(c);
+            // إذا كان المخدوم سجل اعترافاً حديثاً (خلال 40 يوماً) يتم اعتباره منتظماً
+            if (daysAgo <= 40) {
+                if (hasProb || !isConfClean) {
+                    c.confessor = (conf && isConfClean) ? conf : 'منتظم بالاعتراف';
+                    c.problemType = 'لا توجد مشاكل (مقبول طبيعي) 🟢';
+                    c.lastConfession = lastConf;
+                }
+            } else {
+                // إذا لم يكن لديه أب اعتراف أو تأخر أكثر من 40 يوماً
+                let countdownText = '⏳ مهلة أسبوعين لتحديد أب الاعتراف';
+                let countdownClass = 'radar-alert-warning';
+                if (daysAgo > 40 && daysAgo < 999) {
+                    countdownText = `⚠️ تأخر عن الاعتراف (${daysAgo} يوم)`;
+                    countdownClass = 'radar-alert-danger';
+                }
+                pendingConf.push({
+                    name: c.name,
+                    code: c.code,
+                    confessor: conf || 'لا يوجد أب اعتراف',
+                    phone: c.phone || '',
+                    countdownText,
+                    countdownClass,
+                    daysAgo
+                });
             }
         });
+
+        // حفظ التحديث التلقائي للمقبولين
+        try {
+            localStorage.setItem('khedmety_candidates_grades', JSON.stringify(candidates));
+        } catch(e) {}
 
         const elConfCount = document.getElementById('radar_kpiConfessionCount');
         if (elConfCount) elConfCount.textContent = pendingConf.length;
@@ -22393,10 +22552,10 @@ async function exportTodayAbsenteesForWhatsApp() {
                         <tr style="border-bottom: 1px solid #f1f5f9;">
                             <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${c.name}</td>
                             <td style="padding: 8px; font-weight: bold;">${c.code}</td>
-                            <td style="padding: 8px; color: #b45309; font-weight: bold;">${c.confessor || 'لا يوجد أب اعتراف'}</td>
+                            <td style="padding: 8px; color: #b45309; font-weight: bold;">${c.confessor}</td>
                             <td style="padding: 8px;">
-                                <span class="radar-alert-badge radar-alert-warning">
-                                    ⏳ مهلة أسبوعين
+                                <span class="radar-alert-badge ${c.countdownClass}">
+                                    ${c.countdownText}
                                 </span>
                             </td>
                             <td style="padding: 8px;">${c.phone || '-'}</td>
