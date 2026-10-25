@@ -826,3 +826,14 @@ checkLocalStorageUsage();
 }
 
 }
+
+// Explicit Window Exports
+if (typeof window !== 'undefined') {
+  window.renderServantsTable = renderServantsTable;
+  window.renderServantsAttendanceTable = renderServantsAttendanceTable;
+  window.registerActiveSession = registerActiveSession;
+  window.listenToActiveSessions = listenToActiveSessions;
+  window.populatePlanServantsDropdown = populatePlanServantsDropdown;
+  window.shareAutoSetupWhatsAppLink = shareAutoSetupWhatsAppLink;
+  window.recordServantAttendance = recordServantAttendance;
+}

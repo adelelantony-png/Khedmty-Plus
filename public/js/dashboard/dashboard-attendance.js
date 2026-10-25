@@ -1863,3 +1863,14 @@ checkLocalStorageUsage();
 }
 
 // ==========================================
+
+// Explicit Window Exports
+if (typeof window !== 'undefined') {
+  window.renderAttendanceTable = renderAttendanceTable;
+  window.renderLiveCardsFeed = renderLiveCardsFeed;
+  window.renderAttendanceCalendar = renderAttendanceCalendar;
+  window.renderAttendanceHeatmap = renderAttendanceHeatmap;
+  window.atomicRegisterAttendance = atomicRegisterAttendance;
+  window.exportTodaySessionToWhatsApp = exportTodaySessionToWhatsApp;
+  window.formatMatrixDateHeader = formatMatrixDateHeader;
+}

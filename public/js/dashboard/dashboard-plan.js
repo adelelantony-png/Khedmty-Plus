@@ -731,3 +731,10 @@ ${cleanPhone ? `<a href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${
 }
 
 // ==========================================
+// Explicit Window Exports
+if (typeof window !== 'undefined') {
+  window.checkUpcomingBirthdays = checkUpcomingBirthdays;
+  window.checkUpcomingMasterPlanEvents = checkUpcomingMasterPlanEvents;
+  window.renderMaterialsList = renderMaterialsList;
+  window.renderMasterPlanTable = renderMasterPlanTable;
+}

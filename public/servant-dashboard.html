@@ -36,6 +36,26 @@
 
 <script>
 
+
+// ==========================================
+// 🛡️ Global Stubs Shield: يضمن وجود جميع دوال اللوحة فورياً قبل اكتمال تحميل الوحدات
+// ==========================================
+window.renderServantsTable = window.renderServantsTable || function() {};
+window.renderServantsAttendanceTable = window.renderServantsAttendanceTable || function() {};
+window.renderMembersList = window.renderMembersList || function() {};
+window.renderAttendanceTable = window.renderAttendanceTable || function() {};
+window.renderLiveCardsFeed = window.renderLiveCardsFeed || function() {};
+window.renderAttendanceCalendar = window.renderAttendanceCalendar || function() {};
+window.renderRolloverCandidateList = window.renderRolloverCandidateList || function() {};
+window.populatePlanServantsDropdown = window.populatePlanServantsDropdown || function() {};
+window.checkUpcomingBirthdays = window.checkUpcomingBirthdays || function() {};
+window.checkUpcomingMasterPlanEvents = window.checkUpcomingMasterPlanEvents || function() {};
+window.registerActiveSession = window.registerActiveSession || function() {};
+window.listenToActiveSessions = window.listenToActiveSessions || function() {};
+window.renderAttendanceHeatmap = window.renderAttendanceHeatmap || function() {};
+window.renderMaterialsList = window.renderMaterialsList || function() {};
+window.renderMasterPlanTable = window.renderMasterPlanTable || function() {};
+
 window.appErrorLogs = [];
 
 window.pendingErrorReports = [];

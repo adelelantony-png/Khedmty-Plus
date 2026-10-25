@@ -1859,3 +1859,12 @@ alert(`✅ تم نقل (${count}) فرد بنجاح!`);
 
 // ==========================================
 
+
+// Explicit Window Exports
+if (typeof window !== 'undefined') {
+  window.renderMembersList = renderMembersList;
+  window.renderRolloverCandidateList = renderRolloverCandidateList;
+  window.saveSingleMemberUpdate = saveSingleMemberUpdate;
+  window.normalizeStageText = normalizeStageText;
+  window.normalizeGenderText = normalizeGenderText;
+}
