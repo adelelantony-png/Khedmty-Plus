@@ -31711,6 +31711,210 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.removeItem('my_church_class');
     }
 
+    // ========================================================
+    // 🎯 محرك معايير البونص ونقاط التشجيع (Incentive & Bonus Engine)
+    // ========================================================
+    const BONUS_STORAGE_KEY = 'khedmety_bonus_settings';
+
+    function getBonusSettings() {
+        const defaultSettings = {
+            isBonusVisibleToStudents: false,
+            defaultRules: {
+                fridayPoints: 10,
+                extraDayPoints: 15,
+                communionBonus: 5,
+                earlyArrivalBonus: 5
+            },
+            customPeriods: []
+        };
+        try {
+            const raw = localStorage.getItem(BONUS_STORAGE_KEY);
+            if (!raw) return defaultSettings;
+            const parsed = JSON.parse(raw);
+            return {
+                isBonusVisibleToStudents: Boolean(parsed.isBonusVisibleToStudents),
+                defaultRules: Object.assign({}, defaultSettings.defaultRules, parsed.defaultRules || {}),
+                customPeriods: Array.isArray(parsed.customPeriods) ? parsed.customPeriods : []
+            };
+        } catch (e) {
+            return defaultSettings;
+        }
+    }
+
+    function saveBonusSettings(settings) {
+        localStorage.setItem(BONUS_STORAGE_KEY, JSON.stringify(settings));
+        if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+            fsdb.collection('settings').doc('bonus_engine').set(settings, { merge: true }).catch(() => {});
+        }
+    }
+
+    function getEffectiveBonusRule(dateStr) {
+        const settings = getBonusSettings();
+        if (!dateStr) return settings.defaultRules;
+        const target = new Date(dateStr + 'T00:00:00');
+        const activePeriod = settings.customPeriods.find(p => {
+            if (!p.isActive) return false;
+            const s = new Date(p.startDate + 'T00:00:00');
+            const e = new Date(p.endDate + 'T23:59:59');
+            return target >= s && target <= e;
+        });
+
+        if (activePeriod) {
+            return {
+                fridayPoints: Number(activePeriod.fridayPoints) || settings.defaultRules.fridayPoints,
+                extraDayPoints: Number(activePeriod.extraDayPoints) || settings.defaultRules.extraDayPoints,
+                communionBonus: settings.defaultRules.communionBonus,
+                earlyArrivalBonus: settings.defaultRules.earlyArrivalBonus,
+                examBonusPoints: Number(activePeriod.examBonusPoints) || 0,
+                periodName: activePeriod.title
+            };
+        }
+        return settings.defaultRules;
+    }
+
+    function calculateBonusPointsForDate(dateStr, isFriday, isCommunion, isEarly) {
+        const rule = getEffectiveBonusRule(dateStr);
+        let pts = isFriday ? (Number(rule.fridayPoints) || 10) : (Number(rule.extraDayPoints) || 15);
+        if (isCommunion) pts += (Number(rule.communionBonus) || 5);
+        if (isEarly) pts += (Number(rule.earlyArrivalBonus) || 5);
+        return pts;
+    }
+
+    function toggleBonusStudentVisibility() {
+        const settings = getBonusSettings();
+        settings.isBonusVisibleToStudents = !settings.isBonusVisibleToStudents;
+        saveBonusSettings(settings);
+        renderBonusSettingsUI();
+        if (typeof showToast === 'function') {
+            showToast(settings.isBonusVisibleToStudents ? 
+                "🔓 أصبحت نقاط البونص معلنة ومتاحة لجميع المخدومين في بواباتهم!" : 
+                "🔒 تم حجب نقاط البونص وترتيب الأوائل عن المخدومين بأمان!");
+        } else {
+            alert(settings.isBonusVisibleToStudents ? "🔓 تم إعلان النقاط للمخدومين" : "🔒 تم حجب النقاط عن المخدومين");
+        }
+    }
+
+    function saveBaseBonusRules() {
+        const settings = getBonusSettings();
+        settings.defaultRules.fridayPoints = Math.max(0, parseInt(document.getElementById('bonusBaseFridayPts').value) || 10);
+        settings.defaultRules.extraDayPoints = Math.max(0, parseInt(document.getElementById('bonusBaseExtraPts').value) || 15);
+        settings.defaultRules.communionBonus = Math.max(0, parseInt(document.getElementById('bonusBaseCommunionPts').value) || 5);
+        settings.defaultRules.earlyArrivalBonus = Math.max(0, parseInt(document.getElementById('bonusBaseEarlyPts').value) || 5);
+        saveBonusSettings(settings);
+        if (typeof showToast === 'function') showToast("✅ تم حفظ معايير البونص الأساسية بنجاح!");
+        else alert("✅ تم حفظ معايير البونص الأساسية بنجاح!");
+    }
+
+    function addNewBonusPeriodAction() {
+        const title = (document.getElementById('newPeriodTitle').value || '').trim();
+        const start = document.getElementById('newPeriodStartDate').value;
+        const end = document.getElementById('newPeriodEndDate').value;
+        const friPts = parseInt(document.getElementById('newPeriodFriPts').value) || 0;
+        const extraPts = parseInt(document.getElementById('newPeriodExtraPts').value) || 0;
+        const examPts = parseInt(document.getElementById('newPeriodExamPts').value) || 0;
+
+        if (!title) return alert("يرجى إدخال مسمى الفترة (مثال: فترة الصوم الكبير).");
+        if (!start || !end) return alert("يرجى تحديد تاريخ البداية وتاريخ النهاية.");
+        if (start > end) return alert("تاريخ البداية يجب أن يكون قبل أو يساوي تاريخ النهاية.");
+
+        const settings = getBonusSettings();
+        const newPeriod = {
+            id: 'period_' + Date.now(),
+            title: title,
+            startDate: start,
+            endDate: end,
+            fridayPoints: friPts,
+            extraDayPoints: extraPts,
+            examBonusPoints: examPts,
+            isActive: true
+        };
+
+        settings.customPeriods.push(newPeriod);
+        saveBonusSettings(settings);
+
+        document.getElementById('newPeriodTitle').value = '';
+        document.getElementById('newPeriodStartDate').value = '';
+        document.getElementById('newPeriodEndDate').value = '';
+
+        renderBonusSettingsUI();
+        if (typeof showToast === 'function') showToast("✅ تمت إضافة الفترة الزمنية المخصصة بنجاح!");
+        else alert("✅ تمت إضافة الفترة بنجاح!");
+    }
+
+    function deleteBonusPeriodAction(id) {
+        if (!confirm("هل أنت متأكد من حذف هذه الفترة المخصصة؟")) return;
+        const settings = getBonusSettings();
+        settings.customPeriods = settings.customPeriods.filter(p => p.id !== id);
+        saveBonusSettings(settings);
+        renderBonusSettingsUI();
+    }
+
+    function toggleBonusPeriodActiveAction(id) {
+        const settings = getBonusSettings();
+        const p = settings.customPeriods.find(x => x.id === id);
+        if (p) {
+            p.isActive = !p.isActive;
+            saveBonusSettings(settings);
+            renderBonusSettingsUI();
+        }
+    }
+
+    function renderBonusSettingsUI() {
+        const settings = getBonusSettings();
+        const badge = document.getElementById('bonusPublishStatusBadge');
+        const btn = document.getElementById('btnToggleBonusVisibility');
+        if (badge) {
+            if (settings.isBonusVisibleToStudents) {
+                badge.innerHTML = '<i class="fa-solid fa-lock-open me-1"></i> معلن للمخدومين 📢';
+                badge.style.color = '#15803d';
+            } else {
+                badge.innerHTML = '<i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒';
+                badge.style.color = '#dc2626';
+            }
+        }
+        if (btn) {
+            btn.textContent = settings.isBonusVisibleToStudents ? 'حجب النقاط الآن' : 'إعلان النقاط للمخدومين';
+            btn.style.background = settings.isBonusVisibleToStudents ? '#dc2626' : '#15803d';
+        }
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+        setVal('bonusBaseFridayPts', settings.defaultRules.fridayPoints);
+        setVal('bonusBaseExtraPts', settings.defaultRules.extraDayPoints);
+        setVal('bonusBaseCommunionPts', settings.defaultRules.communionBonus);
+        setVal('bonusBaseEarlyPts', settings.defaultRules.earlyArrivalBonus);
+
+        const tbody = document.getElementById('bonusPeriodsTableBody');
+        if (tbody) {
+            if (settings.customPeriods.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:15px; color:#94a3b8;">لا توجد فترات مخصصة مسجلة حالياً.. يتم تطبيق المعايير الأساسية.</td></tr>';
+            } else {
+                tbody.innerHTML = settings.customPeriods.map(p => `
+                    <tr style="border-bottom:1px solid #e2e8f0;">
+                        <td style="font-weight:bold; color:#0f172a;">${escapeHtml(p.title)}</td>
+                        <td>${escapeHtml(p.startDate)}</td>
+                        <td>${escapeHtml(p.endDate)}</td>
+                        <td><span class="badge" style="background:#dbeafe; color:#1e40af;">${p.fridayPoints} نقطة</span></td>
+                        <td><span class="badge" style="background:#fef3c7; color:#92400e;">${p.extraDayPoints} نقطة</span></td>
+                        <td><span class="badge" style="background:#f3e8ff; color:#6b21a8;">+${p.examBonusPoints}</span></td>
+                        <td>
+                            <span class="badge" style="background:${p.isActive ? '#dcfce7; color:#15803d;' : '#fee2e2; color:#b91c1c;'}">
+                                ${p.isActive ? 'مفعلة' : 'معطلة'}
+                            </span>
+                        </td>
+                        <td>
+                            <button type="button" onclick="toggleBonusPeriodActiveAction('${p.id}')" style="background:#f1f5f9; border:1px solid #cbd5e1; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem; margin-left:4px;">
+                                ${p.isActive ? 'تعطيل' : 'تفعيل'}
+                            </button>
+                            <button type="button" onclick="deleteBonusPeriodAction('${p.id}')" style="background:#fee2e2; color:#b91c1c; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:0.75rem;">
+                                حذف
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+    }
+
 </script>
 
     <!-- نافذة تأكيد الأمان لتفريغ السجلات (Safe Purge Modal) -->
