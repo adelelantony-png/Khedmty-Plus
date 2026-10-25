@@ -7026,6 +7026,7 @@
 
 
     <script src="auth-client.js"></script>
+    <script src="js/khedmty-db.js"></script>
 
 
 
@@ -7721,6 +7722,7 @@
 
 
 
+                            if (window.KhedmtyDB) { KhedmtyDB.setItem('khedmety_archived_audit_logs', logs).catch(() => {}); }
                             localStorage.setItem(STORAGE_KEYS.AUDIT_LOGS, JSON.stringify(logs.slice(0, 50)));
 
 
@@ -7837,7 +7839,7 @@
 
 
 
-                txt.innerText = `${usageKB} KB (${usagePercent}%) من أصل 5 MB`;
+                txt.innerHTML = `${usageKB} KB (${usagePercent}%) من 5 MB <span style="color:#15803d; font-weight:800; font-size:0.76rem; margin-right:6px;"><i class="fa-solid fa-database me-1"></i> (IndexedDB عالي السعة نشط: أوفلاين غير محدود 🚀)</span>`;
 
 
 

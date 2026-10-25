@@ -31,6 +31,7 @@ const PRECACHE_ASSETS = [
     './js/firebase-config.js',
     './js/pwa-helper.js',
     './js/app-updater.js',
+    './js/khedmty-db.js',
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/favicon-48.png'
