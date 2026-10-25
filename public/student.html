@@ -1,195 +1,557 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة المخدوم - خدمة إعداد الخدام</title>
-    <meta name="theme-color" content="#1e3799">
-    <link rel="icon" type="image/png" href="icons/favicon-48.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/app-theme.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <style>
-        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
-        .main-card { max-width: 840px; margin: 20px auto; padding: 0 16px; }
-        .welcome-header { background: linear-gradient(135deg, #0c2461 0%, #1e3799 45%, #0984e3 100%); color: #fff; border-radius: 22px; padding: 24px; margin-bottom: 20px; box-shadow: 0 12px 30px rgba(12, 36, 97, 0.22); position: relative; overflow: hidden; }
-        .welcome-header::after { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .card-menu { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; transition: 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .card-menu:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: #0984e3; color: inherit; }
-        .menu-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-left: 14px; flex-shrink: 0; }
-        .category-title { font-size: 15px; font-weight: 800; color: #334155; margin: 18px 0 10px; display: flex; align-items: center; gap: 8px; }
-        .quick-barcode-badge { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
-        .quick-barcode-badge:hover { background: rgba(255, 255, 255, 0.28); color: #fff; transform: translateY(-1px); }
-    </style>
-</head>
-<body>
-
-<div class="main-container main-card">
-    <!-- الشريط العلوي مع زر التحديث ورتبة الطالب والخروج -->
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div class="d-flex align-items-center gap-2">
-            <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
-            <div id="appUpdateContainer"></div>
-        </div>
-        <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold"><i class="fa-solid fa-power-off me-1"></i> خروج</a>
-    </div>
-
-    <!-- الترحيب وسحب حالة الحضور سحابياً -->
-    <div class="welcome-header text-center">
-        <h4 class="fw-bold mb-1" id="ui-student-name">أهلاً بك</h4>
-        <small class="opacity-90 d-block mb-3">كودك: <strong id="ui-student-code"></strong></small>
-        
-        <div class="bg-white bg-opacity-25 rounded-4 p-3 text-white mb-3">
-            <div class="small fw-bold mb-1">حالة حضورك اليوم في كشف الكنيسة:</div>
-            <div id="ui-attendance-status" class="fs-5 fw-bold"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الفحص...</div>
-        </div>
-
-        <!-- زر الوصول المباشر لكارنيه الـ QR المعتمد للكاميرا -->
-        <div>
-            <a href="barcode.html" class="quick-barcode-badge">
-                <i class="fa-solid fa-qrcode text-warning"></i> إبراز كارنيه حضور الكورس (QR Code) 🪪
-            </a>
-        </div>
-    </div>
-
-    <!-- تنبيه ذكي للالتزام الرعوي -->
-    <div id="student-warning-banner" class="alert alert-warning border-0 shadow-sm d-none mb-3 rounded-4" style="border-right: 5px solid #d97706 !important;">
-        <div class="d-flex align-items-center">
-            <i class="fa-solid fa-triangle-exclamation fs-4 text-warning ms-3"></i>
-            <div>
-                <strong class="d-block text-dark">تنبيه لالتزامك الرعوي:</strong>
-                <small class="text-muted">نرجو الانتظام في حضور اجتماعات الجمعة وتسجيل وسائط النعمة.</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- بطاقة قراءة اليوم -->
-    <div class="card p-3 mb-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706 !important; border-radius: 18px;">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-bookmark me-1"></i> قراءة اليوم حسب الخطة السنوية</span>
-                <h5 class="fw-bold text-dark mb-0" id="ui-today-reading-title">جاري التحديد...</h5>
-                <small class="text-muted" id="ui-today-date-text"></small>
-            </div>
-            <a id="btn-go-reading" href="bible.html" class="btn btn-warning text-dark fw-bold px-3 py-2 shadow-sm rounded-pill">
-                <i class="fa-solid fa-book-open-reader me-1"></i> ابدأ القراءة الآن
-            </a>
-        </div>
-    </div>
-
-    <!-- القسم الأول: الالتزام الدراسي والشيتات والحضور -->
-    <div class="category-title"><i class="fa-solid fa-graduation-cap text-primary"></i> الالتزام الدراسي والشيتات والحضور:</div>
-    <div class="menu-grid">
-        <a href="barcode.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-qrcode"></i></div>
-                <div>
-                    <strong class="d-block text-dark">كارنيه كورس إعداد الخدام</strong>
-                    <small class="text-muted">كود الـ QR المعتمد لمسحه بالكاميرا في الاجتماع</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="student_attendance.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-calendar-check"></i></div>
-                <div>
-                    <strong class="d-block text-dark">سجل الحضور والغياب والتأخير</strong>
-                    <small class="text-muted">كشف تفصيلي بحضورك ومواعيدك بالقداس</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="sheets_list.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-purple bg-opacity-10 text-primary" style="background:#f3e8ff;"><i class="fa-solid fa-file-pen" style="color:#7c3aed;"></i></div>
-                <div>
-                    <strong class="d-block text-dark">المقررات والشيتات المطلوبة</strong>
-                    <small class="text-muted">تسليم أبحاث وامتحانات المواد الدراسية</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="results.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-award"></i></div>
-                <div>
-                    <strong class="d-block text-dark">النتيجة والشهادة السحابية</strong>
-                    <small class="text-muted">استعلام درجات المواد والتقدير العام المعتمد</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="harvest.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-success bg-opacity-10 text-success"><i class="fa-solid fa-seedling"></i></div>
-                <div>
-                    <strong class="d-block text-dark">صفحة الحصاد والنقاط</strong>
-                    <small class="text-muted">متابعة إجمالي النقاط ومؤشر قراءة الإنجيل</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-    </div>
-
-    <!-- القسم الثاني: وسائط النعمة والقراءات الروحية -->
-    <div class="category-title"><i class="fa-solid fa-dove text-danger"></i> وسائط النعمة والقراءات الروحية:</div>
-    <div class="menu-grid">
-        <a href="spiritual_note.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-heart-pulse"></i></div>
-                <div>
-                    <strong class="d-block text-dark">النوتة الروحية اليومية</strong>
-                    <small class="text-muted">تسجيل صلوات الأجبية، القداس، والصوم</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="bible.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-book-bible"></i></div>
-                <div>
-                    <strong class="d-block text-dark">قارئ الكتاب المقدس</strong>
-                    <small class="text-muted">قراءة أسفار وإصحاحات العهدين وتسجيل الخلوة</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="katamaros.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-scroll"></i></div>
-                <div>
-                    <strong class="d-block text-dark">القطمارس اليومي</strong>
-                    <small class="text-muted">قراءات العشية، باكر، والقداس الإلهي</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-
-        <a href="synaxarium.html" class="card-menu">
-            <div class="d-flex align-items-center">
-                <div class="menu-icon bg-secondary bg-opacity-10 text-secondary"><i class="fa-solid fa-church"></i></div>
-                <div>
-                    <strong class="d-block text-dark">السنكسار الكنسي</strong>
-                    <small class="text-muted">سير وتذكارات آباء وشهداء الكنيسة</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-        </a>
-    </div>
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>بوابة المخدوم - خدمة إعداد الخدام</title>
+
+    <meta name="theme-color" content="#1e3799">
+
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="stylesheet" href="css/app-theme.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <style>
+
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+
+        .main-card { max-width: 840px; margin: 20px auto; padding: 0 16px; }
+
+        .welcome-header { background: linear-gradient(135deg, #0c2461 0%, #1e3799 45%, #0984e3 100%); color: #fff; border-radius: 22px; padding: 24px; margin-bottom: 20px; box-shadow: 0 12px 30px rgba(12, 36, 97, 0.22); position: relative; overflow: hidden; }
+
+        .welcome-header::after { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.06); border-radius: 50%; pointer-events: none; }
+
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px; }
+
+        .card-menu { background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: inherit; transition: 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+
+        .card-menu:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); border-color: #0984e3; color: inherit; }
+
+        .menu-icon { width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; margin-left: 14px; flex-shrink: 0; }
+
+        .category-title { font-size: 15px; font-weight: 800; color: #334155; margin: 18px 0 10px; display: flex; align-items: center; gap: 8px; }
+
+        .quick-barcode-badge { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(8px); color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+
+        .quick-barcode-badge:hover { background: rgba(255, 255, 255, 0.28); color: #fff; transform: translateY(-1px); }
+
+    
+        /* أنماط رحلتك الروحية الملكية */
+        .spiritual-journey-card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 22px;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 4px 20px rgba(12, 36, 97, 0.06);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+        .streak-banner-glow {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #d97706 100%);
+            border-radius: 18px;
+            box-shadow: 0 6px 18px rgba(234, 88, 12, 0.28);
+            position: relative;
+            overflow: hidden;
+        }
+        .streak-flame-anim {
+            display: inline-block;
+            animation: flamePulse 2s infinite ease-in-out;
+        }
+        @keyframes flamePulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(253, 224, 71, 0.6)); }
+            50% { transform: scale(1.15) rotate(3deg); filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.9)); }
+        }
+        .private-diary-box {
+            background: linear-gradient(135deg, #091a44 0%, #0c2461 60%, #1e3799 100%);
+            border: 1.5px solid rgba(212, 175, 55, 0.4);
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(12, 36, 97, 0.25);
+        }
+        .badge-achievement-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 10px 6px;
+            transition: all 0.25s ease;
+        }
+        .badge-achievement-card.unlocked {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #d97706;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.18);
+        }
+        .badge-achievement-card.unlocked .badge-icon {
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+
+
+<div class="main-container main-card">
+
+    <!-- الشريط العلوي مع زر التحديث ورتبة الطالب والخروج -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+        <div class="d-flex align-items-center gap-2">
+
+            <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
+
+            <div id="appUpdateContainer"></div>
+
+        </div>
+
+        <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold"><i class="fa-solid fa-power-off me-1"></i> خروج</a>
+
+    </div>
+
+
+
+    <!-- الترحيب وسحب حالة الحضور سحابياً -->
+
+    <div class="welcome-header text-center">
+
+        <h4 class="fw-bold mb-1" id="ui-student-name">أهلاً بك</h4>
+
+        <small class="opacity-90 d-block mb-3">كودك: <strong id="ui-student-code"></strong></small>
+
+        
+
+        <div class="bg-white bg-opacity-25 rounded-4 p-3 text-white mb-3">
+
+            <div class="small fw-bold mb-1">حالة حضورك اليوم في كشف الكنيسة:</div>
+
+            <div id="ui-attendance-status" class="fs-5 fw-bold"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الفحص...</div>
+
+        </div>
+
+
+
+        <!-- زر الوصول المباشر لكارنيه الـ QR المعتمد للكاميرا -->
+
+        <div>
+
+            <a href="barcode.html" class="quick-barcode-badge">
+
+                <i class="fa-solid fa-qrcode text-warning"></i> إبراز كارنيه حضور الكورس (QR Code) 🪪
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- تنبيه ذكي للالتزام الرعوي -->
+
+    <div id="student-warning-banner" class="alert alert-warning border-0 shadow-sm d-none mb-3 rounded-4" style="border-right: 5px solid #d97706 !important;">
+
+        <div class="d-flex align-items-center">
+
+            <i class="fa-solid fa-triangle-exclamation fs-4 text-warning ms-3"></i>
+
+            <div>
+
+                <strong class="d-block text-dark">تنبيه لالتزامك الرعوي:</strong>
+
+                <small class="text-muted">نرجو الانتظام في حضور اجتماعات الجمعة وتسجيل وسائط النعمة.</small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- ========================================== -->
+    <!-- 🌟 وحدة رحلتك الروحية الملكية (Spiritual Journey) -->
+    <!-- ========================================== -->
+    <div class="card p-3 mb-3 border-0 spiritual-journey-card">
+        
+        <!-- عنوان القسم -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <span style="font-size: 1.3rem;">🕊️</span>
+                <h5 class="fw-bold mb-0" style="color: #0c2461;">رحلتك الروحية</h5>
+            </div>
+            <span class="badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:0.78rem;">
+                <i class="fa-solid fa-sparkles me-1 text-warning"></i> وسائط النعمة
+            </span>
+        </div>
+
+        <!-- 1. شعلة التتابع الروحي (Streak Banner) -->
+        <div class="streak-banner-glow mb-3 p-3 text-white text-center">
+            <div style="font-size: 2.2rem;" class="streak-flame-anim">🔥</div>
+            <h3 class="fw-bold mb-1" id="ui-streak-count" style="font-size: 1.6rem; letter-spacing: -0.5px;">0 يوم متواصل</h3>
+            <p class="mb-0 opacity-95 small" id="ui-streak-subtitle">ابدأ سلسلتك المباركة اليوم.. ربنا معاك 🙏</p>
+        </div>
+
+        <!-- 2. شريط العد التنازلي للأعياد والمناسبات الكنسية -->
+        <div class="mb-3 p-2 px-3 rounded-4 d-flex align-items-center justify-content-between" style="background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+            <div class="d-flex align-items-center gap-2">
+                <span id="ui-feast-icon" style="font-size: 1.25rem;">🎄</span>
+                <span class="fw-bold text-dark small" id="ui-feast-text">جاري حساب العيد القادم...</span>
+            </div>
+            <span class="badge rounded-pill bg-light text-secondary border px-2 py-1" style="font-size: 0.72rem;" id="ui-coptic-date-tag">الطقس الكنسي</span>
+        </div>
+
+        <!-- 3. مفكرتك الروحية الخاصة (Zero-Knowledge Privacy) -->
+        <div class="private-diary-box p-3 text-white mb-3">
+            
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span>📖</span>
+                    <strong style="color: #fde047; font-size: 0.98rem;">مفكرتك الروحية</strong>
+                </div>
+                <span class="badge" style="background: rgba(255,255,255,0.12); color: #fde047; border: 1px solid rgba(253, 224, 71, 0.4); font-size: 0.72rem;">
+                    <i class="fa-solid fa-lock me-1"></i> خاص تماماً
+                </span>
+            </div>
+            
+            <p style="font-size: 0.76rem; color: #cbd5e1; margin-bottom: 12px; line-height: 1.4;">
+                بينك وبين ربنا فقط — سرّي ومخزن على جهازك ولا يراه أي خادم 🔒
+            </p>
+
+            <!-- بطاقتي آخر اعتراف وتناول -->
+            <div class="row g-2 mb-3 text-center">
+                <div class="col-6">
+                    <div class="p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);">
+                        <div style="font-size: 0.72rem; color: #94a3b8; font-weight: bold;">آخر اعتراف</div>
+                        <div class="fw-bold mt-1" id="ui-last-confession-date" style="font-size: 0.85rem; color: #ffffff;">لم يُسجَّل بعد</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 rounded-3" style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);">
+                        <div style="font-size: 0.72rem; color: #94a3b8; font-weight: bold;">آخر تناول</div>
+                        <div class="fw-bold mt-1" id="ui-last-communion-date" style="font-size: 0.85rem; color: #ffffff;">لم يُسجَّل بعد</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار التسجيل اللحظي بنقرة واحدة -->
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-sm text-white fw-bold py-2 rounded-3" onclick="recordPrivateConfession()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);">
+                    <span class="me-1">🙇‍♂️</span> سجّلت اعترافي اليوم
+                </button>
+                <button type="button" class="btn btn-sm text-white fw-bold py-2 rounded-3" onclick="recordPrivateCommunion()" style="background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.25);">
+                    <span class="me-1">🍞</span> تناولت اليوم
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. نظام الأوسمة التحفيزي (Badges & Gamification) -->
+        <div class="badges-gamification-section">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold small text-dark"><span class="me-1">🎖️</span> الأوسمة والإنجازات:</div>
+                <span class="small text-muted" id="ui-unlocked-badges-count" style="font-size: 0.75rem;">0 / 4 مكتمل</span>
+            </div>
+
+            <div class="row g-2 text-center" id="badgesGrid">
+                <!-- وسام أسبوع كامل -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-week">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🔥</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أسبوع كامل</div>
+                        <div class="small text-muted mt-1" id="badge-week-progress" style="font-size: 0.7rem;">0 / 7 أيام</div>
+                    </div>
+                </div>
+                <!-- وسام شهر متواصل -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-month">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🌟</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">شهر متواصل</div>
+                        <div class="small text-muted mt-1" id="badge-month-progress" style="font-size: 0.7rem;">0 / 30 يوم</div>
+                    </div>
+                </div>
+                <!-- وسام 100 يوم -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-century">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🏆</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">100 يوم بركة</div>
+                        <div class="small text-muted mt-1" id="badge-century-progress" style="font-size: 0.7rem;">0 / 100 يوم</div>
+                    </div>
+                </div>
+                <!-- وسام حامي وسائط النعمة -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-grace">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🕊️</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">وسائط النعمة</div>
+                        <div class="small text-muted mt-1" id="badge-grace-progress" style="font-size: 0.7rem;">اعتراف وتناول</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- بطاقة قراءة اليوم -->
+
+    <div class="card p-3 mb-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706 !important; border-radius: 18px;">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+            <div>
+
+                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-bookmark me-1"></i> قراءة اليوم حسب الخطة السنوية</span>
+
+                <h5 class="fw-bold text-dark mb-0" id="ui-today-reading-title">جاري التحديد...</h5>
+
+                <small class="text-muted" id="ui-today-date-text"></small>
+
+            </div>
+
+            <a id="btn-go-reading" href="bible.html" class="btn btn-warning text-dark fw-bold px-3 py-2 shadow-sm rounded-pill">
+
+                <i class="fa-solid fa-book-open-reader me-1"></i> ابدأ القراءة الآن
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- القسم الأول: الالتزام الدراسي والشيتات والحضور -->
+
+    <div class="category-title"><i class="fa-solid fa-graduation-cap text-primary"></i> الالتزام الدراسي والشيتات والحضور:</div>
+
+    <div class="menu-grid">
+
+        <a href="barcode.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-primary bg-opacity-10 text-primary"><i class="fa-solid fa-qrcode"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">كارنيه كورس إعداد الخدام</strong>
+
+                    <small class="text-muted">كود الـ QR المعتمد لمسحه بالكاميرا في الاجتماع</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="student_attendance.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-calendar-check"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">سجل الحضور والغياب والتأخير</strong>
+
+                    <small class="text-muted">كشف تفصيلي بحضورك ومواعيدك بالقداس</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="sheets_list.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-purple bg-opacity-10 text-primary" style="background:#f3e8ff;"><i class="fa-solid fa-file-pen" style="color:#7c3aed;"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">المقررات والشيتات المطلوبة</strong>
+
+                    <small class="text-muted">تسليم أبحاث وامتحانات المواد الدراسية</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="results.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-award"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">النتيجة والشهادة السحابية</strong>
+
+                    <small class="text-muted">استعلام درجات المواد والتقدير العام المعتمد</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="harvest.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-success bg-opacity-10 text-success"><i class="fa-solid fa-seedling"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">صفحة الحصاد والنقاط</strong>
+
+                    <small class="text-muted">متابعة إجمالي النقاط ومؤشر قراءة الإنجيل</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- القسم الثاني: وسائط النعمة والقراءات الروحية -->
+
+    <div class="category-title"><i class="fa-solid fa-dove text-danger"></i> وسائط النعمة والقراءات الروحية:</div>
+
+    <div class="menu-grid">
+
+        <a href="spiritual_note.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-heart-pulse"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">النوتة الروحية اليومية</strong>
+
+                    <small class="text-muted">تسجيل صلوات الأجبية، القداس، والصوم</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="bible.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-book-bible"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">قارئ الكتاب المقدس</strong>
+
+                    <small class="text-muted">قراءة أسفار وإصحاحات العهدين وتسجيل الخلوة</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="katamaros.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-scroll"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">القطمارس اليومي</strong>
+
+                    <small class="text-muted">قراءات العشية، باكر، والقداس الإلهي</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="synaxarium.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-secondary bg-opacity-10 text-secondary"><i class="fa-solid fa-church"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">السنكسار الكنسي</strong>
+
+                    <small class="text-muted">سير وتذكارات آباء وشهداء الكنيسة</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+    </div>
+
 
     <!-- قسم تقييم لقاء الجمعة والمقترحات (Feedback Widget) -->
     <div class="card p-3 mt-4 mb-3 border-0 shadow-sm rounded-4" style="background: #ffffff; border: 1px solid #e2e8f0 !important;">
@@ -229,248 +591,490 @@
             </button>
         </div>
     </div>
-</div>
-
-<script src="auth-client.js"></script>
-<script src="bible_plan.js"></script>
-<script>
-    if (window.AuthClient) {
-        AuthClient.enforceAuth(['student', 'servant', 'admin']);
-    }
-
-    const FB_CONFIG = {
-        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
-        "authDomain": "khedmety-plus.firebaseapp.com",
-        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
-        "projectId": "khedmety-plus",
-        "storageBucket": "khedmety-plus.firebasestorage.app",
-        "messagingSenderId": "3510220845",
-        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-    const fsdb = firebase.firestore();
-
-    (function enforceStudentAuth() {
-        if (window.AuthClient && !AuthClient.isAuthenticated()) {
-            window.location.replace('index.html');
-            return;
-        }
-        const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
-        if (!studentCode) {
-            window.location.replace('index.html');
-        }
-    })();
-
-    const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
-    const studentUser = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
-    const studentName = (studentUser && studentUser.name) || localStorage.getItem('student_name');
-    const studentLevel = (studentUser && (studentUser.level || studentUser.stage)) || localStorage.getItem('student_level');
-
-    document.getElementById('ui-student-name').textContent = studentName || 'المخدوم';
-    document.getElementById('ui-student-code').textContent = studentCode;
-    document.getElementById('ui-level').textContent = studentLevel || 'الفرقة الأولى';
-
-    function renderTodayStatus(attendanceMap) {
-        const now = new Date();
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-        const todayList = attendanceMap[today] || [];
-        const myRecord = todayList.find(a => String(a.code || a.id || '') === studentCode);
-        const statusBox = document.getElementById('ui-attendance-status');
-
-        if (myRecord) {
-            if (myRecord.isAbsentDueToDelay) {
-                statusBox.innerHTML = '<span class="text-warning">⚠ تم الرصد: تأخير شديد عن الموعد</span>';
-            } else {
-                statusBox.innerHTML = `<span class="text-white">✔️ حاضر ومسجل في الكشف (${myRecord.time || ''})</span>`;
-            }
-        } else {
-            statusBox.innerHTML = '<span class="text-light opacity-75">⭕ لم يتم تسجيل حضورك بعد اليوم</span>';
-        }
-
-        const dateKeys = Object.keys(attendanceMap);
-        if (dateKeys.length > 0) {
-            let attendedCount = 0;
-            dateKeys.forEach(dateKey => {
-                const list = attendanceMap[dateKey] || [];
-                const me = list.find(a => String(a.code || a.id || '') === studentCode);
-                const d = new Date(dateKey);
-                if (me && !me.isAbsentDueToDelay && d.getDay() === 5) attendedCount++;
-            });
-            const banner = document.getElementById('student-warning-banner');
-            if (banner) banner.classList.toggle('d-none', attendedCount >= 2);
-        }
-    }
-
-    function syncCloudAttendance() {
-        const localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-        renderTodayStatus(localAtt);
-
-        const now = new Date();
-        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-        // ترشيد استهلاك السحابة وحماية الخصوصية:
-        // 1. الاستماع اللحظي ليوم الخدمة الحالي فقط (وثيقة واحدة) بدلاً من قراءة كامل السنة
-        fsdb.collection('attendance').doc(today).onSnapshot(docSnap => {
-            if (docSnap.exists) {
-                localAtt[today] = Object.values(docSnap.data() || {}).filter(Boolean);
-                localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
-                renderTodayStatus(localAtt);
-            }
-        }, err => console.warn("Today attendance sync error:", err));
-
-        // 2. تحديث الحضور الأخير (آخر 35 يوماً فقط لحساب نسبة الحضور وبانر التنبيه)
-        const cutoffDate = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-        const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
-            ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
-            : fsdb.collection('attendance');
-
-        attQuery.get().then(snap => {
-            snap.forEach(doc => {
-                localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
-            });
-            localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
-            renderTodayStatus(localAtt);
-        }).catch(err => console.warn("Recent attendance sync error:", err));
-    }
-
-    function getPlanItemForDate(planData, month, day) {
-        if (typeof window !== 'undefined' && typeof window.getBiblePlanReading === 'function') {
-            const now = new Date();
-            const targetDate = (month && day) ? new Date(now.getFullYear(), month - 1, day) : now;
-            const item = window.getBiblePlanReading(targetDate);
-            if (item) return item;
-        }
-        if (!planData) return null;
-        if (planData[`${month}-${day}`]) return planData[`${month}-${day}`];
-        const serviceMonth = ((month - 10 + 12) % 12) + 1;
-        if (planData[`${serviceMonth}-${day}`]) return planData[`${serviceMonth}-${day}`];
-        const keys = Object.keys(planData);
-        if (keys.length > 0) {
-            const dayOfYear = Math.floor((new Date(new Date().getFullYear(), month - 1, day) - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-            return planData[keys[dayOfYear % keys.length]];
-        }
-        return null;
-    }
-
-    async function loadTodayBiblePlan() {
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        const day = today.getDate();
-        document.getElementById('ui-today-date-text').textContent = `تاريخ اليوم: ${day}/${month}`;
-
-        let planData = window.BIBLE_PLAN_DATA || null;
-        if (!planData) {
-            try {
-                const res = await fetch('bible_plan.json');
-                if (res.ok) planData = await res.json();
-            } catch (e) {}
-        }
-
-        const todayItem = getPlanItemForDate(planData, month, day);
-        if (todayItem) {
-            const endChap = todayItem.chapter_end || todayItem.chapter;
-            let displayTitle = todayItem.reading;
-            if (!displayTitle) {
-                const cleanBook = todayItem.book.replace(/^سفر\s+/, '').trim();
-                if (todayItem.chapter && endChap && endChap > todayItem.chapter) {
-                    displayTitle = `${cleanBook} (الإصحاحات ${todayItem.chapter} إلى ${endChap})`;
-                } else if (todayItem.chapter) {
-                    displayTitle = `${cleanBook} (الإصحاح ${todayItem.chapter})`;
-                }
-            }
-            const dayPrefix = todayItem.dayNumber ? `اليوم (${todayItem.dayNumber}): ` : '';
-            document.getElementById('ui-today-reading-title').textContent = `${dayPrefix}${displayTitle}`;
-            document.getElementById('btn-go-reading').href = `bible.html?book=${encodeURIComponent(todayItem.book)}&chapter=${todayItem.chapter}&chapter_end=${endChap}`;
-        } else {
-            document.getElementById('ui-today-reading-title').textContent = "قراءة حرة وتأمل يومي";
-            document.getElementById('btn-go-reading').href = "bible.html";
-        }
-    }
-
-    syncCloudAttendance();
-    loadTodayBiblePlan();
-
-    // مزامنة استباقية لكافة العمليات المسجلة أوفلاين (النوتة الروحية وقراءات الإنجيل) فور فتح لوحة الطالب
-    async function syncOfflineQueue() {
-        if (!navigator.onLine) return;
-        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
-        if (!code) return;
-
-        // 1. مزامنة النوتات الروحية المعلقة
-        try {
-            const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
-            const keys = Object.keys(localSpiritual).filter(k => k.endsWith(`_${code}`));
-            let syncedNotes = 0;
-            for (const k of keys) {
-                const item = localSpiritual[k];
-                if (item && !item._synced) {
-                    try {
-                        const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
-                        const res = await fetchFn('/api/spiritual_note', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(item)
-                        });
-                        if (res.ok) {
-                            item._synced = true;
-                            localSpiritual[k] = item;
-                            syncedNotes++;
-                        }
-                    } catch(e) {}
-                }
-            }
-            if (syncedNotes > 0) {
-                localStorage.setItem('khedmety_student_spiritual', JSON.stringify(localSpiritual));
-                renderLocalPoints();
-            }
-        } catch(e) {}
-
-        // 2. مزامنة قراءات الإنجيل المعلقة
-        try {
-            const localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-            const bKeys = Object.keys(localReadings).filter(k => k.endsWith(`_${code}`));
-            let syncedReadings = 0;
-            for (const bk of bKeys) {
-                const item = localReadings[bk];
-                if (item && item._synced === false) {
-                    try {
-                        const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
-                        const res = await fetchFn('/api/mark_plan_read', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                code: code,
-                                month: item.month,
-                                day: item.day,
-                                reading: item.reading
-                            })
-                        });
-                        if (res.ok) {
-                            item._synced = true;
-                            localReadings[bk] = item;
-                            syncedReadings++;
-                        }
-                    } catch(e) {}
-                }
-            }
-            if (syncedReadings > 0) {
-                localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
-                renderLocalPoints();
-            }
-        } catch(e) {}
-    }
-
-    window.addEventListener('online', syncOfflineQueue);
-    setTimeout(syncOfflineQueue, 2000);
-</script>
-<script src="js/app-updater.js"></script>
-<script src="js/pwa-helper.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (window.KhedmetyAppUpdater && typeof KhedmetyAppUpdater.renderUpdateButton === 'function') {
-        KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
-    }
-});
+</div>
+
+
+
+<script src="auth-client.js"></script>
+
+<script src="bible_plan.js"></script>
+
+<script>
+
+    if (window.AuthClient) {
+
+        AuthClient.enforceAuth(['student', 'servant', 'admin']);
+
+    }
+
+
+
+    const FB_CONFIG = {
+
+        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+
+        "authDomain": "khedmety-plus.firebaseapp.com",
+
+        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
+
+        "projectId": "khedmety-plus",
+
+        "storageBucket": "khedmety-plus.firebasestorage.app",
+
+        "messagingSenderId": "3510220845",
+
+        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
+
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+
+    const fsdb = firebase.firestore();
+
+
+
+    (function enforceStudentAuth() {
+
+        if (window.AuthClient && !AuthClient.isAuthenticated()) {
+
+            window.location.replace('index.html');
+
+            return;
+
+        }
+
+        const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+
+        if (!studentCode) {
+
+            window.location.replace('index.html');
+
+        }
+
+    })();
+
+
+
+    const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+
+    const studentUser = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
+
+    const studentName = (studentUser && studentUser.name) || localStorage.getItem('student_name');
+
+    const studentLevel = (studentUser && (studentUser.level || studentUser.stage)) || localStorage.getItem('student_level');
+
+
+
+    document.getElementById('ui-student-name').textContent = studentName || 'المخدوم';
+
+    document.getElementById('ui-student-code').textContent = studentCode;
+
+    document.getElementById('ui-level').textContent = studentLevel || 'الفرقة الأولى';
+
+
+
+    function renderTodayStatus(attendanceMap) {
+
+        const now = new Date();
+
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        const todayList = attendanceMap[today] || [];
+
+        const myRecord = todayList.find(a => String(a.code || a.id || '') === studentCode);
+
+        const statusBox = document.getElementById('ui-attendance-status');
+
+
+
+        if (myRecord) {
+
+            if (myRecord.isAbsentDueToDelay) {
+
+                statusBox.innerHTML = '<span class="text-warning">⚠ تم الرصد: تأخير شديد عن الموعد</span>';
+
+            } else {
+
+                statusBox.innerHTML = `<span class="text-white">✔️ حاضر ومسجل في الكشف (${myRecord.time || ''})</span>`;
+
+            }
+
+        } else {
+
+            statusBox.innerHTML = '<span class="text-light opacity-75">⭕ لم يتم تسجيل حضورك بعد اليوم</span>';
+
+        }
+
+
+
+        const dateKeys = Object.keys(attendanceMap);
+
+        if (dateKeys.length > 0) {
+
+            let attendedCount = 0;
+
+            dateKeys.forEach(dateKey => {
+
+                const list = attendanceMap[dateKey] || [];
+
+                const me = list.find(a => String(a.code || a.id || '') === studentCode);
+
+                const d = new Date(dateKey);
+
+                if (me && !me.isAbsentDueToDelay && d.getDay() === 5) attendedCount++;
+
+            });
+
+            const banner = document.getElementById('student-warning-banner');
+
+            if (banner) banner.classList.toggle('d-none', attendedCount >= 2);
+
+        }
+
+    }
+
+
+
+    function syncCloudAttendance() {
+
+        const localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+
+        renderTodayStatus(localAtt);
+
+
+
+        const now = new Date();
+
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+
+
+        // ترشيد استهلاك السحابة وحماية الخصوصية:
+
+        // 1. الاستماع اللحظي ليوم الخدمة الحالي فقط (وثيقة واحدة) بدلاً من قراءة كامل السنة
+
+        fsdb.collection('attendance').doc(today).onSnapshot(docSnap => {
+
+            if (docSnap.exists) {
+
+                localAtt[today] = Object.values(docSnap.data() || {}).filter(Boolean);
+
+                localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
+
+                renderTodayStatus(localAtt);
+
+            }
+
+        }, err => console.warn("Today attendance sync error:", err));
+
+
+
+        // 2. تحديث الحضور الأخير (آخر 35 يوماً فقط لحساب نسبة الحضور وبانر التنبيه)
+
+        const cutoffDate = new Date(Date.now() - 35 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
+
+            ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
+
+            : fsdb.collection('attendance');
+
+
+
+        attQuery.get().then(snap => {
+
+            snap.forEach(doc => {
+
+                localAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean);
+
+            });
+
+            localStorage.setItem('my_church_attendance', JSON.stringify(localAtt));
+
+            renderTodayStatus(localAtt);
+
+        }).catch(err => console.warn("Recent attendance sync error:", err));
+
+    }
+
+
+
+    function getPlanItemForDate(planData, month, day) {
+
+        if (typeof window !== 'undefined' && typeof window.getBiblePlanReading === 'function') {
+
+            const now = new Date();
+
+            const targetDate = (month && day) ? new Date(now.getFullYear(), month - 1, day) : now;
+
+            const item = window.getBiblePlanReading(targetDate);
+
+            if (item) return item;
+
+        }
+
+        if (!planData) return null;
+
+        if (planData[`${month}-${day}`]) return planData[`${month}-${day}`];
+
+        const serviceMonth = ((month - 10 + 12) % 12) + 1;
+
+        if (planData[`${serviceMonth}-${day}`]) return planData[`${serviceMonth}-${day}`];
+
+        const keys = Object.keys(planData);
+
+        if (keys.length > 0) {
+
+            const dayOfYear = Math.floor((new Date(new Date().getFullYear(), month - 1, day) - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+
+            return planData[keys[dayOfYear % keys.length]];
+
+        }
+
+        return null;
+
+    }
+
+
+
+    async function loadTodayBiblePlan() {
+
+        const today = new Date();
+
+        const month = today.getMonth() + 1;
+
+        const day = today.getDate();
+
+        document.getElementById('ui-today-date-text').textContent = `تاريخ اليوم: ${day}/${month}`;
+
+
+
+        let planData = window.BIBLE_PLAN_DATA || null;
+
+        if (!planData) {
+
+            try {
+
+                const res = await fetch('bible_plan.json');
+
+                if (res.ok) planData = await res.json();
+
+            } catch (e) {}
+
+        }
+
+
+
+        const todayItem = getPlanItemForDate(planData, month, day);
+
+        if (todayItem) {
+
+            const endChap = todayItem.chapter_end || todayItem.chapter;
+
+            let displayTitle = todayItem.reading;
+
+            if (!displayTitle) {
+
+                const cleanBook = todayItem.book.replace(/^سفر\s+/, '').trim();
+
+                if (todayItem.chapter && endChap && endChap > todayItem.chapter) {
+
+                    displayTitle = `${cleanBook} (الإصحاحات ${todayItem.chapter} إلى ${endChap})`;
+
+                } else if (todayItem.chapter) {
+
+                    displayTitle = `${cleanBook} (الإصحاح ${todayItem.chapter})`;
+
+                }
+
+            }
+
+            const dayPrefix = todayItem.dayNumber ? `اليوم (${todayItem.dayNumber}): ` : '';
+
+            document.getElementById('ui-today-reading-title').textContent = `${dayPrefix}${displayTitle}`;
+
+            document.getElementById('btn-go-reading').href = `bible.html?book=${encodeURIComponent(todayItem.book)}&chapter=${todayItem.chapter}&chapter_end=${endChap}`;
+
+        } else {
+
+            document.getElementById('ui-today-reading-title').textContent = "قراءة حرة وتأمل يومي";
+
+            document.getElementById('btn-go-reading').href = "bible.html";
+
+        }
+
+    }
+
+
+
+    syncCloudAttendance();
+
+    loadTodayBiblePlan();
+
+
+
+    // مزامنة استباقية لكافة العمليات المسجلة أوفلاين (النوتة الروحية وقراءات الإنجيل) فور فتح لوحة الطالب
+
+    async function syncOfflineQueue() {
+
+        if (!navigator.onLine) return;
+
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code');
+
+        if (!code) return;
+
+
+
+        // 1. مزامنة النوتات الروحية المعلقة
+
+        try {
+
+            const localSpiritual = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+
+            const keys = Object.keys(localSpiritual).filter(k => k.endsWith(`_${code}`));
+
+            let syncedNotes = 0;
+
+            for (const k of keys) {
+
+                const item = localSpiritual[k];
+
+                if (item && !item._synced) {
+
+                    try {
+
+                        const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
+
+                        const res = await fetchFn('/api/spiritual_note', {
+
+                            method: 'POST',
+
+                            headers: { 'Content-Type': 'application/json' },
+
+                            body: JSON.stringify(item)
+
+                        });
+
+                        if (res.ok) {
+
+                            item._synced = true;
+
+                            localSpiritual[k] = item;
+
+                            syncedNotes++;
+
+                        }
+
+                    } catch(e) {}
+
+                }
+
+            }
+
+            if (syncedNotes > 0) {
+
+                localStorage.setItem('khedmety_student_spiritual', JSON.stringify(localSpiritual));
+
+                renderLocalPoints();
+
+            }
+
+        } catch(e) {}
+
+
+
+        // 2. مزامنة قراءات الإنجيل المعلقة
+
+        try {
+
+            const localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+
+            const bKeys = Object.keys(localReadings).filter(k => k.endsWith(`_${code}`));
+
+            let syncedReadings = 0;
+
+            for (const bk of bKeys) {
+
+                const item = localReadings[bk];
+
+                if (item && item._synced === false) {
+
+                    try {
+
+                        const fetchFn = window.AuthClient ? AuthClient.fetch.bind(AuthClient) : fetch;
+
+                        const res = await fetchFn('/api/mark_plan_read', {
+
+                            method: 'POST',
+
+                            headers: { 'Content-Type': 'application/json' },
+
+                            body: JSON.stringify({
+
+                                code: code,
+
+                                month: item.month,
+
+                                day: item.day,
+
+                                reading: item.reading
+
+                            })
+
+                        });
+
+                        if (res.ok) {
+
+                            item._synced = true;
+
+                            localReadings[bk] = item;
+
+                            syncedReadings++;
+
+                        }
+
+                    } catch(e) {}
+
+                }
+
+            }
+
+            if (syncedReadings > 0) {
+
+                localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
+
+                renderLocalPoints();
+
+            }
+
+        } catch(e) {}
+
+    }
+
+
+
+    window.addEventListener('online', syncOfflineQueue);
+
+    setTimeout(syncOfflineQueue, 2000);
+
+</script>
+
+<script src="js/app-updater.js"></script>
+
+<script src="js/pwa-helper.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    if (window.KhedmetyAppUpdater && typeof KhedmetyAppUpdater.renderUpdateButton === 'function') {
+
+        KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
+
+    }
+
+});
+
 
 
     // --- 1. حساب الالتزام المتتالي (Spiritual Streak) وحالة اليوم ---
@@ -502,6 +1106,225 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         return streak;
+    }
+
+    
+    // ==========================================
+    // 🕊️ دوال رحلتك الروحية والعد التنازلي للأعياد والمفكرة السرية
+    // ==========================================
+    function getUpcomingCopticFeast() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+
+        const feasts = [
+            { name: "عيد الميلاد المجيد", icon: "🎄", month: 0, day: 7, desc: "29 كيهك" },
+            { name: "عيد الغطاس المجيد", icon: "🕊️", month: 0, day: 19, desc: "11 طوبة" },
+            { name: "عرس قانا الجليل", icon: "🍷", month: 0, day: 21, desc: "13 طوبة" },
+            { name: "عيد دخول السيد المسيح الهيكل", icon: "⛪", month: 1, day: 15, desc: "8 أمشير" },
+            { name: "عيد البشارة المجيد", icon: "✨", month: 2, day: 29, desc: "29 برمهات" },
+            { name: "عيد دخول السيد المسيح أرض مصر", icon: "🌿", month: 4, day: 24, desc: "24 بشنس" },
+            { name: "عيد الرسل الأطهار", icon: "✝️", month: 6, day: 12, desc: "5 أبيب" },
+            { name: "صوم السيدة العذراء مريم", icon: "🌹", month: 7, day: 7, desc: "1 مسرى" },
+            { name: "عيد السيدة العذراء مريم", icon: "👑", month: 7, day: 22, desc: "16 مسرى" },
+            { name: "عيد النيروز (رأس السنة القبطية)", icon: "🍇", month: 8, day: 11, desc: "1 توت" },
+            { name: "عيد الصليب المجيد", icon: "☦️", month: 8, day: 27, desc: "17 توت" },
+            { name: "بدء صوم الميلاد المجيد", icon: "🕯️", month: 10, day: 25, desc: "16 هاتور" }
+        ];
+
+        let upcoming = null;
+        let minDiffDays = 9999;
+
+        feasts.forEach(f => {
+            let fDate = new Date(currentYear, f.month, f.day, 0, 0, 0);
+            let diffMs = fDate.getTime() - now.getTime();
+            let diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                fDate = new Date(currentYear + 1, f.month, f.day, 0, 0, 0);
+                diffMs = fDate.getTime() - now.getTime();
+                diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            }
+
+            if (diffDays >= 0 && diffDays < minDiffDays) {
+                minDiffDays = diffDays;
+                upcoming = { ...f, diffDays };
+            }
+        });
+
+        return upcoming;
+    }
+
+    function renderFeastCountdown() {
+        const feast = getUpcomingCopticFeast();
+        if (!feast) return;
+
+        const iconEl = document.getElementById('ui-feast-icon');
+        const textEl = document.getElementById('ui-feast-text');
+        const tagEl = document.getElementById('ui-coptic-date-tag');
+
+        if (iconEl) iconEl.textContent = feast.icon;
+        if (tagEl) tagEl.textContent = feast.desc;
+
+        if (textEl) {
+            if (feast.diffDays === 0) {
+                textEl.innerHTML = `<span class="text-success fw-bold">اليوم نحتفل بـ ${feast.name}! 🎉 بركته تكون معنا</span>`;
+            } else if (feast.diffDays === 1) {
+                textEl.innerHTML = `<span class="text-warning fw-bold">غداً نحتفل بـ ${feast.name}! 🌟</span>`;
+            } else {
+                textEl.innerHTML = `باقي <strong>${feast.diffDays}</strong> يوم على <strong>${feast.name}</strong>`;
+            }
+        }
+    }
+
+    function renderPrivateSpiritualDiary(studentCode) {
+        if (!studentCode) return;
+
+        const confKey = `khedmety_private_confession_${studentCode}`;
+        const commKey = `khedmety_private_communion_${studentCode}`;
+
+        let confData = null, commData = null;
+        try { confData = JSON.parse(localStorage.getItem(confKey)); } catch(e){}
+        try { commData = JSON.parse(localStorage.getItem(commKey)); } catch(e){}
+
+        const confEl = document.getElementById('ui-last-confession-date');
+        const commEl = document.getElementById('ui-last-communion-date');
+
+        if (confEl) {
+            confEl.textContent = confData ? confData.dateStr : 'لم يُسجَّل بعد';
+            if (confData) confEl.style.color = '#86efac';
+        }
+        if (commEl) {
+            commEl.textContent = commData ? commData.dateStr : 'لم يُسجَّل بعد';
+            if (commData) commEl.style.color = '#86efac';
+        }
+    }
+
+    function recordPrivateConfession() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || 'guest';
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+        const isoStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+        localStorage.setItem(`khedmety_private_confession_${code}`, JSON.stringify({
+            dateStr: dateStr,
+            isoStr: isoStr,
+            timestamp: Date.now()
+        }));
+
+        alert('طوباك يا بطل! 🕊️ تم تسجيل اعترافك في مفكرتك الخاصة في سرية تامة بينك وبين ربنا فقط.');
+        renderSpiritualJourney();
+    }
+
+    function recordPrivateCommunion() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || 'guest';
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+        const isoStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+
+        localStorage.setItem(`khedmety_private_communion_${code}`, JSON.stringify({
+            dateStr: dateStr,
+            isoStr: isoStr,
+            timestamp: Date.now()
+        }));
+
+        alert('بركة التناول المقدس تثبت فيك وتثمر في حياتك! 🍞 تم تسجيل التناول في مفكرتك الخاصة.');
+        renderSpiritualJourney();
+    }
+
+    function renderBadgesAndGamification(streak, studentCode) {
+        let unlockedCount = 0;
+
+        // 1. وسام الأسبوع
+        const bWeek = document.getElementById('badge-week');
+        const bWeekProg = document.getElementById('badge-week-progress');
+        if (streak >= 7) {
+            unlockedCount++;
+            if (bWeek) bWeek.classList.add('unlocked');
+            if (bWeekProg) bWeekProg.innerHTML = '<span class="text-success fw-bold">مكتمل بنجاح 🏆</span>';
+        } else {
+            if (bWeek) bWeek.classList.remove('unlocked');
+            if (bWeekProg) bWeekProg.textContent = `${Math.min(streak, 7)} / 7 أيام`;
+        }
+
+        // 2. وسام الشهر
+        const bMonth = document.getElementById('badge-month');
+        const bMonthProg = document.getElementById('badge-month-progress');
+        if (streak >= 30) {
+            unlockedCount++;
+            if (bMonth) bMonth.classList.add('unlocked');
+            if (bMonthProg) bMonthProg.innerHTML = '<span class="text-success fw-bold">مكتمل بنجاح 🏆</span>';
+        } else {
+            if (bMonth) bMonth.classList.remove('unlocked');
+            if (bMonthProg) bMonthProg.textContent = `${Math.min(streak, 30)} / 30 يوم`;
+        }
+
+        // 3. وسام 100 يوم
+        const bCent = document.getElementById('badge-century');
+        const bCentProg = document.getElementById('badge-century-progress');
+        if (streak >= 100) {
+            unlockedCount++;
+            if (bCent) bCent.classList.add('unlocked');
+            if (bCentProg) bCentProg.innerHTML = '<span class="text-success fw-bold">مكتمل بنجاح 🏆</span>';
+        } else {
+            if (bCent) bCent.classList.remove('unlocked');
+            if (bCentProg) bCentProg.textContent = `${Math.min(streak, 100)} / 100 يوم`;
+        }
+
+        // 4. وسام وسائط النعمة (تناول واعتراف)
+        const bGrace = document.getElementById('badge-grace');
+        const bGraceProg = document.getElementById('badge-grace-progress');
+        let confData = null, commData = null;
+        try { confData = JSON.parse(localStorage.getItem(`khedmety_private_confession_${studentCode}`)); } catch(e){}
+        try { commData = JSON.parse(localStorage.getItem(`khedmety_private_communion_${studentCode}`)); } catch(e){}
+
+        if (confData && commData) {
+            unlockedCount++;
+            if (bGrace) bGrace.classList.add('unlocked');
+            if (bGraceProg) bGraceProg.innerHTML = '<span class="text-success fw-bold">أمين في الوسائط 🕊️</span>';
+        } else if (confData || commData) {
+            if (bGrace) bGrace.classList.remove('unlocked');
+            if (bGraceProg) bGraceProg.textContent = 'نصف المسافة 1/2';
+        } else {
+            if (bGrace) bGrace.classList.remove('unlocked');
+            if (bGraceProg) bGraceProg.textContent = 'سجّل التناول والاعتراف';
+        }
+
+        const countLabel = document.getElementById('ui-unlocked-badges-count');
+        if (countLabel) countLabel.textContent = `${unlockedCount} / 4 مكتمل`;
+    }
+
+    function renderSpiritualJourney() {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || '';
+        const streak = calculateSpiritualStreak(code);
+
+        // 1. تحديث الـ Streak والشعلة
+        const streakCountEl = document.getElementById('ui-streak-count');
+        const streakSubtitleEl = document.getElementById('ui-streak-subtitle');
+
+        if (streakCountEl) {
+            streakCountEl.textContent = streak > 0 ? `${streak} يوم متواصل 🔥` : 'ابدأ سلسلتك المباركة اليوم!';
+        }
+
+        if (streakSubtitleEl) {
+            if (streak >= 30) {
+                streakSubtitleEl.textContent = 'ما شاء الله! مسيرة بركة استثنائية، استمر بثبات 🙏';
+            } else if (streak >= 7) {
+                streakSubtitleEl.textContent = 'أسبوع كامل من الأمانة الروحية، ربنا يبارك جهادك 🌟';
+            } else if (streak >= 1) {
+                streakSubtitleEl.textContent = 'استمر، ربنا معاك كل يوم خطوة بخطوة 🙏';
+            } else {
+                streakSubtitleEl.textContent = 'ابدأ سلسلتك المباركة اليوم.. خطوة صغيرة مع ربنا تفرق كتير 🕊️';
+            }
+        }
+
+        // 2. تحديث العد التنازلي للأعياد
+        renderFeastCountdown();
+
+        // 3. تحديث المفكرة السرية
+        renderPrivateSpiritualDiary(code);
+
+        // 4. تحديث الأوسمة
+        renderBadgesAndGamification(streak, code);
     }
 
     function renderSpiritualHabitsDashboard() {
@@ -702,6 +1525,9 @@ document.addEventListener('DOMContentLoaded', function () {
         initFeedbackSection();
     }, 400);
 
-</script>
-</body>
-</html>
+</script>
+
+</body>
+
+</html>
+

@@ -1050,6 +1050,53 @@
 
 
 
+    
+        /* أنماط رادار أمين الخدمة الملكي */
+        .radar-kpi-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
+            padding: 16px;
+            box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .radar-kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(12, 36, 97, 0.1);
+        }
+        .radar-section-box {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(12, 36, 97, 0.04);
+        }
+        .radar-alert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+        .radar-alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        .radar-alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .radar-alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
     </style>
 
 
@@ -1511,6 +1558,9 @@
 
 
             <div class="tab-btn active" onclick="switchTab('dashTab', this)">الرئيسية 📊</div>
+            <div class="tab-btn admin-or-servant" id="tabBtn_radar" onclick="switchTab('radarTab', this)" style="background: linear-gradient(135deg, #091a44 0%, #1e3a8a 100%); color: #fde047; font-weight: 800; border: 1.5px solid #d4af37;">
+                <i class="fa-solid fa-radar me-1"></i> رادار أمين الخدمة 📡
+            </div>
 
 
 
@@ -1836,6 +1886,167 @@
 
 
 
+
+
+
+        <!-- ========================================== -->
+        <!-- 📡 رادار أمين الخدمة الشامل (Radar Dashboard) -->
+        <!-- ========================================== -->
+        <div id="radarTab" class="tab-content admin-or-servant">
+            
+            <!-- الشريط العلوي للرادار -->
+            <div style="background: linear-gradient(135deg, #091a44 0%, #0c2461 60%, #1e3799 100%); border-radius: 18px; padding: 20px; color: #ffffff; margin-bottom: 20px; border: 1.5px solid #d4af37; box-shadow: 0 8px 24px rgba(12, 36, 97, 0.25);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: #fde047; font-weight: 800;">مركز المتابعة الرعوية والإنذار المبكر</div>
+                        <h2 style="margin: 4px 0 0; font-size: 1.5rem; font-weight: 900; color: #ffffff;">
+                            <i class="fa-solid fa-radar text-warning me-2"></i> رادار أمين الخدمة الشامل (Meeting Pulse)
+                        </h2>
+                        <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px;">
+                            كشف فوري لحالات الغياب المتتالي، مهلة الاعتراف، مقارنة القداس، وشيت الإكسيل الأسبوعي
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-custom" onclick="exportWeeklyExcelSheet()" style="background: #10b981; color: #ffffff; border: 1px solid #059669; font-weight: 800; padding: 8px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-file-excel"></i> تصدير شيت الحضور والقداس الأسبوعي (.xlsx)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="renderRadarDashboard()" style="background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; padding: 8px 12px; border-radius: 10px; cursor: pointer;">
+                            <i class="fa-solid fa-rotate me-1"></i> تحديث الرادار
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- بطاقات النبض الرباعية (Radar Pulse KPIs) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px;">
+                <!-- 1. غياب متتالي -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #ef4444 !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⚠️ غياب 2+ أسبوع متتالي</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #dc2626; margin: 4px 0;" id="radar_kpiAbsenceCount">0</div>
+                    <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">يحتاجون افتقاداً ورعاية عاجلة</div>
+                </div>
+
+                <!-- 2. مهلة الاعتراف -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #f59e0b !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⏳ في مهلة الاعتراف</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #d97706; margin: 4px 0;" id="radar_kpiConfessionCount">0</div>
+                    <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">فترة سماح مشروطة</div>
+                </div>
+
+                <!-- 3. نسبة حضور القداس -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #10b981 !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🍞 نسبة حضور القداس والتناول</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #059669; margin: 4px 0;" id="radar_kpiLiturgyPct">0%</div>
+                    <div style="font-size: 0.76rem; color: #065f46; font-weight: bold;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
+                </div>
+
+                <!-- 4. إجمالي المسجلين وقوة الحضور -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #3b82f6 !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">👥 حضور الاجتماع هذا الأسبوع</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #1d4ed8; margin: 4px 0;" id="radar_kpiMeetingAttended">0</div>
+                    <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;" id="radar_kpiTotalMembers">من إجمالي 0 مخدوم</div>
+                </div>
+            </div>
+
+            <!-- القسم الأول: رادار الغياب والافتقاد الفوري -->
+            <div class="radar-section-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0c2461;">
+                            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> رادار الغياب والافتقاد الفوري (غياب أسبوعين متتاليين فأكثر)
+                        </h4>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                            مخدومون توقفوا عن الحضور ويحتاجون إلى رسالة محبة وافتقاد مباشر عبر الواتساب بنقرة واحدة
+                        </div>
+                    </div>
+                    <span class="radar-alert-badge radar-alert-danger" id="radar_absenceAlertBadge">
+                        <i class="fa-solid fa-bell"></i> تم رصد: 0 مخدوم
+                    </span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
+                                <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
+                                <th style="padding: 10px 8px;">الكود</th>
+                                <th style="padding: 10px 8px;">الفرقة / المرحلة</th>
+                                <th style="padding: 10px 8px;">النوع</th>
+                                <th style="padding: 10px 8px; color: #dc2626;">أسابيع الغياب المتتالية</th>
+                                <th style="padding: 10px 8px;">الهاتف</th>
+                                <th style="padding: 10px 8px;">الإجراء الرعوي السريع</th>
+                            </tr>
+                        </thead>
+                        <tbody id="radar_absenceTableBody">
+                            <tr>
+                                <td colspan="7" style="padding: 20px; color: #94a3b8; font-weight: bold;">جاري مسح سجلات الحضور بواسطة الرادار...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- القسم الثاني: رادار مهلة الاعتراف التنازلي -->
+            <div class="radar-section-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0c2461;">
+                            <i class="fa-solid fa-clock-rotate-left text-warning me-2"></i> رادار مهلة الاعتراف وفترات السماح
+                        </h4>
+                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                            متابعة المخدومين المقبولين بشرط الاعتراف مع مؤقت تنازلي للأيام المتبقية
+                        </div>
+                    </div>
+                    <span class="radar-alert-badge radar-alert-warning" id="radar_confessionAlertBadge">
+                        0 في فترة السماح
+                    </span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                        <thead>
+                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
+                                <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
+                                <th style="padding: 10px 8px;">الكود</th>
+                                <th style="padding: 10px 8px;">أب الاعتراف</th>
+                                <th style="padding: 10px 8px;">المهلة التنازلية</th>
+                                <th style="padding: 10px 8px;">الهاتف</th>
+                                <th style="padding: 10px 8px;">الإجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="radar_confessionTableBody">
+                            <tr>
+                                <td colspan="6" style="padding: 20px; color: #94a3b8; font-weight: bold;">لا توجد مشاكل اعتراف معلقة حالياً، نشكر ربنا! 🟢</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- القسم الثالث: أداة معالجة نسيان كلمة المرور للمخدوم (Offline Password Reset) -->
+            <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border-color: #86efac;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                    <i class="fa-solid fa-key text-success fs-5"></i>
+                    <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #166534;">
+                        معالجة نسيان الباسورد عن طريق الخادم (Offline Password Reset)
+                    </h4>
+                </div>
+                <div style="font-size: 0.82rem; color: #475569; margin-bottom: 14px;">
+                    إذا نسي المخدوم كلمة مروره، يستطيع أمين الخدمة أو الخادم إعادة تعيينها فوراً إلى <strong>كود المخدوم الافتراضي</strong> دون الحاجة لأي إنترنت أو إيميل، ليستطيع الشاب الدخول بكوده وتغيير كلمة مروره بنفسه.
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; max-width: 650px;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <input type="text" id="radar_txtStudentSearch" placeholder="اكتب اسم المخدوم أو كوده للبحث..." style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-weight: bold; font-family: inherit;">
+                    </div>
+                    <button type="button" class="btn-custom" onclick="offlineSearchAndResetPassword()" style="background: #166534; color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-unlock-keyhole"></i> إعادة تعيين كلمة المرور فوراً
+                    </button>
+                </div>
+                <div id="radar_resetResultMsg" style="margin-top: 10px; font-weight: bold; font-size: 0.88rem; display: none;"></div>
+            </div>
+
+        </div>
 
 
         <!-- 1. الرئيسية -->
@@ -22038,7 +22249,281 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-        function switchTab(tabId, btn) {
+        
+    // ==========================================
+    // 📡 رادار أمين الخدمة الشامل وشيت الإكسيل الأسبوعي
+    // ==========================================
+
+    function renderRadarDashboard() {
+        if (!members || members.length === 0) return;
+
+        // 1. تحديد التواريخ الخاصة بالاجتماعات
+        const allDates = Object.keys(attendanceRecord || {}).sort().reverse();
+        const activeDate = activeSelectedDate || allDates[0] || new Date().toISOString().split('T')[0];
+        const currentList = attendanceRecord[activeDate] || [];
+
+        const totalMems = members.length;
+        const attendedCount = currentList.filter(r => r.attended && !r.isAbsentDueToDelay).length;
+        const liturgyCount = currentList.filter(r => r.communion || r.liturgy).length;
+        const liturgyPct = attendedCount > 0 ? Math.round((liturgyCount / attendedCount) * 100) : 0;
+
+        // تحديث كروت النبض
+        const elMeetingAtt = document.getElementById('radar_kpiMeetingAttended');
+        if (elMeetingAtt) elMeetingAtt.textContent = attendedCount;
+        const elTotalMems = document.getElementById('radar_kpiTotalMembers');
+        if (elTotalMems) elTotalMems.textContent = `من إجمالي ${totalMems} مخدوم (${totalMems > 0 ? Math.round((attendedCount/totalMems)*100) : 0}%)`;
+
+        const elLiturgyPct = document.getElementById('radar_kpiLiturgyPct');
+        if (elLiturgyPct) elLiturgyPct.textContent = `${liturgyPct}%`;
+        const elLiturgyCount = document.getElementById('radar_kpiLiturgyCount');
+        if (elLiturgyCount) elLiturgyCount.textContent = `${liturgyCount} من ${attendedCount} حاضرين تناولوا بالقداس`;
+
+        // 2. حساب الغياب المتتالي (Absence Radar)
+        const absentMems = [];
+        members.forEach(m => {
+            const mCode = String(m.code || m.id || '');
+            let consecAbs = 0;
+            let lastSeen = null;
+
+            for (let i = 0; i < allDates.length; i++) {
+                const d = allDates[i];
+                const recs = attendanceRecord[d] || [];
+                const found = recs.find(r => String(r.id) === String(m.id) || String(r.code) === mCode);
+                if (found && found.attended && !found.isAbsentDueToDelay) {
+                    if (!lastSeen) lastSeen = d;
+                    break; // انقطعت سلسلة الغياب
+                } else {
+                    consecAbs++;
+                }
+            }
+
+            if (consecAbs >= 2) {
+                absentMems.push({
+                    id: m.id,
+                    code: m.code || m.id,
+                    name: m.name,
+                    phone: m.phone || '',
+                    stage: m.stage || 'سنة أولى',
+                    gender: m.gender || 'بنين',
+                    consecutiveWeeks: consecAbs,
+                    lastSeenDate: lastSeen || 'غير مسجل'
+                });
+            }
+        });
+
+        // ترتيب الغائبين تنازلياً حسب مدة الانقطاع
+        absentMems.sort((a, b) => b.consecutiveWeeks - a.consecutiveWeeks);
+
+        const elAbsCount = document.getElementById('radar_kpiAbsenceCount');
+        if (elAbsCount) elAbsCount.textContent = absentMems.length;
+        const elAbsBadge = document.getElementById('radar_absenceAlertBadge');
+        if (elAbsBadge) elAbsBadge.innerHTML = `<i class="fa-solid fa-bell"></i> تم رصد: ${absentMems.length} مخدومين`;
+
+        const tbodyAbs = document.getElementById('radar_absenceTableBody');
+        if (tbodyAbs) {
+            if (absentMems.length === 0) {
+                tbodyAbs.innerHTML = `<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا يوجد مخدومون متغيبون لأسبوعين متتاليين حالياً. 🟢</td></tr>`;
+            } else {
+                tbodyAbs.innerHTML = absentMems.map(m => {
+                    let cleanPhone = m.phone.replace(/[^0-9]/g, '');
+                    if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+                    const waMsg = encodeURIComponent(`سلام ونعمة يا أخي الحبيب ${m.name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام الجمعة الماضية، وحابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونشوفك الجمعة القادمة بالقداس والاجتماع 🕊️`);
+
+                    return `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${m.name}</td>
+                            <td style="padding: 8px; font-weight: bold;">${m.code}</td>
+                            <td style="padding: 8px;">${m.stage}</td>
+                            <td style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${m.gender}</span></td>
+                            <td style="padding: 8px; font-weight: 900; color: #dc2626; font-size: 0.95rem;">
+                                ⚠️ ${m.consecutiveWeeks} أسابيع
+                            </td>
+                            <td style="padding: 8px;">${m.phone || '-'}</td>
+                            <td style="padding: 8px;">
+                                <div style="display: flex; gap: 6px; justify-content: center;">
+                                    ${m.phone ? `
+                                        <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                                            <i class="fa-brands fa-whatsapp me-1"></i> افتقاد واتساب
+                                        </a>
+                                        <a href="tel:${m.phone}" class="btn-custom" style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;">
+                                            <i class="fa-solid fa-phone"></i>
+                                        </a>
+                                    ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // 3. رادار مهلة الاعتراف (Confession Radar)
+        renderRadarConfessionSection();
+    }
+
+    function renderRadarConfessionSection() {
+        let candidates = [];
+        try {
+            candidates = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || [];
+        } catch (e) { candidates = []; }
+
+        const pendingConf = [];
+        candidates.forEach(c => {
+            const conf = String(c.confessor || '').trim();
+            const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none' && conf !== 'لم يحدد');
+            const hasProb = c.problemType && c.problemType.includes('اعتراف');
+
+            if (!isConfClean || hasProb) {
+                pendingConf.push(c);
+            }
+        });
+
+        const elConfCount = document.getElementById('radar_kpiConfessionCount');
+        if (elConfCount) elConfCount.textContent = pendingConf.length;
+        const elConfBadge = document.getElementById('radar_confessionAlertBadge');
+        if (elConfBadge) elConfBadge.textContent = `${pendingConf.length} في فترة السماح`;
+
+        const tbodyConf = document.getElementById('radar_confessionTableBody');
+        if (tbodyConf) {
+            if (pendingConf.length === 0) {
+                tbodyConf.innerHTML = `<tr><td colspan="6" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! جميع المخدومين منتظمون بالاعتراف ولا توجد مشاكل معلقة. 🟢</td></tr>`;
+            } else {
+                tbodyConf.innerHTML = pendingConf.map(c => {
+                    return `
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${c.name}</td>
+                            <td style="padding: 8px; font-weight: bold;">${c.code}</td>
+                            <td style="padding: 8px; color: #b45309; font-weight: bold;">${c.confessor || 'لا يوجد أب اعتراف'}</td>
+                            <td style="padding: 8px;">
+                                <span class="radar-alert-badge radar-alert-warning">
+                                    ⏳ مهلة أسبوعين
+                                </span>
+                            </td>
+                            <td style="padding: 8px;">${c.phone || '-'}</td>
+                            <td style="padding: 8px;">
+                                <button type="button" class="btn-custom" onclick="quickResolveRadarConfession('${c.code}')" style="padding: 4px 10px; font-size: 0.75rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                                    <i class="fa-solid fa-check-double me-1 text-success"></i> حل المشكلة والاعتماد
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+    }
+
+    function quickResolveRadarConfession(code) {
+        let candidates = [];
+        try {
+            candidates = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || [];
+        } catch (e) { candidates = []; }
+
+        const c = candidates.find(item => String(item.code) === String(code));
+        if (c) {
+            c.confessor = 'منتظم بالاعتراف (تم الاعتماد)';
+            c.problemType = 'لا توجد مشاكل (مقبول طبيعي) 🟢';
+            localStorage.setItem('khedmety_candidates_grades', JSON.stringify(candidates));
+            alert(`تم اعتماد انتظام الاعتراف للمخدوم [${c.name}] وترقيته بنجاح! ✅`);
+            renderRadarConfessionSection();
+        }
+    }
+
+    // 4. تصدير شيت الإكسيل الأسبوعي المؤتمت
+    function exportWeeklyExcelSheet() {
+        if (!window.XLSX) {
+            alert('مكتبة تصدير الإكسيل غير جاهزة حالياً. يرجى التأكد من الاتصال أو إعادة تحميل الصفحة.');
+            return;
+        }
+
+        const allDates = Object.keys(attendanceRecord || {}).sort().reverse();
+        const activeDate = activeSelectedDate || allDates[0] || new Date().toISOString().split('T')[0];
+        const currentList = attendanceRecord[activeDate] || [];
+
+        const rows = [
+            ["كشف الحضور الأسبوعي والقداس الإلهي — اجتماع القديس بولس لإعداد الخدام"],
+            [`تاريخ الجلسة: ${activeDate}`, `إجمالي الحضور: ${currentList.filter(r => r.attended && !r.isAbsentDueToDelay).length}`, `إجمالي المسجلين: ${members.length}`],
+            [],
+            ["م", "كود المخدوم", "اسم المخدوم", "النوع", "المرحلة / الفرقة", "حالة الحضور", "ساعة الحضور بالدقيقة", "حضور القداس والتناول", "رقم الهاتف"]
+        ];
+
+        members.forEach((m, idx) => {
+            const mCode = String(m.code || m.id || '');
+            const att = currentList.find(r => String(r.id) === String(m.id) || String(r.code) === mCode);
+
+            let statusStr = "غائب 🔴";
+            let timeStr = "-";
+            let liturgyStr = "غائب";
+
+            if (att && att.attended) {
+                if (att.isAbsentDueToDelay) {
+                    statusStr = "تأخير شديد (غائب)";
+                } else {
+                    statusStr = "حاضر ✅";
+                }
+                timeStr = att.time || "-";
+                liturgyStr = (att.communion || att.liturgy) ? "حاضر قداس وتناول 🍞" : "اجتماع فقط";
+            }
+
+            rows.push([
+                idx + 1,
+                m.code || m.id,
+                m.name,
+                m.gender || 'بنين',
+                m.stage || 'سنة أولى',
+                statusStr,
+                timeStr,
+                liturgyStr,
+                m.phone || '-'
+            ]);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "حضور_الاجتماع_والقداس");
+
+        const fileName = `شيت_حضور_وقداس_الاجتماع_${activeDate}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+    }
+
+    // 5. معالجة نسيان الباسورد عن طريق الخادم (Offline Password Reset)
+    function offlineSearchAndResetPassword() {
+        const query = (document.getElementById('radar_txtStudentSearch').value || '').trim().toLowerCase();
+        const resultEl = document.getElementById('radar_resetResultMsg');
+        if (!query) {
+            alert('الرجاء إدخال اسم المخدوم أو كوده للبحث.');
+            return;
+        }
+
+        const found = members.find(m => {
+            const name = String(m.name || '').toLowerCase();
+            const code = String(m.code || m.id || '').toLowerCase();
+            return name.includes(query) || code === query;
+        });
+
+        if (!found) {
+            resultEl.style.display = 'block';
+            resultEl.style.color = '#dc2626';
+            resultEl.textContent = `❌ لم يتم العثور على أي مخدوم يطابق: "${query}". يرجى التأكد من الاسم أو الكود.`;
+            return;
+        }
+
+        const defaultPass = String(found.code || found.id || '123456');
+        found.password = defaultPass;
+        found.passwordHash = null;
+        found.isLocked = false;
+        found.loginFailCount = 0;
+
+        // حفظ في الذاكرة المحلية
+        saveMembers();
+
+        resultEl.style.display = 'block';
+        resultEl.style.color = '#166534';
+        resultEl.innerHTML = `✅ تم بنجاح إعادة تعيين كلمة المرور للمخدوم: <strong>[${found.name}]</strong>.<br>كلمة المرور الحالية هي كوده الافتراضي: <span style="background:#dcfce7; padding:2px 8px; border-radius:4px; font-family:monospace; font-size:1.1rem; color:#15803d;">${defaultPass}</span> (يستطيع الدخول بها الآن وتغييرها).`;
+        
+        alert(`تمت إعادة تعيين كلمة مرور [${found.name}] بنجاح! ✅\nكلمة مروره الحالية هي: ${defaultPass}`);
+    }
+
+    function switchTab(tabId, btn) {
 
 
 
@@ -22176,6 +22661,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
+            if (tabId === 'radarTab') renderRadarDashboard();
             if (tabId === 'dashTab') { renderDashboard(); checkUpcomingBirthdays(); checkUpcomingMasterPlanEvents(); }
 
 
