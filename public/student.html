@@ -37,7 +37,25 @@
         html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }
 body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
 
-        .main-card { max-width: 840px; margin: 20px auto; padding: 0 16px; }
+        .main-card {
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 767px) {
+            .main-card { max-width: 100%; padding: 0 12px; margin: 10px auto; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .main-card { max-width: 92%; padding: 0 18px; margin: 18px auto; }
+        }
+        @media (min-width: 1024px) {
+            .main-card { max-width: 1180px; padding: 0 24px; margin: 24px auto; }
+        }
+        @media (min-width: 1400px) {
+            .main-card { max-width: 1280px; padding: 0 28px; margin: 30px auto; }
+        }
 
         .welcome-header { background: linear-gradient(135deg, #0c2461 0%, #1e3799 45%, #0984e3 100%); color: #fff; border-radius: 22px; padding: 24px; margin-bottom: 20px; box-shadow: 0 12px 30px rgba(12, 36, 97, 0.22); position: relative; overflow: hidden; }
 
