@@ -32496,7 +32496,7 @@ function renderConferenceLedgerTable() {
                     ${r.netPayable} ج
                 </td>
                 <td style="padding:9px 6px;">
-                    <button type="button" onclick="sendConferenceWhatsAppNotification('${r.code}')" style="background:#25d366; color:#ffffff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:700;" title="إرسال إشعار الخصم الفردي">
+                    <button type="button" onclick="sendYouthWhatsAppNotification('${r.code}')" style="background:#25d366; color:#ffffff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:700;" title="إرسال إشعار الخصم الفردي">
                         <i class="fa-brands fa-whatsapp me-1"></i> إشعار
                     </button>
                 </td>
@@ -32584,7 +32584,7 @@ function exportConferenceLedgerToExcel() {
     }
 }
 
-function sendConferenceWhatsAppNotification(code) {
+function sendYouthWhatsAppNotification(code) {
     const data = computeConferenceLedgerData();
     const r = data.rows.find(x => String(x.code) === String(code));
     if (!r) return;
@@ -32733,6 +32733,277 @@ function copyConferenceServantSummary() {
         }
     }
 
+
+
+    // ========================================================
+    // 🚀 منظومة رسائل الواتساب المشوقة للشباب وحملات NewWhats الذكية
+    // ========================================================
+    function generateYouthWhatsAppMessage(r, settings) {
+        const activationDate = (settings && settings.activationDate) || '2026-05-29';
+        
+        // عبارات تشجيعية شبابية مخصصة بحسب مستوى الإنجاز
+        let cheerMsg = '';
+        if (r.totalDiscount >= 500) {
+            cheerMsg = 'أنت محقق رقم قياسي واستثنائي في الدفعة! تعبك يستحق كل تقدير وفخر 🌟🏆';
+        } else if (r.totalDiscount >= 200) {
+            cheerMsg = 'مستواك والتزامك عالي جداً وماشي بخطوات ثابتة نحو التميز! عاش يا بطل 💪';
+        } else {
+            cheerMsg = 'بداية قوية وبإذن ربنا هتعوض وتضاعف رصيدك في الجلسات القادمة! 🙏✨';
+        }
+
+        return '🌟 *مفاجأة كبرى بانتظارك يا ' + r.name + '! مكافأة تميزك للمؤتمر السنوي وصلت* 🏕️🔥\n' +
+'━━━━━━━━━━━━━━━━━━━━\n' +
+'سلام ونعمة يا بطل 🙏\n' +
+'تقديراً لالتزامك ومشاركتك المباركة في الخدمة السنة دي.. يسر أمانة كورس إعداد الخدام إبلاغك باعتماد *"كوبون الخصم الذهبي"* الخاص بيك لحضور مؤتمر 2026:\n\n' +
+'🎯 *تفاصيل كشف حساب استحقاقك وتخفيضك:*\n' +
+'├ 🏷️ اشتراك المؤتمر الأصلي: *' + r.baseFee + ' ج.م*\n' +
+'├ 🗓️ مكافأة الحضور والالتزام: *' + r.attendanceDiscount + ' ج.م* (' + r.totalSessions + ' جلسة - بطل حقيقي! 💪)\n' +
+'├ 🎓 بونص التفوق الدراسي (' + r.stage + '): *' + r.examDiscount + ' ج.م*\n' +
+'└ 💎 إجمالي الخصم المعتمد ليك: *' + r.totalDiscount + ' ج.م* كاملة!\n\n' +
+'━━━━━━━━━━━━━━━━━━━━\n' +
+'🔥 *الصافي المطلوب منك سداده فقط: ' + r.netPayable + ' ج.م لا غير!*\n' +
+'*(مبروك! وفرت ' + r.totalDiscount + ' جنيه كاملين بمجهودك وتعبك واستحقاقك 👏🎉)*\n' +
+'━━━━━━━━━━━━━━━━━━━━\n\n' +
+'💡 *كلمة تشجيع من خدمتك:*\n' +
+cheerMsg + '\n\n' +
+'⏳ *موعد بدء سداد الاشتراكات وتأكيد الحجز رسمياً:* ' + activationDate + '\n' +
+'⚠️ *تنبيه هام للشباب:* مقاعد الأتوبيسات وتسكين الغرف محدودة وتُحجز بأسبقية السداد وتأكيد الاشتراك مع أمين الصندوق!\n\n' +
+'منتظرينك تنور المؤتمر ونصنع مع بعض ذكريات لا تُنسى.. ربنا يفرح قلبك ويبارك كل خطواتك! 🙏❤️\n' +
+'*أسرة خدمة القديس بولس - كورس إعداد الخدام* 🕊️';
+    }
+
+    function sendYouthWhatsAppNotification(code) {
+        const data = computeConferenceLedgerData();
+        const r = data.rows.find(x => String(x.code) === String(code));
+        if (!r) return;
+
+        const phone = (r.phone || '').replace(/[^0-9]/g, '');
+        let cleanPhone = phone;
+        if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+
+        const msg = generateYouthWhatsAppMessage(r, data.settings);
+
+        if (cleanPhone) {
+            window.open('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(msg), '_blank');
+        } else {
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('لم يتم العثور على رقم هاتف مسجل للمخدوم (' + r.name + ').\nتم نسخ نص الإشعار الشبابي بنجاح إلى الحافظة لإرساله يدوياً! 📋');
+            }).catch(() => {
+                prompt('انسخ نص رسالة المؤتمر لـ ' + r.name + ':', msg);
+            });
+        }
+    }
+
+    let activeCampaignTasks = [];
+
+    function openNewWhatsCampaignModal() {
+        const modal = document.getElementById('newWhatsCampaignModal');
+        if (!modal) return;
+
+        const data = computeConferenceLedgerData();
+        // تصفية من لديهم أرقام هواتف
+        activeCampaignTasks = data.rows.filter(r => {
+            const p = (r.phone || '').replace(/[^0-9]/g, '');
+            return p.length >= 10;
+        });
+
+        // تحديث المؤشرات
+        const elCnt = document.getElementById('confCampTargetCount');
+        if (elCnt) elCnt.textContent = activeCampaignTasks.length + ' مخدوم';
+
+        const elSubs = document.getElementById('confCampTotalSubsidy');
+        if (elSubs) elSubs.textContent = activeCampaignTasks.reduce((acc, r) => acc + r.totalDiscount, 0).toLocaleString('ar-EG') + ' ج.م';
+
+        // ملء قائمة المعاينة
+        const sel = document.getElementById('confCampPreviewStudentSelect');
+        if (sel) {
+            sel.innerHTML = activeCampaignTasks.map(r => '<option value="' + r.code + '">' + escapeHtml(r.name) + ' (' + r.code + ')</option>').join('');
+        }
+
+        updateNewWhatsCampaignPreview();
+        checkNewWhatsServerStatus();
+
+        modal.style.display = 'flex';
+    }
+
+    function closeNewWhatsCampaignModal() {
+        const modal = document.getElementById('newWhatsCampaignModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function updateNewWhatsCampaignPreview() {
+        const sel = document.getElementById('confCampPreviewStudentSelect');
+        const code = sel ? sel.value : null;
+        const bubble = document.getElementById('confCampMessagePreviewBubble');
+        if (!bubble) return;
+
+        const data = computeConferenceLedgerData();
+        let targetRow = data.rows.find(r => String(r.code) === String(code));
+        if (!targetRow && data.rows.length > 0) targetRow = data.rows[0];
+
+        if (targetRow) {
+            bubble.textContent = generateYouthWhatsAppMessage(targetRow, data.settings);
+        } else {
+            bubble.textContent = 'لا توجد بيانات مخدومين للمعاينة.';
+        }
+    }
+
+    async function checkNewWhatsServerStatus() {
+        const statusEl = document.getElementById('confCampServerStatus');
+        const detailEl = document.getElementById('confCampServerDetail');
+        const serverUrlInput = document.getElementById('confCampServerUrl');
+        const serverUrl = (serverUrlInput ? serverUrlInput.value : 'http://localhost:3000').replace(/\/+$/, '');
+
+        if (!statusEl) return;
+        statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> فحص الاتصال...';
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2500);
+            const res = await fetch(serverUrl + '/api/status', { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const json = await res.json();
+                statusEl.innerHTML = '<span style="color:#15803d;"><i class="fa-solid fa-circle-check me-1"></i> جاهز ومتصل (' + (json.status || 'متصل') + ')</span>';
+                if (detailEl) detailEl.textContent = 'سيرفر NewWhats جاهز لاستقبال الحملات';
+            } else {
+                statusEl.innerHTML = '<span style="color:#eab308;"><i class="fa-solid fa-circle-exclamation me-1"></i> السيرفر يعمل (بانتظار مسح QR)</span>';
+                if (detailEl) detailEl.textContent = 'امسح رمز QR في شاشة البوت للربط';
+            }
+        } catch(err) {
+            statusEl.innerHTML = '<span style="color:#64748b;"><i class="fa-solid fa-plug-circle-exclamation me-1"></i> غير متصل محلياً</span>';
+            if (detailEl) detailEl.textContent = 'يمكنك تصدير شيت إكسل جاهز أو الإرسال الفردي';
+        }
+    }
+
+    async function startNewWhatsAutoCampaign() {
+        if (!activeCampaignTasks || activeCampaignTasks.length === 0) {
+            alert('لا يوجد مخدومين مستهدفين لديهم أرقام هواتف صالحة!');
+            return;
+        }
+
+        const data = computeConferenceLedgerData();
+        const serverUrlInput = document.getElementById('confCampServerUrl');
+        const serverUrl = (serverUrlInput ? serverUrlInput.value : 'http://localhost:3000').replace(/\/+$/, '');
+        const delayMs = parseInt(document.getElementById('confCampSafeDelay')?.value || '6000');
+
+        const tasksPayload = activeCampaignTasks.map(r => {
+            let p = (r.phone || '').replace(/[^0-9]/g, '');
+            if (p.startsWith('01')) p = '2' + p;
+            return {
+                phone: p,
+                message: generateYouthWhatsAppMessage(r, data.settings),
+                name: r.name,
+                code: r.code
+            };
+        });
+
+        const progressSection = document.getElementById('confCampProgressSection');
+        const progressText = document.getElementById('confCampProgressText');
+        const progressPct = document.getElementById('confCampProgressPct');
+        const progressBar = document.getElementById('confCampProgressBar');
+        const liveLogs = document.getElementById('confCampLiveLogs');
+        const btnStart = document.getElementById('btnStartNewWhatsAuto');
+
+        if (progressSection) progressSection.style.display = 'block';
+        if (btnStart) btnStart.disabled = true;
+
+        const addLog = (msg) => {
+            if (liveLogs) {
+                const div = document.createElement('div');
+                div.textContent = '[' + new Date().toLocaleTimeString('ar-EG') + '] ' + msg;
+                liveLogs.appendChild(div);
+                liveLogs.scrollTop = liveLogs.scrollHeight;
+            }
+        };
+
+        addLog('🚀 جاري إرسال حملة إشعارات المؤتمر (' + tasksPayload.length + ' رسالة) إلى سيرفر NewWhats...');
+
+        try {
+            const res = await fetch(serverUrl + '/api/campaign/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    campaign_name: 'إشعارات تخفيضات المؤتمر السنوي 2026',
+                    tasks: tasksPayload,
+                    batch_size: 50,
+                    rest_time: 15
+                })
+            });
+
+            if (res.ok) {
+                const resJson = await res.json();
+                addLog('✅ تم قبول الحملة بنجاح من محرك NewWhats! رقم الحملة: ' + (resJson.campaign_id || '#'));
+                if (progressBar) progressBar.style.width = '100%';
+                if (progressPct) progressPct.textContent = '100%';
+                if (progressText) progressText.textContent = 'تم إطلاق الحملة بنجاح في الخلفية!';
+                if (typeof showToast === 'function') showToast("🎉 تم إطلاق حملة إشعارات المؤتمر بنجاح عبر NewWhats!");
+                else alert("🎉 تم إطلاق حملة إشعارات المؤتمر بنجاح عبر NewWhats!");
+            } else {
+                const errJson = await res.json().catch(() => ({}));
+                addLog('⚠️ تعذر بدء الحملة المباشرة: ' + (errJson.error || res.statusText));
+                addLog('💡 جاري تجهيز بديل التصدير الفوري لشيت الإكسل المعتمد...');
+                exportNewWhatsCampaignToExcel();
+            }
+        } catch(err) {
+            addLog('⚠️ لم يتم العثور على سيرفر NewWhats يعمل على المنفذ المحلي.');
+            addLog('📥 تم تلقائياً تحميل شيت إكسل الحملة بكافة النصوص المنسقة لتشغيلها من واجهة بايثون أو البوت!');
+            exportNewWhatsCampaignToExcel();
+        } finally {
+            if (btnStart) btnStart.disabled = false;
+        }
+    }
+
+    function exportNewWhatsCampaignToExcel() {
+        const data = computeConferenceLedgerData();
+        const headers = ['م', 'كود المخدوم', 'اسم المخدوم', 'الفرقة', 'رقم الواتساب', 'المبلغ الصافي', 'إجمالي الخصم', 'نص الرسالة الشبابية المشوقة'];
+        const rows = data.rows.map((r, i) => {
+            let p = (r.phone || '').replace(/[^0-9]/g, '');
+            if (p.startsWith('01')) p = '2' + p;
+            return [
+                i + 1,
+                r.code,
+                r.name,
+                r.stage,
+                p,
+                r.netPayable,
+                r.totalDiscount,
+                generateYouthWhatsAppMessage(r, data.settings)
+            ];
+        });
+
+        const fileName = 'حملة_إشعارات_المؤتمر_السنوي_NewWhats.xlsx';
+
+        if (typeof XLSX !== 'undefined') {
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "حملة_المؤتمر");
+            XLSX.writeFile(wb, fileName);
+            if (typeof showToast === 'function') showToast("📥 تم تصدير شيت حملة إشعارات الواتساب بنجاح!");
+            else alert("📥 تم تصدير شيت حملة إشعارات الواتساب بنجاح!");
+        } else {
+            let csv = '\uFEFF' + [headers, ...rows].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName.replace('.xlsx', '.csv');
+            link.click();
+        }
+    }
+
+    function copyAllYouthWhatsAppMessages() {
+        const data = computeConferenceLedgerData();
+        const allMsgs = data.rows.map((r, i) => '=== [' + (i + 1) + '] ' + r.name + ' (' + (r.phone || 'بدون هاتف') + ') ===\n' + generateYouthWhatsAppMessage(r, data.settings)).join('\n\n' + '─'.repeat(40) + '\n\n');
+
+        navigator.clipboard.writeText(allMsgs).then(() => {
+            if (typeof showToast === 'function') showToast("📋 تم نسخ كافة نصوص رسائل الشباب للحافظة بنجاح!");
+            else alert("📋 تم نسخ كافة نصوص رسائل الشباب للحافظة بنجاح!");
+        }).catch(() => {
+            prompt("انسخ نصوص رسائل المؤتمر:", allMsgs.slice(0, 500) + '...');
+        });
+    }
+
 </script>
 
         <!-- نافذة كشف حساب وتخفيضات المؤتمر السنوي (Conference Financial Ledger Modal) -->
@@ -32804,6 +33075,9 @@ function copyConferenceServantSummary() {
                         <button type="button" onclick="copyConferenceServantSummary()" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:7px 12px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer;">
                             <i class="fa-solid fa-copy me-1"></i> نسخ ملخص الخدام
                         </button>
+                        <button type="button" onclick="openNewWhatsCampaignModal()" style="background:linear-gradient(135deg, #16a34a 0%, #15803d 100%); color:#ffffff; border:none; padding:7px 15px; border-radius:8px; font-weight:800; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 8px rgba(22,163,74,0.3);">
+                            <i class="fa-brands fa-whatsapp"></i> 🚀 إطلاق إشعارات الشباب عبر NewWhats
+                        </button>
                         <button type="button" onclick="exportConferenceLedgerToExcel()" style="background:#15803d; color:#ffffff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
                             <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
                         </button>
@@ -32843,6 +33117,130 @@ function copyConferenceServantSummary() {
                 <button type="button" onclick="closeConferenceLedgerModal()" style="padding:8px 20px; background:#0f172a; color:#ffffff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">
                     إغلاق
                 </button>
+            </div>
+        </div>
+    </div>
+
+
+    
+    <!-- نافذة إطلاق حملة إشعارات المؤتمر المشوقة للشباب عبر NewWhats (Smart Youth WhatsApp Campaign Modal) -->
+    <div id="newWhatsCampaignModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.8); z-index:10000; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:15px;">
+        <div style="background:#ffffff; border-radius:20px; max-width:860px; width:100%; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 25px 60px rgba(0,0,0,0.35); border:2px solid #22c55e; text-align:right; overflow:hidden;">
+            <!-- ترويسة النافذة -->
+            <div style="background:linear-gradient(135deg, #15803d 0%, #166534 100%); color:#ffffff; padding:16px 22px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+                        📲
+                    </div>
+                    <div>
+                        <h4 style="margin:0; font-size:1.15rem; font-weight:800; color:#ffffff;">إطلاق حملة إشعارات المؤتمر المشوقة للشباب (NewWhats Bot)</h4>
+                        <span style="font-size:0.78rem; color:#bbf7d0;">إرسال آلي ذكي لرسائل التهنئة والخصومات الفردية عبر واتساب</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeNewWhatsCampaignModal()" style="background:transparent; border:none; color:#ffffff; font-size:1.5rem; cursor:pointer; line-height:1;">
+                    &times;
+                </button>
+            </div>
+
+            <!-- محتوى النافذة -->
+            <div style="flex:1; overflow-y:auto; padding:20px 22px;">
+                <!-- شريط مؤشرات الحملة -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:18px;">
+                    <div style="background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:12px 14px;">
+                        <div style="font-size:0.75rem; font-weight:700; color:#166534;">👥 المخدومين المستهدفين</div>
+                        <div id="confCampTargetCount" style="font-size:1.25rem; font-weight:900; color:#15803d; margin-top:2px;">0 مخدوم</div>
+                        <small style="color:#64748b; font-size:0.7rem;">مسجل لديهم رقم هاتف</small>
+                    </div>
+
+                    <div style="background:#fefce8; border:1.5px solid #fef08a; border-radius:12px; padding:12px 14px;">
+                        <div style="font-size:0.75rem; font-weight:700; color:#854d0e;">💎 إجمالي الوفر الممنوح للشباب</div>
+                        <div id="confCampTotalSubsidy" style="font-size:1.25rem; font-weight:900; color:#b45309; margin-top:2px;">0 ج.م</div>
+                        <small style="color:#64748b; font-size:0.7rem;">مكافآت حضور وتفوق</small>
+                    </div>
+
+                    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 14px;">
+                        <div style="font-size:0.75rem; font-weight:700; color:#475569;">⚡ اتصال سيرفر NewWhats</div>
+                        <div id="confCampServerStatus" style="font-size:0.95rem; font-weight:800; color:#2563eb; margin-top:4px;">
+                            <i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الفحص...
+                        </div>
+                        <small id="confCampServerDetail" style="color:#64748b; font-size:0.7rem;">سيرفر البوت المحلي</small>
+                    </div>
+                </div>
+
+                <!-- معاينة الرسالة التفاعلية المخصصة للشباب -->
+                <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:18px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                        <div style="font-size:0.9rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-eye text-primary"></i> معاينة نص الرسالة الشبابية المشوقة:
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <label style="font-size:0.78rem; color:#475569; font-weight:700;">معاينة لمخدوم:</label>
+                            <select id="confCampPreviewStudentSelect" onchange="updateNewWhatsCampaignPreview()" style="padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem; max-width:200px;">
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- فقاعة محاكاة واتساب -->
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; padding:14px; font-size:0.82rem; line-height:1.6; color:#1e293b; max-height:220px; overflow-y:auto; white-space:pre-wrap; font-family:inherit; border-right:4px solid #25d366;" id="confCampMessagePreviewBubble">
+                    </div>
+                </div>
+
+                <!-- خيارات الإرسال والتحكم بالأمان -->
+                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:14px; margin-bottom:18px;">
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">
+                        <div>
+                            <label style="font-size:0.78rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🛡️ فاصل الأمان الذكي بين الرسائل (لحماية الرقم):
+                            </label>
+                            <select id="confCampSafeDelay" style="width:100%; padding:6px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.82rem; font-weight:bold;">
+                                <option value="4000">٤ ثوانٍ (سريع - للكميات الصغيرة)</option>
+                                <option value="6000" selected>٦ ثوانٍ (متوازن - موصى به جداً)</option>
+                                <option value="9000">٩ ثوانٍ (فائق الأمان - للقوائم الكبيرة)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.78rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🌐 عنوان سيرفر NewWhats المحلي:
+                            </label>
+                            <input type="text" id="confCampServerUrl" value="http://localhost:3000" style="width:100%; padding:6px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.82rem; font-weight:bold;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شريط التقدم وسجل الإرسال اللحظي -->
+                <div id="confCampProgressSection" style="display:none; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:0.8rem; font-weight:700;">
+                        <span id="confCampProgressText">جاري الإرسال... (0 / 0)</span>
+                        <span id="confCampProgressPct">0%</span>
+                    </div>
+                    <div style="height:10px; background:#e2e8f0; border-radius:6px; overflow:hidden;">
+                        <div id="confCampProgressBar" style="height:100%; width:0%; background:linear-gradient(90deg, #22c55e, #16a34a); transition:width 0.3s;"></div>
+                    </div>
+                    <div id="confCampLiveLogs" style="margin-top:8px; max-height:90px; overflow-y:auto; background:#0f172a; color:#a7f3d0; padding:8px 10px; border-radius:8px; font-size:0.74rem; font-family:monospace;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار الإجراءات السفلية -->
+            <div style="background:#f8fafc; border-top:1.5px solid #e2e8f0; padding:14px 22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button type="button" onclick="exportNewWhatsCampaignToExcel()" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:8px 14px; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer;">
+                        <i class="fa-solid fa-file-excel me-1 text-success"></i> تصدير شيت الحملة (Excel)
+                    </button>
+                    <button type="button" onclick="copyAllYouthWhatsAppMessages()" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:8px 14px; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer;">
+                        <i class="fa-solid fa-copy me-1 text-primary"></i> نسخ كافة النصوص
+                    </button>
+                </div>
+
+                <div style="display:flex; gap:8px;">
+                    <button type="button" onclick="closeNewWhatsCampaignModal()" style="padding:8px 16px; background:#e2e8f0; color:#334155; border:none; border-radius:8px; font-weight:700; cursor:pointer;">
+                        إلغاء
+                    </button>
+                    <button type="button" id="btnStartNewWhatsAuto" onclick="startNewWhatsAutoCampaign()" style="padding:8px 20px; background:linear-gradient(135deg, #16a34a 0%, #15803d 100%); color:#ffffff; border:none; border-radius:8px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(22,163,74,0.3);">
+                        <i class="fa-brands fa-whatsapp"></i> 🚀 بدء الإرسال الآلي الآن
+                    </button>
+                </div>
             </div>
         </div>
     </div>

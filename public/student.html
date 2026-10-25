@@ -411,6 +411,9 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
             </div>
         </div>
 
+        <!-- 🎯 شريط التحفيز الاستباقي الذكي (Smart Incentive Nudge Banner) -->
+        <div id="confSmartNudgeContainer" style="margin: 10px 0;"></div>
+
         <!-- صندوق التسوية والصافي المطلوب سداده -->
         <div class="p-3 rounded-3" style="background: #ffffff; border: 1.5px dashed #93c5fd; margin-top: 6px;">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -1897,6 +1900,99 @@ document.addEventListener('DOMContentLoaded', function () {
         setTxt('ui-conf-base-fee', baseFee + ' ج.م');
         setTxt('ui-conf-net-payable', netPayable + ' ج.م');
         setTxt('ui-conf-activation-date', settings.activationDate || '2026-05-29');
+
+        
+        // 5. التحفيز الاستباقي الذكي (Smart Incentive Nudge)
+        const nudgeBox = document.getElementById('confSmartNudgeContainer');
+        if (nudgeBox) {
+            let attNudge = null;
+            let examNudge = null;
+
+            if (totalSessions === 0) {
+                attNudge = {
+                    icon: '🚀',
+                    title: 'فرصتك الذهبية تبدأ الجمعة القادمة!',
+                    text: 'حضورك اجتماع الجمعة القادم يمنحك فوراً الحد الأدنى للخصم (100 ج.م)! ابدأ الآن واكسب مكانك 🌟',
+                    badge: '100 ج مضمونة'
+                };
+            } else if (attendanceDiscount <= 100) {
+                attNudge = {
+                    icon: '🔥',
+                    title: 'خطوة واحدة لمضاعفة رصيدك!',
+                    text: 'حضرت ' + totalSessions + ' جلسة.. بحضورك الجلسات القادمة ستكسر حاجز الـ 100 ج وتبدأ مضاعفة رصيدك في كل جلسة! 💪',
+                    badge: 'مضاعفة ×2'
+                };
+            } else {
+                attNudge = {
+                    icon: '💪',
+                    title: 'التزام أبطال حقيقي!',
+                    text: 'عاش يا بطل! حققت ' + totalSessions + ' جلسة حضور وحصدت مكافأة حضور استثنائية بقيمة ' + attendanceDiscount + ' ج.م! استمر في التألق 🙏✨',
+                    badge: attendanceDiscount + ' ج مكافأة'
+                };
+            }
+
+            if (examPct >= 90) {
+                examNudge = {
+                    icon: '🏆',
+                    title: 'القمة والتفوق الاستثنائي!',
+                    text: 'معدلك الأكاديمي ممتاز (' + examPct.toFixed(1) + '%)! وصلت للقمة وحققت بونص تفوق كامل بقيمة ' + examDiscount + ' ج.م! فخورين بيك 👏',
+                    badge: 'شريحة الـ 90% ⭐'
+                };
+            } else if (examPct >= 80) {
+                const diff = (90 - examPct).toFixed(1);
+                examNudge = {
+                    icon: '🎯',
+                    title: 'باقي لك ' + diff + '% فقط وتكسر حاجز الـ 90%!',
+                    text: 'مستواك رائع (' + examPct.toFixed(1) + '%)! بتركيز بسيط في الامتحان القادم تكسر حاجز الـ 90% وترفع خصمك من ' + examDiscount + ' ج إلى ' + (Number(stageRules.tier90) * expectedExamCount) + ' ج كاملة! 📚',
+                    badge: '+' + ((Number(stageRules.tier90) - Number(stageRules.tier80)) * expectedExamCount) + ' ج بانتظارك'
+                };
+            } else if (examPct >= 65) {
+                const diff = (80 - examPct).toFixed(1);
+                examNudge = {
+                    icon: '⚡',
+                    title: 'تحدي التفوق: باقيلك ' + diff + '% للشريحة الأعلى!',
+                    text: 'أنت في شريحة الـ 65%.. بزيادة طفيفة تتجاوز الـ 80% وتضاعف خصمك الدراسي من ' + examDiscount + ' ج إلى ' + (Number(stageRules.tier80) * expectedExamCount) + ' ج! بنعمة ربنا تقدر! 💪',
+                    badge: 'شريحة 80% قريبة'
+                };
+            } else if (examPct > 0) {
+                const diff = (65 - examPct).toFixed(1);
+                examNudge = {
+                    icon: '📖',
+                    title: 'فرصة التعويض قائمة وبقوة!',
+                    text: 'أنت على بعد ' + diff + '% فقط من دخول شرائح التخفيض المعتمدة.. تعويض امتحان واحد أو تسليم شيت يضعك فوراً في قائمة المتميزين! ✨',
+                    badge: 'عوّض واكسب'
+                };
+            }
+
+            let nudgeHtml = '<div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:12px; padding:12px 14px; margin-top:8px;">' +
+                '<div style="font-weight:800; font-size:0.84rem; color:#15803d; margin-bottom:6px; display:flex; align-items:center; gap:6px;">' +
+                '<span>🎯 التحفيز الذكي للتميز القادم:</span>' +
+                '</div>' +
+                '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:8px;">';
+
+            if (attNudge) {
+                nudgeHtml += '<div style="background:#ffffff; border:1px solid #bbf7d0; border-radius:10px; padding:8px 10px;">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
+                    '<strong style="font-size:0.78rem; color:#166534;">' + attNudge.icon + ' ' + attNudge.title + '</strong>' +
+                    '<span class="badge" style="background:#dcfce7; color:#15803d; font-size:0.68rem;">' + attNudge.badge + '</span>' +
+                    '</div>' +
+                    '<p style="margin:0; font-size:0.74rem; color:#475569; line-height:1.4;">' + attNudge.text + '</p>' +
+                    '</div>';
+            }
+
+            if (examNudge) {
+                nudgeHtml += '<div style="background:#ffffff; border:1px solid #fef08a; border-radius:10px; padding:8px 10px;">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">' +
+                    '<strong style="font-size:0.78rem; color:#854d0e;">' + examNudge.icon + ' ' + examNudge.title + '</strong>' +
+                    '<span class="badge" style="background:#fef9c3; color:#a16207; font-size:0.68rem;">' + examNudge.badge + '</span>' +
+                    '</div>' +
+                    '<p style="margin:0; font-size:0.74rem; color:#475569; line-height:1.4;">' + examNudge.text + '</p>' +
+                    '</div>';
+            }
+
+            nudgeHtml += '</div></div>';
+            nudgeBox.innerHTML = nudgeHtml;
+        }
 
         card.classList.remove('d-none');
     }
