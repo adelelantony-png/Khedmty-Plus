@@ -7574,42 +7574,24 @@ currentRole = currentUser.role || 'servant';
 currentPermission = currentUser.permission || (currentRole === 'admin' ? 'admin' : 'full');
 
 // تشغيل دوال العرض والرصد فوراً
-
 updateRoleUI();
-
-renderServantsTable();
-
-populatePlanServantsDropdown();
-
-checkUpcomingBirthdays();
-
-checkUpcomingMasterPlanEvents();
-
-checkLocalStorageUsage();
-
-updatePendingBadge();
-
-renderDashboard();
-
-renderMembersList();
-
-renderAttendanceTable();
-
-renderLiveCardsFeed();
-
-updateCloudUsageUI();
-
-renderAuditLogTable();
-
-renderRolloverCandidateList();
-
-renderAttendanceCalendar();
-
-registerActiveSession();
-
-if (currentPermission === 'admin') listenToActiveSessions();
-
-runPostLoginChecks();
+if (typeof renderServantsTable === 'function') renderServantsTable();
+if (typeof populatePlanServantsDropdown === 'function') populatePlanServantsDropdown();
+if (typeof checkUpcomingBirthdays === 'function') checkUpcomingBirthdays();
+if (typeof checkUpcomingMasterPlanEvents === 'function') checkUpcomingMasterPlanEvents();
+if (typeof checkLocalStorageUsage === 'function') checkLocalStorageUsage();
+if (typeof updatePendingBadge === 'function') updatePendingBadge();
+if (typeof renderDashboard === 'function') renderDashboard();
+if (typeof renderMembersList === 'function') renderMembersList();
+if (typeof renderAttendanceTable === 'function') renderAttendanceTable();
+if (typeof renderLiveCardsFeed === 'function') renderLiveCardsFeed();
+if (typeof updateCloudUsageUI === 'function') updateCloudUsageUI();
+if (typeof renderAuditLogTable === 'function') renderAuditLogTable();
+if (typeof renderRolloverCandidateList === 'function') renderRolloverCandidateList();
+if (typeof renderAttendanceCalendar === 'function') renderAttendanceCalendar();
+if (typeof registerActiveSession === 'function') registerActiveSession();
+if (currentPermission === 'admin' && typeof listenToActiveSessions === 'function') listenToActiveSessions();
+if (typeof runPostLoginChecks === 'function') runPostLoginChecks();
 
 } else {
 
@@ -7949,41 +7931,7 @@ container.innerHTML = list.map(b =>
 
 // ==========================================
 
-// 50. التشغيل الأولي
-
-// ==========================================
-
-checkInAppBrowser();
-
-applyServiceBranding();
-
-checkSession();
-
-initFirebase();
-
-maybeRunAutoBackup();
-
-renderMaterialsList();
-
-renderMembersList();
-
-renderAttendanceTable();
-
-renderLiveCardsFeed();
-
-renderServantsAttendanceTable();
-
-renderServantsTable();
-
-renderMasterPlanTable();
-
-renderDashboard();
-
-renderAuditLogTable();
-
-renderRolloverCandidateList();
-
-renderAttendanceCalendar();
+// 50. التشغيل الأولي: يتم استدعاؤه بعد اكتمال تحميل كافة وحدات اللوحة في الأسفل
 
 
 </script>
@@ -8021,6 +7969,36 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 <script src="js/dashboard/dashboard-feedback.js"></script>
 <script src="js/dashboard/dashboard-incentives.js"></script>
+
+<script>
+// ==========================================
+// 50. التشغيل الأولي الموحد بعد اكتمال تحميل وتجهيز كافة وحدات المنظومة
+// ==========================================
+function bootDashboardApp() {
+    if (typeof checkInAppBrowser === 'function') checkInAppBrowser();
+    if (typeof applyServiceBranding === 'function') applyServiceBranding();
+    if (typeof checkSession === 'function') checkSession();
+    if (typeof initFirebase === 'function') initFirebase();
+    if (typeof maybeRunAutoBackup === 'function') maybeRunAutoBackup();
+    if (typeof renderMaterialsList === 'function') renderMaterialsList();
+    if (typeof renderMembersList === 'function') renderMembersList();
+    if (typeof renderAttendanceTable === 'function') renderAttendanceTable();
+    if (typeof renderLiveCardsFeed === 'function') renderLiveCardsFeed();
+    if (typeof renderServantsAttendanceTable === 'function') renderServantsAttendanceTable();
+    if (typeof renderServantsTable === 'function') renderServantsTable();
+    if (typeof renderMasterPlanTable === 'function') renderMasterPlanTable();
+    if (typeof renderDashboard === 'function') renderDashboard();
+    if (typeof renderAuditLogTable === 'function') renderAuditLogTable();
+    if (typeof renderRolloverCandidateList === 'function') renderRolloverCandidateList();
+    if (typeof renderAttendanceCalendar === 'function') renderAttendanceCalendar();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootDashboardApp);
+} else {
+    bootDashboardApp();
+}
+</script>
 
         <!-- نافذة كشف حساب وتخفيضات المؤتمر السنوي (Conference Financial Ledger Modal) -->
     <div id="conferenceLedgerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:9999; backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:15px;">
