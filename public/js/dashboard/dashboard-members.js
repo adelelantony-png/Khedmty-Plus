@@ -1867,4 +1867,15 @@ if (typeof window !== 'undefined') {
   window.saveSingleMemberUpdate = saveSingleMemberUpdate;
   window.normalizeStageText = normalizeStageText;
   window.normalizeGenderText = normalizeGenderText;
+
+  window.openProfile = openProfile;
+  window.closeProfile = closeProfile;
+  window.switchProfileTab = switchProfileTab;
+  window.saveVisitation = saveVisitation;
+  window.saveFieldEvaluation = saveFieldEvaluation;
+  window.openEditMemberModal = openEditMemberModal;
+  window.closeEditMemberModal = closeEditMemberModal;
+  window.openQrSearchModal = openQrSearchModal;
+  window.closeQrSearchModal = closeQrSearchModal;
+
 }

@@ -56,6 +56,18 @@ window.renderAttendanceHeatmap = window.renderAttendanceHeatmap || function() {}
 window.renderMaterialsList = window.renderMaterialsList || function() {};
 window.renderMasterPlanTable = window.renderMasterPlanTable || function() {};
 
+window.openProfile = window.openProfile || function() {};
+window.closeProfile = window.closeProfile || function() {};
+window.switchProfileTab = window.switchProfileTab || function() {};
+window.saveVisitation = window.saveVisitation || function() {};
+window.saveFieldEvaluation = window.saveFieldEvaluation || function() {};
+window.closeKioskWelcome = window.closeKioskWelcome || function() {};
+window.openManualAttendanceModal = window.openManualAttendanceModal || function() {};
+window.closeManualAttendanceModal = window.closeManualAttendanceModal || function() {};
+window.openAttendanceExportModal = window.openAttendanceExportModal || function() {};
+window.closeAttendanceExportModal = window.closeAttendanceExportModal || function() {};
+
+
 window.appErrorLogs = [];
 
 window.pendingErrorReports = [];
@@ -5856,7 +5868,7 @@ const configObj = {
 
 localStorage.setItem(STORAGE_KEYS.FB_CONFIG, JSON.stringify(configObj));
 
-if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+if (typeof firebase !== 'undefined' && (!firebase.apps || !firebase.apps.length)) {
 
 firebase.initializeApp(configObj);
 

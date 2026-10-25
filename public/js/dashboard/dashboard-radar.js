@@ -449,7 +449,7 @@ if (targetBtn) targetBtn.classList.add('active');
 
 try {
 
-if (typeof window !== 'undefined' && window.location) {
+if (typeof window !== 'undefined' && window.location && window.history && typeof window.history.replaceState === 'function') {
 
 const currentUrl = new URL(window.location.href);
 

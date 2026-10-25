@@ -1873,4 +1873,14 @@ if (typeof window !== 'undefined') {
   window.atomicRegisterAttendance = atomicRegisterAttendance;
   window.exportTodaySessionToWhatsApp = exportTodaySessionToWhatsApp;
   window.formatMatrixDateHeader = formatMatrixDateHeader;
+
+  window.showKioskWelcome = showKioskWelcome;
+  window.closeKioskWelcome = closeKioskWelcome;
+  window.openAttendanceExportModal = openAttendanceExportModal;
+  window.closeAttendanceExportModal = closeAttendanceExportModal;
+  window.openManualAttendanceModal = openManualAttendanceModal;
+  window.closeManualAttendanceModal = closeManualAttendanceModal;
+  window.changeCalendarMonth = changeCalendarMonth;
+  window.selectAttendanceDate = selectAttendanceDate;
+
 }
