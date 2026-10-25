@@ -4384,6 +4384,173 @@
                     </div>
                 </div>
             </div>
+            <!-- ======================================================== -->
+            <!-- 🏕️ منظومة تخفيضات ومكافآت المؤتمر السنوي 2026 (Conference Incentive & Subsidy Engine) -->
+            <!-- ======================================================== -->
+            <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border: 2px solid #93c5fd; padding: 22px; border-radius: 16px; margin: 20px 0; box-shadow: 0 4px 15px rgba(37,99,235,0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1.5px solid #bfdbfe; padding-bottom:12px;">
+                    <div>
+                        <h3 style="margin:0; border:none; color:#1e40af; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-campground text-primary"></i> 🏕️ منظومة تخفيضات ومكافآت المؤتمر السنوي 2026 (Conference Incentive Engine)
+                        </h3>
+                        <p style="font-size:0.83rem; color:#475569; margin:4px 0 0 0;">
+                            احتساب خصومات الحضور والتفوق الدراسي تلقائياً، مراجعة الكشوف المالية، وتصدير شيت الإكسل المعتمد لأمين الصندوق.
+                        </p>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:8px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                        <div id="confPublishStatusBadge" style="font-size:0.82rem; font-weight:800; color:#dc2626;">
+                            <i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒
+                        </div>
+                        <button type="button" id="btnToggleConfVisibility" onclick="toggleConferenceDiscountVisibility()" class="btn-custom" style="background:#1e40af; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
+                            تغيير حالة النشر
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. إعدادات المؤتمر العامة ومكافآت الحضور -->
+                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-calendar-check text-primary"></i> 1. الإعدادات العامة للمؤتمر ومكافآت الحضور والالتزام:
+                    </h5>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🏷️ قيمة اشتراك المؤتمر الأساسي:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="confBaseFee" min="0" value="800" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                ⏳ تاريخ بدء التفعيل والسداد:
+                            </label>
+                            <input type="date" id="confActivationDate" value="2026-05-29" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🗓️ خصم حضور يوم الجمعة:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="confFridayDiscount" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                ☀️ خصم حضور الصيف / الإضافي:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="confSummerDiscount" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                ✖️ مضاعف الحضور (بدل الأسابيع):
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="confMultiplierFactor" min="1" step="0.5" value="2" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ضعف</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🛡️ الحد الأدنى لمكافأة الحضور:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="confMinAttendanceFloor" min="0" value="100" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="confApplyMultiplier" checked style="width:17px; height:17px; cursor:pointer;">
+                        <label for="confApplyMultiplier" style="font-size:0.82rem; font-weight:700; color:#1e293b; cursor:pointer;">
+                            تطبيق مضاعفة رصيد الحضور (ضرب في 2 مع الحد الأدنى 100 ج لمن حضر جلسة واحدة على الأقل)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. شرائح مكافآت التفوق الدراسي -->
+                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-graduation-cap text-success"></i> 2. شرائح مكافآت التفوق الدراسي (حسب الفرقة وعدد الامتحانات):
+                    </h5>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+                        <!-- الفرقة الأولى -->
+                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
+                            <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
+                                <span>📚 الفرقة الأولى (٣ امتحانات)</span>
+                                <span class="badge" style="background:#dbeafe; color:#1e40af;">سنة أولى</span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
+                                    <input type="number" id="confStage1Tier90" value="100" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
+                                    <input type="number" id="confStage1Tier80" value="50" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
+                                    <input type="number" id="confStage1Tier65" value="30" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- الفرقة الثانية -->
+                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
+                            <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
+                                <span>🌟 الفرقة الثانية (امتحانين)</span>
+                                <span class="badge" style="background:#fef3c7; color:#92400e;">سنة ثانية</span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
+                                    <input type="number" id="confStage2Tier90" value="150" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
+                                    <input type="number" id="confStage2Tier80" value="75" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
+                                    <input type="number" id="confStage2Tier65" value="45" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار الإجراءات وكشف الحساب -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" onclick="openConferenceLedgerModal()" style="background:#1e40af; color:#ffffff; border:none; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 3px 8px rgba(30,64,175,0.25);">
+                            <i class="fa-solid fa-table-list"></i> 📊 فتح كشف حساب وتخفيضات المؤتمر
+                        </button>
+                        <button type="button" onclick="exportConferenceLedgerToExcel()" style="background:#15803d; color:#ffffff; border:none; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 3px 8px rgba(21,128,61,0.25);">
+                            <i class="fa-solid fa-file-excel"></i> 📥 تصدير كشف المؤتمر إلى Excel
+                        </button>
+                    </div>
+
+                    <button type="button" onclick="saveConferenceSettingsAction()" style="background:#0f172a; color:#ffffff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات المؤتمر
+                    </button>
+                </div>
+            </div>
+
+
 
             <div class="admin-only" style="background:#e8f4fd; border:2px solid #74b9ff; padding:15px; border-radius:10px; margin:15px 0;">
 
@@ -22998,7 +23165,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); renderBonusSettingsUI(); }
+            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); renderBonusSettingsUI(); renderConferenceSettingsUI(); }
 
 
 
@@ -31915,7 +32082,652 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+
+// ========================================================
+// 🏕️ محرك تخفيضات ومكافآت المؤتمر السنوي 2026 (Conference Incentive Engine)
+// ========================================================
+const CONFERENCE_STORAGE_KEY = 'khedmety_conference_settings';
+
+function getConferenceSettings() {
+    const defaultSettings = {
+        conferenceBaseFee: 800,
+        activationDate: "2026-05-29",
+        isDiscountPublished: false,
+        attendanceRules: {
+            fridayDiscount: 10,
+            summerDiscount: 15,
+            applyMultiplier: true,
+            multiplierFactor: 2,
+            minimumAttendanceDiscount: 100
+        },
+        examRules: {
+            stage1: {
+                name: "الفرقة الأولى (٣ امتحانات)",
+                tier90: 100,
+                tier80: 50,
+                tier65: 30
+            },
+            stage2: {
+                name: "الفرقة الثانية (امتحانين)",
+                tier90: 150,
+                tier80: 75,
+                tier65: 45
+            }
+        }
+    };
+    try {
+        const raw = localStorage.getItem(CONFERENCE_STORAGE_KEY);
+        if (!raw) return defaultSettings;
+        const parsed = JSON.parse(raw);
+        return {
+            conferenceBaseFee: Number(parsed.conferenceBaseFee) || defaultSettings.conferenceBaseFee,
+            activationDate: parsed.activationDate || defaultSettings.activationDate,
+            isDiscountPublished: Boolean(parsed.isDiscountPublished),
+            attendanceRules: Object.assign({}, defaultSettings.attendanceRules, parsed.attendanceRules || {}),
+            examRules: {
+                stage1: Object.assign({}, defaultSettings.examRules.stage1, (parsed.examRules && parsed.examRules.stage1) || {}),
+                stage2: Object.assign({}, defaultSettings.examRules.stage2, (parsed.examRules && parsed.examRules.stage2) || {})
+            }
+        };
+    } catch(e) {
+        return defaultSettings;
+    }
+}
+
+function saveConferenceSettings(settings) {
+    localStorage.setItem(CONFERENCE_STORAGE_KEY, JSON.stringify(settings));
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        fsdb.collection('settings').doc('conference_discounts').set(settings, { merge: true }).catch(() => {});
+    }
+}
+
+function getExamTierDiscountVal(scorePct, tierConfig) {
+    if (scorePct >= 90) return Number(tierConfig.tier90) || 0;
+    if (scorePct >= 80) return Number(tierConfig.tier80) || 0;
+    if (scorePct >= 65) return Number(tierConfig.tier65) || 0;
+    return 0;
+}
+
+function calculateStudentConferenceDiscount(student, attendanceRecord, candidatesGrades, settings) {
+    const sCode = String(student.code || student.id || '').trim();
+    const sId = String(student.id || '').trim();
+    const sName = String(student.name || 'مخدوم').trim();
+
+    // 1. تحديد الفرقة الدراسية وقواعدها
+    const rawStage = String(student.stage || student.level || '').toLowerCase();
+    const isStage2 = rawStage.includes('ثانية') || rawStage.includes('ثانيه') || rawStage.includes('2') || rawStage.includes('second');
+    const stageName = isStage2 ? 'الفرقة الثانية' : 'الفرقة الأولى';
+    const tierConfig = isStage2 ? settings.examRules.stage2 : settings.examRules.stage1;
+    const expectedExamCount = isStage2 ? 2 : 3;
+
+    // 2. احتساب الحضور والالتزام
+    let fridayCount = 0;
+    let summerCount = 0;
+    if (attendanceRecord && typeof attendanceRecord === 'object') {
+        Object.keys(attendanceRecord).forEach(dateStr => {
+            const list = attendanceRecord[dateStr] || [];
+            const attended = list.some(a => {
+                if (a.isAbsentDueToDelay) return false;
+                const aCode = String(a.code || a.id || '').trim();
+                const aId = String(a.id || '').trim();
+                return (sCode && aCode === sCode) || (sId && aId === sId);
+            });
+            if (attended) {
+                const d = new Date(dateStr);
+                if (d.getDay() === 5) fridayCount++;
+                else summerCount++;
+            }
+        });
+    }
+
+    const totalSessions = fridayCount + summerCount;
+    const fridayRate = Number(settings.attendanceRules.fridayDiscount) || 10;
+    const summerRate = Number(settings.attendanceRules.summerDiscount) || 15;
+    let rawAttDiscount = (fridayCount * fridayRate) + (summerCount * summerRate);
+
+    const applyMultiplier = settings.attendanceRules.applyMultiplier !== false;
+    const factor = applyMultiplier ? (Number(settings.attendanceRules.multiplierFactor) || 2) : 1;
+    rawAttDiscount = rawAttDiscount * factor;
+
+    const minFloor = Number(settings.attendanceRules.minimumAttendanceDiscount) || 100;
+    const attendanceDiscount = totalSessions > 0 ? Math.max(minFloor, rawAttDiscount) : 0;
+
+    // 3. درجات الامتحانات وشرائح التفوق
+    let cand = null;
+    if (Array.isArray(candidatesGrades)) {
+        cand = candidatesGrades.find(c => {
+            const cCode = String(c.code || c.id || '').trim();
+            const cId = String(c.id || '').trim();
+            const cName = String(c.name || '').trim();
+            return (sCode && cCode === sCode) || (sId && cId === sId) || (cName && cName === sName);
+        });
+    }
+
+    let examDiscount = 0;
+    let examPct = 0;
+
+    if (cand) {
+        const gScores = [];
+        if (cand.g1 != null && cand.g1 !== '') gScores.push(Number(cand.g1));
+        if (cand.g2 != null && cand.g2 !== '') gScores.push(Number(cand.g2));
+        if (cand.g3 != null && cand.g3 !== '' && !isStage2) gScores.push(Number(cand.g3));
+
+        if (gScores.length > 0) {
+            const examMax = Number(cand.examMax) || 100;
+            gScores.forEach(sc => {
+                const p = examMax > 0 ? (sc / examMax) * 100 : 0;
+                examDiscount += getExamTierDiscountVal(p, tierConfig);
+            });
+            const totalSum = gScores.reduce((a, b) => a + b, 0);
+            examPct = (totalSum / (gScores.length * examMax)) * 100;
+        } else {
+            let rawPct = cand.pct != null ? Number(cand.pct) : (cand.percentage != null ? Number(cand.percentage) : 0);
+            if (!rawPct && cand.total != null && cand.maxTotalScore) {
+                rawPct = (Number(cand.total) / Number(cand.maxTotalScore)) * 100;
+            }
+            examPct = rawPct;
+            const singleExamDisc = getExamTierDiscountVal(examPct, tierConfig);
+            examDiscount = singleExamDisc * expectedExamCount;
+        }
+    }
+
+    // 4. إجمالي الخصم الديناميكي (بدون سقف جامد ومصطنع!)
+    const totalDiscount = attendanceDiscount + examDiscount;
+    const baseFee = Number(settings.conferenceBaseFee) || 800;
+    const netPayable = Math.max(0, baseFee - totalDiscount);
+
+    return {
+        code: sCode,
+        name: sName,
+        stage: stageName,
+        isStage2: isStage2,
+        phone: student.phone || (cand ? cand.phone : '') || '',
+        fridayCount: fridayCount,
+        summerCount: summerCount,
+        totalSessions: totalSessions,
+        rawAttDiscount: rawAttDiscount,
+        attendanceDiscount: attendanceDiscount,
+        examPct: Number(examPct.toFixed(1)),
+        examDiscount: examDiscount,
+        totalDiscount: totalDiscount,
+        baseFee: baseFee,
+        netPayable: netPayable
+    };
+}
+
+function computeConferenceLedgerData() {
+    const settings = getConferenceSettings();
+    let members = [];
+    try {
+        members = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
+    } catch(e) { members = []; }
+
+    let attendanceRecord = {};
+    try {
+        attendanceRecord = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
+    } catch(e) { attendanceRecord = {}; }
+
+    let candidatesGrades = [];
+    try {
+        candidatesGrades = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || 
+                           JSON.parse(localStorage.getItem('khedmety_new_applicants_grades')) || [];
+    } catch(e) { candidatesGrades = []; }
+
+    const rows = members.map(m => calculateStudentConferenceDiscount(m, attendanceRecord, candidatesGrades, settings));
+
+    // حساب المؤشرات العامة (KPIs)
+    const highestDiscount = rows.length > 0 ? Math.max(...rows.map(r => r.totalDiscount)) : 0;
+    const topRow = rows.find(r => r.totalDiscount === highestDiscount && highestDiscount > 0);
+    const totalSubsidy = rows.reduce((acc, r) => acc + r.totalDiscount, 0);
+    const expectedNet = rows.reduce((acc, r) => acc + r.netPayable, 0);
+    const beneficiaryCount = rows.filter(r => r.totalDiscount > 0).length;
+
+    return {
+        settings: settings,
+        rows: rows,
+        highestDiscount: highestDiscount,
+        topStudentName: topRow ? topRow.name : '—',
+        totalSubsidy: totalSubsidy,
+        expectedNet: expectedNet,
+        beneficiaryCount: beneficiaryCount,
+        totalMembers: rows.length
+    };
+}
+
+function toggleConferenceDiscountVisibility() {
+    const settings = getConferenceSettings();
+    settings.isDiscountPublished = !settings.isDiscountPublished;
+    saveConferenceSettings(settings);
+    renderConferenceSettingsUI();
+    if (typeof showToast === 'function') {
+        showToast(settings.isDiscountPublished ? 
+            "📢 تم إعلان خصومات المؤتمر رسمياً لجميع المخدومين في بواباتهم!" : 
+            "🔒 تم حجب خصومات المؤتمر عن المخدومين بأمان!");
+    } else {
+        alert(settings.isDiscountPublished ? "📢 تم إعلان خصومات المؤتمر للمخدومين" : "🔒 تم حجب خصومات المؤتمر");
+    }
+}
+
+function saveConferenceSettingsAction() {
+    const settings = getConferenceSettings();
+    settings.conferenceBaseFee = Math.max(0, parseInt(document.getElementById('confBaseFee').value) || 800);
+    settings.activationDate = document.getElementById('confActivationDate').value || "2026-05-29";
+    settings.attendanceRules.fridayDiscount = Math.max(0, parseInt(document.getElementById('confFridayDiscount').value) || 10);
+    settings.attendanceRules.summerDiscount = Math.max(0, parseInt(document.getElementById('confSummerDiscount').value) || 15);
+    settings.attendanceRules.multiplierFactor = Math.max(1, parseFloat(document.getElementById('confMultiplierFactor').value) || 2);
+    settings.attendanceRules.minimumAttendanceDiscount = Math.max(0, parseInt(document.getElementById('confMinAttendanceFloor').value) || 100);
+    settings.attendanceRules.applyMultiplier = document.getElementById('confApplyMultiplier').checked;
+
+    settings.examRules.stage1.tier90 = Math.max(0, parseInt(document.getElementById('confStage1Tier90').value) || 100);
+    settings.examRules.stage1.tier80 = Math.max(0, parseInt(document.getElementById('confStage1Tier80').value) || 50);
+    settings.examRules.stage1.tier65 = Math.max(0, parseInt(document.getElementById('confStage1Tier65').value) || 30);
+
+    settings.examRules.stage2.tier90 = Math.max(0, parseInt(document.getElementById('confStage2Tier90').value) || 150);
+    settings.examRules.stage2.tier80 = Math.max(0, parseInt(document.getElementById('confStage2Tier80').value) || 75);
+    settings.examRules.stage2.tier65 = Math.max(0, parseInt(document.getElementById('confStage2Tier65').value) || 45);
+
+    saveConferenceSettings(settings);
+    renderConferenceSettingsUI();
+    if (typeof showToast === 'function') showToast("✅ تم حفظ إعدادات تخفيضات المؤتمر السنوي بنجاح!");
+    else alert("✅ تم حفظ إعدادات تخفيضات المؤتمر بنجاح!");
+}
+
+function renderConferenceSettingsUI() {
+    const settings = getConferenceSettings();
+    const badge = document.getElementById('confPublishStatusBadge');
+    const btn = document.getElementById('btnToggleConfVisibility');
+    if (badge) {
+        if (settings.isDiscountPublished) {
+            badge.innerHTML = '<i class="fa-solid fa-lock-open me-1"></i> معلن للمخدومين 📢';
+            badge.style.color = '#15803d';
+        } else {
+            badge.innerHTML = '<i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒';
+            badge.style.color = '#dc2626';
+        }
+    }
+    if (btn) {
+        btn.textContent = settings.isDiscountPublished ? 'حجب الخصومات الآن' : 'إعلان الخصومات للجميع';
+        btn.style.background = settings.isDiscountPublished ? '#dc2626' : '#1e40af';
+    }
+
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+    setVal('confBaseFee', settings.conferenceBaseFee);
+    setVal('confActivationDate', settings.activationDate);
+    setVal('confFridayDiscount', settings.attendanceRules.fridayDiscount);
+    setVal('confSummerDiscount', settings.attendanceRules.summerDiscount);
+    setVal('confMultiplierFactor', settings.attendanceRules.multiplierFactor);
+    setVal('confMinAttendanceFloor', settings.attendanceRules.minimumAttendanceDiscount);
+
+    const chk = document.getElementById('confApplyMultiplier');
+    if (chk) chk.checked = settings.attendanceRules.applyMultiplier !== false;
+
+    setVal('confStage1Tier90', settings.examRules.stage1.tier90);
+    setVal('confStage1Tier80', settings.examRules.stage1.tier80);
+    setVal('confStage1Tier65', settings.examRules.stage1.tier65);
+
+    setVal('confStage2Tier90', settings.examRules.stage2.tier90);
+    setVal('confStage2Tier80', settings.examRules.stage2.tier80);
+    setVal('confStage2Tier65', settings.examRules.stage2.tier65);
+}
+
+function openConferenceLedgerModal() {
+    const modal = document.getElementById('conferenceLedgerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        renderConferenceLedgerTable();
+    }
+}
+
+function closeConferenceLedgerModal() {
+    const modal = document.getElementById('conferenceLedgerModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function renderConferenceLedgerTable() {
+    const data = computeConferenceLedgerData();
+
+    // تحديث كروت المؤشرات
+    const elTopDisc = document.getElementById('kpiTopDiscountAchieved');
+    if (elTopDisc) elTopDisc.textContent = data.highestDiscount + ' ج.م';
+    const elTopName = document.getElementById('kpiTopStudentName');
+    if (elTopName) elTopName.textContent = data.highestDiscount > 0 ? ('المحقق: ' + data.topStudentName) : 'لا توجد خصومات';
+
+    const elSubsidy = document.getElementById('kpiTotalSubsidy');
+    if (elSubsidy) elSubsidy.textContent = data.totalSubsidy.toLocaleString('ar-EG') + ' ج.م';
+
+    const elExpNet = document.getElementById('kpiExpectedNet');
+    if (elExpNet) elExpNet.textContent = data.expectedNet.toLocaleString('ar-EG') + ' ج.م';
+
+    const elBenCount = document.getElementById('kpiBeneficiariesCount');
+    if (elBenCount) elBenCount.textContent = data.beneficiaryCount + ' مخدوم';
+
+    const elBenPct = document.getElementById('kpiBeneficiariesPct');
+    if (elBenPct) {
+        const pct = data.totalMembers > 0 ? ((data.beneficiaryCount / data.totalMembers) * 100).toFixed(1) : '0';
+        elBenPct.textContent = pct + '% من إجمالي ' + data.totalMembers + ' مخدوم';
+    }
+
+    // فلترة الصفوف
+    const elSearch = document.getElementById('confLedgerSearch');
+    const searchVal = (elSearch && elSearch.value ? elSearch.value : '').trim().toLowerCase();
+    const elStage = document.getElementById('confLedgerStageFilter');
+    const stageVal = elStage ? elStage.value : 'all';
+    const elDisc = document.getElementById('confLedgerDiscountFilter');
+    const discVal = elDisc ? elDisc.value : 'all';
+
+    let filtered = data.rows.filter(r => {
+        if (searchVal && !r.name.toLowerCase().includes(searchVal) && !r.code.toLowerCase().includes(searchVal)) {
+            return false;
+        }
+        if (stageVal === 'stage1' && r.isStage2) return false;
+        if (stageVal === 'stage2' && !r.isStage2) return false;
+        if (discVal === 'has_discount' && r.totalDiscount <= 0) return false;
+        if (discVal === 'no_discount' && r.totalDiscount > 0) return false;
+        return true;
+    });
+
+    // ترتيب: الأكبر خصماً أولاً
+    filtered.sort((a, b) => b.totalDiscount - a.totalDiscount || a.name.localeCompare(b.name, 'ar'));
+
+    const tbody = document.getElementById('confLedgerTableBody');
+    if (!tbody) return;
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" style="padding:20px; color:#94a3b8;">لا توجد نتائج مطابقة لخيارات البحث والفلترة.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map((r, i) => {
+        const isTop = r.totalDiscount === data.highestDiscount && data.highestDiscount > 0;
+        return `
+            <tr style="border-bottom:1px solid #e2e8f0; ${isTop ? 'background:#fffbeb;' : ''}">
+                <td style="padding:9px 6px; font-weight:bold; color:#64748b;">${i + 1}</td>
+                <td style="padding:9px 8px; text-align:right;">
+                    <div style="font-weight:800; color:#0f172a;">${escapeHtml(r.name)}</div>
+                    <small style="color:#64748b; font-size:0.75rem;">كود: ${escapeHtml(r.code)}</small>
+                </td>
+                <td style="padding:9px 6px;">
+                    <span class="badge" style="background:${r.isStage2 ? '#fef3c7; color:#92400e;' : '#dbeafe; color:#1e40af;'}">
+                        ${r.stage}
+                    </span>
+                </td>
+                <td style="padding:9px 6px; font-weight:700; color:#334155;">
+                    ${r.fridayCount} <small style="color:#94a3b8;">(${r.fridayCount * data.settings.attendanceRules.fridayDiscount} ج)</small>
+                </td>
+                <td style="padding:9px 6px; font-weight:700; color:#334155;">
+                    ${r.summerCount} <small style="color:#94a3b8;">(${r.summerCount * data.settings.attendanceRules.summerDiscount} ج)</small>
+                </td>
+                <td style="padding:9px 6px; font-weight:800; color:#0369a1;">
+                    ${r.attendanceDiscount} ج
+                </td>
+                <td style="padding:9px 6px; font-weight:700; color:#334155;">
+                    ${r.examPct > 0 ? r.examPct + '%' : '—'}
+                </td>
+                <td style="padding:9px 6px; font-weight:800; color:#15803d;">
+                    ${r.examDiscount} ج
+                </td>
+                <td style="padding:9px 6px; background:#fef3c7; font-weight:900; color:#b45309; font-size:0.92rem;">
+                    ${r.totalDiscount} ج ${isTop ? '⭐' : ''}
+                </td>
+                <td style="padding:9px 6px; background:#dbeafe; font-weight:900; color:#1e40af; font-size:0.92rem;">
+                    ${r.netPayable} ج
+                </td>
+                <td style="padding:9px 6px;">
+                    <button type="button" onclick="sendConferenceWhatsAppNotification('${r.code}')" style="background:#25d366; color:#ffffff; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:700;" title="إرسال إشعار الخصم الفردي">
+                        <i class="fa-brands fa-whatsapp me-1"></i> إشعار
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function exportConferenceLedgerToExcel() {
+    const data = computeConferenceLedgerData();
+    if (!data.rows || data.rows.length === 0) {
+        alert('لا توجد بيانات مخدومين متاحة للتصدير حالياً.');
+        return;
+    }
+
+    const headers = [
+        'م',
+        'كود المخدوم',
+        'اسم المخدوم',
+        'الفرقة الدراسية',
+        'رقم الهاتف',
+        'حضور الجمعة (جلسات)',
+        'حضور الصيف (جلسات)',
+        'خصم الحضور المعتمد (ج.م)',
+        'نسبة الامتحانات %',
+        'خصم التفوق الدراسي (ج.م)',
+        'إجمالي الخصم المستحق (ج.م)',
+        'اشتراك المؤتمر الأساسي (ج.م)',
+        'صافي المبلغ المطلوب سداده (ج.م)',
+        'تاريخ التفعيل'
+    ];
+
+    const rows = data.rows.map((r, i) => [
+        i + 1,
+        r.code,
+        r.name,
+        r.stage,
+        r.phone,
+        r.fridayCount,
+        r.summerCount,
+        r.attendanceDiscount,
+        r.examPct > 0 ? r.examPct + '%' : '0%',
+        r.examDiscount,
+        r.totalDiscount,
+        r.baseFee,
+        r.netPayable,
+        data.settings.activationDate
+    ]);
+
+    // صف الإجماليات
+    rows.push([
+        'الإجمالي',
+        '—',
+        'عدد المخدومين: ' + data.rows.length,
+        '—',
+        '—',
+        data.rows.reduce((a, b) => a + b.fridayCount, 0),
+        data.rows.reduce((a, b) => a + b.summerCount, 0),
+        data.rows.reduce((a, b) => a + b.attendanceDiscount, 0),
+        '—',
+        data.rows.reduce((a, b) => a + b.examDiscount, 0),
+        data.totalSubsidy,
+        data.rows.length * data.settings.conferenceBaseFee,
+        data.expectedNet,
+        '—'
+    ]);
+
+    const fileName = 'سجل_خصومات_المؤتمر_السنوي_2026.xlsx';
+
+    if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "خصومات_المؤتمر");
+        XLSX.writeFile(wb, fileName);
+        if (typeof showToast === 'function') showToast("✅ تم تصدير كشف حساب المؤتمر إلى Excel بنجاح!");
+        else alert("✅ تم تصدير كشف حساب المؤتمر بنجاح!");
+    } else {
+        // تصدير CSV بديل
+        let csv = '\uFEFF' + [headers, ...rows].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName.replace('.xlsx', '.csv');
+        link.click();
+    }
+}
+
+function sendConferenceWhatsAppNotification(code) {
+    const data = computeConferenceLedgerData();
+    const r = data.rows.find(x => String(x.code) === String(code));
+    if (!r) return;
+
+    const phone = (r.phone || '').replace(/[^0-9]/g, '');
+    let cleanPhone = phone;
+    if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+
+    const msg = 'سلام ونعمة يا ' + r.name + ' 🙏✨\n' +
+'تقديراً لالتزامك وتفوقك المبارك، يسر أمانة خدمة القديس بولس إعلان تفاصيل تخفيضك المستحق لحضور المؤتمر السنوي 2026:\n' +
+'⛺ اشتراك المؤتمر الأساسي: ' + r.baseFee + ' ج.م\n' +
+'🗓️ مكافأة الحضور والالتزام: ' + r.attendanceDiscount + ' ج.م (' + r.totalSessions + ' جلسة)\n' +
+'🎓 مكافأة التفوق الدراسي (' + r.stage + '): ' + r.examDiscount + ' ج.م\n' +
+'💎 إجمالي الخصم المستحق لك: ' + r.totalDiscount + ' ج.م\n' +
+'━━━━━━━━━━━━━━━━━━━━\n' +
+'💰 الصافي المطلوب سداده لأمين الصندوق: ' + r.netPayable + ' ج.م فقط!\n' +
+'⏳ يبدأ سداد الاشتراكات وتأكيد الحجز اعتباراً من: ' + data.settings.activationDate + '\n' +
+'طوباك على اجتهادك، وبانتظار مشاركتك المباركة في المؤتمر! 🙏❤️';
+
+    if (cleanPhone) {
+        window.open('https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(msg), '_blank');
+    } else {
+        navigator.clipboard.writeText(msg).then(() => {
+            alert('لم يتم العثور على رقم هاتف مسجل للمخدوم (' + r.name + ').\nتم نسخ نص الإشعار بنجاح إلى الحافظة لإرساله يدوياً! 📋');
+        }).catch(() => {
+            prompt('انسخ نص رسالة المؤتمر لـ ' + r.name + ':', msg);
+        });
+    }
+}
+
+function copyConferenceServantSummary() {
+    const data = computeConferenceLedgerData();
+    const pctBen = data.totalMembers > 0 ? ((data.beneficiaryCount / data.totalMembers) * 100).toFixed(1) : 0;
+    const summary = '🏕️ ملخص تقرير تخفيضات المؤتمر السنوي 2026:\n' +
+'━━━━━━━━━━━━━━━━━━━━\n' +
+'👥 إجمالي عدد المخدومين: ' + data.totalMembers + '\n' +
+'💎 عدد المستفيدين من الخصومات: ' + data.beneficiaryCount + ' (' + pctBen + '%)\n' +
+'🏆 أعلى خصم محقق بالدفعة: ' + data.highestDiscount + ' ج.م (' + data.topStudentName + ')\n' +
+'💰 إجمالي الدعم الممنوح من الخدمة: ' + data.totalSubsidy.toLocaleString('ar-EG') + ' ج.م\n' +
+'💵 إجمالي الاشتراكات المتوقع تحصيلها: ' + data.expectedNet.toLocaleString('ar-EG') + ' ج.م\n' +
+'⏳ موعد بدء التفعيل والتحصيل: ' + data.settings.activationDate + '\n' +
+'━━━━━━━━━━━━━━━━━━━━\n' +
+'خدمة القديس بولس - نظام خدمتي برو';
+
+    navigator.clipboard.writeText(summary).then(() => {
+        if (typeof showToast === 'function') showToast("📋 تم نسخ ملخص المؤتمر بنجاح!");
+        else alert("📋 تم نسخ ملخص المؤتمر بنجاح!");
+    }).catch(() => {
+        prompt("انسخ ملخص المؤتمر:", summary);
+    });
+}
+
 </script>
+
+        <!-- نافذة كشف حساب وتخفيضات المؤتمر السنوي (Conference Financial Ledger Modal) -->
+    <div id="conferenceLedgerModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.75); z-index:9999; backdrop-filter:blur(5px); align-items:center; justify-content:center; padding:15px;">
+        <div style="background:#ffffff; border-radius:20px; max-width:1240px; width:100%; max-height:92vh; display:flex; flex-direction:column; box-shadow:0 25px 50px rgba(0,0,0,0.3); border:2px solid #3b82f6; text-align:right; overflow:hidden;">
+            <!-- ترويسة النافذة -->
+            <div style="background:linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color:#ffffff; padding:16px 22px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                        🏕️
+                    </div>
+                    <div>
+                        <h4 style="margin:0; font-size:1.15rem; font-weight:800; color:#ffffff;">كشف حساب وتخفيضات المؤتمر السنوي 2026</h4>
+                        <span style="font-size:0.78rem; color:#bfdbfe;">سجل الخصومات المستحقة والمبالغ الصافية المطلوب تحصيلها</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeConferenceLedgerModal()" style="background:transparent; border:none; color:#ffffff; font-size:1.5rem; cursor:pointer; line-height:1;">
+                    &times;
+                </button>
+            </div>
+
+            <!-- بطاقات المؤشرات الديناميكية (KPI Cards) -->
+            <div style="padding:14px 22px; background:#f8fafc; border-bottom:1.5px solid #e2e8f0;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 14px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+                        <div style="font-size:0.75rem; font-weight:700; color:#64748b;">🏆 أعلى خصم محقق بالدفعة</div>
+                        <div id="kpiTopDiscountAchieved" style="font-size:1.2rem; font-weight:900; color:#b45309; margin-top:4px;">0 ج.م</div>
+                        <small id="kpiTopStudentName" style="color:#64748b; font-size:0.72rem; display:block;">—</small>
+                    </div>
+
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 14px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+                        <div style="font-size:0.75rem; font-weight:700; color:#64748b;">💰 إجمالي دعم المؤتمر الممنوح</div>
+                        <div id="kpiTotalSubsidy" style="font-size:1.2rem; font-weight:900; color:#15803d; margin-top:4px;">0 ج.م</div>
+                        <small style="color:#64748b; font-size:0.72rem; display:block;">إجمالي الخصومات المستحقة</small>
+                    </div>
+
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 14px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+                        <div style="font-size:0.75rem; font-weight:700; color:#64748b;">💵 إجمالي المتوقع تحصيله</div>
+                        <div id="kpiExpectedNet" style="font-size:1.2rem; font-weight:900; color:#1e40af; margin-top:4px;">0 ج.م</div>
+                        <small style="color:#64748b; font-size:0.72rem; display:block;">صافي اشتراكات الخزينة</small>
+                    </div>
+
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px 14px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+                        <div style="font-size:0.75rem; font-weight:700; color:#64748b;">👥 المخدومين المستفيدين</div>
+                        <div id="kpiBeneficiariesCount" style="font-size:1.2rem; font-weight:900; color:#0f172a; margin-top:4px;">0 مخدوم</div>
+                        <small id="kpiBeneficiariesPct" style="color:#64748b; font-size:0.72rem; display:block;">0% من إجمالي الدفعة</small>
+                    </div>
+                </div>
+
+                <!-- شريط البحث والفلترة والأزرار السريعة -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:12px;">
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1;">
+                        <input type="text" id="confLedgerSearch" placeholder="🔍 بحث بالاسم أو الكود..." oninput="renderConferenceLedgerTable()" style="padding:7px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem; min-width:200px;">
+                        
+                        <select id="confLedgerStageFilter" onchange="renderConferenceLedgerTable()" style="padding:7px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                            <option value="all">جميع الفرق الدراسية</option>
+                            <option value="stage1">الفرقة الأولى</option>
+                            <option value="stage2">الفرقة الثانية</option>
+                        </select>
+
+                        <select id="confLedgerDiscountFilter" onchange="renderConferenceLedgerTable()" style="padding:7px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+                            <option value="all">جميع حالات الخصم</option>
+                            <option value="has_discount">حاصل على خصم (&gt; 0 ج)</option>
+                            <option value="no_discount">بدون خصم (0 ج)</option>
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" onclick="copyConferenceServantSummary()" style="background:#f1f5f9; color:#1e293b; border:1px solid #cbd5e1; padding:7px 12px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer;">
+                            <i class="fa-solid fa-copy me-1"></i> نسخ ملخص الخدام
+                        </button>
+                        <button type="button" onclick="exportConferenceLedgerToExcel()" style="background:#15803d; color:#ffffff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
+                            <i class="fa-solid fa-file-excel me-1"></i> تصدير Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول البيانات التفاعلي -->
+            <div style="flex:1; overflow-y:auto; overflow-x:auto; padding:0 22px;">
+                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:0.84rem; margin:14px 0;">
+                    <thead style="position:sticky; top:0; background:#f1f5f9; z-index:2; border-bottom:2px solid #cbd5e1;">
+                        <tr>
+                            <th style="padding:10px 6px;">#</th>
+                            <th style="padding:10px 8px; text-align:right;">المخدوم</th>
+                            <th style="padding:10px 6px;">الفرقة</th>
+                            <th style="padding:10px 6px;">حضور الجمعة</th>
+                            <th style="padding:10px 6px;">حضور الصيف</th>
+                            <th style="padding:10px 6px;">خصم الحضور</th>
+                            <th style="padding:10px 6px;">نسبة الامتحانات</th>
+                            <th style="padding:10px 6px;">خصم التفوق</th>
+                            <th style="padding:10px 6px; background:#fef3c7; color:#92400e; font-weight:900;">إجمالي الخصم</th>
+                            <th style="padding:10px 6px; background:#dbeafe; color:#1e40af; font-weight:900;">المطلوب سداده</th>
+                            <th style="padding:10px 6px;">إشعار واتساب</th>
+                        </tr>
+                    </thead>
+                    <tbody id="confLedgerTableBody">
+                        <tr><td colspan="11" style="padding:20px; color:#94a3b8;">جاري تحميل ومعالجة بيانات المؤتمر...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- تذييل النافذة -->
+            <div style="background:#f8fafc; border-top:1.5px solid #e2e8f0; padding:12px 22px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:0.8rem; color:#64748b;">
+                    💡 يتم احتساب الخصم تلقائياً لكل مخدوم بدون سقف ثابت، وحفظ البيانات سحابياً.
+                </div>
+                <button type="button" onclick="closeConferenceLedgerModal()" style="padding:8px 20px; background:#0f172a; color:#ffffff; border:none; border-radius:8px; font-weight:800; cursor:pointer;">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- نافذة تأكيد الأمان لتفريغ السجلات (Safe Purge Modal) -->
     <div id="safePurgeModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.7); z-index:9999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:15px;">
