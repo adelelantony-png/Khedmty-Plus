@@ -805,3 +805,206 @@ a:hover {
         padding: 0 !important;
     }
 }
+
+
+/* ========================================================
+   9. حظر التمرير الأفقي الشامل (Strict Zero Horizontal Overflow)
+   ======================================================== */
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box !important;
+}
+
+/* حاوية احتواء الجداول لمنع دفع عرض الصفحة أفقياً */
+.table-responsive-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: var(--radius-md, 14px) !important;
+    margin-bottom: 1.25rem !important;
+    background: #ffffff !important;
+    border: 1px solid var(--k-border-subtle, #e2e8f0) !important;
+    box-shadow: var(--k-shadow-xs, 0 1px 3px rgba(12, 36, 97, 0.04)) !important;
+}
+
+.table-responsive-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+.table-responsive-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+}
+
+/* عمود تثبيت الهوية اليميني للجداول */
+.table-sticky-col {
+    position: sticky !important;
+    right: 0 !important;
+    background: #ffffff !important;
+    z-index: 2 !important;
+    box-shadow: -2px 0 6px rgba(0,0,0,0.04) !important;
+}
+
+/* ========================================================
+   10. أزرار الهوية الملكية الكنسية الموحدة (Royal Coptic Buttons)
+   ======================================================== */
+.btn-royal-primary {
+    background: linear-gradient(135deg, var(--k-primary-900, #081a42) 0%, var(--k-primary-800, #0c2461) 45%, var(--k-primary-700, #1e3799) 100%) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 9px 18px !important;
+    font-weight: 700 !important;
+    font-family: inherit !important;
+    font-size: 0.88rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 14px rgba(12, 36, 97, 0.18) !important;
+    cursor: pointer !important;
+    transition: var(--transition-fast, 0.2s) !important;
+    text-decoration: none !important;
+}
+.btn-royal-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(12, 36, 97, 0.26) !important;
+    filter: brightness(1.08) !important;
+    color: #ffffff !important;
+}
+
+.btn-royal-gold {
+    background: linear-gradient(135deg, var(--k-gold-600, #b88b32) 0%, var(--k-gold-500, #d4af37) 50%, var(--k-gold-400, #e5c07b) 100%) !important;
+    color: #081a42 !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 9px 18px !important;
+    font-weight: 800 !important;
+    font-family: inherit !important;
+    font-size: 0.88rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.28) !important;
+    cursor: pointer !important;
+    transition: var(--transition-fast, 0.2s) !important;
+    text-decoration: none !important;
+}
+.btn-royal-gold:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.36) !important;
+    filter: brightness(1.06) !important;
+    color: #081a42 !important;
+}
+
+.btn-royal-grace {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border: 1.5px solid #a7f3d0 !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 8px 16px !important;
+    font-weight: 700 !important;
+    font-family: inherit !important;
+    font-size: 0.86rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    cursor: pointer !important;
+    transition: var(--transition-fast, 0.2s) !important;
+    text-decoration: none !important;
+}
+.btn-royal-grace:hover {
+    background: #d1fae5 !important;
+    border-color: #6ee7b7 !important;
+    color: #047857 !important;
+}
+
+.btn-royal-pastoral {
+    background: #fff7ed !important;
+    color: #c2410c !important;
+    border: 1.5px solid #fed7aa !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 8px 16px !important;
+    font-weight: 700 !important;
+    font-family: inherit !important;
+    font-size: 0.86rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    cursor: pointer !important;
+    transition: var(--transition-fast, 0.2s) !important;
+    text-decoration: none !important;
+}
+.btn-royal-pastoral:hover {
+    background: #ffedd5 !important;
+    border-color: #fdba74 !important;
+    color: #9a3412 !important;
+}
+
+.btn-royal-ghost {
+    background: #ffffff !important;
+    color: #334155 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: var(--radius-md, 12px) !important;
+    padding: 8px 16px !important;
+    font-weight: 700 !important;
+    font-family: inherit !important;
+    font-size: 0.86rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    cursor: pointer !important;
+    transition: var(--transition-fast, 0.2s) !important;
+    text-decoration: none !important;
+}
+.btn-royal-ghost:hover {
+    background: #f8fafc !important;
+    border-color: var(--k-primary-700, #1e3799) !important;
+    color: var(--k-primary-700, #1e3799) !important;
+}
+
+/* ========================================================
+   11. التكيف الذكي للشاشات (Smart Viewport Adaptations)
+   ======================================================== */
+@media (max-width: 767px) {
+    .radar-pulse-grid, .stat-grid, .form-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .radar-pulse-grid .radar-kpi-card:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+    .tabs {
+        padding: 4px !important;
+        gap: 4px !important;
+    }
+    .tab-btn {
+        padding: 7px 11px !important;
+        font-size: 0.78rem !important;
+    }
+    .main-container, .container {
+        padding: 0 10px !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .radar-pulse-grid, .stat-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .radar-pulse-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+}

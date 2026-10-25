@@ -25,7 +25,8 @@
             --info: #0284c7;
         }
 
-        body {
+        html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }
+body {
             margin: 0;
             font-family: 'Tajawal', sans-serif;
             background-color: #f1f5f9;
@@ -882,19 +883,19 @@
         </a>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
-                <i class="fa-solid fa-cloud-arrow-down text-success"></i> سحب البيانات من جوجل فورم / شيت 📥
+                <i class="fa-solid fa-cloud-arrow-down text-success"></i> استيراد البيانات من استمارة جوجل / كشف إكسيل 📥
             </button>
                                     <button type="button" class="btn-custom" onclick="openWhatsappCampaignModal()" style="background: #25d366; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
-                <i class="fa-brands fa-whatsapp fs-5"></i> شيت رسائل الواتساب للقبول 📲
+                <i class="fa-brands fa-whatsapp fs-5"></i> كشف رسائل الواتساب للقبول 📲
             </button>
             <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background: linear-gradient(135deg, #b91c1c, #dc2626); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">
                 <i class="fa-solid fa-file-pdf"></i> تصدير تقرير PDF رسمي 📄
             </button>
             <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
-                <i class="fa-solid fa-file-excel text-success"></i> تصدير شيت خدمتي برو (CSV)
+                <i class="fa-solid fa-file-excel text-success"></i> تصدير كشف خدمتي برو (CSV)
             </button>
             <button type="button" class="btn-custom btn-navy" onclick="saveGradesLocal(true)">
-                <i class="fa-solid fa-floppy-disk"></i> حفظ الدرجات الآن
+                <i class="fa-solid fa-floppy-disk"></i> اعتماد ورصد درجات التأهيل ✍️
             </button>
         </div>
     </div>
@@ -933,7 +934,7 @@
                     <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF رسمي 📄
                 </button>
                 <button type="button" class="btn-custom" onclick="openWhatsappCampaignModal()" style="background:#dcfce7; color:#15803d; border-color:#86efac; font-size: 0.82rem; padding: 6px 12px; font-weight:800;">
-                    <i class="fa-brands fa-whatsapp me-1"></i> شيت رسائل الواتساب 📲
+                    <i class="fa-brands fa-whatsapp me-1"></i> كشف رسائل الواتساب 📲
                 </button>
             </div>
         </div>
@@ -942,13 +943,13 @@
         <div class="spectrum-bar-wrapper">
             <div class="spectrum-bar" id="spectrumBar">
                 <div class="spectrum-segment spectrum-seg-accepted" id="spectrumAccepted" style="width: 40%;" title="مقبول نهائياً"></div>
-                <div class="spectrum-segment spectrum-seg-conditional" id="spectrumConditional" style="width: 20%;" title="مقبول بشرط الاعتراف"></div>
+                <div class="spectrum-segment spectrum-seg-conditional" id="spectrumConditional" style="width: 20%;" title="مقبول مع رعاية ومتابعة الاعتراف"></div>
                 <div class="spectrum-segment spectrum-seg-interview" id="spectrumInterview" style="width: 25%;" title="معلق للمقابلة"></div>
                 <div class="spectrum-segment spectrum-seg-rejected" id="spectrumRejected" style="width: 15%;" title="غير مجتاز"></div>
             </div>
             <div class="spectrum-legend">
                 <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> <span>مقبول نهائياً 🟢</span></div>
-                <div class="legend-item"><span class="legend-dot" style="background:#eab308;"></span> <span>مقبول بشرط الاعتراف 🟡</span></div>
+                <div class="legend-item"><span class="legend-dot" style="background:#eab308;"></span> <span>مقبول مع رعاية ومتابعة الاعتراف 🕊️</span></div>
                 <div class="legend-item"><span class="legend-dot" style="background:#f97316;"></span> <span>معلق للمقابلة الشخصية 🟠</span></div>
                 <div class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span> <span>غير مجتاز / دور ثان 🔴</span></div>
             </div>
@@ -967,10 +968,10 @@
                 <div class="card-sub-pct" id="cardAcceptedPct">0% من المتقدمين</div>
             </div>
 
-            <!-- 2. مقبول بشرط الاعتراف -->
+            <!-- 2. مقبول مع رعاية ومتابعة الاعتراف -->
             <div class="criteria-card card-cond">
                 <div class="card-badge-title">
-                    <span>مقبول بشرط الاعتراف 🟡</span>
+                    <span>مقبول مع رعاية ومتابعة الاعتراف 🕊️</span>
                     <i class="fa-solid fa-triangle-exclamation fs-6" style="color:#d97706;"></i>
                 </div>
                 <div class="card-rule-desc" id="cardConditionalRange">>= 60% (درجة ناجحة) + مهلة اعتراف أسبوع</div>
@@ -1098,13 +1099,13 @@
                 <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF 📄
             </button>
             <button type="button" class="btn-custom" style="background:#25d366; color:#ffffff; border:none;" onclick="openWhatsappCampaignModal()">
-                <i class="fa-brands fa-whatsapp me-1"></i> شيت الواتساب 📲
+                <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
             </button>
             <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()">
-                <i class="fa-solid fa-cloud-arrow-down me-1"></i> سحب من جوجل فورم / شيت 📥
+                <i class="fa-solid fa-cloud-arrow-down me-1"></i> استيراد من استمارة جوجل / كشف إكسيل 📥
             </button>
             <button type="button" class="btn-custom btn-navy" onclick="openModernGradeEntryModal()">
-                <i class="fa-solid fa-pen-to-square me-1"></i> رصد الدرجات للمخدومين ✍️
+                <i class="fa-solid fa-pen-to-square me-1"></i> رصد درجات التأهيل للمخدومين ✍️
             </button>
             <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
                 <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم
@@ -1120,7 +1121,7 @@
             <select id="statusFilter" class="filter-select" onchange="renderTable()">
                 <option value="all">🎯 كل قرارات القبول</option>
                 <option value="accepted">مقبول نهائياً 🟢</option>
-                <option value="conditional">مقبول بشرط الاعتراف 🟡</option>
+                <option value="conditional">مقبول مع رعاية ومتابعة الاعتراف 🕊️</option>
                 <option value="interview">معلق للمقابلة الشخصية 🟠</option>
                 <option value="rejected">غير مجتاز / دور ثان 🔴</option>
             </select>
@@ -1402,7 +1403,7 @@
                 <!-- أزرار الإجراءات والتصدير -->
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
                     <button type="button" class="btn-custom" onclick="exportWhatsappCampaignExcel()" style="background:#25d366; color:#ffffff; border:none; padding:10px 18px; font-size:0.95rem; font-weight:900; box-shadow:0 4px 12px rgba(37,211,102,0.3); flex:1; min-width:240px;">
-                        <i class="fa-solid fa-file-excel me-1"></i> تنزيل شيت إكسيل جاهز لبرنامج NewWhats 2027 📥
+                        <i class="fa-solid fa-file-excel me-1"></i> تنزيل كشف إكسيل معتمد لبرنامج NewWhats 2027 📥
                     </button>
                     <button type="button" class="btn-custom" onclick="copyWhatsappMessageToClipboard()" style="background:#ffffff; border-color:#25d366; color:#075e54; font-weight:bold;">
                         <i class="fa-solid fa-copy me-1"></i> نسخ نص الرسالة
@@ -1486,7 +1487,7 @@
                             <div style="font-size: 12pt; font-weight: 900; color: #065f46;" id="pdfKpiAccepted">0</div>
                         </div>
                         <div style="background: #fefce8; border: 1px solid #fde047; border-radius: 6px; padding: 6px 4px;">
-                            <div style="font-size: 8pt; font-weight: 800; color: #854d0e;">مقبول بشرط الاعتراف 🟡</div>
+                            <div style="font-size: 8pt; font-weight: 800; color: #854d0e;">مقبول مع رعاية ومتابعة الاعتراف 🕊️</div>
                             <div style="font-size: 12pt; font-weight: 900; color: #854d0e;" id="pdfKpiConditional">0</div>
                         </div>
                         <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 6px 4px;">
@@ -1562,7 +1563,7 @@
             <!-- تبويبات طرق الاستيراد -->
             <div class="import-tabs-bar">
                 <button type="button" class="import-tab-btn active" id="btnTabSheetLink" onclick="switchImportTab('link')">
-                    <i class="fa-solid fa-link"></i> رابط شيت جوجل السحابي
+                    <i class="fa-solid fa-link"></i> رابط كشف جوجل السحابي
                 </button>
                 <button type="button" class="import-tab-btn" id="btnTabFileUpload" onclick="switchImportTab('file')">
                     <i class="fa-solid fa-file-arrow-up"></i> رفع ملف إكسيل / CSV
@@ -1929,7 +1930,7 @@
                 <!-- أزرار الحفظ والتنقل في أسفل الفورم -->
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:16px; border-top:1.5px solid #e2e8f0; padding-top:14px;">
                     <button type="button" class="btn-custom btn-navy" style="flex:1; padding:10px;" onclick="royalSaveCurrentStudent()">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> حفظ درجات المخدوم (Enter)
+                        <i class="fa-solid fa-floppy-disk me-1"></i> اعتماد ورصد درجات التأهيل ✍️
                     </button>
                     <button type="button" class="btn-custom" onclick="royalSaveAndNext()" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0; font-weight:800;">
                         حفظ والانتقال للتالي ⏭️
@@ -2032,7 +2033,7 @@
                 <!-- أزرار الإجراءات في أسفل الفورم -->
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:6px;">
                     <button type="button" onclick="vbaSaveGrade()" style="background:#ece9d8; border:2px outset #fff; font-weight:bold; font-size:13px; padding:6px 20px; cursor:pointer; min-width:130px; box-shadow:1px 1px 3px rgba(0,0,0,0.2);">
-                        💾 حفظ الدرجات
+                        اعتماد ورصد درجات التأهيل ✍️
                     </button>
                     <div style="display:flex; gap:6px;">
                         <button type="button" onclick="vbaNextStudent()" style="background:#ece9d8; border:2px outset #fff; font-weight:bold; font-size:12px; padding:6px 12px; cursor:pointer;">
@@ -2119,7 +2120,7 @@
         const elCardAccRange = document.getElementById('cardAcceptedRange');
         if (elCardAccRange) elCardAccRange.textContent = `>= ${passThreshold}% (${minPassScore} - ${maxTotalScore} درجة) + اعتراف سليم`;
 
-        // بطاقة مقبول بشرط الاعتراف
+        // بطاقة مقبول مع رعاية ومتابعة الاعتراف
         const elCardCondCount = document.getElementById('cardConditionalCount');
         if (elCardCondCount) elCardCondCount.textContent = conditionalCount;
         const elCardCondPct = document.getElementById('cardConditionalPct');
@@ -2158,7 +2159,7 @@
             const elSpCond = document.getElementById('spectrumConditional');
             if (elSpCond) {
                 elSpCond.style.width = `${pCond}%`;
-                elSpCond.title = `مقبول بشرط الاعتراف: ${conditionalCount} (${pCond.toFixed(1)}%)`;
+                elSpCond.title = `مقبول مع رعاية ومتابعة الاعتراف: ${conditionalCount} (${pCond.toFixed(1)}%)`;
             }
             const elSpInt = document.getElementById('spectrumInterview');
             if (elSpInt) {

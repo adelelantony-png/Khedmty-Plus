@@ -1561,7 +1561,7 @@
 
 
 
-                <a href="#" onclick="logout()" style="color:#ff7675; margin-right:8px; text-decoration:none; font-weight:bold;">[خروج]</a>
+                <a href="#" onclick="logout()" style="color:#ff7675; margin-right:8px; text-decoration:none; font-weight:bold;">[خروج آمن 🚪]</a>
 
 
 
@@ -1612,7 +1612,7 @@
 
 
 
-            <div class="tab-btn" onclick="switchTab('coursesTab', this)">المواد والامتحانات 🎓</div>
+            <div class="tab-btn" onclick="switchTab('coursesTab', this)">المناهج والتقييم التأهيلي 🎓</div>
 
 
 
@@ -1650,7 +1650,7 @@
 
 
 
-<a href="servant_spiritual_note.html?from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html?from=servant&group=spirit" onclick="this.href='bible.html?from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل العمليات 🛡️</div>
+<a href="servant_spiritual_note.html?from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html?from=servant&group=spirit" onclick="this.href='bible.html?from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل أمان العمليات والرقابة الرعوية 🛡️</div>
 
 
 
@@ -1658,7 +1658,7 @@
 
 
 
-<a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">ترحيل الحضور لـFirestore 🔄</a>
+<a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مزامنة الحضور بالسحابة ☁️</a>
 
 
 
@@ -1666,7 +1666,7 @@
 
 
 
-            <div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin" style="border:1px solid #0984e3; color:#0984e3; font-weight:bold;">استهلاك السحابة (Vercel & Firebase) ☁️</div>
+            <div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin" style="border:1px solid #0984e3; color:#0984e3; font-weight:bold;">مؤشرات المزامنة وحالة السحابة ☁️</div>
 
 
 
@@ -1802,13 +1802,13 @@
 
                     <button class="btn-success btn-mini" onclick="exportFollowupToExcel()" style="width:auto; padding:8px 16px;">
 
-                        <i class="fa-solid fa-file-excel me-1"></i> تحميل شيت الإكسيل (Excel) 📊
+                        <i class="fa-solid fa-file-excel me-1"></i> كشف الإكسيل المعتمد 📊
 
                     </button>
 
                     <button class="btn-success btn-mini" onclick="exportFollowupForWhatsApp()" style="background:#25D366; border-color:#128C7E; color:#fff; width:auto; padding:8px 16px; font-weight:bold;">
 
-                        <i class="fa-brands fa-whatsapp me-1"></i> شيت الواتساب (New Whats 2027) 📲
+                        <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
 
                     </button>
 
@@ -1952,7 +1952,7 @@
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                         <button type="button" class="btn-custom" onclick="exportWeeklyExcelSheet()" style="background: #10b981; color: #ffffff; border: 1px solid #059669; font-weight: 800; padding: 8px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-file-excel"></i> تصدير شيت الحضور والقداس الأسبوعي (.xlsx)
+                            <i class="fa-solid fa-file-excel"></i> تصدير كشف الحضور والقداس الأسبوعي (.xlsx)
                         </button>
                         <button type="button" class="btn-custom" onclick="renderRadarDashboard()" style="background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; padding: 8px 12px; border-radius: 10px; cursor: pointer;">
                             <i class="fa-solid fa-rotate me-1"></i> تحديث الرادار
@@ -1976,7 +1976,7 @@
             </div>
 
             <!-- بطاقات النبض الرباعية (Radar Pulse KPIs) -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 22px;">
+            <div class="radar-pulse-grid" style="display: grid; gap: 14px; margin-bottom: 22px;">
                 <!-- 1. غياب متتالي -->
                 <div class="radar-kpi-card" style="border-right: 5px solid #ef4444 !important;">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⚠️ غياب 2+ أسبوع متتالي</div>
@@ -2022,7 +2022,7 @@
                     </span>
                 </div>
 
-                <div style="overflow-x: auto;">
+                <div class="table-responsive-wrapper">
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
@@ -2060,7 +2060,7 @@
                     </span>
                 </div>
 
-                <div style="overflow-x: auto;">
+                <div class="table-responsive-wrapper">
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
@@ -3271,7 +3271,7 @@
 
 
 
-                        <i class="fa-solid fa-handshake-angle"></i> الافتقاد الذكي وحصر الغياب 🤝
+                        <i class="fa-solid fa-handshake-angle"></i> الافتقاد الذكي والرعاية الأبوية 🤝
 
 
 
@@ -3298,12 +3298,12 @@
                     </button>
 
                     <a href="servant_grades_entry.html" class="btn-mini" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-graduation-cap"></i> رصد امتحانات القبول للمخدومين الجدد 🎓
+                        <i class="fa-solid fa-graduation-cap"></i> تقييم تأهيل المخدومين للخدمة ✍️
                     </a>
 
 
 
-                    <button class="btn-danger admin-only" onclick="clearAllMembers()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">🗑️ حذف جميع المخدومين</button>
+                    <button class="btn-danger admin-only" onclick="clearAllMembers()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">تفريغ كشف الدارسين لبدء دورة جديدة</button>
 
 
 
@@ -3323,7 +3323,7 @@
 
 
 
-                <button class="btn-purple" onclick="openQrSearchModal()" style="width:auto; margin:0; padding:10px 14px; white-space:nowrap; font-size:13px;">📷 مسح كود الكارنيه</button>
+                <button class="btn-purple" onclick="openQrSearchModal()" style="width:auto; margin:0; padding:10px 14px; white-space:nowrap; font-size:13px;">📷 قراءة باركود الكارنيه 📷</button>
 
 
 
@@ -3467,11 +3467,11 @@
 
 
 
-                <button class="btn-primary" onclick="renderBroadcastList('parents')" style="flex:1;">أولياء أمور الغائبين</button>
+                <button class="btn-primary" onclick="renderBroadcastList('parents')" style="flex:1;">افتقاد أولياء أمور الغائبين 📞</button>
 
 
 
-                <button class="btn-warning" onclick="renderBroadcastList('members')" style="flex:1;">هواتف الغائبين مباشرة</button>
+                <button class="btn-warning" onclick="renderBroadcastList('members')" style="flex:1;">هواتف المفتقدين مباشرة 📞</button>
 
 
 
@@ -4220,7 +4220,7 @@
                             </p>
                         </div>
                         <button type="button" class="btn-custom" onclick="openSafePurgeModal('full')" style="background:#dc2626; color:#ffffff; border:none; padding:10px 14px; border-radius:8px; font-weight:800; cursor:pointer;">
-                            <i class="fa-solid fa-skull-crossbones me-1"></i> تصفير شامل لبدء سنة جديدة
+                            <i class="fa-solid fa-skull-crossbones me-1"></i> تهيئة سنوية نقية لبدء الخدمة 🕊️
                         </button>
                     </div>
 
@@ -4805,7 +4805,7 @@
 
 
 
-                        🚨 تصفير المشروع (مع حفظ نسخة أولاً)
+                        🚨 إعادة ضبط المنظومة للبدء من الصفر 🛡️
 
 
 
@@ -6125,7 +6125,7 @@
 
 
 
-            <button class="btn-danger admin-only" id="btn_delete_member" style="padding:8px;">حذف هذا المخدوم نهائياً</button>
+            <button class="btn-danger admin-only" id="btn_delete_member" style="padding:8px;">أرشفة سجل المخدوم 📁</button>
 
 
 
@@ -6637,7 +6637,7 @@
 
                 <button class="btn-success" onclick="exportTodayAbsenteesForWhatsApp()" style="background:#25D366; border-color:#128C7E; color:#fff; flex:2; min-width:180px; padding:10px 16px; font-size:14px; font-weight:bold; margin:0;">
 
-                    <i class="fa-brands fa-whatsapp"></i> شيت غياب اليوم للواتساب 📲
+                    <i class="fa-brands fa-whatsapp"></i> كشف افتقاد الأحبة اليوم 🤝
 
                 </button>
 
