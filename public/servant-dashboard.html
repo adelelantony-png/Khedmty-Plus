@@ -4241,315 +4241,319 @@
                 </div>
             </div>
 
+            
             <!-- ======================================================== -->
-            <!-- 🎯 محرك معايير البونص ونقاط التشجيع (Incentive & Bonus Engine) -->
+            <!-- 🎯 المنظومة الموحدة للبونص ونقاط التشجيع وتخفيضات المؤتمر -->
+            <!-- (Unified Incentive, Bonus & Conference Engine)           -->
             <!-- ======================================================== -->
-            <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 2px solid #86efac; padding: 22px; border-radius: 16px; margin: 20px 0; box-shadow: 0 4px 15px rgba(22,163,74,0.08);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1.5px solid #bbf7d0; padding-bottom:12px;">
+            <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #3b82f6; padding: 22px; border-radius: 18px; margin: 20px 0; box-shadow: 0 6px 20px rgba(59,130,246,0.08);">
+                
+                <!-- 1. الترويسة الموحدة والشاملة -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:18px; border-bottom:1.5px solid #e2e8f0; padding-bottom:16px;">
                     <div>
-                        <h3 style="margin:0; border:none; color:#15803d; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-                            <i class="fa-solid fa-award text-success"></i> محرك معايير البونص ونقاط التشجيع (Bonus & Incentive Engine)
+                        <h3 style="margin:0; border:none; color:#1e3a8a; font-size:1.25rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-sliders text-primary"></i> 🎯 المنظومة الشاملة للبونص وتخفيضات المؤتمر
                         </h3>
                         <p style="font-size:0.83rem; color:#475569; margin:4px 0 0 0;">
-                            تحديد أوزان الحضور والامتحانات عبر الفترات الزمنية، والتحكم التام في إظهار أو حجب النقاط عن شاشات المخدومين.
+                            شاشة واحدة موحدة لإدارة نقاط البونص الروحية والتشجيعية، وتحديد قواعد ومكافآت اشتراك المؤتمر السنوي.
                         </p>
                     </div>
 
+                    <!-- شريط حالة النشر الموحد -->
                     <div style="display:flex; align-items:center; gap:10px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:8px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-                        <div id="bonusPublishStatusBadge" style="font-size:0.82rem; font-weight:800; color:#dc2626;">
+                        <div id="unifiedPublishStatusBadge" style="font-size:0.82rem; font-weight:800; color:#dc2626;">
                             <i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒
                         </div>
-                        <button type="button" id="btnToggleBonusVisibility" onclick="toggleBonusStudentVisibility()" class="btn-custom" style="background:#0f172a; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
+                        <button type="button" id="btnToggleUnifiedVisibility" onclick="toggleUnifiedVisibility()" class="btn-custom" style="background:#0f172a; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
                             تغيير حالة النشر
                         </button>
+                        <!-- عناصر التوافق المخفية للتوافق البرمجي التام -->
+                        <span id="bonusPublishStatusBadge" style="display:none;"></span>
+                        <button id="btnToggleBonusVisibility" style="display:none;" onclick="toggleBonusStudentVisibility()"></button>
+                        <span id="confPublishStatusBadge" style="display:none;"></span>
+                        <button id="btnToggleConfVisibility" style="display:none;" onclick="toggleConferenceDiscountVisibility()"></button>
                     </div>
                 </div>
 
-                <!-- 1. المعايير الأساسية الدائمة -->
-                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
-                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-sliders text-primary"></i> 1. المعايير الافتراضية (خارج الفترات الخاصة):
-                    </h5>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                📅 حضور اجتماع الجمعة الرسمي:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="bonusBaseFridayPts" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                <!-- 2. أزرار التبديل السلس بين الأقسام (Segmented Navigation) -->
+                <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; background:#f1f5f9; padding:6px; border-radius:12px; border:1px solid #e2e8f0;">
+                    <button type="button" id="btnUnifiedTabConf" onclick="switchUnifiedIncentiveTab('conf')" style="flex:1; min-width:200px; padding:10px 16px; border:none; border-radius:8px; font-weight:800; font-size:0.88rem; cursor:pointer; background:#1e40af; color:#ffffff; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fa-solid fa-campground"></i> 🏕️ تخفيضات ومكافآت المؤتمر (مالي بالجنيه)
+                    </button>
+                    <button type="button" id="btnUnifiedTabSpiritual" onclick="switchUnifiedIncentiveTab('spiritual')" style="flex:1; min-width:200px; padding:10px 16px; border:none; border-radius:8px; font-weight:800; font-size:0.88rem; cursor:pointer; background:transparent; color:#475569; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <i class="fa-solid fa-award"></i> 🌟 معايير البونص والنقاط الروحية (نقاط معنوية)
+                    </button>
+                    <button type="button" id="btnUnifiedTabAll" onclick="switchUnifiedIncentiveTab('all')" style="padding:10px 16px; border:none; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer; background:transparent; color:#64748b; transition:all 0.2s;">
+                        <i class="fa-solid fa-table-columns"></i> عرض الكل
+                    </button>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- القسم الأول: تخفيضات ومكافآت المؤتمر السنوي -->
+                <!-- ========================================== -->
+                <div id="unifiedSectionConference" style="display:block;">
+                    <!-- 1.1 إعدادات المؤتمر العامة ومكافآت الحضور -->
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                        <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-calendar-check text-primary"></i> 1. الإعدادات العامة للمؤتمر ومكافآت الحضور والالتزام:
+                        </h5>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px;">
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    🏷️ قيمة اشتراك المؤتمر الأساسي:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="confBaseFee" min="0" value="800" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    ⏳ تاريخ بدء التفعيل والسداد:
+                                </label>
+                                <input type="date" id="confActivationDate" value="2026-05-29" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                            </div>
+
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    🗓️ خصم حضور يوم الجمعة:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="confFridayDiscount" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    ☀️ خصم حضور الصيف / الإضافي:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="confSummerDiscount" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    ✖️ مضاعف الحضور (بدل الأسابيع):
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="confMultiplierFactor" min="1" step="0.5" value="2" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ضعف</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    🛡️ الحد الأدنى لمكافأة الحضور:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="confMinAttendanceFloor" min="0" value="100" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                ⛪ حضور اليوم الإضافي (قداس/تسبحة):
+                        <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="confApplyMultiplier" checked style="width:17px; height:17px; cursor:pointer;">
+                            <label for="confApplyMultiplier" style="font-size:0.82rem; font-weight:700; color:#1e293b; cursor:pointer;">
+                                تطبيق مضاعفة رصيد الحضور (ضرب في 2 مع الحد الأدنى 100 ج لمن حضر جلسة واحدة على الأقل)
                             </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="bonusBaseExtraPts" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                🕊️ بونص سر التناول والإفخارستيا:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="bonusBaseCommunionPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                ⏰ بونص الحضور المبكر:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="bonusBaseEarlyPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
-                            </div>
                         </div>
                     </div>
-                    <div style="text-align:left; margin-top:12px;">
-                        <button type="button" onclick="saveBaseBonusRules()" style="background:#15803d; color:#fff; border:none; padding:8px 18px; border-radius:8px; font-weight:800; cursor:pointer;">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> حفظ المعايير الأساسية
-                        </button>
+
+                    <!-- 1.2 شرائح مكافآت التفوق الدراسي -->
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                        <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#1e40af; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-graduation-cap text-success"></i> 2. شرائح مكافآت التفوق الدراسي (حسب الفرقة وعدد الامتحانات):
+                        </h5>
+                        
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+                            <!-- الفرقة الأولى -->
+                            <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
+                                <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
+                                    <span>📚 الفرقة الأولى (٣ امتحانات)</span>
+                                    <span class="badge" style="background:#dbeafe; color:#1e40af;">سنة أولى</span>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
+                                        <input type="number" id="confStage1Tier90" value="100" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
+                                        <input type="number" id="confStage1Tier80" value="50" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
+                                        <input type="number" id="confStage1Tier65" value="30" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- الفرقة الثانية -->
+                            <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
+                                <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
+                                    <span>🌟 الفرقة الثانية (امتحانين)</span>
+                                    <span class="badge" style="background:#fef3c7; color:#92400e;">سنة ثانية</span>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
+                                        <input type="number" id="confStage2Tier90" value="150" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
+                                        <input type="number" id="confStage2Tier80" value="75" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
+                                        <input type="number" id="confStage2Tier65" value="45" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 2. الفترات الزمنية المخصصة (Time-Bounded Custom Periods) -->
-                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px;">
-                    <h5 style="margin:0 0 8px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-calendar-week text-warning"></i> 2. الفترات الزمنية المخصصة (من تاريخ .. إلى تاريخ):
-                    </h5>
-                    <p style="font-size:0.79rem; color:#64748b; margin:0 0 14px 0;">
-                        يمكنك إضافة مواسم خاصة (مثل الصوم الكبير، فترة الامتحانات، أو مسابقة صيفية) لتعديل أوزان يوم الجمعة واليوم الإضافي وبونص الامتحانات تلقائياً.
-                    </p>
+                <!-- ========================================== -->
+                <!-- القسم الثاني: معايير نقاط البونص الروحية   -->
+                <!-- ========================================== -->
+                <div id="unifiedSectionSpiritual" style="display:none;">
+                    <!-- 2.1 المعايير الأساسية الدائمة -->
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                        <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#15803d; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-sliders text-success"></i> 1. المعايير الافتراضية للنقاط (خارج الفترات الخاصة):
+                        </h5>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                            <div>
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    📅 حضور اجتماع الجمعة الرسمي:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="bonusBaseFridayPts" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                                </div>
+                            </div>
 
-                    <div style="background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; padding:14px; margin-bottom:14px;">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end;">
                             <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">مسمى الفترة:</label>
-                                <input type="text" id="newPeriodTitle" placeholder="مثال: الصوم الكبير / الامتحانات" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    ⛪ حضور اليوم الإضافي (قداس/تسبحة):
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="bonusBaseExtraPts" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                                </div>
                             </div>
+
                             <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">من تاريخ:</label>
-                                <input type="date" id="newPeriodStartDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    🕊️ بونص سر التناول والإفخارستيا:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="bonusBaseCommunionPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                                </div>
                             </div>
+
                             <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">إلى تاريخ:</label>
-                                <input type="date" id="newPeriodEndDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                                <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                    ⏰ بونص الحضور المبكر:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <input type="number" id="bonusBaseEarlyPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                    <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                                </div>
                             </div>
-                            <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">نقاط الجمعة:</label>
-                                <input type="number" id="newPeriodFriPts" value="20" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                        </div>
+                    </div>
+
+                    <!-- 2.2 الفترات الزمنية المخصصة (Time-Bounded Custom Periods) -->
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                        <h5 style="margin:0 0 8px 0; font-size:0.95rem; font-weight:800; color:#15803d; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-calendar-week text-warning"></i> 2. الفترات الزمنية المخصصة (مواسم خاصة):
+                        </h5>
+                        <p style="font-size:0.79rem; color:#64748b; margin:0 0 14px 0;">
+                            إضافة مواسم خاصة (مثل الصوم الكبير، فترة الامتحانات، أو مسابقة صيفية) لتعديل أوزان يوم الجمعة واليوم الإضافي وبونص الامتحانات تلقائياً.
+                        </p>
+
+                        <div style="background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; padding:14px; margin-bottom:14px;">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">مسمى الفترة:</label>
+                                    <input type="text" id="newPeriodTitle" placeholder="مثال: الصوم الكبير / الامتحانات" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">من تاريخ:</label>
+                                    <input type="date" id="newPeriodStartDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">إلى تاريخ:</label>
+                                    <input type="date" id="newPeriodEndDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">نقاط الجمعة:</label>
+                                    <input type="number" id="newPeriodFridayPts" value="20" min="0" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; font-weight:bold;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">نقاط اليوم الإضافي:</label>
+                                    <input type="number" id="newPeriodExtraPts" value="30" min="0" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; font-weight:bold;">
+                                </div>
+                                <div>
+                                    <label style="font-size:0.75rem; font-weight:700; color:#475569; display:block; margin-bottom:3px;">بونص الشيت/الامتحان:</label>
+                                    <input type="number" id="newPeriodExamPts" value="25" min="0" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.85rem; font-weight:bold;">
+                                </div>
                             </div>
-                            <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">نقاط اليوم الإضافي:</label>
-                                <input type="number" id="newPeriodExtraPts" value="30" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
-                            </div>
-                            <div>
-                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">بونص الشيت/الامتحان:</label>
-                                <input type="number" id="newPeriodExamPts" value="25" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
-                            </div>
-                            <div>
-                                <button type="button" onclick="addNewBonusPeriodAction()" style="width:100%; background:#2563eb; color:#fff; border:none; padding:9px 14px; border-radius:6px; font-weight:800; cursor:pointer;">
+                            <div style="text-align:left;">
+                                <button type="button" onclick="addBonusPeriodAction()" style="background:#2563eb; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:0.82rem; cursor:pointer;">
                                     <i class="fa-solid fa-plus me-1"></i> إضافة الفترة
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="table-responsive-wrapper">
-                        <table class="table-modern" style="width:100%; margin:0; text-align:center; font-size:0.83rem;">
-                            <thead>
-                                <tr style="background:#f1f5f9;">
-                                    <th>مسمى الفترة</th>
-                                    <th>من تاريخ</th>
-                                    <th>إلى تاريخ</th>
-                                    <th>نقاط الجمعة</th>
-                                    <th>اليوم الإضافي</th>
-                                    <th>بونص الامتحان</th>
-                                    <th>الحالة</th>
-                                    <th>إجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bonusPeriodsTableBody">
-                                <tr>
-                                    <td colspan="8" style="padding:15px; color:#94a3b8;">لا توجد فترات مخصصة مسجلة حالياً.. يتم تطبيق المعايير الأساسية.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <!-- ======================================================== -->
-            <!-- 🏕️ منظومة تخفيضات ومكافآت المؤتمر السنوي 2026 (Conference Incentive & Subsidy Engine) -->
-            <!-- ======================================================== -->
-            <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border: 2px solid #93c5fd; padding: 22px; border-radius: 16px; margin: 20px 0; box-shadow: 0 4px 15px rgba(37,99,235,0.08);">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1.5px solid #bfdbfe; padding-bottom:12px;">
-                    <div>
-                        <h3 style="margin:0; border:none; color:#1e40af; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:8px;">
-                            <i class="fa-solid fa-campground text-primary"></i> 🏕️ منظومة تخفيضات ومكافآت المؤتمر السنوي 2026 (Conference Incentive Engine)
-                        </h3>
-                        <p style="font-size:0.83rem; color:#475569; margin:4px 0 0 0;">
-                            احتساب خصومات الحضور والتفوق الدراسي تلقائياً، مراجعة الكشوف المالية، وتصدير شيت الإكسل المعتمد لأمين الصندوق.
-                        </p>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:10px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:8px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-                        <div id="confPublishStatusBadge" style="font-size:0.82rem; font-weight:800; color:#dc2626;">
-                            <i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒
-                        </div>
-                        <button type="button" id="btnToggleConfVisibility" onclick="toggleConferenceDiscountVisibility()" class="btn-custom" style="background:#1e40af; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
-                            تغيير حالة النشر
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 1. إعدادات المؤتمر العامة ومكافآت الحضور -->
-                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
-                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-calendar-check text-primary"></i> 1. الإعدادات العامة للمؤتمر ومكافآت الحضور والالتزام:
-                    </h5>
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px;">
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                🏷️ قيمة اشتراك المؤتمر الأساسي:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="confBaseFee" min="0" value="800" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                ⏳ تاريخ بدء التفعيل والسداد:
-                            </label>
-                            <input type="date" id="confActivationDate" value="2026-05-29" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                🗓️ خصم حضور يوم الجمعة:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="confFridayDiscount" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                ☀️ خصم حضور الصيف / الإضافي:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="confSummerDiscount" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج/جلسة</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                ✖️ مضاعف الحضور (بدل الأسابيع):
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="confMultiplierFactor" min="1" step="0.5" value="2" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ضعف</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
-                                🛡️ الحد الأدنى لمكافأة الحضور:
-                            </label>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <input type="number" id="confMinAttendanceFloor" min="0" value="100" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
-                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">ج.م</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:12px; padding-top:10px; border-top:1px dashed #e2e8f0; display:flex; align-items:center; gap:8px;">
-                        <input type="checkbox" id="confApplyMultiplier" checked style="width:17px; height:17px; cursor:pointer;">
-                        <label for="confApplyMultiplier" style="font-size:0.82rem; font-weight:700; color:#1e293b; cursor:pointer;">
-                            تطبيق مضاعفة رصيد الحضور (ضرب في 2 مع الحد الأدنى 100 ج لمن حضر جلسة واحدة على الأقل)
-                        </label>
-                    </div>
-                </div>
-
-                <!-- 2. شرائح مكافآت التفوق الدراسي -->
-                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
-                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-graduation-cap text-success"></i> 2. شرائح مكافآت التفوق الدراسي (حسب الفرقة وعدد الامتحانات):
-                    </h5>
-                    
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
-                        <!-- الفرقة الأولى -->
-                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
-                            <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
-                                <span>📚 الفرقة الأولى (٣ امتحانات)</span>
-                                <span class="badge" style="background:#dbeafe; color:#1e40af;">سنة أولى</span>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
-                                    <input type="number" id="confStage1Tier90" value="100" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
-                                    <input type="number" id="confStage1Tier80" value="50" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
-                                    <input type="number" id="confStage1Tier65" value="30" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- الفرقة الثانية -->
-                        <div style="background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:12px;">
-                            <div style="font-weight:800; color:#1e293b; font-size:0.88rem; margin-bottom:8px; display:flex; justify-content:space-between;">
-                                <span>🌟 الفرقة الثانية (امتحانين)</span>
-                                <span class="badge" style="background:#fef3c7; color:#92400e;">سنة ثانية</span>
-                            </div>
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 90%</label>
-                                    <input type="number" id="confStage2Tier90" value="150" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 80%</label>
-                                    <input type="number" id="confStage2Tier80" value="75" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                                <div>
-                                    <label style="font-size:0.75rem; color:#64748b; display:block; margin-bottom:2px;">أعلى من 65%</label>
-                                    <input type="number" id="confStage2Tier65" value="45" min="0" style="width:100%; padding:6px 8px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold; font-size:0.85rem;">
-                                </div>
-                            </div>
+                        <!-- جدول الفترات المسجلة -->
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.82rem; text-align:center;">
+                                <thead>
+                                    <tr style="background:#1e293b; color:#ffffff;">
+                                        <th style="padding:8px 6px;">مسمى الفترة</th>
+                                        <th style="padding:8px 6px;">من تاريخ</th>
+                                        <th style="padding:8px 6px;">إلى تاريخ</th>
+                                        <th style="padding:8px 6px;">نقاط الجمعة</th>
+                                        <th style="padding:8px 6px;">اليوم الإضافي</th>
+                                        <th style="padding:8px 6px;">بونص الامتحان</th>
+                                        <th style="padding:8px 6px;">الحالة</th>
+                                        <th style="padding:8px 6px;">إجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bonusPeriodsTableBody">
+                                    <tr>
+                                        <td colspan="8" style="padding:15px; color:#94a3b8;">لا توجد فترات مخصصة مسجلة حالياً.. يتم تطبيق المعايير الأساسية.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
-                <!-- أزرار الإجراءات وكشف الحساب -->
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <!-- 3. شريط الأزرار والإجراءات المشترك للمنظومة الموحدة -->
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px; padding-top:14px; border-top:1.5px solid #e2e8f0;">
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
                         <button type="button" onclick="openConferenceLedgerModal()" style="background:#1e40af; color:#ffffff; border:none; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 3px 8px rgba(30,64,175,0.25);">
-                            <i class="fa-solid fa-table-list"></i> 📊 فتح كشف حساب وتخفيضات المؤتمر
+                            <i class="fa-solid fa-table-list"></i> 📊 كشف حساب وتخفيضات المؤتمر
                         </button>
                         <button type="button" onclick="exportConferenceLedgerToExcel()" style="background:#15803d; color:#ffffff; border:none; padding:10px 18px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 3px 8px rgba(21,128,61,0.25);">
                             <i class="fa-solid fa-file-excel"></i> 📥 تصدير كشف المؤتمر إلى Excel
                         </button>
                     </div>
 
-                    <button type="button" onclick="saveConferenceSettingsAction()" style="background:#0f172a; color:#ffffff; border:none; padding:10px 20px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات المؤتمر
+                    <button type="button" onclick="saveAllUnifiedIncentiveSettings()" style="background:#0f172a; color:#ffffff; border:none; padding:10px 22px; border-radius:10px; font-weight:800; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 8px rgba(15,23,42,0.25);">
+                        <i class="fa-solid fa-floppy-disk"></i> 💾 حفظ كافة الإعدادات
                     </button>
                 </div>
             </div>
-
 
 
             <div class="admin-only" style="background:#e8f4fd; border:2px solid #74b9ff; padding:15px; border-radius:10px; margin:15px 0;">
@@ -23165,7 +23169,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); renderBonusSettingsUI(); renderConferenceSettingsUI(); }
+            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); renderBonusSettingsUI(); renderConferenceSettingsUI(); if(typeof renderUnifiedPublishStatus==='function') renderUnifiedPublishStatus(); }
 
 
 
@@ -32613,6 +32617,102 @@ function copyConferenceServantSummary() {
         prompt("انسخ ملخص المؤتمر:", summary);
     });
 }
+
+
+
+    // ========================================================
+    // 🎯 دوال إدارة المنظومة الموحدة للبونص والمؤتمر (Unified Incentive Helpers)
+    // ========================================================
+    function switchUnifiedIncentiveTab(tabKey) {
+        const secConf = document.getElementById('unifiedSectionConference');
+        const secSpiritual = document.getElementById('unifiedSectionSpiritual');
+        const bConf = document.getElementById('btnUnifiedTabConf');
+        const bSpiritual = document.getElementById('btnUnifiedTabSpiritual');
+        const bAll = document.getElementById('btnUnifiedTabAll');
+
+        if (!secConf || !secSpiritual) return;
+
+        if (tabKey === 'conf') {
+            secConf.style.display = 'block';
+            secSpiritual.style.display = 'none';
+            if (bConf) { bConf.style.background = '#1e40af'; bConf.style.color = '#ffffff'; }
+            if (bSpiritual) { bSpiritual.style.background = 'transparent'; bSpiritual.style.color = '#475569'; }
+            if (bAll) { bAll.style.background = 'transparent'; bAll.style.color = '#64748b'; }
+        } else if (tabKey === 'spiritual') {
+            secConf.style.display = 'none';
+            secSpiritual.style.display = 'block';
+            if (bConf) { bConf.style.background = 'transparent'; bConf.style.color = '#475569'; }
+            if (bSpiritual) { bSpiritual.style.background = '#15803d'; bSpiritual.style.color = '#ffffff'; }
+            if (bAll) { bAll.style.background = 'transparent'; bAll.style.color = '#64748b'; }
+        } else {
+            // All
+            secConf.style.display = 'block';
+            secSpiritual.style.display = 'block';
+            if (bConf) { bConf.style.background = 'transparent'; bConf.style.color = '#475569'; }
+            if (bSpiritual) { bSpiritual.style.background = 'transparent'; bSpiritual.style.color = '#475569'; }
+            if (bAll) { bAll.style.background = '#0f172a'; bAll.style.color = '#ffffff'; }
+        }
+    }
+
+    function toggleUnifiedVisibility() {
+        const confSettings = getConferenceSettings();
+        const bonusSettings = getBonusSettings();
+
+        // التبديل المتزامن
+        const newVisible = !(confSettings.isDiscountPublished && bonusSettings.isBonusVisibleToStudents);
+        confSettings.isDiscountPublished = newVisible;
+        bonusSettings.isBonusVisibleToStudents = newVisible;
+
+        saveConferenceSettings(confSettings);
+        saveBonusSettings(bonusSettings);
+
+        renderUnifiedPublishStatus();
+
+        if (typeof showToast === 'function') {
+            showToast(newVisible ? 
+                "📢 أصبحت نقاط البونص وتخفيضات المؤتمر معلنة لجميع المخدومين في بواباتهم!" : 
+                "🔒 تم حجب نقاط البونص وتخفيضات المؤتمر عن المخدومين بأمان!");
+        } else {
+            alert(newVisible ? "📢 تم إعلان النقاط والخصومات للمخدومين" : "🔒 تم حجب النقاط والخصومات عن المخدومين");
+        }
+    }
+
+    function renderUnifiedPublishStatus() {
+        const confSettings = getConferenceSettings();
+        const bonusSettings = getBonusSettings();
+        const isPub = confSettings.isDiscountPublished && bonusSettings.isBonusVisibleToStudents;
+
+        const badge = document.getElementById('unifiedPublishStatusBadge');
+        const btn = document.getElementById('btnToggleUnifiedVisibility');
+
+        if (badge) {
+            if (isPub) {
+                badge.innerHTML = '<i class="fa-solid fa-lock-open me-1"></i> معلن للمخدومين 📢';
+                badge.style.color = '#15803d';
+            } else {
+                badge.innerHTML = '<i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒';
+                badge.style.color = '#dc2626';
+            }
+        }
+        if (btn) {
+            btn.textContent = isPub ? 'حجب الكل الآن' : 'إعلان الكل للمخدومين';
+            btn.style.background = isPub ? '#dc2626' : '#15803d';
+        }
+
+        renderConferenceSettingsUI();
+        renderBonusSettingsUI();
+    }
+
+    function saveAllUnifiedIncentiveSettings() {
+        saveConferenceSettingsAction();
+        saveBaseBonusRules();
+        renderUnifiedPublishStatus();
+        if (typeof showToast === 'function') {
+            showToast("✅ تم حفظ كافة إعدادات البونص وتخفيضات المؤتمر السنوي بنجاح!");
+        } else {
+            alert("✅ تم حفظ كافة إعدادات البونص وتخفيضات المؤتمر السنوي بنجاح!");
+        }
+    }
 
 </script>
 
