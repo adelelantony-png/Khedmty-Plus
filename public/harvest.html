@@ -224,7 +224,15 @@
     }
 
     function renderHarvestUI(data) {
-        document.getElementById('stat-points').textContent = data.points;
+        if (isBonusPointsPublished()) {
+            document.getElementById('stat-points').textContent = data.points;
+        } else {
+            const ptEl = document.getElementById('stat-points');
+            if (ptEl) {
+                ptEl.innerHTML = '<span style="font-size:0.95rem; color:#64748b; font-weight:800;">🔒 محفوظة لدى أمين الخدمة</span>';
+                if (ptEl.nextElementSibling) ptEl.nextElementSibling.textContent = 'تُعلن بقرار الإدارة';
+            }
+        }
 
         const biblePercent = data.totalPlanDays > 0 ? Math.min(100, Math.round((data.bibleCount / data.totalPlanDays) * 100)) : 0;
         document.getElementById('stat-bible-text').textContent = `أتممت ${data.bibleCount} من أصل ${data.totalPlanDays} يوماً`;

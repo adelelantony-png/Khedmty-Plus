@@ -4241,6 +4241,150 @@
                 </div>
             </div>
 
+            <!-- ======================================================== -->
+            <!-- 🎯 محرك معايير البونص ونقاط التشجيع (Incentive & Bonus Engine) -->
+            <!-- ======================================================== -->
+            <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border: 2px solid #86efac; padding: 22px; border-radius: 16px; margin: 20px 0; box-shadow: 0 4px 15px rgba(22,163,74,0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px; border-bottom:1.5px solid #bbf7d0; padding-bottom:12px;">
+                    <div>
+                        <h3 style="margin:0; border:none; color:#15803d; font-size:1.2rem; font-weight:800; display:flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-award text-success"></i> محرك معايير البونص ونقاط التشجيع (Bonus & Incentive Engine)
+                        </h3>
+                        <p style="font-size:0.83rem; color:#475569; margin:4px 0 0 0;">
+                            تحديد أوزان الحضور والامتحانات عبر الفترات الزمنية، والتحكم التام في إظهار أو حجب النقاط عن شاشات المخدومين.
+                        </p>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:10px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:8px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+                        <div id="bonusPublishStatusBadge" style="font-size:0.82rem; font-weight:800; color:#dc2626;">
+                            <i class="fa-solid fa-lock me-1"></i> محجوب عن المخدومين 🔒
+                        </div>
+                        <button type="button" id="btnToggleBonusVisibility" onclick="toggleBonusStudentVisibility()" class="btn-custom" style="background:#0f172a; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer;">
+                            تغيير حالة النشر
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1. المعايير الأساسية الدائمة -->
+                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:16px;">
+                    <h5 style="margin:0 0 10px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-sliders text-primary"></i> 1. المعايير الافتراضية (خارج الفترات الخاصة):
+                    </h5>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                📅 حضور اجتماع الجمعة الرسمي:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="bonusBaseFridayPts" min="0" value="10" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                ⛪ حضور اليوم الإضافي (قداس/تسبحة):
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="bonusBaseExtraPts" min="0" value="15" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                🕊️ بونص سر التناول والإفخارستيا:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="bonusBaseCommunionPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:0.8rem; font-weight:700; color:#475569; display:block; margin-bottom:4px;">
+                                ⏰ بونص الحضور المبكر:
+                            </label>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <input type="number" id="bonusBaseEarlyPts" min="0" value="5" style="width:100%; padding:8px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-weight:bold;">
+                                <span style="font-size:0.8rem; font-weight:700; color:#64748b;">نقطة</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align:left; margin-top:12px;">
+                        <button type="button" onclick="saveBaseBonusRules()" style="background:#15803d; color:#fff; border:none; padding:8px 18px; border-radius:8px; font-weight:800; cursor:pointer;">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> حفظ المعايير الأساسية
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. الفترات الزمنية المخصصة (Time-Bounded Custom Periods) -->
+                <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:12px; padding:16px;">
+                    <h5 style="margin:0 0 8px 0; font-size:0.95rem; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-calendar-week text-warning"></i> 2. الفترات الزمنية المخصصة (من تاريخ .. إلى تاريخ):
+                    </h5>
+                    <p style="font-size:0.79rem; color:#64748b; margin:0 0 14px 0;">
+                        يمكنك إضافة مواسم خاصة (مثل الصوم الكبير، فترة الامتحانات، أو مسابقة صيفية) لتعديل أوزان يوم الجمعة واليوم الإضافي وبونص الامتحانات تلقائياً.
+                    </p>
+
+                    <div style="background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:10px; padding:14px; margin-bottom:14px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end;">
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">مسمى الفترة:</label>
+                                <input type="text" id="newPeriodTitle" placeholder="مثال: الصوم الكبير / الامتحانات" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">من تاريخ:</label>
+                                <input type="date" id="newPeriodStartDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">إلى تاريخ:</label>
+                                <input type="date" id="newPeriodEndDate" style="width:100%; padding:7px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">نقاط الجمعة:</label>
+                                <input type="number" id="newPeriodFriPts" value="20" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">نقاط اليوم الإضافي:</label>
+                                <input type="number" id="newPeriodExtraPts" value="30" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <label style="font-size:0.78rem; font-weight:700; color:#334155; display:block; margin-bottom:4px;">بونص الشيت/الامتحان:</label>
+                                <input type="number" id="newPeriodExamPts" value="25" min="0" style="width:100%; padding:8px 10px; border:1px solid #cbd5e1; border-radius:6px; font-weight:bold;">
+                            </div>
+                            <div>
+                                <button type="button" onclick="addNewBonusPeriodAction()" style="width:100%; background:#2563eb; color:#fff; border:none; padding:9px 14px; border-radius:6px; font-weight:800; cursor:pointer;">
+                                    <i class="fa-solid fa-plus me-1"></i> إضافة الفترة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive-wrapper">
+                        <table class="table-modern" style="width:100%; margin:0; text-align:center; font-size:0.83rem;">
+                            <thead>
+                                <tr style="background:#f1f5f9;">
+                                    <th>مسمى الفترة</th>
+                                    <th>من تاريخ</th>
+                                    <th>إلى تاريخ</th>
+                                    <th>نقاط الجمعة</th>
+                                    <th>اليوم الإضافي</th>
+                                    <th>بونص الامتحان</th>
+                                    <th>الحالة</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bonusPeriodsTableBody">
+                                <tr>
+                                    <td colspan="8" style="padding:15px; color:#94a3b8;">لا توجد فترات مخصصة مسجلة حالياً.. يتم تطبيق المعايير الأساسية.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <div class="admin-only" style="background:#e8f4fd; border:2px solid #74b9ff; padding:15px; border-radius:10px; margin:15px 0;">
 
 
@@ -9985,7 +10129,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            let percent = Math.round((fridayAttended / totalFridays) * 100);
+            let percent = totalFridays > 0 ? Math.round((fridayAttended / totalFridays) * 100) : 0;
 
 
 
@@ -11307,7 +11451,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            let defaultPts = isFri ? 5 : 15;
+            let defaultPts = calculateBonusPointsForDate((typeof activeDate !== "undefined" && activeDate) ? activeDate : today, isFri);
 
 
 
@@ -13575,7 +13719,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            let percent = Math.round((attendedSessions / totalSessions) * 100);
+            let percent = totalSessions > 0 ? Math.round((attendedSessions / totalSessions) * 100) : 0;
 
 
 
@@ -22854,7 +22998,7 @@ async function exportTodayAbsenteesForWhatsApp() {
 
 
 
-            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); }
+            if (tabId === 'settingsTab') { updateCloudUsageUI(); renderAutoBackupsList(); renderBonusSettingsUI(); }
 
 
 

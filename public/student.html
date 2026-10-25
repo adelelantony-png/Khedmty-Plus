@@ -1484,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (streakSubtitleEl) {
             if (streak >= 30) {
-                streakSubtitleEl.textContent = 'ما شاء الله! مسيرة بركة استثنائية، استمر بثبات 🙏';
+                streakSubtitleEl.textContent = 'مبارك الرب! مسيرة بركة ونمو روحي استثنائي، استمر بنعمة المسيح 🙏';
             } else if (streak >= 7) {
                 streakSubtitleEl.textContent = 'أسبوع كامل من الأمانة الروحية، ربنا يبارك جهادك 🌟';
             } else if (streak >= 1) {
@@ -1541,7 +1541,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (readingDone) {
             if (rIcon) rIcon.innerHTML = '<i class="fa-solid fa-circle-check text-success fs-5"></i>';
-            if (rLabel) rLabel.innerHTML = '<span class="text-success fw-bold">تمت القراءة بنجاح اليوم ✅ (+10 نقاط)</span>';
+            if (rLabel) rLabel.innerHTML = isBonusPointsPublished() ? '<span class="text-success fw-bold">تمت القراءة بنجاح اليوم ✅ (+10 نقاط)</span>' : '<span class="text-success fw-bold">تمت القراءة بنجاح اليوم ✅</span>';
             if (rBtn) {
                 rBtn.className = 'btn btn-sm btn-outline-warning text-dark fw-bold px-3 rounded-pill';
                 if (rBtnText) rBtnText.textContent = 'مراجعة الإصحاح';
@@ -1563,7 +1563,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (noteDone) {
             if (nIcon) nIcon.innerHTML = '<i class="fa-solid fa-circle-check text-success fs-5"></i>';
-            if (nLabel) nLabel.innerHTML = '<span class="text-success fw-bold">تم تسجيل نوتة اليوم بنجاح ✅ (+15 نقطة)</span>';
+            if (nLabel) nLabel.innerHTML = isBonusPointsPublished() ? '<span class="text-success fw-bold">تم تسجيل نوتة اليوم بنجاح ✅ (+15 نقطة)</span>' : '<span class="text-success fw-bold">تم تسجيل نوتة اليوم بنجاح ✅</span>';
             if (nBtn) {
                 nBtn.className = 'btn btn-sm btn-outline-danger fw-bold px-3 rounded-pill';
                 if (nBtnText) nBtnText.textContent = 'تعديل النوتة';

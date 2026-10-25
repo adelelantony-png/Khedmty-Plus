@@ -2100,8 +2100,8 @@ body {
     }
 
     function updateScoreEquivalents() {
-        const passScore = (passThreshold / 100 * maxTotalScore).toFixed(1);
-        const intScore = (interviewThreshold / 100 * maxTotalScore).toFixed(1);
+        const passScore = maxTotalScore > 0 ? (passThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
+        const intScore = maxTotalScore > 0 ? (interviewThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
         const elPassEq = document.getElementById('passScoreEquivalent');
         if (elPassEq) elPassEq.textContent = `(${passScore} / ${maxTotalScore} درجة)`;
         const elIntEq = document.getElementById('interviewScoreEquivalent');
@@ -2109,8 +2109,8 @@ body {
     }
 
     function updateCriteriaCards(totalCount, acceptedCount, conditionalCount, interviewCount, rejectedCount) {
-        const minPassScore = (passThreshold / 100 * maxTotalScore).toFixed(1);
-        const minInterviewScore = (interviewThreshold / 100 * maxTotalScore).toFixed(1);
+        const minPassScore = maxTotalScore > 0 ? (passThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
+        const minInterviewScore = maxTotalScore > 0 ? (interviewThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
 
         // بطاقة مقبول نهائياً
         const elCardAccCount = document.getElementById('cardAcceptedCount');
@@ -2235,7 +2235,7 @@ body {
 
         tbody.innerHTML = filtered.map((c, idx) => {
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = ((total / maxTotalScore) * 100).toFixed(1);
+            const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
             const dec = computeDecision(c);
             const isConfClean = (c.confessor && c.confessor !== 'لا يوجد' && c.confessor !== 'none');
 
@@ -2435,7 +2435,7 @@ body {
             return { label: "غائب عن الامتحان 🔴", key: "rejected", class: "status-rejected" };
         }
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
-        const pct = (total / maxTotalScore) * 100;
+        const pct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
         const conf = String(candidate.confessor || '').trim().toLowerCase();
         const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none');
 
@@ -2482,7 +2482,7 @@ body {
             const conf = String(c.confessor || '').toLowerCase();
             const dec = computeDecision(c);
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = (total / maxTotalScore) * 100;
+            const pct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
             const isConfClean = (c.confessor && c.confessor !== 'لا يوجد' && c.confessor !== 'none' && c.confessor !== 'لم يحدد');
 
             // 1. بحث بالاسم، الكود، الهاتف، أو أب الاعتراف
@@ -2698,7 +2698,7 @@ body {
         const g4 = Number(document.getElementById('royal_txtG4').value) || 0;
 
         const total = g1 + g2 + g3 + g4;
-        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
 
         const tempCand = { ...candidate, g1, g2, g3, g4, attended: true };
         const dec = computeDecision(tempCand);
@@ -2788,7 +2788,7 @@ body {
 
         currentCertCandidate = candidate;
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
-        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
 
         const isCertF = (candidate.gender === 'بنات' || candidate.gender === 'female' || candidate.gender === 'أنثى');
         const greetingEl = document.getElementById('certGreetingTitle');
@@ -2827,7 +2827,7 @@ body {
 
         const c = currentCertCandidate;
         const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
 
         // 1. الخلفية الملكية المتدرجة
         const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -2974,7 +2974,7 @@ body {
         if (p.startsWith('01')) p = '2' + p;
 
         const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
 
         const origin = window.location.origin;
         const path = window.location.pathname.replace('servant_grades_entry.html', 'barcode.html');
@@ -3088,7 +3088,7 @@ body {
         }
 
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
-        const pct = ((total / maxTotalScore) * 100).toFixed(1);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
         const dec = computeDecision(candidate);
 
         // صياغة الرسالة حسب حالة القبول والنوع (Male / Female)
@@ -3167,7 +3167,7 @@ body {
             if (phone.startsWith('01')) phone = '2' + phone;
             const dec = computeDecision(c);
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = ((total / maxTotalScore) * 100).toFixed(1);
+            const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
             const msg = buildStudentWhatsappMessage(c);
 
             rows.push([
@@ -3265,7 +3265,7 @@ body {
 
         tbody.innerHTML = filtered.map((c, idx) => {
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = ((total / maxTotalScore) * 100).toFixed(1);
+            const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
             const dec = computeDecision(c);
             const conf = String(c.confessor || '').trim();
             const isConfClean = (conf && conf !== 'لا يوجد' && conf !== 'none' && conf !== 'لم يحدد');
