@@ -1856,8 +1856,17 @@ body {
                         </div>
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:4px;">ملاحظات الجانب الروحي أو المشكلة:</label>
-                        <input type="text" id="newCand_notes" placeholder="أي ملاحظة روحية أو نفسية..." style="width:100%; padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; box-sizing:border-box;">
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#0c2461; margin-bottom:4px;">🕊️ ملاحظات الجانب الروحي:</label>
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <select id="newCand_cboNotes" onchange="syncSpiritualNotes('newCand')" style="flex:1; min-width:160px; padding:9px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.88rem; font-weight:bold; background:#ffffff;">
+                                <option value="">-- خالية (بدون ملاحظات) --</option>
+                                <option value="اعتراف وتناول">اعتراف وتناول 🍞</option>
+                                <option value="اعتراف فقط">اعتراف فقط ✝️</option>
+                                <option value="اعتراف ومظهر الشعر">اعتراف ومظهر الشعر ✂️</option>
+                                <option value="custom">ملاحظة أخرى (كتابة يدوية...) ✍️</option>
+                            </select>
+                            <input type="text" id="newCand_notes" oninput="onSpiritualInputTyped('newCand')" placeholder="اكتب ملاحظة يدوية هنا..." style="flex:1.5; min-width:200px; padding:9px 12px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.88rem; box-sizing:border-box;">
+                        </div>
                     </div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:18px; border-top:1px solid #e2e8f0; padding-top:14px;">
@@ -1992,9 +2001,18 @@ body {
                 <div style="display:flex; flex-direction:column; gap:10px;">
                     <div>
                         <label style="display:block; font-size:0.85rem; font-weight:bold; color:#0c2461; margin-bottom:3px;">
-                            🕊️ ملاحظات الجانب الروحي (أب الاعتراف / التناول / صلاة الأجبية):
+                            🕊️ ملاحظات الجانب الروحي والسلوكي:
                         </label>
-                        <input type="text" id="royal_txtSpiritualNotes" placeholder="اكتب حالة الاعتراف، كنيسة الكاهن، التناول، الصلاة..." style="width: 100%; padding: 8px 10px; border: 1.5px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.88rem; box-sizing: border-box;">
+                        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                            <select id="royal_cboSpiritualNotes" onchange="syncSpiritualNotes('royal')" style="flex:1; min-width:170px; padding:8px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.88rem; font-weight:bold; background:#ffffff;">
+                                <option value="">-- خالية (بدون ملاحظات) --</option>
+                                <option value="اعتراف وتناول">اعتراف وتناول 🍞</option>
+                                <option value="اعتراف فقط">اعتراف فقط ✝️</option>
+                                <option value="اعتراف ومظهر الشعر">اعتراف ومظهر الشعر ✂️</option>
+                                <option value="custom">ملاحظة أخرى (كتابة يدوية...) ✍️</option>
+                            </select>
+                            <input type="text" id="royal_txtSpiritualNotes" oninput="onSpiritualInputTyped('royal')" placeholder="اكتب ملاحظة يدوية هنا..." style="flex:1.5; min-width:200px; padding:8px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-family:inherit; font-size:0.88rem; box-sizing:border-box;">
+                        </div>
                     </div>
 
                     <div>
@@ -2101,8 +2119,17 @@ body {
 
                 <!-- 6. الإضافات المطورة: الجانب الروحي والنفسي وتصنيف المشكلة -->
                 <div>
-                    <label style="display:block; font-size:13px; font-weight:bold; color:#0c2461; margin-bottom:2px;">🕊️ ملاحظات الجانب الروحي (أب الاعتراف / التناول / الصلاة):</label>
-                    <textarea id="vba_txtSpiritualNotes" rows="2" placeholder="اكتب حالة الاعتراف، التناول، الصلاة بالأجبية، أو أي ملاحظة روحية..." style="width:100%; padding:6px 8px; font-size:12px; border:2px inset #fff; box-sizing:border-box;"></textarea>
+                    <label style="display:block; font-size:13px; font-weight:bold; color:#0c2461; margin-bottom:2px;">🕊️ ملاحظات الجانب الروحي والسلوكي:</label>
+                    <div style="display:flex; gap:6px; align-items:center;">
+                        <select id="vba_cboSpiritualNotes" onchange="syncSpiritualNotes('vba')" style="flex:1; padding:6px 8px; font-size:12px; font-weight:bold; border:2px inset #fff; box-sizing:border-box;">
+                            <option value="">-- خالية (بدون ملاحظات) --</option>
+                            <option value="اعتراف وتناول">اعتراف وتناول 🍞</option>
+                            <option value="اعتراف فقط">اعتراف فقط ✝️</option>
+                            <option value="اعتراف ومظهر الشعر">اعتراف ومظهر الشعر ✂️</option>
+                            <option value="custom">ملاحظة أخرى (كتابة يدوية...) ✍️</option>
+                        </select>
+                        <input type="text" id="vba_txtSpiritualNotes" oninput="onSpiritualInputTyped('vba')" placeholder="اكتب ملاحظة يدوية..." style="flex:1.5; padding:6px 8px; font-size:12px; border:2px inset #fff; box-sizing:border-box;">
+                    </div>
                 </div>
 
                 <div>
@@ -2409,7 +2436,15 @@ body {
             const raw = localStorage.getItem('khedmety_new_applicants_grades');
             if (raw) {
                 const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) candidatesList = parsed;
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    candidatesList = parsed.map(c => {
+                        // تنظيف الملاحظات الروحية القديمة التلقائية
+                        if (c.spiritualNotes && (c.spiritualNotes.includes('صلاة الأجبية:') || c.spiritualNotes.includes('آخر اعتراف:') || c.spiritualNotes.includes('آخر تناول:') || c.spiritualNotes.includes('كنيسة أب الاعتراف:'))) {
+                            c.spiritualNotes = '';
+                        }
+                        return c;
+                    });
+                }
             }
             const sPass = localStorage.getItem('khedmety_pass_threshold');
             if (sPass) {
@@ -2915,6 +2950,75 @@ body {
         });
     }
 
+    // ==========================================
+    // محرك التحكم في القوائم المنسدلة للجانب الروحي
+    // ==========================================
+    const STANDARD_SPIRITUAL_OPTIONS = [
+        'اعتراف وتناول',
+        'اعتراف فقط',
+        'اعتراف ومظهر الشعر'
+    ];
+
+    function setSpiritualControls(prefix, val) {
+        const cbo = document.getElementById(prefix + '_cboSpiritualNotes') || document.getElementById(prefix + '_cboNotes');
+        const txt = document.getElementById(prefix + '_txtSpiritualNotes') || document.getElementById(prefix + '_notes');
+        if (!cbo || !txt) return;
+
+        let cleanVal = String(val || '').trim();
+        if (cleanVal.includes('صلاة الأجبية:') || cleanVal.includes('آخر اعتراف:') || cleanVal.includes('آخر تناول:') || cleanVal.includes('كنيسة أب الاعتراف:')) {
+            cleanVal = '';
+        }
+
+        txt.value = cleanVal;
+
+        if (!cleanVal) {
+            cbo.value = '';
+        } else if (STANDARD_SPIRITUAL_OPTIONS.includes(cleanVal)) {
+            cbo.value = cleanVal;
+        } else if (cleanVal.includes('اعتراف') && cleanVal.includes('تناول')) {
+            cbo.value = 'اعتراف وتناول';
+            txt.value = 'اعتراف وتناول';
+        } else if (cleanVal.includes('شعر')) {
+            cbo.value = 'اعتراف ومظهر الشعر';
+            txt.value = 'اعتراف ومظهر الشعر';
+        } else {
+            cbo.value = 'custom';
+        }
+    }
+
+    function syncSpiritualNotes(prefix) {
+        const cbo = document.getElementById(prefix + '_cboSpiritualNotes') || document.getElementById(prefix + '_cboNotes');
+        const txt = document.getElementById(prefix + '_txtSpiritualNotes') || document.getElementById(prefix + '_notes');
+        if (!cbo || !txt) return;
+
+        const sel = cbo.value;
+        if (sel === '') {
+            txt.value = '';
+        } else if (sel === 'custom') {
+            if (STANDARD_SPIRITUAL_OPTIONS.includes(txt.value)) {
+                txt.value = '';
+            }
+            txt.focus();
+        } else {
+            txt.value = sel;
+        }
+    }
+
+    function onSpiritualInputTyped(prefix) {
+        const cbo = document.getElementById(prefix + '_cboSpiritualNotes') || document.getElementById(prefix + '_cboNotes');
+        const txt = document.getElementById(prefix + '_txtSpiritualNotes') || document.getElementById(prefix + '_notes');
+        if (!cbo || !txt) return;
+
+        const val = txt.value.trim();
+        if (!val) {
+            cbo.value = '';
+        } else if (STANDARD_SPIRITUAL_OPTIONS.includes(val)) {
+            cbo.value = val;
+        } else {
+            cbo.value = 'custom';
+        }
+    }
+
     function royalOnStudentSelect() {
         const cbo = document.getElementById('royal_cboStudents');
         royalCurrentIndex = Number(cbo.value) || 0;
@@ -2934,7 +3038,7 @@ body {
         document.getElementById('royal_txtG3').value = candidate.g3 ?? 0;
         document.getElementById('royal_txtG4').value = candidate.g4 ?? 0;
 
-        document.getElementById('royal_txtSpiritualNotes').value = candidate.spiritualNotes || '';
+        setSpiritualControls('royal', candidate.spiritualNotes);
         document.getElementById('royal_txtPsychNotes').value = candidate.psychNotes || '';
         if (candidate.problemType) {
             document.getElementById('royal_cboProblemType').value = candidate.problemType;
@@ -3603,7 +3707,7 @@ body {
         document.getElementById('newCand_code').value = nextCode;
         document.getElementById('newCand_phone').value = '';
         document.getElementById('newCand_confessor').value = '';
-        document.getElementById('newCand_notes').value = '';
+        setSpiritualControls('newCand', '');
 
         setTimeout(() => document.getElementById('newCand_name').focus(), 100);
     }
@@ -4240,13 +4344,9 @@ body {
 
             // الملاحظات الروحية والنفسية
             let spNotes = map.spiritualNotes !== -1 ? String(row[map.spiritualNotes] || '').trim() : '';
-            if (!spNotes) {
-                const parts = [];
-                if (map.spiritualPray !== -1 && row[map.spiritualPray]) parts.push(`صلاة الأجبية: ${row[map.spiritualPray]}`);
-                if (map.lastConfDates !== -1 && row[map.lastConfDates]) parts.push(`آخر اعتراف: ${row[map.lastConfDates]}`);
-                if (map.lastCommunionDate !== -1 && row[map.lastCommunionDate]) parts.push(`آخر تناول: ${row[map.lastCommunionDate]}`);
-                if (map.confessorChurch !== -1 && row[map.confessorChurch]) parts.push(`كنيسة أب الاعتراف: ${row[map.confessorChurch]}`);
-                spNotes = parts.join(' | ');
+            // تنظيف أي تجميع قديم وإبقاء الخانة خالية افتراضياً بحسب رغبة الخادم
+            if (spNotes.includes('صلاة الأجبية:') || spNotes.includes('آخر اعتراف:') || spNotes.includes('آخر تناول:') || spNotes.includes('كنيسة أب الاعتراف:')) {
+                spNotes = '';
             }
 
             let psNotes = map.psychNotes !== -1 ? String(row[map.psychNotes] || '').trim() : '';
@@ -4461,7 +4561,7 @@ body {
         vbaOnSubjectChange();
 
         // تحديث ملاحظات الجانب الروحي والنفسي
-        document.getElementById('vba_txtSpiritualNotes').value = candidate.spiritualNotes || '';
+        setSpiritualControls('vba', candidate.spiritualNotes);
         document.getElementById('vba_txtPsychNotes').value = candidate.psychNotes || '';
         if (candidate.problemType) {
             document.getElementById('vba_cboProblemType').value = candidate.problemType;
