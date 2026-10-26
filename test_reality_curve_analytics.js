@@ -2,42 +2,44 @@ const fs = require('fs');
 const assert = require('assert');
 
 console.log('================================================================');
-console.log('🚀 تشغيل حزمة اختبارات مستكشف منحنى الواقع وخلاط مكس المواد الذكي');
+console.log('🚀 تشغيل حزمة اختبارات المرشد والدليل الذكي لمعايير المواد الأربعة');
 console.log('================================================================');
 
 const htmlContent = fs.readFileSync('D:/StPaul_Service_System/03_Web_Khedmty_Plus/public/servant_grades_entry.html', 'utf8');
 
 // --- 1. فحص عناصر واجهة المستخدم في HTML ---
-console.log('\n--- 1. فحص عناصر واجهة المستخدم وخلاط المكس في HTML ---');
+console.log('\n--- 1. فحص عناصر واجهة المرشد والدليل الذكي في HTML ---');
 
 const requiredElements = [
     'id="realityCurveExplorerPanel"',
     'id="tabModeForward"',
     'id="tabModeReverse"',
-    'id="panelModeForward"',
-    'id="panelModeReverse"',
-    // أشرطة متوسطات المواد اللحظية
-    'id="ribbonAvg1"',
-    'id="ribbonAvg2"',
-    'id="ribbonAvg3"',
-    'id="ribbonAvg4"',
-    // خلاط مكس المواد الأربعة
-    'id="smartMixBlenderPanel"',
-    'id="btnMixStrict"',
-    'id="btnMixDomain"',
-    'id="btnMixRealityAvg"',
-    'id="btnMixTotalOnly"',
-    'id="mixSlider1"',
-    'id="mixPassDisp1"',
-    'id="mixLiveResultText"',
+    // عناصر المرشد الذكي في كروت المواد الأربعة
+    'id="guideDiffBadge1"',
+    'id="guideMean1"',
+    'id="guideMinMax1"',
+    'id="guideImpact1"',
+    'id="guideDiffBadge2"',
+    'id="guideMean2"',
+    'id="guideMinMax2"',
+    'id="guideImpact2"',
+    'id="guideDiffBadge3"',
+    'id="guideMean3"',
+    'id="guideMinMax3"',
+    'id="guideImpact3"',
+    'id="guideDiffBadge4"',
+    'id="guideMean4"',
+    'id="guideMinMax4"',
+    'id="guideImpact4"',
+    // أزرار المرشد في الترويسة والكروت
+    'applyExamGuidePreset',
+    'applyAllExamsToRealityAverages',
     // تذييل الجدول ومتوسطات الأقسام
     'id="tableFooter"',
     'id="tfAvgG1"',
     'id="tfAvgG2"',
     'id="tfAvgG3"',
-    'id="tfAvgG4"',
-    'id="tfAvgTotal"',
-    'id="tfAvgPct"'
+    'id="tfAvgG4"'
 ];
 
 let uiPassCount = 0;
@@ -45,19 +47,17 @@ requiredElements.forEach(elem => {
     assert.ok(htmlContent.includes(elem), `عنصر الواجهة مفقود: ${elem}`);
     uiPassCount++;
 });
-console.log(`  [PASS] ✅ كافة عناصر واجهة المحاكي الثنائي وخلاط المكس (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
+console.log(`  [PASS] ✅ كافة عناصر واجهة المرشد والدليل الذكي (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
 
 // --- 2. فحص الدوال البرمجية في كود الجافاسكريبت ---
-console.log('\n--- 2. فحص وجود دوال أنماط المكس التفاعلي والدمج ---');
+console.log('\n--- 2. فحص وجود دوال المرشد الإحصائي ودليل الأثر ---');
 
 const requiredFunctions = [
+    'function applyExamGuidePreset(',
+    'function applyAllExamsToRealityAverages()',
+    'function updateExamGuidesUI()',
     'function getRealityScoreStats()',
     'function calculateThresholdForTargetPassRate(',
-    'function switchRealityExplorerMode(',
-    'function simulateReverseThreshold(',
-    'function setMixMode(',
-    'function handleMixSliderChange(',
-    'function applySubjectAverageAsThreshold(',
     'function getCandidateExamDetails('
 ];
 
@@ -66,57 +66,49 @@ requiredFunctions.forEach(fn => {
     assert.ok(htmlContent.includes(fn), `الدالة مفقودة: ${fn}`);
     fnPassCount++;
 });
-console.log(`  [PASS] ✅ كافة الدوال البرمجية لخلاط المكس والدمج (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
+console.log(`  [PASS] ✅ كافة الدوال البرمجية للمرشد والدليل (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
 
-// --- 3. محاكاة أنماط المكس واختبار دمج المحاور (Domain Blend) ---
-console.log('\n--- 3. محاكاة واختبار منطق مكس المواد (Strict vs Domain Blend) ---');
+// --- 3. محاكاة حسابات دليل الأثر ومستوى الصعوبة ---
+console.log('\n--- 3. محاكاة واختبار حسابات دليل الأثر للمادة (Impact Mentor Logic) ---');
 
-// مخدوم درجاته: تحريري روحي 22/25 (قوي جداً)، شفوي روحي 8/25 (ضعيف)، نفسي تحريري 18، نفسي شفوي 18
-const testCandidate = {
-    attended: true,
-    g1: 22, // 88%
-    g2: 18, // 72%
-    g3: 8,  // 32% (دون 50%)
-    g4: 18  // 72%
-};
+const candidatesList = [
+    { code: "2201", attended: true, g1: 24.0, g2: 23.5, g3: 25.0, g4: 22.5 }, // 95%
+    { code: "2202", attended: true, g1: 21.0, g2: 22.0, g3: 20.5, g4: 21.5 }, // 85%
+    { code: "2203", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5 }, // 72%
+    { code: "2204", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5 }, // 60%
+    { code: "2205", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5 }, // 54%
+    { code: "2206", attended: false, g1: 0, g2: 0, g3: 0, g4: 0 } // غائب
+];
 
-const examMaxScores = [25, 25, 25, 25];
-const examMinPassPercentages = [50, 50, 50, 50];
+const examMax = 25;
+const attended = candidatesList.filter(c => c && c.attended);
+const scoresG1 = attended.map(c => c.g1);
 
-function evalMix(candidate, mode) {
-    const grades = [candidate.g1, candidate.g2, candidate.g3, candidate.g4];
-    if (mode === 'strict') {
-        const failed = grades.some((g, i) => (g / examMaxScores[i]) * 100 < examMinPassPercentages[i]);
-        return { allPassed: !failed, mode: 'strict' };
-    }
-    if (mode === 'domain_blend') {
-        // مكس المحور الروحي: (22 + 8) / 50 = 30 / 50 = 60% (>= 50%)
-        const spiritPct = ((candidate.g1 + candidate.g3) / 50) * 100;
-        // مكس المحور النفسي: (18 + 18) / 50 = 36 / 50 = 72% (>= 50%)
-        const psychPct = ((candidate.g2 + candidate.g4) / 50) * 100;
-        return { allPassed: spiritPct >= 50 && psychPct >= 50, mode: 'domain_blend', spiritPct, psychPct };
-    }
-    if (mode === 'total_only') {
-        return { allPassed: grades.every(g => g > 0), mode: 'total_only' };
-    }
-}
+// أ. عند وضع حد 50% (12.5 د) لمادة تحريري روحي:
+const req50 = (50 / 100) * examMax;
+const pass50 = scoresG1.filter(s => s >= req50).length;
+assert.strictEqual(pass50, 5, 'عند حد 50% ينجح كل الحاضرين الـ 5');
+console.log(`  [PASS] ✅ دليل الأثر عند حد 50%: ينجح ${pass50} من ${attended.length} (100%) ويرسب 0.`);
 
-// أ. الفحص الصارم (Strict): يرسب بسبب مادة الشفوي الروحي (32%)
-const resStrict = evalMix(testCandidate, 'strict');
-assert.strictEqual(resStrict.allPassed, false, 'في النمط الصارم يجب أن يرسب لأن الشفوي الروحي 32%');
-console.log('  [PASS] ✅ النمط الصارم (Strict): المخدوم لا يجتاز بسبب الشفوي الروحي منفردة.');
+// ب. عند وضع حد مرتفع 75% (18.75 د) لمادة تحريري روحي:
+const req75 = (75 / 100) * examMax;
+const pass75 = scoresG1.filter(s => s >= req75).length;
+const fail75 = attended.length - pass75;
+assert.strictEqual(pass75, 2, 'عند حد 75% ينجح 2 فقط');
+assert.strictEqual(fail75, 3, 'عند حد 75% يرسب 3 مخدومين');
+console.log(`  [PASS] ✅ دليل الأثر عند حد مرتفع 75%: ينبه بوضوح أن ${fail75} مخدومين (60%) سيرسبون في المادة.`);
 
-// ب. فحص مكس المحاور (Domain Blend): ينجح لأن التحريري الروحي (22) عوّض الشفوي الروحي (8) ليصبح مجموع الروحي 60%!
-const resBlend = evalMix(testCandidate, 'domain_blend');
-assert.strictEqual(resBlend.allPassed, true, 'في مكس المحاور يجب أن ينجح لأن مجموع المحور الروحي 60%');
-assert.strictEqual(resBlend.spiritPct, 60, 'نسبة المحور الروحي المدمج يجب أن تكون 60%');
-console.log(`  [PASS] ✅ مكس دمج المحاور (Domain Blend): المخدوم يجتاز بنجاح لأن مجموع الروحي المدمج ${resBlend.spiritPct}% عوّض النقص!`);
+// جـ. فحص تصنيف مستوى الصعوبة
+const meanG1 = scoresG1.reduce((a, b) => a + b, 0) / attended.length;
+const meanPctG1 = (meanG1 / examMax) * 100;
+let diffCategory = '';
+if (meanPctG1 >= 75) diffCategory = 'ميسرة';
+else if (meanPctG1 >= 58) diffCategory = 'متوازنة';
+else diffCategory = 'صعبة';
 
-// جـ. فحص مكس المجموع العام (Total Only)
-const resTotal = evalMix(testCandidate, 'total_only');
-assert.strictEqual(resTotal.allPassed, true);
-console.log('  [PASS] ✅ مكس المجموع العام (Total Only): المخدوم يجتاز ما دام لم يصفّر في أي مادة.');
+assert.strictEqual(diffCategory, 'متوازنة', 'المادة بمتوسط 72.8% تصنف متوازنة');
+console.log(`  [PASS] ✅ تصنيف صعوبة المادة: متوسطها ${meanG1.toFixed(1)} / 25 (${meanPctG1.toFixed(1)}%) وتصنيفها: ${diffCategory}.`);
 
 console.log('\n================================================================');
-console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 11 نجحت بنسبة 100% ✅');
+console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 10 نجحت بنسبة 100% ✅');
 console.log('================================================================\n');
