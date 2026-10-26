@@ -2065,6 +2065,24 @@ body {
                 <option value="family">مشكلة أسرية أو اجتماعية 🏠</option>
                 <option value="special">يحتاج مقابلة خاصة مع الكاهن ⚠️</option>
             </select>
+
+            <!-- 8. فلترة ملاحظات الجانب الروحي والسلوكي -->
+            <select id="spiritualNotesFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">🕊️ كل الملاحظات الروحية والسلوكية</option>
+                <option value="has_notes">📝 لديه ملاحظة روحية مسجلة</option>
+                <option value="no_notes">✨ بدون ملاحظات (خالية)</option>
+                <option value="اعتراف وتناول">🍞 اعتراف وتناول</option>
+                <option value="اعتراف فقط">✝️ اعتراف فقط</option>
+                <option value="اعتراف ومظهر الشعر">✂️ اعتراف ومظهر الشعر</option>
+                <option value="custom">✍️ ملاحظة مخصصة (كتابة يدوية)</option>
+            </select>
+
+            <!-- 9. فلترة ملاحظات الجانب النفسي والسلوكي -->
+            <select id="psychNotesFilter" class="filter-select" onchange="renderTable()">
+                <option value="all">🧠 كل الملاحظات النفسية</option>
+                <option value="has_notes">📝 لديه ملاحظة نفسية مسجلة</option>
+                <option value="no_notes">✨ بدون ملاحظات نفسية (خالية)</option>
+            </select>
         </div>
 
         <!-- شريط حالة الفلترة النشطة والعداد -->
@@ -4929,6 +4947,20 @@ body {
             chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'problem\')" title="إزالة">&times;</span></span>');
         }
 
+        // 8. ملاحظات الجانب الروحي والسلوكي
+        const spEl = document.getElementById('spiritualNotesFilter');
+        if (spEl && spEl.value !== 'all') {
+            const text = spEl.options[spEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'spiritualNotes\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 9. ملاحظات الجانب النفسي والسلوكي
+        const psEl = document.getElementById('psychNotesFilter');
+        if (psEl && psEl.value !== 'all') {
+            const text = psEl.options[psEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'psychNotes\')" title="إزالة">&times;</span></span>');
+        }
+
         // 8. معايير المواد الأربعة المتعددة
         const m = multiCriteriaFilterState;
         if (m.preset === 'all_passed') {
@@ -4986,6 +5018,12 @@ body {
         } else if (fieldType === 'problem') {
             const el = document.getElementById('problemFilter');
             if (el) el.value = 'all';
+        } else if (fieldType === 'spiritualNotes') {
+            const el = document.getElementById('spiritualNotesFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'psychNotes') {
+            const el = document.getElementById('psychNotesFilter');
+            if (el) el.value = 'all';
         }
         renderTable();
     }
@@ -5001,6 +5039,8 @@ body {
         document.getElementById('attendanceFilter').value = 'all';
         document.getElementById('scoreBracketFilter').value = 'all';
         document.getElementById('problemFilter').value = 'all';
+        if (document.getElementById('spiritualNotesFilter')) document.getElementById('spiritualNotesFilter').value = 'all';
+        if (document.getElementById('psychNotesFilter')) document.getElementById('psychNotesFilter').value = 'all';
         if (document.getElementById('criteriaFilter')) document.getElementById('criteriaFilter').value = 'all';
         if (typeof resetMultiCriteriaFilters === 'function') resetMultiCriteriaFilters(false);
         renderTable();
@@ -5014,6 +5054,8 @@ body {
         const attendanceVal = document.getElementById('attendanceFilter').value;
         const scoreVal = document.getElementById('scoreBracketFilter').value;
         const problemVal = document.getElementById('problemFilter').value;
+        const spiritualNotesVal = (document.getElementById('spiritualNotesFilter') ? document.getElementById('spiritualNotesFilter').value : 'all');
+        const psychNotesVal = (document.getElementById('psychNotesFilter') ? document.getElementById('psychNotesFilter').value : 'all');
         const criteriaVal = (document.getElementById('criteriaFilter') ? document.getElementById('criteriaFilter').value : 'all');
 
         const mCrit = (typeof multiCriteriaFilterState !== 'undefined') ? multiCriteriaFilterState : { mode:'AND', ex1:'any', ex2:'any', ex3:'any', ex4:'any', preset:null };
@@ -5029,14 +5071,16 @@ body {
             const code = String(c.code || '').toLowerCase();
             const phone = String(c.phone || '').toLowerCase();
             const conf = String(c.confessor || '').toLowerCase();
+            const spNotes = String(c.spiritualNotes || '').toLowerCase();
+            const psNotes = String(c.psychNotes || '').toLowerCase();
             const dec = computeDecision(c);
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
             const pct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
             const isConfClean = (c.confessor && c.confessor !== 'لا يوجد' && c.confessor !== 'none' && c.confessor !== 'لم يحدد');
 
-            // 1. بحث بالاسم، الكود، الهاتف، أو أب الاعتراف
+            // 1. بحث بالاسم، الكود، الهاتف، أب الاعتراف، أو نص الملاحظات الروحية والنفسية
             if (searchVal) {
-                const match = name.includes(searchVal) || code.includes(searchVal) || phone.includes(searchVal) || conf.includes(searchVal);
+                const match = name.includes(searchVal) || code.includes(searchVal) || phone.includes(searchVal) || conf.includes(searchVal) || spNotes.includes(searchVal) || psNotes.includes(searchVal);
                 if (!match) return false;
             }
 
@@ -5051,14 +5095,12 @@ body {
 
                 if (activeExamFilters.length > 0) {
                     if (mCrit.mode === 'OR') {
-                        // مطابقة أي شرط واحد على الأقل
                         const anyMatch = activeExamFilters.some(f => {
                             const passed = evalRes.details[f.index - 1].isPassed;
                             return f.state === 'pass' ? passed : !passed;
                         });
                         if (!anyMatch) return false;
                     } else {
-                        // الوضع الافتراضي AND: يجب مطابقة كافة الشروط المحددة معاً
                         const allMatch = activeExamFilters.every(f => {
                             const passed = evalRes.details[f.index - 1].isPassed;
                             return f.state === 'pass' ? passed : !passed;
@@ -5067,7 +5109,6 @@ body {
                     }
                 }
             } else if (criteriaVal !== 'all') {
-                // توافق تراجعي مع القائمة الكلاسيكية
                 const evalRes = getCandidateExamDetails(c);
                 if (criteriaVal === 'all_passed' && !evalRes.allPassed) return false;
                 if (criteriaVal === 'failed_any' && evalRes.allPassed) return false;
@@ -5108,6 +5149,26 @@ body {
                 if (problemVal === 'discipline' && !prob.includes('التزام')) return false;
                 if (problemVal === 'family' && !prob.includes('أسرية')) return false;
                 if (problemVal === 'special' && !prob.includes('خاصة')) return false;
+            }
+
+            // 8. فلترة ملاحظات الجانب الروحي والسلوكي
+            if (spiritualNotesVal !== 'all') {
+                const sp = String(c.spiritualNotes || '').trim();
+                if (spiritualNotesVal === 'has_notes' && !sp) return false;
+                if (spiritualNotesVal === 'no_notes' && sp) return false;
+                if (spiritualNotesVal === 'custom') {
+                    const isPreset = (sp === 'اعتراف وتناول' || sp === 'اعتراف فقط' || sp === 'اعتراف ومظهر الشعر');
+                    if (!sp || isPreset) return false;
+                } else if (spiritualNotesVal !== 'has_notes' && spiritualNotesVal !== 'no_notes') {
+                    if (!sp.includes(spiritualNotesVal)) return false;
+                }
+            }
+
+            // 9. فلترة ملاحظات الجانب النفسي والسلوكي
+            if (psychNotesVal !== 'all') {
+                const ps = String(c.psychNotes || '').trim();
+                if (psychNotesVal === 'has_notes' && !ps) return false;
+                if (psychNotesVal === 'no_notes' && ps) return false;
             }
 
             return true;
@@ -5958,8 +6019,9 @@ body {
                     <td class="fw-bold fs-6" style="background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
                     <td class="fw-bold">${c.attended ? pct + '%' : '-'}</td>
                     <td class="text-end" style="font-size:0.8rem; line-height:1.3;">
-                        ${c.problemType ? `<div style="font-weight:bold; color:#b45309;">${c.problemType}</div>` : ''}
-                        ${c.spiritualNotes ? `<div style="color:#64748b; font-size:0.75rem;" title="${c.spiritualNotes}">🕊️ ${c.spiritualNotes.slice(0, 25)}...</div>` : ''}
+                        ${c.problemType ? `<div style="font-weight:bold; color:#b45309; margin-bottom:2px;">${c.problemType}</div>` : ''}
+                        ${c.spiritualNotes ? `<div style="color:#0369a1; font-size:0.74rem; background:#e0f2fe; border:1px solid #bae6fd; border-radius:4px; padding:2px 6px; margin-top:2px; display:inline-block;" title="${c.spiritualNotes}">🕊️ ${c.spiritualNotes}</div>` : ''}
+                        ${c.psychNotes ? `<div style="color:#78350f; font-size:0.73rem; background:#fef3c7; border:1px solid #fde68a; border-radius:4px; padding:2px 6px; margin-top:2px; display:inline-block;" title="${c.psychNotes}">🧠 ${c.psychNotes}</div>` : ''}
                         ${getConfessionCountdownBadge(c)}
                         ${dec.key === 'conditional' ? `<button type="button" class="btn-custom" onclick="quickResolveConfession('${c.code}')" style="padding:2px 6px; font-size:0.72rem; background:#ecfdf5; color:#047857; border-color:#a7f3d0; margin-top:3px;" title="تسجيل حل مشكلة الاعتراف وترقية المخدوم لمقبول نهائي"><i class="fa-solid fa-check-double text-success me-1"></i> حل الاعتراف</button>` : ''}
                     </td>
