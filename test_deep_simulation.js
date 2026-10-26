@@ -141,6 +141,34 @@ runTest('6. كاش الـ Service Worker محدث لإصدار v2.6 مع الح�
     assert(swCode.includes('khedmety-ultra-v2.0'), 'يجب الحفاظ على جملة التوافق khedmety-ultra-v2.0');
 });
 
+// -------------------------------------------------------------
+// 7. فحص إعادة الاتصال المستمر دون توقف في الواتساب
+// -------------------------------------------------------------
+runTest('7. محرك الواتساب: إعادة الاتصال المستمر (Persistent Reconnect) دون توقف عند الفشل المتكرر', () => {
+    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    assert(whatsCode.includes('45000'), 'يجب أن يعيد المحاولة دورياً كل 45 ثانية عند انقطاع النت الطويل');
+    assert(!whatsCode.includes("engineState = 'update_required'"), 'يجب ألا يقفل السيرفر على update_required بعد 6 محاولات');
+});
+
+// -------------------------------------------------------------
+// 8. فحص كاش إعادة إرسال الرسائل (msgRetryCounterCache & getMessage)
+// -------------------------------------------------------------
+runTest('8. محرك الواتساب: دعم كاش الرسائل وحل مشكلة Waiting for this message', () => {
+    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    assert(whatsCode.includes('msgRetryCounterCache'), 'يجب تفعيل كاش إعادة المحاولة msgRetryCounterCache');
+    assert(whatsCode.includes('getMessage'), 'يجب توفير دالة getMessage لاسترجاع الرسائل المفقودة');
+});
+
+// -------------------------------------------------------------
+// 9. فحص دعم كود الاقتران السريع برقم الهاتف (Pairing Code)
+// -------------------------------------------------------------
+runTest('9. محرك الواتساب: دعم كود الاقتران بالهاتف (Pairing Code) ونقطة API المخصصة', () => {
+    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    const serverCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/server.mjs', 'utf8');
+    assert(whatsCode.includes('requestPhonePairingCode'), 'يجب تصدير دالة requestPhonePairingCode');
+    assert(serverCode.includes('/api/pairing-code'), 'يجب توفير مسار /api/pairing-code في server.mjs');
+});
+
 console.log('\n================================================================');
 console.log(`📊 النتيجة الإجمالية للمحاكاة: ناجح: ${passCount} | راسب: ${failCount}`);
 console.log('================================================================');
