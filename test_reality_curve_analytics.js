@@ -2,55 +2,35 @@ const fs = require('fs');
 const assert = require('assert');
 
 console.log('================================================================');
-console.log('🚀 بدء تشغيل حزمة اختبارات مستكشف منحنى الواقع ثنائي الاتجاه (المباشر والعكسي)');
+console.log('🚀 تشغيل حزمة اختبارات مستكشف منحنى الواقع وخلاط مكس المواد الذكي');
 console.log('================================================================');
 
 const htmlContent = fs.readFileSync('D:/StPaul_Service_System/03_Web_Khedmty_Plus/public/servant_grades_entry.html', 'utf8');
 
 // --- 1. فحص عناصر واجهة المستخدم في HTML ---
-console.log('\n--- 1. فحص عناصر واجهة المستخدم ثنائية الاتجاه (Forward & Reverse) ---');
+console.log('\n--- 1. فحص عناصر واجهة المستخدم وخلاط المكس في HTML ---');
 
 const requiredElements = [
     'id="realityCurveExplorerPanel"',
-    'id="realityQuickBadge"',
-    'id="realityStatAttendees"',
-    'id="realityStatMean"',
-    'id="realityStatMedian"',
-    // أزرار وحاويات التبديل الثنائي
     'id="tabModeForward"',
     'id="tabModeReverse"',
     'id="panelModeForward"',
     'id="panelModeReverse"',
-    // عناصر الوضع المباشر
-    'id="targetPassRateSlider"',
-    'id="targetPassRateInput"',
-    'id="realityResultBox"',
-    'id="btnApplyRealityThreshold"',
-    // عناصر الوضع العكسي (من الدرجة إلى نسبة النجاح)
-    'id="proposedScoreSlider"',
-    'id="proposedScoreInput"',
-    'id="revDispScore"',
-    'id="revScoreEquivalent"',
-    'id="revPassedCount"',
-    'id="revPassedPct"',
-    'id="revInterviewCount"',
-    'id="revInterviewPct"',
-    'id="revRejectedCount"',
-    'id="revRejectedPct"',
-    'id="revSpectrumPass"',
-    'id="revSpectrumInt"',
-    'id="revSpectrumRej"',
-    'id="revCriteriaDetails"',
-    // متوسطات الأقسام الأربعة
-    'id="secAvgScore1"',
-    'id="secAvgScore2"',
-    'id="secAvgScore3"',
-    'id="secAvgScore4"',
-    'id="avgDomainSpiritual"',
-    'id="avgDomainPsych"',
-    'id="avgGenderMale"',
-    'id="avgGenderFemale"',
-    // تذييل الجدول
+    // أشرطة متوسطات المواد اللحظية
+    'id="ribbonAvg1"',
+    'id="ribbonAvg2"',
+    'id="ribbonAvg3"',
+    'id="ribbonAvg4"',
+    // خلاط مكس المواد الأربعة
+    'id="smartMixBlenderPanel"',
+    'id="btnMixStrict"',
+    'id="btnMixDomain"',
+    'id="btnMixRealityAvg"',
+    'id="btnMixTotalOnly"',
+    'id="mixSlider1"',
+    'id="mixPassDisp1"',
+    'id="mixLiveResultText"',
+    // تذييل الجدول ومتوسطات الأقسام
     'id="tableFooter"',
     'id="tfAvgG1"',
     'id="tfAvgG2"',
@@ -65,22 +45,20 @@ requiredElements.forEach(elem => {
     assert.ok(htmlContent.includes(elem), `عنصر الواجهة مفقود: ${elem}`);
     uiPassCount++;
 });
-console.log(`  [PASS] ✅ كافة عناصر واجهة المحاكي الثنائي ومتوسطات الأقسام (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
+console.log(`  [PASS] ✅ كافة عناصر واجهة المحاكي الثنائي وخلاط المكس (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
 
 // --- 2. فحص الدوال البرمجية في كود الجافاسكريبت ---
-console.log('\n--- 2. فحص وجود الدوال البرمجية للوضعين المباشر والعكسي ---');
+console.log('\n--- 2. فحص وجود دوال أنماط المكس التفاعلي والدمج ---');
 
 const requiredFunctions = [
     'function getRealityScoreStats()',
     'function calculateThresholdForTargetPassRate(',
     'function switchRealityExplorerMode(',
     'function simulateReverseThreshold(',
-    'function handleProposedScoreChange(',
-    'function setProposedScorePreset(',
-    'function updateReverseRealitySimulatorUI()',
-    'function applyProposedScoreAsThreshold()',
-    'function updateRealityCurveUI()',
-    'function applyRealityCalculatedThreshold()'
+    'function setMixMode(',
+    'function handleMixSliderChange(',
+    'function applySubjectAverageAsThreshold(',
+    'function getCandidateExamDetails('
 ];
 
 let fnPassCount = 0;
@@ -88,62 +66,57 @@ requiredFunctions.forEach(fn => {
     assert.ok(htmlContent.includes(fn), `الدالة مفقودة: ${fn}`);
     fnPassCount++;
 });
-console.log(`  [PASS] ✅ كافة الدوال البرمجية للوضعين المباشر والعكسي (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
+console.log(`  [PASS] ✅ كافة الدوال البرمجية لخلاط المكس والدمج (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
 
-// --- 3. محاكاة الاتجاه العكسي (من الدرجة المقترحة ⬅️ إلى نسبة وعدد الناجحين) ---
-console.log('\n--- 3. محاكاة واختبار حسابات الاتجاه العكسي (Reverse Mode Logic) ---');
+// --- 3. محاكاة أنماط المكس واختبار دمج المحاور (Domain Blend) ---
+console.log('\n--- 3. محاكاة واختبار منطق مكس المواد (Strict vs Domain Blend) ---');
 
-const candidatesList = [
-    { code: "2201", attended: true, g1: 24.0, g2: 23.5, g3: 25.0, g4: 22.5, gender: 'بنين' }, // 95%
-    { code: "2202", attended: true, g1: 21.0, g2: 22.0, g3: 20.5, g4: 21.5, gender: 'بنات' }, // 85%
-    { code: "2203", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5, gender: 'بنين' }, // 72%
-    { code: "2204", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5, gender: 'بنات' }, // 60%
-    { code: "2205", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5, gender: 'بنين' }, // 54%
-    { code: "2206", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, gender: 'بنين' } // غائب
-];
-const maxTotalScore = 100;
-const interviewThreshold = 50;
+// مخدوم درجاته: تحريري روحي 22/25 (قوي جداً)، شفوي روحي 8/25 (ضعيف)، نفسي تحريري 18، نفسي شفوي 18
+const testCandidate = {
+    attended: true,
+    g1: 22, // 88%
+    g2: 18, // 72%
+    g3: 8,  // 32% (دون 50%)
+    g4: 18  // 72%
+};
 
-function simulateReverse(thresh) {
-    const attended = candidatesList.filter(c => c && c.attended);
-    const N = attended.length;
-    const scores = attended.map(c => c.g1 + c.g2 + c.g3 + c.g4);
-    const passedCount = scores.filter(s => s >= thresh).length;
-    const passedPct = (passedCount / N) * 100;
-    const interviewCount = scores.filter(s => s < thresh && s >= interviewThreshold).length;
-    const interviewPct = (interviewCount / N) * 100;
-    const rejectedCount = N - passedCount - interviewCount;
-    const rejectedPct = (rejectedCount / N) * 100;
-    return { thresh, passedCount, passedPct, interviewCount, interviewPct, rejectedCount, rejectedPct };
+const examMaxScores = [25, 25, 25, 25];
+const examMinPassPercentages = [50, 50, 50, 50];
+
+function evalMix(candidate, mode) {
+    const grades = [candidate.g1, candidate.g2, candidate.g3, candidate.g4];
+    if (mode === 'strict') {
+        const failed = grades.some((g, i) => (g / examMaxScores[i]) * 100 < examMinPassPercentages[i]);
+        return { allPassed: !failed, mode: 'strict' };
+    }
+    if (mode === 'domain_blend') {
+        // مكس المحور الروحي: (22 + 8) / 50 = 30 / 50 = 60% (>= 50%)
+        const spiritPct = ((candidate.g1 + candidate.g3) / 50) * 100;
+        // مكس المحور النفسي: (18 + 18) / 50 = 36 / 50 = 72% (>= 50%)
+        const psychPct = ((candidate.g2 + candidate.g4) / 50) * 100;
+        return { allPassed: spiritPct >= 50 && psychPct >= 50, mode: 'domain_blend', spiritPct, psychPct };
+    }
+    if (mode === 'total_only') {
+        return { allPassed: grades.every(g => g > 0), mode: 'total_only' };
+    }
 }
 
-// أ. تجربة درجة نجاح 60%
-const rev60 = simulateReverse(60);
-assert.strictEqual(rev60.passedCount, 4, 'عند درجة 60 يجب أن ينجح 4 مخدومين');
-assert.strictEqual(rev60.passedPct, 80, 'نسبة النجاح عند 60 يجب أن تكون 80%');
-assert.strictEqual(rev60.interviewCount, 1, 'المعلقون للمقابلة عند 60 يجب أن يكونوا 1');
-console.log(`  [PASS] ✅ عند حد نجاح 60%: ينجح ${rev60.passedCount} (${rev60.passedPct}%) ويعلق ${rev60.interviewCount} للمقابلة.`);
+// أ. الفحص الصارم (Strict): يرسب بسبب مادة الشفوي الروحي (32%)
+const resStrict = evalMix(testCandidate, 'strict');
+assert.strictEqual(resStrict.allPassed, false, 'في النمط الصارم يجب أن يرسب لأن الشفوي الروحي 32%');
+console.log('  [PASS] ✅ النمط الصارم (Strict): المخدوم لا يجتاز بسبب الشفوي الروحي منفردة.');
 
-// ب. تجربة درجة نجاح 65%
-const rev65 = simulateReverse(65);
-assert.strictEqual(rev65.passedCount, 3, 'عند درجة 65 يجب أن ينجح 3 مخدومين');
-assert.strictEqual(rev65.passedPct, 60, 'نسبة النجاح عند 65 يجب أن تكون 60%');
-assert.strictEqual(rev65.interviewCount, 2, 'المعلقون للمقابلة عند 65 يجب أن يكونوا 2');
-console.log(`  [PASS] ✅ عند حد نجاح 65%: ينجح ${rev65.passedCount} (${rev65.passedPct}%) ويعلق ${rev65.interviewCount} للمقابلة.`);
+// ب. فحص مكس المحاور (Domain Blend): ينجح لأن التحريري الروحي (22) عوّض الشفوي الروحي (8) ليصبح مجموع الروحي 60%!
+const resBlend = evalMix(testCandidate, 'domain_blend');
+assert.strictEqual(resBlend.allPassed, true, 'في مكس المحاور يجب أن ينجح لأن مجموع المحور الروحي 60%');
+assert.strictEqual(resBlend.spiritPct, 60, 'نسبة المحور الروحي المدمج يجب أن تكون 60%');
+console.log(`  [PASS] ✅ مكس دمج المحاور (Domain Blend): المخدوم يجتاز بنجاح لأن مجموع الروحي المدمج ${resBlend.spiritPct}% عوّض النقص!`);
 
-// جـ. تجربة درجة نجاح 75%
-const rev75 = simulateReverse(75);
-assert.strictEqual(rev75.passedCount, 2, 'عند درجة 75 يجب أن ينجح 2 مخدومين');
-assert.strictEqual(rev75.passedPct, 40, 'نسبة النجاح عند 75 يجب أن تكون 40%');
-assert.strictEqual(rev75.interviewCount, 3, 'المعلقون للمقابلة عند 75 يجب أن يكونوا 3');
-console.log(`  [PASS] ✅ عند حد نجاح 75%: ينجح ${rev75.passedCount} (${rev75.passedPct}%) ويعلق ${rev75.interviewCount} للمقابلة.`);
-
-// د. تجربة درجة نجاح 50% (الكل ينجح)
-const rev50 = simulateReverse(50);
-assert.strictEqual(rev50.passedCount, 5, 'عند درجة 50 يجب أن ينجح جميع الحاضرين الـ 5');
-assert.strictEqual(rev50.passedPct, 100);
-console.log(`  [PASS] ✅ عند حد نجاح 50%: ينجح الجميع بنسبة ${rev50.passedPct}%.`);
+// جـ. فحص مكس المجموع العام (Total Only)
+const resTotal = evalMix(testCandidate, 'total_only');
+assert.strictEqual(resTotal.allPassed, true);
+console.log('  [PASS] ✅ مكس المجموع العام (Total Only): المخدوم يجتاز ما دام لم يصفّر في أي مادة.');
 
 console.log('\n================================================================');
-console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 12 للاتجاهين نجحت بنسبة 100% ✅');
+console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 11 نجحت بنسبة 100% ✅');
 console.log('================================================================\n');

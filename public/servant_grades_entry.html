@@ -204,6 +204,42 @@ body {
             background: #ede9fe;
             color: #4c1d95;
         }
+        
+        .btn-mix-mode {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-mix-mode:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .btn-mix-mode.active {
+            background: #0f172a !important;
+            color: #ffffff !important;
+            border-color: #0f172a !important;
+            box-shadow: 0 2px 6px rgba(15,23,42,0.3) !important;
+        }
+        .live-subject-ribbon {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.78rem;
+        }
         .btn-preset-rev-score.active {
             background: #7c3aed !important;
             color: #ffffff !important;
@@ -1145,6 +1181,24 @@ body {
 
             <!-- الحاوية الأولى: الاتجاه المباشر (Forward Mode) -->
             <div id="panelModeForward">
+
+                <!-- شريط متوسطات المواد اللحظي المدمج -->
+                <div class="live-subject-ribbon">
+                    <div style="font-weight:800; color:#1e3a8a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-chart-pie text-primary"></i>
+                        <span>متوسطات المواد الأربعة في الدفعة:</span>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; font-weight:700;">
+                        <span>✍️🕊️ تحريري روحي: <strong id="ribbonAvg1" style="color:#0c2461;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>✍️🧠 تحريري نفسي: <strong id="ribbonAvg2" style="color:#0c2461;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>🗣️🕊️ شفوي روحي: <strong id="ribbonAvg3" style="color:#1e3799;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>🗣️🧠 شفوي نفسي: <strong id="ribbonAvg4" style="color:#1e3799;">0.0 (0%)</strong></span>
+                    </div>
+                </div>
+
             <!-- 2. محدد ومستكشف نسبة النجاح المستهدفة (Interactive Target Pass Rate Selector) -->
             <div style="background:#ffffff; border:1.5px solid #93c5fd; border-radius:12px; padding:14px 16px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
@@ -1206,6 +1260,24 @@ body {
 
             <!-- الحاوية الثانية: الاتجاه العكسي (Reverse Mode Simulator) -->
             <div id="panelModeReverse" style="display:none; background:#ffffff; border:1.5px solid #8b5cf6; border-radius:12px; padding:14px 16px; margin-bottom:12px; box-shadow:0 4px 14px rgba(139,92,246,0.08);">
+
+                <!-- شريط متوسطات المواد اللحظي المدمج -->
+                <div class="live-subject-ribbon">
+                    <div style="font-weight:800; color:#1e3a8a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-chart-pie text-primary"></i>
+                        <span>متوسطات المواد الأربعة في الدفعة:</span>
+                    </div>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; font-weight:700;">
+                        <span>✍️🕊️ تحريري روحي: <strong id="ribbonRevAvg1" style="color:#0c2461;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>✍️🧠 تحريري نفسي: <strong id="ribbonRevAvg2" style="color:#0c2461;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>🗣️🕊️ شفوي روحي: <strong id="ribbonRevAvg3" style="color:#1e3799;">0.0 (0%)</strong></span>
+                        <span style="color:#cbd5e1;">|</span>
+                        <span>🗣️🧠 شفوي نفسي: <strong id="ribbonRevAvg4" style="color:#1e3799;">0.0 (0%)</strong></span>
+                    </div>
+                </div>
+
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
                     <div style="font-size:0.9rem; font-weight:800; color:#5b21b6;">
                         <i class="fa-solid fa-calculator text-primary me-1"></i> جرّب أي درجة نجاح مقترحة لترى كم سينجح ويعلق في الواقع:
@@ -1301,89 +1373,158 @@ body {
                 </div>
             </div>
 
-            <!-- 5. شبكة بطاقات متوسطات أقسام ومواد الامتحان (Section / Subject Averages) -->
-            <div style="margin-top:16px; border-top:1.5px dashed #bfdbfe; padding-top:14px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-                    <div style="font-size:0.92rem; font-weight:800; color:#1e3a8a; display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-layer-group text-primary"></i>
-                        <span>متوسطات أقسام الامتحانات الأربعة والمحاور (الأداء الواقعي لكل قسم):</span>
+            <!-- 5. خلاط ومعاير مكس المواد ومتوسطات الأقسام (Smart Subject Mixer & Blender) -->
+            <div id="smartMixBlenderPanel" style="margin-top:16px; border-top:1.5px dashed #bfdbfe; padding-top:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:0.96rem; font-weight:800; color:#1e3a8a; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-sliders text-primary"></i>
+                            <span>خلاط ومعاير مكس المواد الأربعة (عرض المتوسطات والدمج المرن):</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">
+                            يمكنك دمج المحاور الروحية والنفسية ليعوض الشفوي التحريري، أو ضبط حد كل مادة بناءً على متوسط الدفعة.
+                        </div>
                     </div>
-                    <span style="font-size:0.75rem; color:#64748b; font-weight:700;">محسوبة بدقة لجميع الحاضرين</span>
+
+                    <!-- أزرار اختيار نمط المكس -->
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-size:0.75rem; color:#475569; font-weight:700;">نمط المكس:</span>
+                        <button type="button" class="btn-mix-mode active" id="btnMixStrict" onclick="setMixMode('strict')" title="يشترط تخطي النسبة في كل مادة منفردة">
+                            🎯 1. مواد منفردة (صارم)
+                        </button>
+                        <button type="button" class="btn-mix-mode" id="btnMixDomain" onclick="setMixMode('domain_blend')" title="الروحي يدمج معاً والنفسي يدمج معاً (الشفوي والتحريري يعوضان بعضهما)">
+                            🕊️🧠 2. مكس دمج المحاور
+                        </button>
+                        <button type="button" class="btn-mix-mode" id="btnMixRealityAvg" onclick="setMixMode('reality_avg')" title="يضبط حد النجاح لكل مادة تلقائياً على متوسط الدفعة في تلك المادة">
+                            📊 3. مكس متوسطات الواقع
+                        </button>
+                        <button type="button" class="btn-mix-mode" id="btnMixTotalOnly" onclick="setMixMode('total_only')" title="المجموع العام هو الأساس بشرط عدم التصفير">
+                            ⚖️ 4. مكس المجموع العام
+                        </button>
+                    </div>
                 </div>
 
-                <!-- شبكة الأقسام الأربعة -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:10px; margin-bottom:12px;">
+                <!-- شبكة الأقسام الأربعة مع سلايدرات المكس الفورية وأزرار المتوسط -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)); gap:12px; margin-bottom:12px;">
                     <!-- قسم 1: تحريري روحي -->
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span style="font-size:0.78rem; font-weight:800; color:#0c2461;">✍️🕊️ تحريري روحي</span>
+                            <span style="font-size:0.8rem; font-weight:800; color:#0c2461;">✍️🕊️ تحريري روحي</span>
                             <span id="secAvgPct1" style="font-size:0.82rem; font-weight:900; color:#0c2461; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
                         </div>
-                        <div style="display:flex; align-items:baseline; gap:6px;">
-                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                        <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+                            <span style="font-size:0.72rem; color:#64748b;">متوسط الدفعة:</span>
                             <strong id="secAvgScore1" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
                             <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp1">/ 25</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+
+                        <!-- شريط مكس المادة الفوري -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                                <span>حد اجتياز المادة:</span>
+                                <span id="mixPassDisp1" style="color:#0c2461; font-weight:800;">50% (12.5 د)</span>
+                            </div>
+                            <input type="range" id="mixSlider1" min="20" max="85" step="1" value="50" oninput="handleMixSliderChange(1, this.value)" style="width:100%; accent-color:#0c2461; cursor:pointer;">
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#475569;">
                             <span>نسبة الاجتياز: <strong id="secPassRate1" style="color:#059669;">0%</strong></span>
-                            <span id="secMinMax1" style="color:#64748b;">0 - 0</span>
+                            <button type="button" class="btn-custom" onclick="applySubjectAverageAsThreshold(1)" style="font-size:0.68rem; padding:2px 6px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" title="جعل حد المادة يطابق متوسط الدفعة تماماً">
+                                ⚡ حد = المتوسط
+                            </button>
                         </div>
                     </div>
 
                     <!-- قسم 2: تحريري نفسي -->
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span style="font-size:0.78rem; font-weight:800; color:#0c2461;">✍️🧠 تحريري نفسي</span>
+                            <span style="font-size:0.8rem; font-weight:800; color:#0c2461;">✍️🧠 تحريري نفسي</span>
                             <span id="secAvgPct2" style="font-size:0.82rem; font-weight:900; color:#0c2461; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
                         </div>
-                        <div style="display:flex; align-items:baseline; gap:6px;">
-                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                        <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+                            <span style="font-size:0.72rem; color:#64748b;">متوسط الدفعة:</span>
                             <strong id="secAvgScore2" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
                             <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp2">/ 25</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+
+                        <!-- شريط مكس المادة الفوري -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                                <span>حد اجتياز المادة:</span>
+                                <span id="mixPassDisp2" style="color:#0c2461; font-weight:800;">50% (12.5 د)</span>
+                            </div>
+                            <input type="range" id="mixSlider2" min="20" max="85" step="1" value="50" oninput="handleMixSliderChange(2, this.value)" style="width:100%; accent-color:#0c2461; cursor:pointer;">
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#475569;">
                             <span>نسبة الاجتياز: <strong id="secPassRate2" style="color:#059669;">0%</strong></span>
-                            <span id="secMinMax2" style="color:#64748b;">0 - 0</span>
+                            <button type="button" class="btn-custom" onclick="applySubjectAverageAsThreshold(2)" style="font-size:0.68rem; padding:2px 6px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" title="جعل حد المادة يطابق متوسط الدفعة تماماً">
+                                ⚡ حد = المتوسط
+                            </button>
                         </div>
                     </div>
 
                     <!-- قسم 3: شفوي روحي -->
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span style="font-size:0.78rem; font-weight:800; color:#1e3799;">🗣️🕊️ شفوي روحي</span>
+                            <span style="font-size:0.8rem; font-weight:800; color:#1e3799;">🗣️🕊️ شفوي روحي</span>
                             <span id="secAvgPct3" style="font-size:0.82rem; font-weight:900; color:#1e3799; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
                         </div>
-                        <div style="display:flex; align-items:baseline; gap:6px;">
-                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                        <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+                            <span style="font-size:0.72rem; color:#64748b;">متوسط الدفعة:</span>
                             <strong id="secAvgScore3" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
                             <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp3">/ 25</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+
+                        <!-- شريط مكس المادة الفوري -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                                <span>حد اجتياز المادة:</span>
+                                <span id="mixPassDisp3" style="color:#1e3799; font-weight:800;">50% (12.5 د)</span>
+                            </div>
+                            <input type="range" id="mixSlider3" min="20" max="85" step="1" value="50" oninput="handleMixSliderChange(3, this.value)" style="width:100%; accent-color:#1e3799; cursor:pointer;">
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#475569;">
                             <span>نسبة الاجتياز: <strong id="secPassRate3" style="color:#059669;">0%</strong></span>
-                            <span id="secMinMax3" style="color:#64748b;">0 - 0</span>
+                            <button type="button" class="btn-custom" onclick="applySubjectAverageAsThreshold(3)" style="font-size:0.68rem; padding:2px 6px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" title="جعل حد المادة يطابق متوسط الدفعة تماماً">
+                                ⚡ حد = المتوسط
+                            </button>
                         </div>
                     </div>
 
                     <!-- قسم 4: شفوي نفسي -->
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span style="font-size:0.78rem; font-weight:800; color:#1e3799;">🗣️🧠 شفوي نفسي</span>
+                            <span style="font-size:0.8rem; font-weight:800; color:#1e3799;">🗣️🧠 شفوي نفسي</span>
                             <span id="secAvgPct4" style="font-size:0.82rem; font-weight:900; color:#1e3799; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
                         </div>
-                        <div style="display:flex; align-items:baseline; gap:6px;">
-                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                        <div style="display:flex; align-items:baseline; gap:6px; margin-bottom:6px;">
+                            <span style="font-size:0.72rem; color:#64748b;">متوسط الدفعة:</span>
                             <strong id="secAvgScore4" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
                             <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp4">/ 25</span>
                         </div>
-                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+
+                        <!-- شريط مكس المادة الفوري -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; margin-bottom:6px;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; font-weight:700; color:#334155; margin-bottom:2px;">
+                                <span>حد اجتياز المادة:</span>
+                                <span id="mixPassDisp4" style="color:#1e3799; font-weight:800;">50% (12.5 د)</span>
+                            </div>
+                            <input type="range" id="mixSlider4" min="20" max="85" step="1" value="50" oninput="handleMixSliderChange(4, this.value)" style="width:100%; accent-color:#1e3799; cursor:pointer;">
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#475569;">
                             <span>نسبة الاجتياز: <strong id="secPassRate4" style="color:#059669;">0%</strong></span>
-                            <span id="secMinMax4" style="color:#64748b;">0 - 0</span>
+                            <button type="button" class="btn-custom" onclick="applySubjectAverageAsThreshold(4)" style="font-size:0.68rem; padding:2px 6px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;" title="جعل حد المادة يطابق متوسط الدفعة تماماً">
+                                ⚡ حد = المتوسط
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- شريط ملخص المحاور الكبرى (روحي ونفسي) والأقسام (بنين وبنات) -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px; margin-bottom:10px;">
                     <!-- متوسط الجانب الروحي الإجمالي -->
                     <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:0.76rem; font-weight:800; color:#166534;">🕊️ المحور الروحي (كلي):</span>
@@ -1408,6 +1549,20 @@ body {
                         <strong id="avgGenderFemale" style="font-size:0.88rem; color:#be185d;">0% (0 مخدومة)</strong>
                     </div>
                 </div>
+
+                <!-- بطاقة نتيجة المكس الحالية الفورية -->
+                <div style="background:#eff6ff; border:1px solid #93c5fd; border-radius:8px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div id="mixLiveResultText" style="font-size:0.82rem; font-weight:700; color:#1e3a8a;">
+                        <i class="fa-solid fa-sparkles text-warning me-1"></i> النتيجة التراكمية للمكس الحالي: جاري الحساب...
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button type="button" class="btn-custom" onclick="applyUniformPassPct(50)" style="font-size:0.75rem; padding:3px 8px; background:#ffffff; color:#334155;">
+                            إعادة ضبط 50% للكل
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             </div>
         </div>
 
@@ -2854,6 +3009,8 @@ body {
                     });
                 }
             }
+            const sMix = localStorage.getItem('khedmety_mix_mode');
+            if (sMix) setMixMode(sMix);
             const sTargetRate = localStorage.getItem('khedmety_target_pass_rate');
             if (sTargetRate) {
                 currentTargetPassRate = Number(sTargetRate) || 80;
@@ -2912,6 +3069,7 @@ body {
         try {
             localStorage.setItem('khedmety_new_applicants_grades', JSON.stringify(candidatesList));
             localStorage.setItem('khedmety_target_pass_rate', currentTargetPassRate);
+            localStorage.setItem('khedmety_mix_mode', currentMixMode);
             localStorage.setItem('khedmety_pass_threshold', passThreshold);
             localStorage.setItem('khedmety_interview_threshold', interviewThreshold);
             localStorage.setItem('khedmety_max_total_score', maxTotalScore);
@@ -3397,6 +3555,38 @@ body {
             }
             if (badge) badge.innerHTML = '<i class="fa-solid fa-arrow-right-arrow-left me-1"></i> الاتجاه العكسي: من الدرجة المقترحة إلى النسبة';
             updateReverseRealitySimulatorUI();
+
+        // تحديث شريط متوسطات المواد اللحظي في اللوحتين المباشرة والعكسية
+        const rib1 = document.getElementById('ribbonAvg1'); if (rib1) rib1.textContent = stats.avgG1.toFixed(1) + ' (' + stats.avgPctG1.toFixed(1) + '%)';
+        const rib2 = document.getElementById('ribbonAvg2'); if (rib2) rib2.textContent = stats.avgG2.toFixed(1) + ' (' + stats.avgPctG2.toFixed(1) + '%)';
+        const rib3 = document.getElementById('ribbonAvg3'); if (rib3) rib3.textContent = stats.avgG3.toFixed(1) + ' (' + stats.avgPctG3.toFixed(1) + '%)';
+        const rib4 = document.getElementById('ribbonAvg4'); if (rib4) rib4.textContent = stats.avgG4.toFixed(1) + ' (' + stats.avgPctG4.toFixed(1) + '%)';
+
+        const ribRev1 = document.getElementById('ribbonRevAvg1'); if (ribRev1) ribRev1.textContent = stats.avgG1.toFixed(1) + ' (' + stats.avgPctG1.toFixed(1) + '%)';
+        const ribRev2 = document.getElementById('ribbonRevAvg2'); if (ribRev2) ribRev2.textContent = stats.avgG2.toFixed(1) + ' (' + stats.avgPctG2.toFixed(1) + '%)';
+        const ribRev3 = document.getElementById('ribbonRevAvg3'); if (ribRev3) ribRev3.textContent = stats.avgG3.toFixed(1) + ' (' + stats.avgPctG3.toFixed(1) + '%)';
+        const ribRev4 = document.getElementById('ribbonRevAvg4'); if (ribRev4) ribRev4.textContent = stats.avgG4.toFixed(1) + ' (' + stats.avgPctG4.toFixed(1) + '%)';
+
+        // تحديث ملخص نتيجة المكس الحالية
+        const mixResEl = document.getElementById('mixLiveResultText');
+        if (mixResEl) {
+            let modeName = 'مواد منفردة 🎯';
+            if (currentMixMode === 'domain_blend') modeName = 'دمج المحاور (الروحي والنفسي) 🕊️🧠';
+            if (currentMixMode === 'reality_avg') modeName = 'متوسطات الواقع 📊';
+            if (currentMixMode === 'total_only') modeName = 'المجموع العام فقط ⚖️';
+            
+            const attendedCount = stats.totalAttendees;
+            const passingMixCount = stats.attendedList.filter(c => {
+                const tot = (Number(c.g1)||0) + (Number(c.g2)||0) + (Number(c.g3)||0) + (Number(c.g4)||0);
+                const p = maxTotalScore > 0 ? (tot / maxTotalScore) * 100 : 0;
+                const d = getCandidateExamDetails(c);
+                return p >= passThreshold && d.allPassed;
+            }).length;
+            const mixPassPct = attendedCount > 0 ? ((passingMixCount / attendedCount) * 100).toFixed(1) : 0;
+
+            mixResEl.innerHTML = '<i class="fa-solid fa-sparkles text-warning me-1"></i> النمط النشط: <strong style="color:#0f172a;">' + modeName + '</strong> | سينجح بهذا المكس: <strong style="color:#059669;">' + passingMixCount + '</strong> من أصل ' + attendedCount + ' حاضرين (' + mixPassPct + '%)';
+        }
+
         }
     }
 
@@ -3583,6 +3773,72 @@ body {
         renderTable();
     }
 
+    
+    // =========================================================================
+    // 🎚️ خلاط ومعاير مكس المواد التفاعلي (Smart Subject Mixer)
+    // =========================================================================
+    let currentMixMode = 'strict'; // 'strict' | 'domain_blend' | 'reality_avg' | 'total_only'
+
+    function setMixMode(mode) {
+        currentMixMode = mode;
+        const btnStrict = document.getElementById('btnMixStrict');
+        const btnDomain = document.getElementById('btnMixDomain');
+        const btnReality = document.getElementById('btnMixRealityAvg');
+        const btnTotal = document.getElementById('btnMixTotalOnly');
+
+        [btnStrict, btnDomain, btnReality, btnTotal].forEach(b => {
+            if (b) b.classList.remove('active');
+        });
+
+        if (mode === 'strict' && btnStrict) btnStrict.classList.add('active');
+        if (mode === 'domain_blend' && btnDomain) btnDomain.classList.add('active');
+        if (mode === 'reality_avg' && btnReality) btnReality.classList.add('active');
+        if (mode === 'total_only' && btnTotal) btnTotal.classList.add('active');
+
+        if (mode === 'reality_avg') {
+            const stats = getRealityScoreStats();
+            if (stats.totalAttendees > 0) {
+                examMinPassPercentages = [
+                    Math.round(stats.avgPctG1),
+                    Math.round(stats.avgPctG2),
+                    Math.round(stats.avgPctG3),
+                    Math.round(stats.avgPctG4)
+                ];
+                for (let i = 1; i <= 4; i++) {
+                    const elInp = document.getElementById('cfgPassPct' + i);
+                    if (elInp) elInp.value = examMinPassPercentages[i - 1];
+                    const elMixSl = document.getElementById('mixSlider' + i);
+                    if (elMixSl) elMixSl.value = examMinPassPercentages[i - 1];
+                }
+                updateExamPassScoreEquivalents();
+            }
+        }
+
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function handleMixSliderChange(examNum, val) {
+        const num = Math.max(1, Math.min(100, Number(val) || 50));
+        examMinPassPercentages[examNum - 1] = num;
+        
+        const cfgInp = document.getElementById('cfgPassPct' + examNum);
+        if (cfgInp && Number(cfgInp.value) !== num) cfgInp.value = num;
+
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function applySubjectAverageAsThreshold(examNum) {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) return;
+        const avgPct = Math.round(stats['avgPctG' + examNum] || 50);
+        handleMixSliderChange(examNum, avgPct);
+        const mixSl = document.getElementById('mixSlider' + examNum);
+        if (mixSl) mixSl.value = avgPct;
+    }
+
     function updateExamPassScoreEquivalents() {
         for (let i = 1; i <= 4; i++) {
             const max = (Array.isArray(examMaxScores) && examMaxScores[i - 1] > 0) ? examMaxScores[i - 1] : 25;
@@ -3592,7 +3848,20 @@ body {
             const el = document.getElementById('examScoreEq' + i);
             if (el) {
                 el.innerHTML = '<span style="color:#0369a1; font-weight:800; font-size:0.8rem;">(يعادل: ' + cleanScore + ' من ' + max + ' درجة)</span>';
+            
+        for (let i = 1; i <= 4; i++) {
+            const sl = document.getElementById('mixSlider' + i);
+            if (sl && Array.isArray(examMinPassPercentages)) sl.value = examMinPassPercentages[i - 1] || 50;
+            const disp = document.getElementById('mixPassDisp' + i);
+            if (disp && Array.isArray(examMinPassPercentages)) {
+                const max = (Array.isArray(examMaxScores) && examMaxScores[i - 1] > 0) ? examMaxScores[i - 1] : 25;
+                const p = examMinPassPercentages[i - 1] || 50;
+                const sc = ((p / 100) * max).toFixed(1);
+                disp.textContent = p + '% (' + sc + ' د)';
             }
+        }
+
+    }
         }
     }
 
@@ -3635,7 +3904,40 @@ body {
             }
         }
 
-        return { details, failedExams, allPassed: failedExams.length === 0 };
+        // معالجة أنماط المكس التفاعلية
+        if (typeof currentMixMode !== 'undefined') {
+            if (currentMixMode === 'domain_blend') {
+                // نمط مكس دمج المحاور: دمج الروحي (g1 + g3) ودمج النفسي (g2 + g4)
+                const spiritScore = grades[0] + grades[2];
+                const spiritMax = (examMaxScores[0] || 25) + (examMaxScores[2] || 25);
+                const spiritPct = spiritMax > 0 ? (spiritScore / spiritMax) * 100 : 0;
+                const spiritReq = ((examMinPassPercentages[0] || 50) + (examMinPassPercentages[2] || 50)) / 2;
+
+                const psychScore = grades[1] + grades[3];
+                const psychMax = (examMaxScores[1] || 25) + (examMaxScores[3] || 25);
+                const psychPct = psychMax > 0 ? (psychScore / psychMax) * 100 : 0;
+                const psychReq = ((examMinPassPercentages[1] || 50) + (examMinPassPercentages[3] || 50)) / 2;
+
+                const spiritPassed = spiritPct >= spiritReq;
+                const psychPassed = psychPct >= psychReq;
+
+                const domainFailed = [];
+                if (!spiritPassed) {
+                    domainFailed.push({ name: 'المحور الروحي المدمج (تحريري+شفوي)', pct: spiritPct, reqPct: spiritReq });
+                }
+                if (!psychPassed) {
+                    domainFailed.push({ name: 'المحور النفسي المدمج (تحريري+شفوي)', pct: psychPct, reqPct: psychReq });
+                }
+
+                return { details, failedExams: domainFailed, allPassed: domainFailed.length === 0, mixMode: 'domain_blend' };
+            } else if (currentMixMode === 'total_only') {
+                // نمط مكس المجموع العام فقط: عدم التصفير في أي مادة
+                const zeroExams = details.filter(d => d.score <= 0);
+                return { details, failedExams: zeroExams, allPassed: zeroExams.length === 0, mixMode: 'total_only' };
+            }
+        }
+
+        return { details, failedExams, allPassed: failedExams.length === 0, mixMode: 'strict' };
     }
 
 
