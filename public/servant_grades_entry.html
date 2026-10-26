@@ -1175,6 +1175,115 @@ body {
                     <span>📌 الانحراف المعياري (StdDev): <strong id="realityStatStdDev" style="color:#2563eb;">-</strong></span>
                 </div>
             </div>
+
+            <!-- 5. شبكة بطاقات متوسطات أقسام ومواد الامتحان (Section / Subject Averages) -->
+            <div style="margin-top:16px; border-top:1.5px dashed #bfdbfe; padding-top:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                    <div style="font-size:0.92rem; font-weight:800; color:#1e3a8a; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-layer-group text-primary"></i>
+                        <span>متوسطات أقسام الامتحانات الأربعة والمحاور (الأداء الواقعي لكل قسم):</span>
+                    </div>
+                    <span style="font-size:0.75rem; color:#64748b; font-weight:700;">محسوبة بدقة لجميع الحاضرين</span>
+                </div>
+
+                <!-- شبكة الأقسام الأربعة -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:10px; margin-bottom:12px;">
+                    <!-- قسم 1: تحريري روحي -->
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:0.78rem; font-weight:800; color:#0c2461;">✍️🕊️ تحريري روحي</span>
+                            <span id="secAvgPct1" style="font-size:0.82rem; font-weight:900; color:#0c2461; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
+                        </div>
+                        <div style="display:flex; align-items:baseline; gap:6px;">
+                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                            <strong id="secAvgScore1" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
+                            <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp1">/ 25</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+                            <span>نسبة الاجتياز: <strong id="secPassRate1" style="color:#059669;">0%</strong></span>
+                            <span id="secMinMax1" style="color:#64748b;">0 - 0</span>
+                        </div>
+                    </div>
+
+                    <!-- قسم 2: تحريري نفسي -->
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:0.78rem; font-weight:800; color:#0c2461;">✍️🧠 تحريري نفسي</span>
+                            <span id="secAvgPct2" style="font-size:0.82rem; font-weight:900; color:#0c2461; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
+                        </div>
+                        <div style="display:flex; align-items:baseline; gap:6px;">
+                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                            <strong id="secAvgScore2" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
+                            <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp2">/ 25</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+                            <span>نسبة الاجتياز: <strong id="secPassRate2" style="color:#059669;">0%</strong></span>
+                            <span id="secMinMax2" style="color:#64748b;">0 - 0</span>
+                        </div>
+                    </div>
+
+                    <!-- قسم 3: شفوي روحي -->
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:0.78rem; font-weight:800; color:#1e3799;">🗣️🕊️ شفوي روحي</span>
+                            <span id="secAvgPct3" style="font-size:0.82rem; font-weight:900; color:#1e3799; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
+                        </div>
+                        <div style="display:flex; align-items:baseline; gap:6px;">
+                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                            <strong id="secAvgScore3" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
+                            <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp3">/ 25</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+                            <span>نسبة الاجتياز: <strong id="secPassRate3" style="color:#059669;">0%</strong></span>
+                            <span id="secMinMax3" style="color:#64748b;">0 - 0</span>
+                        </div>
+                    </div>
+
+                    <!-- قسم 4: شفوي نفسي -->
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #1e3799; border-radius:10px; padding:10px 12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:0.78rem; font-weight:800; color:#1e3799;">🗣️🧠 شفوي نفسي</span>
+                            <span id="secAvgPct4" style="font-size:0.82rem; font-weight:900; color:#1e3799; background:#eff6ff; padding:2px 6px; border-radius:6px;">0%</span>
+                        </div>
+                        <div style="display:flex; align-items:baseline; gap:6px;">
+                            <span style="font-size:0.7rem; color:#64748b;">المتوسط:</span>
+                            <strong id="secAvgScore4" style="font-size:1.15rem; color:#0f172a;">0.0</strong>
+                            <span style="font-size:0.75rem; color:#64748b;" id="secMaxScoreDisp4">/ 25</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-top:6px; border-top:1px dotted #e2e8f0; padding-top:4px;">
+                            <span>نسبة الاجتياز: <strong id="secPassRate4" style="color:#059669;">0%</strong></span>
+                            <span id="secMinMax4" style="color:#64748b;">0 - 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شريط ملخص المحاور الكبرى (روحي ونفسي) والأقسام (بنين وبنات) -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:8px;">
+                    <!-- متوسط الجانب الروحي الإجمالي -->
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.76rem; font-weight:800; color:#166534;">🕊️ المحور الروحي (كلي):</span>
+                        <strong id="avgDomainSpiritual" style="font-size:0.88rem; color:#15803d;">0.0 / 50 (0%)</strong>
+                    </div>
+
+                    <!-- متوسط الجانب النفسي الإجمالي -->
+                    <div style="background:#fefce8; border:1px solid #fef08a; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.76rem; font-weight:800; color:#854d0e;">🧠 المحور النفسي (كلي):</span>
+                        <strong id="avgDomainPsych" style="font-size:0.88rem; color:#a16207;">0.0 / 50 (0%)</strong>
+                    </div>
+
+                    <!-- متوسط قسم البنين -->
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.76rem; font-weight:800; color:#1e3a8a;">👨 قسم البنين (Male):</span>
+                        <strong id="avgGenderMale" style="font-size:0.88rem; color:#1d4ed8;">0% (0 مخدوم)</strong>
+                    </div>
+
+                    <!-- متوسط قسم البنات -->
+                    <div style="background:#fdf2f8; border:1px solid #fbcfe8; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.76rem; font-weight:800; color:#9d174d;">👩 قسم البنات (Female):</span>
+                        <strong id="avgGenderFemale" style="font-size:0.88rem; color:#be185d;">0% (0 مخدومة)</strong>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -1212,7 +1321,8 @@ body {
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="number" id="cfgPassPct1" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(1, this.value)">
                         <span style="font-weight:900; font-size:0.95rem; color:#0c2461;">%</span>
-                        <span id="examScoreEq1" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span></span>
+                        <span id="examScoreEq1" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span>
+                        <div id="examAvgBadge1" style="font-size:0.74rem; color:#0369a1; margin-top:3px; font-weight:700;"><i class="fa-solid fa-chart-simple me-1"></i>متوسط الدفعة: 0.0 (0%)</div></span>
                     </div>
                 </div>
 
@@ -1224,7 +1334,8 @@ body {
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="number" id="cfgPassPct2" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(2, this.value)">
                         <span style="font-weight:900; font-size:0.95rem; color:#0c2461;">%</span>
-                        <span id="examScoreEq2" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span></span>
+                        <span id="examScoreEq2" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span>
+                        <div id="examAvgBadge2" style="font-size:0.74rem; color:#0369a1; margin-top:3px; font-weight:700;"><i class="fa-solid fa-chart-simple me-1"></i>متوسط الدفعة: 0.0 (0%)</div></span>
                     </div>
                 </div>
 
@@ -1236,7 +1347,8 @@ body {
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="number" id="cfgPassPct3" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(3, this.value)">
                         <span style="font-weight:900; font-size:0.95rem; color:#1e3799;">%</span>
-                        <span id="examScoreEq3" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span></span>
+                        <span id="examScoreEq3" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span>
+                        <div id="examAvgBadge3" style="font-size:0.74rem; color:#0369a1; margin-top:3px; font-weight:700;"><i class="fa-solid fa-chart-simple me-1"></i>متوسط الدفعة: 0.0 (0%)</div></span>
                     </div>
                 </div>
 
@@ -1248,7 +1360,8 @@ body {
                     <div style="display:flex; align-items:center; gap:8px;">
                         <input type="number" id="cfgPassPct4" min="1" max="100" value="50" style="width:75px; text-align:center; font-weight:800; font-size:0.95rem; padding:6px; border:1.5px solid #cbd5e1; border-radius:8px;" oninput="handleExamPassPctChange(4, this.value)">
                         <span style="font-weight:900; font-size:0.95rem; color:#1e3799;">%</span>
-                        <span id="examScoreEq4" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span></span>
+                        <span id="examScoreEq4" style="font-size:0.78rem; font-weight:700;"><span style="color:#0369a1; font-weight:800;">(يعادل: 12.5 من 25 درجة)</span>
+                        <div id="examAvgBadge4" style="font-size:0.74rem; color:#0369a1; margin-top:3px; font-weight:700;"><i class="fa-solid fa-chart-simple me-1"></i>متوسط الدفعة: 0.0 (0%)</div></span>
                     </div>
                 </div>
             </div>
@@ -1450,6 +1563,22 @@ body {
                 <tbody id="tableBody">
                     <!-- تعبئة تلقائية بالجافاسكريبت -->
                 </tbody>
+                <tfoot id="tableFooter" style="background:#f8fafc; font-weight:bold; border-top:2.5px solid #0c2461;">
+                    <tr style="text-align:center;">
+                        <td colspan="4" style="padding:8px 10px; text-align:right; font-weight:900; color:#0c2461; font-size:0.86rem; background:#eff6ff;">
+                            <i class="fa-solid fa-chart-column me-1 text-primary"></i> 📊 متوسط درجات كل قسم (للحاضرين):
+                        </td>
+                        <td id="tfAvgG1" style="padding:8px 4px; font-weight:900; color:#0c2461; background:#f0fdf4;">0.0</td>
+                        <td id="tfAvgG2" style="padding:8px 4px; font-weight:900; color:#0c2461; background:#f0fdf4;">0.0</td>
+                        <td id="tfAvgG3" style="padding:8px 4px; font-weight:900; color:#1e3799; background:#eff6ff;">0.0</td>
+                        <td id="tfAvgG4" style="padding:8px 4px; font-weight:900; color:#1e3799; background:#eff6ff;">0.0</td>
+                        <td id="tfAvgTotal" style="padding:8px 4px; font-weight:900; color:#d97706; background:#fef3c7;">0.0</td>
+                        <td id="tfAvgPct" style="padding:8px 4px; font-weight:900; color:#0f172a; background:#e2e8f0;">0%</td>
+                        <td colspan="2" id="tfSummaryDec" style="padding:8px 6px; font-size:0.78rem; color:#059669; font-weight:800; background:#f8fafc;">
+                            نسبة النجاح: 0%
+                        </td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>
@@ -2706,6 +2835,16 @@ body {
         const totalCandidates = candidatesList.length;
         const absentCount = totalCandidates - totalAttendees;
 
+        const maxEx1 = (Array.isArray(examMaxScores) && examMaxScores[0] > 0) ? examMaxScores[0] : 25;
+        const maxEx2 = (Array.isArray(examMaxScores) && examMaxScores[1] > 0) ? examMaxScores[1] : 25;
+        const maxEx3 = (Array.isArray(examMaxScores) && examMaxScores[2] > 0) ? examMaxScores[2] : 25;
+        const maxEx4 = (Array.isArray(examMaxScores) && examMaxScores[3] > 0) ? examMaxScores[3] : 25;
+
+        const reqPct1 = (Array.isArray(examMinPassPercentages) && examMinPassPercentages[0]) ? examMinPassPercentages[0] : 50;
+        const reqPct2 = (Array.isArray(examMinPassPercentages) && examMinPassPercentages[1]) ? examMinPassPercentages[1] : 50;
+        const reqPct3 = (Array.isArray(examMinPassPercentages) && examMinPassPercentages[2]) ? examMinPassPercentages[2] : 50;
+        const reqPct4 = (Array.isArray(examMinPassPercentages) && examMinPassPercentages[3]) ? examMinPassPercentages[3] : 50;
+
         if (totalAttendees === 0) {
             return {
                 totalAttendees: 0,
@@ -2719,7 +2858,16 @@ body {
                 q3: 0,
                 stdDev: 0,
                 scores: [],
-                attendedList: []
+                attendedList: [],
+                // إحصائيات الأقسام الأربعة الافتراضية
+                avgG1: 0, avgG2: 0, avgG3: 0, avgG4: 0,
+                avgPctG1: 0, avgPctG2: 0, avgPctG3: 0, avgPctG4: 0,
+                passPctG1: 0, passPctG2: 0, passPctG3: 0, passPctG4: 0,
+                minG1: 0, maxG1: 0, minG2: 0, maxG2: 0, minG3: 0, maxG3: 0, minG4: 0, maxG4: 0,
+                avgSpiritual: 0, avgPctSpiritual: 0, maxSpiritual: maxEx1 + maxEx3,
+                avgPsych: 0, avgPctPsych: 0, maxPsych: maxEx2 + maxEx4,
+                maleAvgScore: 0, maleAvgPct: 0, maleCount: 0,
+                femaleAvgScore: 0, femaleAvgPct: 0, femaleCount: 0
             };
         }
 
@@ -2740,6 +2888,61 @@ body {
         const variance = scores.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / totalAttendees;
         const stdDev = Math.sqrt(variance);
 
+        // حساب متوسطات كل قسم من الأقسام الأربعة
+        const sumG1 = attendedList.reduce((acc, c) => acc + (Number(c.g1) || 0), 0);
+        const sumG2 = attendedList.reduce((acc, c) => acc + (Number(c.g2) || 0), 0);
+        const sumG3 = attendedList.reduce((acc, c) => acc + (Number(c.g3) || 0), 0);
+        const sumG4 = attendedList.reduce((acc, c) => acc + (Number(c.g4) || 0), 0);
+
+        const avgG1 = sumG1 / totalAttendees;
+        const avgG2 = sumG2 / totalAttendees;
+        const avgG3 = sumG3 / totalAttendees;
+        const avgG4 = sumG4 / totalAttendees;
+
+        const avgPctG1 = maxEx1 > 0 ? (avgG1 / maxEx1) * 100 : 0;
+        const avgPctG2 = maxEx2 > 0 ? (avgG2 / maxEx2) * 100 : 0;
+        const avgPctG3 = maxEx3 > 0 ? (avgG3 / maxEx3) * 100 : 0;
+        const avgPctG4 = maxEx4 > 0 ? (avgG4 / maxEx4) * 100 : 0;
+
+        const passedG1 = attendedList.filter(c => (Number(c.g1) || 0) >= ((reqPct1 / 100) * maxEx1)).length;
+        const passedG2 = attendedList.filter(c => (Number(c.g2) || 0) >= ((reqPct2 / 100) * maxEx2)).length;
+        const passedG3 = attendedList.filter(c => (Number(c.g3) || 0) >= ((reqPct3 / 100) * maxEx3)).length;
+        const passedG4 = attendedList.filter(c => (Number(c.g4) || 0) >= ((reqPct4 / 100) * maxEx4)).length;
+
+        const passPctG1 = (passedG1 / totalAttendees) * 100;
+        const passPctG2 = (passedG2 / totalAttendees) * 100;
+        const passPctG3 = (passedG3 / totalAttendees) * 100;
+        const passPctG4 = (passedG4 / totalAttendees) * 100;
+
+        const scoresG1 = attendedList.map(c => Number(c.g1) || 0);
+        const scoresG2 = attendedList.map(c => Number(c.g2) || 0);
+        const scoresG3 = attendedList.map(c => Number(c.g3) || 0);
+        const scoresG4 = attendedList.map(c => Number(c.g4) || 0);
+
+        const minG1 = Math.min(...scoresG1), maxG1 = Math.max(...scoresG1);
+        const minG2 = Math.min(...scoresG2), maxG2 = Math.max(...scoresG2);
+        const minG3 = Math.min(...scoresG3), maxG3 = Math.max(...scoresG3);
+        const minG4 = Math.min(...scoresG4), maxG4 = Math.max(...scoresG4);
+
+        // متوسطات المحاور الكبرى: الروحي (g1 + g3) والنفسي (g2 + g4)
+        const maxSpiritual = maxEx1 + maxEx3;
+        const avgSpiritual = avgG1 + avgG3;
+        const avgPctSpiritual = maxSpiritual > 0 ? (avgSpiritual / maxSpiritual) * 100 : 0;
+
+        const maxPsych = maxEx2 + maxEx4;
+        const avgPsych = avgG2 + avgG4;
+        const avgPctPsych = maxPsych > 0 ? (avgPsych / maxPsych) * 100 : 0;
+
+        // متوسطات أقسام النوع (بنين وبنات)
+        const males = attendedList.filter(c => (c.gender === 'بنين' || c.gender === 'male' || (typeof normalizeGender === 'function' && normalizeGender('', c.name || '') === 'بنين')));
+        const females = attendedList.filter(c => (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى' || (typeof normalizeGender === 'function' && normalizeGender('', c.name || '') === 'بنات')));
+
+        const maleAvgScore = males.length > 0 ? males.reduce((acc, c) => acc + ((Number(c.g1)||0)+(Number(c.g2)||0)+(Number(c.g3)||0)+(Number(c.g4)||0)), 0) / males.length : 0;
+        const maleAvgPct = maxTotalScore > 0 ? (maleAvgScore / maxTotalScore) * 100 : 0;
+
+        const femaleAvgScore = females.length > 0 ? females.reduce((acc, c) => acc + ((Number(c.g1)||0)+(Number(c.g2)||0)+(Number(c.g3)||0)+(Number(c.g4)||0)), 0) / females.length : 0;
+        const femaleAvgPct = maxTotalScore > 0 ? (femaleAvgScore / maxTotalScore) * 100 : 0;
+
         return {
             totalAttendees,
             absentCount,
@@ -2752,7 +2955,20 @@ body {
             q3,
             stdDev,
             scores,
-            attendedList
+            attendedList,
+            // أقسام المواد الأربعة
+            avgG1, avgG2, avgG3, avgG4,
+            avgPctG1, avgPctG2, avgPctG3, avgPctG4,
+            passedG1, passedG2, passedG3, passedG4,
+            passPctG1, passPctG2, passPctG3, passPctG4,
+            minG1, maxG1, minG2, maxG2, minG3, maxG3, minG4, maxG4,
+            maxEx1, maxEx2, maxEx3, maxEx4,
+            // المحاور الكبرى
+            avgSpiritual, avgPctSpiritual, maxSpiritual,
+            avgPsych, avgPctPsych, maxPsych,
+            // أقسام البنين والبنات
+            maleAvgScore, maleAvgPct, maleCount: males.length,
+            femaleAvgScore, femaleAvgPct, femaleCount: females.length
         };
     }
 
@@ -2915,6 +3131,60 @@ body {
         if (elQuickBadge) {
             elQuickBadge.innerHTML = `<i class="fa-solid fa-chart-line me-1"></i> لتمرير ${currentTargetPassRate}%: حد الواقع = ${calc.requiredThreshold}%`;
         }
+    
+        // 5. تحديث بطاقات متوسطات الأقسام الأربعة
+        const maxE1 = stats.maxEx1 || 25, maxE2 = stats.maxEx2 || 25, maxE3 = stats.maxEx3 || 25, maxE4 = stats.maxEx4 || 25;
+        
+        const elSecScore1 = document.getElementById('secAvgScore1'); if (elSecScore1) elSecScore1.textContent = stats.avgG1.toFixed(1);
+        const elSecPct1 = document.getElementById('secAvgPct1'); if (elSecPct1) elSecPct1.textContent = stats.avgPctG1.toFixed(1) + '%';
+        const elSecMax1 = document.getElementById('secMaxScoreDisp1'); if (elSecMax1) elSecMax1.textContent = '/ ' + maxE1;
+        const elSecPass1 = document.getElementById('secPassRate1'); if (elSecPass1) elSecPass1.textContent = stats.passPctG1.toFixed(1) + '%';
+        const elSecMinMax1 = document.getElementById('secMinMax1'); if (elSecMinMax1) elSecMinMax1.textContent = (stats.totalAttendees > 0 ? stats.minG1.toFixed(1) + ' - ' + stats.maxG1.toFixed(1) : '0 - 0');
+
+        const elSecScore2 = document.getElementById('secAvgScore2'); if (elSecScore2) elSecScore2.textContent = stats.avgG2.toFixed(1);
+        const elSecPct2 = document.getElementById('secAvgPct2'); if (elSecPct2) elSecPct2.textContent = stats.avgPctG2.toFixed(1) + '%';
+        const elSecMax2 = document.getElementById('secMaxScoreDisp2'); if (elSecMax2) elSecMax2.textContent = '/ ' + maxE2;
+        const elSecPass2 = document.getElementById('secPassRate2'); if (elSecPass2) elSecPass2.textContent = stats.passPctG2.toFixed(1) + '%';
+        const elSecMinMax2 = document.getElementById('secMinMax2'); if (elSecMinMax2) elSecMinMax2.textContent = (stats.totalAttendees > 0 ? stats.minG2.toFixed(1) + ' - ' + stats.maxG2.toFixed(1) : '0 - 0');
+
+        const elSecScore3 = document.getElementById('secAvgScore3'); if (elSecScore3) elSecScore3.textContent = stats.avgG3.toFixed(1);
+        const elSecPct3 = document.getElementById('secAvgPct3'); if (elSecPct3) elSecPct3.textContent = stats.avgPctG3.toFixed(1) + '%';
+        const elSecMax3 = document.getElementById('secMaxScoreDisp3'); if (elSecMax3) elSecMax3.textContent = '/ ' + maxE3;
+        const elSecPass3 = document.getElementById('secPassRate3'); if (elSecPass3) elSecPass3.textContent = stats.passPctG3.toFixed(1) + '%';
+        const elSecMinMax3 = document.getElementById('secMinMax3'); if (elSecMinMax3) elSecMinMax3.textContent = (stats.totalAttendees > 0 ? stats.minG3.toFixed(1) + ' - ' + stats.maxG3.toFixed(1) : '0 - 0');
+
+        const elSecScore4 = document.getElementById('secAvgScore4'); if (elSecScore4) elSecScore4.textContent = stats.avgG4.toFixed(1);
+        const elSecPct4 = document.getElementById('secAvgPct4'); if (elSecPct4) elSecPct4.textContent = stats.avgPctG4.toFixed(1) + '%';
+        const elSecMax4 = document.getElementById('secMaxScoreDisp4'); if (elSecMax4) elSecMax4.textContent = '/ ' + maxE4;
+        const elSecPass4 = document.getElementById('secPassRate4'); if (elSecPass4) elSecPass4.textContent = stats.passPctG4.toFixed(1) + '%';
+        const elSecMinMax4 = document.getElementById('secMinMax4'); if (elSecMinMax4) elSecMinMax4.textContent = (stats.totalAttendees > 0 ? stats.minG4.toFixed(1) + ' - ' + stats.maxG4.toFixed(1) : '0 - 0');
+
+        // تحديث ملخص المحاور الكبرى وأقسام النوع
+        const elDomainSpiritual = document.getElementById('avgDomainSpiritual');
+        if (elDomainSpiritual) elDomainSpiritual.textContent = stats.avgSpiritual.toFixed(1) + ' / ' + stats.maxSpiritual + ' (' + stats.avgPctSpiritual.toFixed(1) + '%)';
+        const elDomainPsych = document.getElementById('avgDomainPsych');
+        if (elDomainPsych) elDomainPsych.textContent = stats.avgPsych.toFixed(1) + ' / ' + stats.maxPsych + ' (' + stats.avgPctPsych.toFixed(1) + '%)';
+
+        const elGenderMale = document.getElementById('avgGenderMale');
+        if (elGenderMale) elGenderMale.textContent = stats.maleAvgPct.toFixed(1) + '% (' + stats.maleCount + ' حاضرين)';
+        const elGenderFemale = document.getElementById('avgGenderFemale');
+        if (elGenderFemale) elGenderFemale.textContent = stats.femaleAvgPct.toFixed(1) + '% (' + stats.femaleCount + ' حاضرات)';
+
+        // تحديث شارات متوسط كل قسم في لوحة المعايير التفصيلية
+        const b1 = document.getElementById('examAvgBadge1'); if (b1) b1.innerHTML = '<i class="fa-solid fa-chart-simple me-1"></i>متوسط القسم: <strong>' + stats.avgG1.toFixed(1) + '</strong> / ' + maxE1 + ' (' + stats.avgPctG1.toFixed(1) + '%)';
+        const b2 = document.getElementById('examAvgBadge2'); if (b2) b2.innerHTML = '<i class="fa-solid fa-chart-simple me-1"></i>متوسط القسم: <strong>' + stats.avgG2.toFixed(1) + '</strong> / ' + maxE2 + ' (' + stats.avgPctG2.toFixed(1) + '%)';
+        const b3 = document.getElementById('examAvgBadge3'); if (b3) b3.innerHTML = '<i class="fa-solid fa-chart-simple me-1"></i>متوسط القسم: <strong>' + stats.avgG3.toFixed(1) + '</strong> / ' + maxE3 + ' (' + stats.avgPctG3.toFixed(1) + '%)';
+        const b4 = document.getElementById('examAvgBadge4'); if (b4) b4.innerHTML = '<i class="fa-solid fa-chart-simple me-1"></i>متوسط القسم: <strong>' + stats.avgG4.toFixed(1) + '</strong> / ' + maxE4 + ' (' + stats.avgPctG4.toFixed(1) + '%)';
+
+        // 6. تحديث صف إجمالي متوسطات الأقسام في ذيل الجدول (Table Footer)
+        const tf1 = document.getElementById('tfAvgG1'); if (tf1) tf1.innerHTML = '<strong>' + stats.avgG1.toFixed(1) + '</strong><br><small style="color:#64748b;">(' + stats.avgPctG1.toFixed(1) + '%)</small>';
+        const tf2 = document.getElementById('tfAvgG2'); if (tf2) tf2.innerHTML = '<strong>' + stats.avgG2.toFixed(1) + '</strong><br><small style="color:#64748b;">(' + stats.avgPctG2.toFixed(1) + '%)</small>';
+        const tf3 = document.getElementById('tfAvgG3'); if (tf3) tf3.innerHTML = '<strong>' + stats.avgG3.toFixed(1) + '</strong><br><small style="color:#64748b;">(' + stats.avgPctG3.toFixed(1) + '%)</small>';
+        const tf4 = document.getElementById('tfAvgG4'); if (tf4) tf4.innerHTML = '<strong>' + stats.avgG4.toFixed(1) + '</strong><br><small style="color:#64748b;">(' + stats.avgPctG4.toFixed(1) + '%)</small>';
+        const tfTot = document.getElementById('tfAvgTotal'); if (tfTot) tfTot.innerHTML = '<strong>' + ((stats.mean / 100) * maxTotalScore).toFixed(1) + '</strong><br><small style="color:#64748b;">/ ' + maxTotalScore + '</small>';
+        const tfPct = document.getElementById('tfAvgPct'); if (tfPct) tfPct.textContent = stats.mean.toFixed(1) + '%';
+        const tfDec = document.getElementById('tfSummaryDec'); if (tfDec) tfDec.innerHTML = 'المجتازون بالحد الحالي (' + passThreshold + '%): <strong>' + currPassCount + '</strong> من <strong>' + stats.totalAttendees + '</strong> (' + currPassPct.toFixed(1) + '%)';
+    
     }
 
     function applyRealityCalculatedThreshold() {
