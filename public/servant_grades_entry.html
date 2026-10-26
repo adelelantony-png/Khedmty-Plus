@@ -1838,10 +1838,13 @@ body {
 
                     <!-- لوحة توزيع درجات الامتحانات الأربعة (الدرجات العظمى) -->
                     <div id="scaleConfigDrawer" style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px 14px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                             <strong style="color:var(--primary); font-size:0.9rem;">
                                 <i class="fa-solid fa-sliders me-1"></i> توزيع الدرجات العظمى للامتحانات الأربعة (المجموع الإجمالي: <span id="cfgTotalMaxScoreDisplay" style="color:#2563eb; font-weight:900;">100</span> درجة):
                             </strong>
+                            <button type="button" class="btn-custom" id="btnResetExamMaxScores" onclick="resetExamMaxScoresToDefault()" style="font-size:0.75rem; padding:4px 10px; background:#e2e8f0; color:#334155; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;" title="استعادة 25 درجة لكل امتحان">
+                                <i class="fa-solid fa-rotate-left me-1"></i> استعادة الافتراضي (25 لكل مادة)
+                            </button>
                         </div>
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px;">
                             <div>
@@ -3033,15 +3036,42 @@ body {
     }
 
     function updateExamMaxScores() {
-        const e1 = Number(document.getElementById('cfgMaxExam1').value) || 25;
-        const e2 = Number(document.getElementById('cfgMaxExam2').value) || 25;
-        const e3 = Number(document.getElementById('cfgMaxExam3').value) || 25;
-        const e4 = Number(document.getElementById('cfgMaxExam4').value) || 25;
+        const inp1 = document.getElementById('cfgMaxExam1');
+        const inp2 = document.getElementById('cfgMaxExam2');
+        const inp3 = document.getElementById('cfgMaxExam3');
+        const inp4 = document.getElementById('cfgMaxExam4');
+
+        const e1 = Math.max(1, Number(inp1 ? inp1.value : 25) || 25);
+        const e2 = Math.max(1, Number(inp2 ? inp2.value : 25) || 25);
+        const e3 = Math.max(1, Number(inp3 ? inp3.value : 25) || 25);
+        const e4 = Math.max(1, Number(inp4 ? inp4.value : 25) || 25);
 
         examMaxScores = [e1, e2, e3, e4];
         maxTotalScore = e1 + e2 + e3 + e4;
 
-        document.getElementById('cfgTotalMaxScoreDisplay').textContent = maxTotalScore;
+        const elTot = document.getElementById('cfgTotalMaxScoreDisplay');
+        if (elTot) elTot.textContent = maxTotalScore;
+        const elPdfMax = document.getElementById('pdfHeaderMaxScore');
+        if (elPdfMax) elPdfMax.textContent = maxTotalScore;
+
+        updateScoreEquivalents();
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+    }
+
+    function resetExamMaxScoresToDefault() {
+        examMaxScores = [25, 25, 25, 25];
+        maxTotalScore = 100;
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById('cfgMaxExam' + i);
+            if (el) el.value = 25;
+        }
+        const elTot = document.getElementById('cfgTotalMaxScoreDisplay');
+        if (elTot) elTot.textContent = 100;
+        const elPdfMax = document.getElementById('pdfHeaderMaxScore');
+        if (elPdfMax) elPdfMax.textContent = 100;
+
         updateScoreEquivalents();
         updateExamPassScoreEquivalents();
         saveGradesLocal(false);
@@ -3287,8 +3317,74 @@ body {
                     });
                 }
             }
-            const sMix = localStorage.getItem('khedmety_mix_mode');
-            if (sMix) setMixMode(sMix);
+
+            // 1. استرجاع الدرجات العظمى للامتحانات الأربعة والمجموع أولاً لتفادي تصفيرها أثناء استرجاع باقي الإعدادات
+            const sExamMax = localStorage.getItem('khedmety_exam_max_scores');
+            if (sExamMax) {
+                try {
+                    const parsedMax = JSON.parse(sExamMax);
+                    if (Array.isArray(parsedMax) && parsedMax.length === 4) {
+                        examMaxScores = parsedMax.map(v => Math.max(1, Number(v) || 25));
+                    }
+                } catch(e) {
+                    console.warn('Error parsing khedmety_exam_max_scores:', e);
+                }
+            }
+            maxTotalScore = examMaxScores.reduce((a, b) => a + b, 0);
+            const sMax = localStorage.getItem('khedmety_max_total_score');
+            if (sMax && Number(sMax) > 0) {
+                const numMax = Number(sMax);
+                if (examMaxScores.reduce((a, b) => a + b, 0) === numMax) {
+                    maxTotalScore = numMax;
+                }
+            }
+
+            // تحديث واجهات إدخال وعرض الدرجات العظمى
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('cfgMaxExam' + i);
+                if (el) el.value = examMaxScores[i - 1];
+            }
+            const elCfgTotal = document.getElementById('cfgTotalMaxScoreDisplay');
+            if (elCfgTotal) elCfgTotal.textContent = maxTotalScore;
+            const elPdfMax = document.getElementById('pdfHeaderMaxScore');
+            if (elPdfMax) elPdfMax.textContent = maxTotalScore;
+
+            // 2. استرجاع نسب النجاح الصغرى لكل مادة
+            const sExamMinPct = localStorage.getItem('khedmety_exam_min_percentages');
+            if (sExamMinPct) {
+                try {
+                    const parsedMin = JSON.parse(sExamMinPct);
+                    if (Array.isArray(parsedMin) && parsedMin.length === 4) {
+                        examMinPassPercentages = parsedMin.map(v => Math.max(1, Math.min(100, Number(v) || 50)));
+                    }
+                } catch(e) {}
+            }
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('cfgPassPct' + i);
+                if (el) el.value = examMinPassPercentages[i - 1];
+                const sl = document.getElementById('mixSlider' + i);
+                if (sl) sl.value = examMinPassPercentages[i - 1];
+            }
+
+            // 3. استرجاع عتبات النجاح الإجمالية والمقابلة
+            const sPass = localStorage.getItem('khedmety_pass_threshold');
+            if (sPass) {
+                passThreshold = Number(sPass) || 60;
+                const sl = document.getElementById('passThresholdSlider');
+                if (sl) sl.value = passThreshold;
+                const disp = document.getElementById('thresholdDisplay');
+                if (disp) disp.textContent = `${passThreshold}%`;
+            }
+            const sInterview = localStorage.getItem('khedmety_interview_threshold');
+            if (sInterview) {
+                interviewThreshold = Number(sInterview) || 50;
+                const slInt = document.getElementById('interviewThresholdSlider');
+                if (slInt) slInt.value = interviewThreshold;
+                const dispInt = document.getElementById('interviewThresholdDisplay');
+                if (dispInt) dispInt.textContent = `${interviewThreshold}%`;
+            }
+
+            // 4. استرجاع النسبة المستهدفة
             const sTargetRate = localStorage.getItem('khedmety_target_pass_rate');
             if (sTargetRate) {
                 currentTargetPassRate = Number(sTargetRate) || 80;
@@ -3297,50 +3393,18 @@ body {
                 const inp = document.getElementById('targetPassRateInput');
                 if (inp) inp.value = currentTargetPassRate;
             }
-            const sPass = localStorage.getItem('khedmety_pass_threshold');
-            if (sPass) {
-                passThreshold = Number(sPass);
-                document.getElementById('passThresholdSlider').value = passThreshold;
-                document.getElementById('thresholdDisplay').textContent = `${passThreshold}%`;
+
+            // 5. استرجاع نمط المكس (مع تعطيل الحفظ العكسي أثناء التحميل triggerSave = false)
+            const sMix = localStorage.getItem('khedmety_mix_mode');
+            if (sMix) {
+                setMixMode(sMix, false);
             }
-            const sInterview = localStorage.getItem('khedmety_interview_threshold');
-            if (sInterview) {
-                interviewThreshold = Number(sInterview);
-            }
-            const sMax = localStorage.getItem('khedmety_max_total_score');
-            if (sMax) {
-                maxTotalScore = Number(sMax);
-                const elCfg = document.getElementById('cfgTotalMaxScoreDisplay');
-                if (elCfg) elCfg.textContent = maxTotalScore;
-            }
-            const sExamMinPct = localStorage.getItem('khedmety_exam_min_percentages');
-            if (sExamMinPct) {
-                try {
-                    const parsed = JSON.parse(sExamMinPct);
-                    if (Array.isArray(parsed) && parsed.length === 4) {
-                        examMinPassPercentages = parsed.map(v => Number(v) || 50);
-                    }
-                } catch(e) {}
-            }
-            for (let i = 1; i <= 4; i++) {
-                const el = document.getElementById('cfgPassPct' + i);
-                if (el) el.value = examMinPassPercentages[i - 1];
-            }
-            const sExamMax = localStorage.getItem('khedmety_exam_max_scores');
-            if (sExamMax) {
-                examMaxScores = JSON.parse(sExamMax);
-                if (Array.isArray(examMaxScores) && examMaxScores.length === 4) {
-                    if (document.getElementById('cfgMaxExam1')) document.getElementById('cfgMaxExam1').value = examMaxScores[0];
-                    if (document.getElementById('cfgMaxExam2')) document.getElementById('cfgMaxExam2').value = examMaxScores[1];
-                    if (document.getElementById('cfgMaxExam3')) document.getElementById('cfgMaxExam3').value = examMaxScores[2];
-                    if (document.getElementById('cfgMaxExam4')) document.getElementById('cfgMaxExam4').value = examMaxScores[3];
-                }
-                document.getElementById('interviewThresholdSlider').value = interviewThreshold;
-                document.getElementById('interviewThresholdDisplay').textContent = `${interviewThreshold}%`;
-            }
+
             updateScoreEquivalents();
             updateExamPassScoreEquivalents();
-        } catch(e) {}
+        } catch(e) {
+            console.error('Error in loadSavedData:', e);
+        }
     }
 
     function saveGradesLocal(showAlert = false) {
@@ -4392,7 +4456,7 @@ body {
     // =========================================================================
     let currentMixMode = 'strict'; // 'strict' | 'domain_blend' | 'reality_avg' | 'total_only'
 
-    function setMixMode(mode) {
+    function setMixMode(mode, triggerSave = true) {
         currentMixMode = mode;
         const btnStrict = document.getElementById('btnMixStrict');
         const btnDomain = document.getElementById('btnMixDomain');
@@ -4427,8 +4491,10 @@ body {
             }
         }
 
-        saveGradesLocal(false);
-        renderTable();
+        if (triggerSave) {
+            saveGradesLocal(false);
+            renderTable();
+        }
     }
 
     function handleMixSliderChange(examNum, val) {
@@ -4461,7 +4527,9 @@ body {
             const el = document.getElementById('examScoreEq' + i);
             if (el) {
                 el.innerHTML = '<span style="color:#0369a1; font-weight:800; font-size:0.8rem;">(يعادل: ' + cleanScore + ' من ' + max + ' درجة)</span>';
-            
+            }
+        }
+
         for (let i = 1; i <= 4; i++) {
             const sl = document.getElementById('mixSlider' + i);
             if (sl && Array.isArray(examMinPassPercentages)) sl.value = examMinPassPercentages[i - 1] || 50;
@@ -4472,9 +4540,6 @@ body {
                 const sc = ((p / 100) * max).toFixed(1);
                 disp.textContent = p + '% (' + sc + ' د)';
             }
-        }
-
-    }
         }
     }
 
@@ -7183,10 +7248,16 @@ body {
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    function initApp() {
         loadSavedData();
         renderTable();
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+        initApp();
+    }
 </script>
 <script src="js/pwa-helper.js"></script>
 </body>
