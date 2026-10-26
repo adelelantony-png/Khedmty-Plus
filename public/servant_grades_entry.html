@@ -1082,8 +1082,8 @@ body {
             <button type="button" class="btn-custom" onclick="openPdfExportModal()" style="background: linear-gradient(135deg, #b91c1c, #dc2626); color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);">
                 <i class="fa-solid fa-file-pdf"></i> تصدير تقرير PDF رسمي 📄
             </button>
-            <button type="button" class="btn-custom" onclick="exportToExcelCSV()">
-                <i class="fa-solid fa-file-excel text-success"></i> تصدير كشف خدمتي برو (CSV)
+            <button type="button" class="btn-custom" onclick="exportDetailedCriteriaExcel()" style="background:#f0fdf4; color:#15803d; border-color:#86efac; font-weight:800;" title="تصدير شيت إكسيل معتمد يتضمن معادلات المجموع والنسب الحية والملاحظات وملخص الأعداد">
+                <i class="fa-solid fa-file-excel text-success me-1"></i> تصدير شيت إكسيل معتمد (XLSX) 📊
             </button>
             <button type="button" class="btn-custom btn-navy" onclick="saveGradesLocal(true)">
                 <i class="fa-solid fa-floppy-disk"></i> اعتماد ورصد درجات التأهيل ✍️
@@ -6117,7 +6117,7 @@ body {
 
     
     // =========================================================================
-    // 📊 تصدير تقرير المعايير والنتائج التفصيلي (Excel)
+    // 📊 تصدير شيت إكسيل احترافي معتمد (معادلات حية + ملاحظات + شيت ملخص إحصائي)
     // =========================================================================
     function exportDetailedCriteriaExcel() {
         if (!candidatesList || candidatesList.length === 0) {
@@ -6125,6 +6125,10 @@ body {
             return;
         }
 
+        const sheetNameGrades = "كشف_الدرجات_والمعايير";
+        const sheetNameSummary = "ملخص_الإحصائيات_والأعداد";
+
+        // 1. عناوين الأعمدة لشيت الدرجات والمعايير
         const headers = [
             "م",
             "كود المخدوم",
@@ -6132,6 +6136,7 @@ body {
             "النوع",
             "رقم الهاتف",
             "أب الاعتراف",
+            "حالة الحضور",
             "تحريري روحي (" + examMaxScores[0] + ")",
             "تحريري روحي %",
             "حالة التحريري الروحي (≥" + examMinPassPercentages[0] + "%)",
@@ -6148,62 +6153,262 @@ body {
             "النسبة الكلية %",
             "استيفاء شرط النسب الأربعة",
             "القرار النهائي",
-            "سبب عدم النجاح / الملاحظات"
+            "سبب عدم النجاح والتوجيه",
+            "ملاحظات الجانب الروحي والسلوكي 🕊️",
+            "ملاحظات الجانب النفسي والسلوكي 🧠",
+            "تصنيف التحدي أو المشكلة الرعوية ⚠️"
         ];
 
-        const rows = candidatesList.map((c, idx) => {
+        // إحصائيات الملخص الحسابية
+        let totalCandidates = candidatesList.length;
+        let attendedCount = 0;
+        let absentCount = 0;
+        let accClean = 0;
+        let accCond = 0;
+        let interviewCount = 0;
+        let rejCount = 0;
+        let sumTotal = 0;
+        let maxTotal = 0;
+        let passEx1 = 0, passEx2 = 0, passEx3 = 0, passEx4 = 0, allFourPass = 0;
+        let spRecorded = 0, psRecorded = 0;
+        let spCommunion = 0, spHair = 0, spConfOnly = 0, spCustom = 0;
+        let probClean = 0, probConf = 0, probPsych = 0, probDisc = 0, probFam = 0, probSpec = 0;
+
+        const rows = [headers];
+
+        candidatesList.forEach((c, idx) => {
+            const rowNum = idx + 2; // الصف الفعلي بالإكسيل (الصف 1 هو العناوين)
             const evalRes = getCandidateExamDetails(c);
             const dec = computeDecision(c);
-            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
-            const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
+            const isAtt = !!c.attended;
+            const g1 = Number(c.g1) || 0;
+            const g2 = Number(c.g2) || 0;
+            const g3 = Number(c.g3) || 0;
+            const g4 = Number(c.g4) || 0;
+            const tot = g1 + g2 + g3 + g4;
 
-            return [
+            if (isAtt) {
+                attendedCount++;
+                sumTotal += tot;
+                if (tot > maxTotal) maxTotal = tot;
+                if (evalRes.details[0].isPassed) passEx1++;
+                if (evalRes.details[1].isPassed) passEx2++;
+                if (evalRes.details[2].isPassed) passEx3++;
+                if (evalRes.details[3].isPassed) passEx4++;
+                if (evalRes.allPassed) allFourPass++;
+            } else {
+                absentCount++;
+            }
+
+            if (dec.key === 'accepted') accClean++;
+            else if (dec.key === 'conditional') accCond++;
+            else if (dec.key === 'interview') interviewCount++;
+            else rejCount++;
+
+            // إحصائيات الملاحظات
+            const spText = String(c.spiritualNotes || '').trim();
+            const psText = String(c.psychNotes || '').trim();
+            const probText = String(c.problemType || '').trim();
+
+            if (spText) {
+                spRecorded++;
+                if (spText.includes('اعتراف وتناول')) spCommunion++;
+                else if (spText.includes('مظهر الشعر')) spHair++;
+                else if (spText.includes('اعتراف فقط')) spConfOnly++;
+                else spCustom++;
+            }
+            if (psText) psRecorded++;
+
+            if (probText.includes('لا توجد')) probClean++;
+            else if (probText.includes('اعتراف')) probConf++;
+            else if (probText.includes('نفسية')) probPsych++;
+            else if (probText.includes('التزام')) probDisc++;
+            else if (probText.includes('أسرية')) probFam++;
+            else if (probText.includes('خاصة')) probSpec++;
+
+            // معادلات الإكسيل الحية للسطر
+            // الأعمدة: H=g1, I=g1%, J=حالة1, K=g2, L=g2%, M=حالة2, N=g3, O=g3%, P=حالة3, Q=g4, R=g4%, S=حالة4, T=المجموع, U=النسبة%
+            const fPct1 = isAtt ? { f: `IF(G${rowNum}="حاضر", H${rowNum}/${examMaxScores[0]}, 0)`, v: evalRes.details[0].pct / 100, z: "0.0%" } : { v: 0, z: "0.0%" };
+            const fStat1 = isAtt ? { f: `IF(G${rowNum}="غائب", "غائب", IF(I${rowNum}>=${(examMinPassPercentages[0]/100).toFixed(4)}, "ناجح ✅", "راسب ❌"))`, v: evalRes.details[0].isPassed ? 'ناجح ✅' : 'راسب ❌' } : { v: 'غائب' };
+
+            const fPct2 = isAtt ? { f: `IF(G${rowNum}="حاضر", K${rowNum}/${examMaxScores[1]}, 0)`, v: evalRes.details[1].pct / 100, z: "0.0%" } : { v: 0, z: "0.0%" };
+            const fStat2 = isAtt ? { f: `IF(G${rowNum}="غائب", "غائب", IF(L${rowNum}>=${(examMinPassPercentages[1]/100).toFixed(4)}, "ناجح ✅", "راسب ❌"))`, v: evalRes.details[1].isPassed ? 'ناجح ✅' : 'راسب ❌' } : { v: 'غائب' };
+
+            const fPct3 = isAtt ? { f: `IF(G${rowNum}="حاضر", N${rowNum}/${examMaxScores[2]}, 0)`, v: evalRes.details[2].pct / 100, z: "0.0%" } : { v: 0, z: "0.0%" };
+            const fStat3 = isAtt ? { f: `IF(G${rowNum}="غائب", "غائب", IF(O${rowNum}>=${(examMinPassPercentages[2]/100).toFixed(4)}, "ناجح ✅", "راسب ❌"))`, v: evalRes.details[2].isPassed ? 'ناجح ✅' : 'راسب ❌' } : { v: 'غائب' };
+
+            const fPct4 = isAtt ? { f: `IF(G${rowNum}="حاضر", Q${rowNum}/${examMaxScores[3]}, 0)`, v: evalRes.details[3].pct / 100, z: "0.0%" } : { v: 0, z: "0.0%" };
+            const fStat4 = isAtt ? { f: `IF(G${rowNum}="غائب", "غائب", IF(R${rowNum}>=${(examMinPassPercentages[3]/100).toFixed(4)}, "ناجح ✅", "راسب ❌"))`, v: evalRes.details[3].isPassed ? 'ناجح ✅' : 'راسب ❌' } : { v: 'غائب' };
+
+            const fTotal = isAtt ? { f: `IF(G${rowNum}="حاضر", H${rowNum}+K${rowNum}+N${rowNum}+Q${rowNum}, 0)`, v: tot } : { v: 0 };
+            const fTotalPct = isAtt ? { f: `IF(G${rowNum}="حاضر", T${rowNum}/${maxTotalScore}, 0)`, v: maxTotalScore > 0 ? (tot / maxTotalScore) : 0, z: "0.0%" } : { v: 0, z: "0.0%" };
+            const fAllFour = isAtt ? { f: `IF(G${rowNum}="غائب", "غائب", IF(AND(I${rowNum}>=${(examMinPassPercentages[0]/100).toFixed(4)}, L${rowNum}>=${(examMinPassPercentages[1]/100).toFixed(4)}, O${rowNum}>=${(examMinPassPercentages[2]/100).toFixed(4)}, R${rowNum}>=${(examMinPassPercentages[3]/100).toFixed(4)}), "نعم (اجتاز كافة المواد ✅)", "لا (لم يتخطَ عناصر ❌)"))`, v: evalRes.allPassed ? 'نعم (اجتاز كافة المواد ✅)' : 'لا (لم يتخطَ عناصر ❌)' } : { v: 'غائب' };
+
+            rows.push([
                 idx + 1,
                 c.code,
                 c.name,
                 c.gender || 'بنين',
                 c.phone || '-',
                 c.confessor || 'لا يوجد',
-                c.attended ? (c.g1 ?? 0) : 'غائب',
-                c.attended ? evalRes.details[0].pct.toFixed(1) + '%' : '-',
-                c.attended ? (evalRes.details[0].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
-                c.attended ? (c.g2 ?? 0) : 'غائب',
-                c.attended ? evalRes.details[1].pct.toFixed(1) + '%' : '-',
-                c.attended ? (evalRes.details[1].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
-                c.attended ? (c.g3 ?? 0) : 'غائب',
-                c.attended ? evalRes.details[2].pct.toFixed(1) + '%' : '-',
-                c.attended ? (evalRes.details[2].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
-                c.attended ? (c.g4 ?? 0) : 'غائب',
-                c.attended ? evalRes.details[3].pct.toFixed(1) + '%' : '-',
-                c.attended ? (evalRes.details[3].isPassed ? 'ناجح ✅' : 'راسب ❌') : 'غائب',
-                c.attended ? total.toFixed(1) : 'غائب',
-                c.attended ? pct + '%' : '-',
-                c.attended ? (evalRes.allPassed ? 'نعم (اجتاز كافة المواد)' : 'لا (لم يتخطَ عناصر)') : 'غائب',
+                isAtt ? 'حاضر' : 'غائب',
+                isAtt ? g1 : 0,
+                fPct1,
+                fStat1,
+                isAtt ? g2 : 0,
+                fPct2,
+                fStat2,
+                isAtt ? g3 : 0,
+                fPct3,
+                fStat3,
+                isAtt ? g4 : 0,
+                fPct4,
+                fStat4,
+                fTotal,
+                fTotalPct,
+                fAllFour,
                 dec.label,
-                dec.failReason || 'لا يوجد'
-            ];
+                dec.failReason || 'لا يوجد',
+                spText || 'لا توجد ملاحظات',
+                psText || 'لا توجد ملاحظات',
+                probText || 'لا توجد مشاكل (طبيعي) 🟢'
+            ]);
         });
+
+        // صفوف الإجماليات والمتوسطات في نهاية جدول الدرجات
+        const lastDataRow = candidatesList.length + 1;
+        const avgRow = lastDataRow + 2;
+        const maxRow = lastDataRow + 3;
+
+        // صف متوسط درجات الحاضرين
+        const avgCells = new Array(headers.length).fill("");
+        avgCells[2] = "متوسط درجات الحاضرين (Average)";
+        avgCells[7] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", H2:H${lastDataRow})`, v: attendedCount > 0 ? (candidatesList.reduce((s, c) => s + (c.attended ? (Number(c.g1)||0) : 0), 0) / attendedCount) : 0 };
+        avgCells[10] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", K2:K${lastDataRow})`, v: attendedCount > 0 ? (candidatesList.reduce((s, c) => s + (c.attended ? (Number(c.g2)||0) : 0), 0) / attendedCount) : 0 };
+        avgCells[13] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", N2:N${lastDataRow})`, v: attendedCount > 0 ? (candidatesList.reduce((s, c) => s + (c.attended ? (Number(c.g3)||0) : 0), 0) / attendedCount) : 0 };
+        avgCells[16] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", Q2:Q${lastDataRow})`, v: attendedCount > 0 ? (candidatesList.reduce((s, c) => s + (c.attended ? (Number(c.g4)||0) : 0), 0) / attendedCount) : 0 };
+        avgCells[19] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", T2:T${lastDataRow})`, v: attendedCount > 0 ? (sumTotal / attendedCount) : 0 };
+        avgCells[20] = { f: `AVERAGEIF(G2:G${lastDataRow}, "حاضر", U2:U${lastDataRow})`, v: (attendedCount > 0 && maxTotalScore > 0) ? (sumTotal / attendedCount / maxTotalScore) : 0, z: "0.0%" };
+
+        // صف أعلى درجة بالدفعة
+        const maxCells = new Array(headers.length).fill("");
+        maxCells[2] = "أعلى درجة مسجلة بالدفعة (Maximum)";
+        maxCells[7] = { f: `MAX(H2:H${lastDataRow})`, v: Math.max(...candidatesList.map(c => c.attended ? (Number(c.g1)||0) : 0), 0) };
+        maxCells[10] = { f: `MAX(K2:K${lastDataRow})`, v: Math.max(...candidatesList.map(c => c.attended ? (Number(c.g2)||0) : 0), 0) };
+        maxCells[13] = { f: `MAX(N2:N${lastDataRow})`, v: Math.max(...candidatesList.map(c => c.attended ? (Number(c.g3)||0) : 0), 0) };
+        maxCells[16] = { f: `MAX(Q2:Q${lastDataRow})`, v: Math.max(...candidatesList.map(c => c.attended ? (Number(c.g4)||0) : 0), 0) };
+        maxCells[19] = { f: `MAX(T2:T${lastDataRow})`, v: maxTotal };
+        maxCells[20] = { f: `MAX(U2:U${lastDataRow})`, v: maxTotalScore > 0 ? (maxTotal / maxTotalScore) : 0, z: "0.0%" };
+
+        rows.push(new Array(headers.length).fill("")); // سطر فارغ فاصل
+        rows.push(avgCells);
+        rows.push(maxCells);
+
+        // 2. إعداد شيت 2: ملخص الأعداد والإحصائيات الاحتياطي
+        const summaryAoa = [
+            ["تقرير ملخص إحصائيات وأعداد نتائج القبول - كنيسة الشهيد العظيم ماربولس ببوش", ""],
+            ["تاريخ وتوقيت استخراج التقرير:", new Date().toLocaleString('ar-EG')],
+            ["نظام إدارة وتأهيل الخدام:", "خدمتي برو (Khedmety Plus v2.7)"],
+            ["", ""],
+            ["📊 1. المؤشرات العامة لدفعة المخدومين", "القيمة الإحصائية"],
+            ["إجمالي المسجلين بالدفعة", { f: `COUNTA(${sheetNameGrades}!B2:B${lastDataRow})`, v: totalCandidates }],
+            ["الحاضرون فعلياً للامتحانات", { f: `COUNTIF(${sheetNameGrades}!G2:G${lastDataRow}, "حاضر")`, v: attendedCount }],
+            ["الغائبون عن الامتحانات", { f: `COUNTIF(${sheetNameGrades}!G2:G${lastDataRow}, "غائب")`, v: absentCount }],
+            ["نسبة حضور الامتحان الإجمالية", { f: `B7/B6`, v: totalCandidates > 0 ? (attendedCount / totalCandidates) : 0, z: "0.0%" }],
+            ["المقبولون نهائياً (🟢)", { f: `COUNTIF(${sheetNameGrades}!W2:W${lastDataRow}, "*مقبول نهائياً*")`, v: accClean }],
+            ["مقبولون مع متابعة ورعاية الاعتراف (🕊️)", { f: `COUNTIF(${sheetNameGrades}!W2:W${lastDataRow}, "*رعاية ومتابعة*")`, v: accCond }],
+            ["معلقون للمقابلة الشخصية (🟠)", { f: `COUNTIF(${sheetNameGrades}!W2:W${lastDataRow}, "*معلق للمقابلة*")`, v: interviewCount }],
+            ["غير مجتازين / دور ثان (🔴)", { f: `COUNTIF(${sheetNameGrades}!W2:W${lastDataRow}, "*غير مجتاز*")`, v: rejCount }],
+            ["إجمالي المقبولين (نهائي + متابعة اعتراف)", { f: `B10+B11`, v: accClean + accCond }],
+            ["نسبة النجاح والاجتياز العامة", { f: `B14/B7`, v: attendedCount > 0 ? ((accClean + accCond) / attendedCount) : 0, z: "0.0%" }],
+            ["متوسط مجموع درجات الحاضرين", { f: `AVERAGEIF(${sheetNameGrades}!G2:G${lastDataRow}, "حاضر", ${sheetNameGrades}!T2:T${lastDataRow})`, v: attendedCount > 0 ? (sumTotal / attendedCount) : 0 }],
+            ["أعلى مجموع مسجل بالدفعة", { f: `MAX(${sheetNameGrades}!T2:T${lastDataRow})`, v: maxTotal }],
+            ["", ""],
+            ["🎯 2. إحصائيات اجتياز المعايير الأربعة الفردية", "عدد المجتازين"],
+            [`1. تحريري روحي (عظمى: ${examMaxScores[0]} | نجاح: ${examMinPassPercentages[0]}%)`, { f: `COUNTIF(${sheetNameGrades}!J2:J${lastDataRow}, "*ناجح*")`, v: passEx1 }],
+            [`2. تحريري نفسي (عظمى: ${examMaxScores[1]} | نجاح: ${examMinPassPercentages[1]}%)`, { f: `COUNTIF(${sheetNameGrades}!M2:M${lastDataRow}, "*ناجح*")`, v: passEx2 }],
+            [`3. شفوي روحي (عظمى: ${examMaxScores[2]} | نجاح: ${examMinPassPercentages[2]}%)`, { f: `COUNTIF(${sheetNameGrades}!P2:P${lastDataRow}, "*ناجح*")`, v: passEx3 }],
+            [`4. شفوي نفسي (عظمى: ${examMaxScores[3]} | نجاح: ${examMinPassPercentages[3]}%)`, { f: `COUNTIF(${sheetNameGrades}!S2:S${lastDataRow}, "*ناجح*")`, v: passEx4 }],
+            ["المستوفون لكافة النسب الأربعة معاً", { f: `COUNTIF(${sheetNameGrades}!V2:V${lastDataRow}, "*اجتاز كافة المواد*")`, v: allFourPass }],
+            ["", ""],
+            ["🕊️ 3. ملخص الملاحظات الروحية والنفسية والرعوية المسجلة", "العدد"],
+            ["إجمالي من لديهم ملاحظات روحية وسلوكية مسجلة", spRecorded],
+            ["ملاحظة: اعتراف وتناول 🍞", spCommunion],
+            ["ملاحظة: اعتراف ومظهر الشعر ✂️", spHair],
+            ["ملاحظة: اعتراف فقط ✝️", spConfOnly],
+            ["ملاحظات روحية يدوية مخصصة ✍️", spCustom],
+            ["إجمالي من لديهم ملاحظات نفسية وسلوكية مسجلة 🧠", psRecorded],
+            ["تصنيف: لا توجد مشاكل رعوية (طبيعي) 🟢", probClean],
+            ["تصنيف: مشكلة اعتراف (مهلة أسبوع) 🟡", probConf],
+            ["تصنيف: مشكلة نفسية أو سلوكية 🟠", probPsych],
+            ["تصنيف: مشكلة التزام ومواعيد ⏰", probDisc],
+            ["تصنيف: مشكلة أسرية أو اجتماعية 🏠", probFam],
+            ["تصنيف: يحتاج مقابلة خاصة مع الكاهن ⚠️", probSpec]
+        ];
 
         const fileName = "تقرير_نتائج_ومعايير_القبول_المفصلة_" + new Date().toISOString().slice(0, 10) + ".xlsx";
 
         if (typeof XLSX !== 'undefined') {
-            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "نتائج_المعايير_الأربعة");
+
+            // شيت 1: كشف الدرجات والمعايير
+            const wsGrades = XLSX.utils.aoa_to_sheet(rows);
+            wsGrades['!views'] = [{ RTL: true }];
+            wsGrades['!cols'] = [
+                { wch: 5 },   // م
+                { wch: 13 },  // كود
+                { wch: 28 },  // اسم المخدوم
+                { wch: 10 },  // النوع
+                { wch: 15 },  // الهاتف
+                { wch: 22 },  // أب الاعتراف
+                { wch: 12 },  // الحضور
+                { wch: 16 },  // تحريري روحي
+                { wch: 14 },  // روحي %
+                { wch: 18 },  // حالة روحي
+                { wch: 16 },  // تحريري نفسي
+                { wch: 14 },  // نفسي %
+                { wch: 18 },  // حالة نفسي
+                { wch: 16 },  // شفوي روحي
+                { wch: 14 },  // شفوي %
+                { wch: 18 },  // حالة شفوي روحي
+                { wch: 16 },  // شفوي نفسي
+                { wch: 14 },  // شفوي نفسي %
+                { wch: 18 },  // حالة شفوي نفسي
+                { wch: 18 },  // المجموع
+                { wch: 14 },  // النسبة %
+                { wch: 24 },  // استيفاء النسب الأربعة
+                { wch: 26 },  // القرار النهائي
+                { wch: 28 },  // سبب عدم النجاح
+                { wch: 32 },  // ملاحظات الجانب الروحي والسلوكي
+                { wch: 32 },  // ملاحظات الجانب النفسي والسلوكي
+                { wch: 32 }   // تصنيف التحدي الرعوي
+            ];
+            XLSX.utils.book_append_sheet(wb, wsGrades, sheetNameGrades);
+
+            // شيت 2: ملخص الإحصائيات والأعداد
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryAoa);
+            wsSummary['!views'] = [{ RTL: true }];
+            wsSummary['!cols'] = [
+                { wch: 48 },  // البيان الإحصائي
+                { wch: 22 }   // القيمة
+            ];
+            XLSX.utils.book_append_sheet(wb, wsSummary, sheetNameSummary);
+
             XLSX.writeFile(wb, fileName);
-            alert("تم تصدير تقرير المعايير والنتائج التفصيلي بنجاح! 📊✅");
+            alert("تم تصدير شيت الإكسيل المعتمد بنجاح! 📊✅\nيتضمن:\n1. شيت الدرجات مع معادلات المجموع والنسب الحية والملاحظات.\n2. شيت ملخص إحصائيات وأعداد الدفعة احتياطياً.");
         } else {
-            let csv = '\uFEFF' + [headers, ...rows].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+            // بديل في حالة تعذر مكتبة XLSX
+            let csv = '\uFEFF' + rows.map(r => r.map(v => {
+                if (v && typeof v === 'object') return '"' + String(v.v ?? '').replace(/"/g, '""') + '"';
+                return '"' + String(v ?? '').replace(/"/g, '""') + '"';
+            }).join(',')).join('\r\n');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = fileName.replace('.xlsx', '.csv');
             link.click();
         }
-    }
-
-
-    function exportToExcelCSV() {
+    }function exportToExcelCSV() {
         if (!candidatesList || candidatesList.length === 0) {
             alert('لا توجد بيانات لتصديرها.');
             return;
@@ -6223,7 +6428,10 @@ body {
             "الباركود المعتمد للكاميرا",
             "الفرقة",
             "النوع",
-            "بيانات أخري والنتيجة"
+            "بيانات أخري والنتيجة",
+            "ملاحظات الجانب الروحي والسلوكي 🕊️",
+            "ملاحظات الجانب النفسي والسلوكي 🧠",
+            "تصنيف المشكلة الرعوية ⚠️"
         ];
 
         const rows = [headers];
@@ -6255,7 +6463,10 @@ body {
                 `"${c.name}/${parseInt(bDay)}"`,
                 "الفرقة الأولى",
                 `"${c.gender || 'بنين'}"`,
-                `"${dec.label} | المجموع: ${total}/100 | ${c.confessor || 'بدون اعتراف'}"`
+                `"${dec.label} | المجموع: ${total}/100 | ${c.confessor || 'بدون اعتراف'}"`,
+                `"${(c.spiritualNotes || '').replace(/"/g, '""')}"`,
+                `"${(c.psychNotes || '').replace(/"/g, '""')}"`,
+                `"${(c.problemType || '').replace(/"/g, '""')}"`
             ]);
         });
 
