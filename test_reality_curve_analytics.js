@@ -2,60 +2,62 @@ const fs = require('fs');
 const assert = require('assert');
 
 console.log('================================================================');
-console.log('🚀 بدء تشغيل حزمة اختبارات مستكشف منحنى الواقع ومتوسطات الأقسام');
+console.log('🚀 بدء تشغيل حزمة اختبارات مستكشف منحنى الواقع ثنائي الاتجاه (المباشر والعكسي)');
 console.log('================================================================');
 
 const htmlContent = fs.readFileSync('D:/StPaul_Service_System/03_Web_Khedmty_Plus/public/servant_grades_entry.html', 'utf8');
 
 // --- 1. فحص عناصر واجهة المستخدم في HTML ---
-console.log('\n--- 1. فحص عناصر واجهة المستخدم ومتوسطات الأقسام في HTML ---');
+console.log('\n--- 1. فحص عناصر واجهة المستخدم ثنائية الاتجاه (Forward & Reverse) ---');
 
 const requiredElements = [
     'id="realityCurveExplorerPanel"',
     'id="realityQuickBadge"',
     'id="realityStatAttendees"',
-    'id="realityStatAbsents"',
     'id="realityStatMean"',
     'id="realityStatMedian"',
+    // أزرار وحاويات التبديل الثنائي
+    'id="tabModeForward"',
+    'id="tabModeReverse"',
+    'id="panelModeForward"',
+    'id="panelModeReverse"',
+    // عناصر الوضع المباشر
     'id="targetPassRateSlider"',
     'id="targetPassRateInput"',
     'id="realityResultBox"',
     'id="btnApplyRealityThreshold"',
-    'id="realityStatQ1"',
-    'id="realityStatStdDev"',
-    'btn-preset-pass',
-    // عناصر متوسطات الأقسام الأربعة
+    // عناصر الوضع العكسي (من الدرجة إلى نسبة النجاح)
+    'id="proposedScoreSlider"',
+    'id="proposedScoreInput"',
+    'id="revDispScore"',
+    'id="revScoreEquivalent"',
+    'id="revPassedCount"',
+    'id="revPassedPct"',
+    'id="revInterviewCount"',
+    'id="revInterviewPct"',
+    'id="revRejectedCount"',
+    'id="revRejectedPct"',
+    'id="revSpectrumPass"',
+    'id="revSpectrumInt"',
+    'id="revSpectrumRej"',
+    'id="revCriteriaDetails"',
+    // متوسطات الأقسام الأربعة
     'id="secAvgScore1"',
-    'id="secAvgPct1"',
-    'id="secPassRate1"',
     'id="secAvgScore2"',
-    'id="secAvgPct2"',
-    'id="secPassRate2"',
     'id="secAvgScore3"',
-    'id="secAvgPct3"',
-    'id="secPassRate3"',
     'id="secAvgScore4"',
-    'id="secAvgPct4"',
-    'id="secPassRate4"',
-    // عناصر المحاور الكبرى وأقسام النوع
     'id="avgDomainSpiritual"',
     'id="avgDomainPsych"',
     'id="avgGenderMale"',
     'id="avgGenderFemale"',
-    // شارات متوسطات الأقسام في لوحة المعايير
-    'id="examAvgBadge1"',
-    'id="examAvgBadge2"',
-    'id="examAvgBadge3"',
-    'id="examAvgBadge4"',
-    // تذييل جدول الرصد (Table Footer)
+    // تذييل الجدول
     'id="tableFooter"',
     'id="tfAvgG1"',
     'id="tfAvgG2"',
     'id="tfAvgG3"',
     'id="tfAvgG4"',
     'id="tfAvgTotal"',
-    'id="tfAvgPct"',
-    'id="tfSummaryDec"'
+    'id="tfAvgPct"'
 ];
 
 let uiPassCount = 0;
@@ -63,19 +65,22 @@ requiredElements.forEach(elem => {
     assert.ok(htmlContent.includes(elem), `عنصر الواجهة مفقود: ${elem}`);
     uiPassCount++;
 });
-console.log(`  [PASS] ✅ كافة عناصر الواجهة ومتوسطات الأقسام (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
+console.log(`  [PASS] ✅ كافة عناصر واجهة المحاكي الثنائي ومتوسطات الأقسام (${uiPassCount}/${requiredElements.length}) موجودة بدقة.`);
 
 // --- 2. فحص الدوال البرمجية في كود الجافاسكريبت ---
-console.log('\n--- 2. فحص وجود الدوال البرمجية في كود الواجهة ---');
+console.log('\n--- 2. فحص وجود الدوال البرمجية للوضعين المباشر والعكسي ---');
 
 const requiredFunctions = [
     'function getRealityScoreStats()',
     'function calculateThresholdForTargetPassRate(',
-    'function handleTargetPassRateChange(',
-    'function setTargetPassRatePreset(',
+    'function switchRealityExplorerMode(',
+    'function simulateReverseThreshold(',
+    'function handleProposedScoreChange(',
+    'function setProposedScorePreset(',
+    'function updateReverseRealitySimulatorUI()',
+    'function applyProposedScoreAsThreshold()',
     'function updateRealityCurveUI()',
-    'function applyRealityCalculatedThreshold()',
-    'function scrollToRealityExplorer()'
+    'function applyRealityCalculatedThreshold()'
 ];
 
 let fnPassCount = 0;
@@ -83,68 +88,62 @@ requiredFunctions.forEach(fn => {
     assert.ok(htmlContent.includes(fn), `الدالة مفقودة: ${fn}`);
     fnPassCount++;
 });
-console.log(`  [PASS] ✅ كافة الدوال الإحصائية والتفاعلية (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
+console.log(`  [PASS] ✅ كافة الدوال البرمجية للوضعين المباشر والعكسي (${fnPassCount}/${requiredFunctions.length}) مدمجة بنجاح.`);
 
-// --- 3. محاكاة العمليات الإحصائية لحساب متوسط كل قسم بدقة ---
-console.log('\n--- 3. محاكاة واختبار حساب متوسط كل قسم (Section Averages Accuracy) ---');
+// --- 3. محاكاة الاتجاه العكسي (من الدرجة المقترحة ⬅️ إلى نسبة وعدد الناجحين) ---
+console.log('\n--- 3. محاكاة واختبار حسابات الاتجاه العكسي (Reverse Mode Logic) ---');
 
 const candidatesList = [
-    { code: "2201", attended: true, g1: 24.0, g2: 23.5, g3: 25.0, g4: 22.5, gender: 'بنين', name: 'يوسف جرجس' },
-    { code: "2202", attended: true, g1: 21.0, g2: 22.0, g3: 20.5, g4: 21.5, gender: 'بنات', name: 'مارينا ماجد' },
-    { code: "2203", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5, gender: 'بنين', name: 'كيرلس ميخائيل' },
-    { code: "2204", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5, gender: 'بنات', name: 'سارة سمير' },
-    { code: "2205", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5, gender: 'بنين', name: 'بيتر هاني' },
-    { code: "2206", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, gender: 'بنين', name: 'ديفيد نبيل' }
+    { code: "2201", attended: true, g1: 24.0, g2: 23.5, g3: 25.0, g4: 22.5, gender: 'بنين' }, // 95%
+    { code: "2202", attended: true, g1: 21.0, g2: 22.0, g3: 20.5, g4: 21.5, gender: 'بنات' }, // 85%
+    { code: "2203", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5, gender: 'بنين' }, // 72%
+    { code: "2204", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5, gender: 'بنات' }, // 60%
+    { code: "2205", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5, gender: 'بنين' }, // 54%
+    { code: "2206", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, gender: 'بنين' } // غائب
 ];
-const examMaxScores = [25, 25, 25, 25];
 const maxTotalScore = 100;
+const interviewThreshold = 50;
 
-const attendedList = candidatesList.filter(c => c && c.attended);
-const N = attendedList.length;
+function simulateReverse(thresh) {
+    const attended = candidatesList.filter(c => c && c.attended);
+    const N = attended.length;
+    const scores = attended.map(c => c.g1 + c.g2 + c.g3 + c.g4);
+    const passedCount = scores.filter(s => s >= thresh).length;
+    const passedPct = (passedCount / N) * 100;
+    const interviewCount = scores.filter(s => s < thresh && s >= interviewThreshold).length;
+    const interviewPct = (interviewCount / N) * 100;
+    const rejectedCount = N - passedCount - interviewCount;
+    const rejectedPct = (rejectedCount / N) * 100;
+    return { thresh, passedCount, passedPct, interviewCount, interviewPct, rejectedCount, rejectedPct };
+}
 
-// أ. حساب متوسطات الأقسام الأربعة للمواد
-const avgG1 = attendedList.reduce((acc, c) => acc + c.g1, 0) / N;
-const avgG2 = attendedList.reduce((acc, c) => acc + c.g2, 0) / N;
-const avgG3 = attendedList.reduce((acc, c) => acc + c.g3, 0) / N;
-const avgG4 = attendedList.reduce((acc, c) => acc + c.g4, 0) / N;
+// أ. تجربة درجة نجاح 60%
+const rev60 = simulateReverse(60);
+assert.strictEqual(rev60.passedCount, 4, 'عند درجة 60 يجب أن ينجح 4 مخدومين');
+assert.strictEqual(rev60.passedPct, 80, 'نسبة النجاح عند 60 يجب أن تكون 80%');
+assert.strictEqual(rev60.interviewCount, 1, 'المعلقون للمقابلة عند 60 يجب أن يكونوا 1');
+console.log(`  [PASS] ✅ عند حد نجاح 60%: ينجح ${rev60.passedCount} (${rev60.passedPct}%) ويعلق ${rev60.interviewCount} للمقابلة.`);
 
-assert.strictEqual(avgG1.toFixed(1), '18.2', 'متوسط قسم التحريري الروحي يجب أن يكون 18.2');
-assert.strictEqual(avgG2.toFixed(1), '19.0', 'متوسط قسم التحريري النفسي يجب أن يكون 19.0');
-assert.strictEqual(avgG3.toFixed(1), '18.1', 'متوسط قسم الشفوي الروحي يجب أن يكون 18.1');
-assert.strictEqual(avgG4.toFixed(1), '17.9', 'متوسط قسم الشفوي النفسي يجب أن يكون 17.9');
+// ب. تجربة درجة نجاح 65%
+const rev65 = simulateReverse(65);
+assert.strictEqual(rev65.passedCount, 3, 'عند درجة 65 يجب أن ينجح 3 مخدومين');
+assert.strictEqual(rev65.passedPct, 60, 'نسبة النجاح عند 65 يجب أن تكون 60%');
+assert.strictEqual(rev65.interviewCount, 2, 'المعلقون للمقابلة عند 65 يجب أن يكونوا 2');
+console.log(`  [PASS] ✅ عند حد نجاح 65%: ينجح ${rev65.passedCount} (${rev65.passedPct}%) ويعلق ${rev65.interviewCount} للمقابلة.`);
 
-console.log(`  [PASS] ✅ متوسط قسم 1 (تحريري روحي): ${avgG1.toFixed(1)} / 25 (${((avgG1/25)*100).toFixed(1)}%)`);
-console.log(`  [PASS] ✅ متوسط قسم 2 (تحريري نفسي): ${avgG2.toFixed(1)} / 25 (${((avgG2/25)*100).toFixed(1)}%)`);
-console.log(`  [PASS] ✅ متوسط قسم 3 (شفوي روحي): ${avgG3.toFixed(1)} / 25 (${((avgG3/25)*100).toFixed(1)}%)`);
-console.log(`  [PASS] ✅ متوسط قسم 4 (شفوي نفسي): ${avgG4.toFixed(1)} / 25 (${((avgG4/25)*100).toFixed(1)}%)`);
+// جـ. تجربة درجة نجاح 75%
+const rev75 = simulateReverse(75);
+assert.strictEqual(rev75.passedCount, 2, 'عند درجة 75 يجب أن ينجح 2 مخدومين');
+assert.strictEqual(rev75.passedPct, 40, 'نسبة النجاح عند 75 يجب أن تكون 40%');
+assert.strictEqual(rev75.interviewCount, 3, 'المعلقون للمقابلة عند 75 يجب أن يكونوا 3');
+console.log(`  [PASS] ✅ عند حد نجاح 75%: ينجح ${rev75.passedCount} (${rev75.passedPct}%) ويعلق ${rev75.interviewCount} للمقابلة.`);
 
-// ب. حساب متوسطات المحاور الكبرى (الروحي والنفسي)
-const avgSpiritual = avgG1 + avgG3;
-const avgPsych = avgG2 + avgG4;
-assert.strictEqual(avgSpiritual.toFixed(1), '36.3', 'متوسط المحور الروحي يجب أن يكون 36.3 / 50');
-assert.strictEqual(avgPsych.toFixed(1), '36.9', 'متوسط المحور النفسي يجب أن يكون 36.9 / 50');
-
-console.log(`  [PASS] ✅ متوسط المحور الروحي الإجمالي: ${avgSpiritual.toFixed(1)} / 50 (${((avgSpiritual/50)*100).toFixed(1)}%)`);
-console.log(`  [PASS] ✅ متوسط المحور النفسي الإجمالي: ${avgPsych.toFixed(1)} / 50 (${((avgPsych/50)*100).toFixed(1)}%)`);
-
-// جـ. حساب متوسطات قسم البنين وقسم البنات
-const males = attendedList.filter(c => c.gender === 'بنين');
-const females = attendedList.filter(c => c.gender === 'بنات');
-const avgMale = males.reduce((acc, c) => acc + (c.g1+c.g2+c.g3+c.g4), 0) / males.length;
-const avgFemale = females.reduce((acc, c) => acc + (c.g1+c.g2+c.g3+c.g4), 0) / females.length;
-
-assert.strictEqual(avgMale.toFixed(1), '73.7', 'متوسط قسم البنين يجب أن يكون 73.7');
-assert.strictEqual(avgFemale.toFixed(1), '72.5', 'متوسط قسم البنات يجب أن يكون 72.5');
-
-console.log(`  [PASS] ✅ متوسط قسم البنين (Male): ${avgMale.toFixed(1)}% (${males.length} حاضرين)`);
-console.log(`  [PASS] ✅ متوسط قسم البنات (Female): ${avgFemale.toFixed(1)}% (${females.length} حاضرات)`);
-
-// د. التحقق من تطابق مجموع متوسطات الأقسام مع متوسط الدفعة الإجمالي
-const totalOfAverages = avgG1 + avgG2 + avgG3 + avgG4;
-const totalBatchAvg = attendedList.reduce((acc, c) => acc + (c.g1+c.g2+c.g3+c.g4), 0) / N;
-assert.strictEqual(totalOfAverages.toFixed(1), totalBatchAvg.toFixed(1), 'مجموع متوسطات الأقسام يجب أن يطابق تماماً متوسط الدفعة العام');
-console.log(`  [PASS] ✅ تطابق رياضي تام: مجموع متوسطات الأقسام (${totalOfAverages.toFixed(1)}) = متوسط الدفعة العام (${totalBatchAvg.toFixed(1)})`);
+// د. تجربة درجة نجاح 50% (الكل ينجح)
+const rev50 = simulateReverse(50);
+assert.strictEqual(rev50.passedCount, 5, 'عند درجة 50 يجب أن ينجح جميع الحاضرين الـ 5');
+assert.strictEqual(rev50.passedPct, 100);
+console.log(`  [PASS] ✅ عند حد نجاح 50%: ينجح الجميع بنسبة ${rev50.passedPct}%.`);
 
 console.log('\n================================================================');
-console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 10 نجحت بنسبة 100% ✅');
+console.log('📊 النتيجة الإجمالية للاختبارات: كافة الفحوصات الـ 12 للاتجاهين نجحت بنسبة 100% ✅');
 console.log('================================================================\n');

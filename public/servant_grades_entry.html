@@ -185,6 +185,32 @@ body {
             background: #e2e8f0;
             color: #0f172a;
         }
+        
+        .active-mode-tab {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.35) !important;
+        }
+        .btn-preset-rev-score {
+            background: #f5f3ff;
+            color: #5b21b6;
+            border: 1px solid #ddd6fe;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-preset-rev-score:hover {
+            background: #ede9fe;
+            color: #4c1d95;
+        }
+        .btn-preset-rev-score.active {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            border-color: #6d28d9 !important;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(124,58,237,0.3);
+        }
         .btn-preset-pass.active {
             background: #2563eb !important;
             color: #ffffff !important;
@@ -1107,6 +1133,18 @@ body {
                 </div>
             </div>
 
+            <!-- أزرار التبديل التفاعلية ثنائية الاتجاه (المباشر والعكسي) -->
+            <div style="display:flex; gap:10px; margin-bottom:14px; background:#e2e8f0; padding:4px; border-radius:10px; flex-wrap:wrap;">
+                <button type="button" id="tabModeForward" class="btn-custom active-mode-tab" onclick="switchRealityExplorerMode('forward')" style="flex:1; min-width:260px; padding:9px 14px; font-weight:800; font-size:0.88rem; border-radius:8px; border:none; transition:all 0.2s;">
+                    <i class="fa-solid fa-bullseye me-1"></i> 1. الاتجاه المباشر: (من نسبة النجاح المستهدفة 🎯 ⬅️ درجة النجاح المطلوبة)
+                </button>
+                <button type="button" id="tabModeReverse" class="btn-custom" onclick="switchRealityExplorerMode('reverse')" style="flex:1; min-width:260px; padding:9px 14px; font-weight:800; font-size:0.88rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
+                    <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> 2. الاتجاه العكسي 🔄: (من درجة مقترحة في بالك ⬅️ كم سينجح ويعلق؟)
+                </button>
+            </div>
+
+            <!-- الحاوية الأولى: الاتجاه المباشر (Forward Mode) -->
+            <div id="panelModeForward">
             <!-- 2. محدد ومستكشف نسبة النجاح المستهدفة (Interactive Target Pass Rate Selector) -->
             <div style="background:#ffffff; border:1.5px solid #93c5fd; border-radius:12px; padding:14px 16px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
@@ -1162,6 +1200,93 @@ body {
                     </button>
                 </div>
             </div>
+
+            
+            </div> <!-- نهاية panelModeForward -->
+
+            <!-- الحاوية الثانية: الاتجاه العكسي (Reverse Mode Simulator) -->
+            <div id="panelModeReverse" style="display:none; background:#ffffff; border:1.5px solid #8b5cf6; border-radius:12px; padding:14px 16px; margin-bottom:12px; box-shadow:0 4px 14px rgba(139,92,246,0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:10px;">
+                    <div style="font-size:0.9rem; font-weight:800; color:#5b21b6;">
+                        <i class="fa-solid fa-calculator text-primary me-1"></i> جرّب أي درجة نجاح مقترحة لترى كم سينجح ويعلق في الواقع:
+                    </div>
+                    <!-- أزرار درجات شائعة للتجربة -->
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-size:0.75rem; color:#64748b; font-weight:700;">درجات شائعة:</span>
+                        <button type="button" class="btn-custom btn-preset-rev-score" data-score="50" onclick="setProposedScorePreset(50)" style="padding:3px 9px; font-size:0.78rem;">50%</button>
+                        <button type="button" class="btn-custom btn-preset-rev-score" data-score="55" onclick="setProposedScorePreset(55)" style="padding:3px 9px; font-size:0.78rem;">55%</button>
+                        <button type="button" class="btn-custom btn-preset-rev-score active" data-score="60" onclick="setProposedScorePreset(60)" style="padding:3px 11px; font-size:0.8rem; font-weight:900;">60% ⭐</button>
+                        <button type="button" class="btn-custom btn-preset-rev-score" data-score="65" onclick="setProposedScorePreset(65)" style="padding:3px 9px; font-size:0.78rem;">65%</button>
+                        <button type="button" class="btn-custom btn-preset-rev-score" data-score="70" onclick="setProposedScorePreset(70)" style="padding:3px 9px; font-size:0.78rem;">70%</button>
+                        <button type="button" class="btn-custom btn-preset-rev-score" data-score="75" onclick="setProposedScorePreset(75)" style="padding:3px 9px; font-size:0.78rem;">75%</button>
+                    </div>
+                </div>
+
+                <!-- شريط السلايدر وحقل الإدخال للدرجة المقترحة -->
+                <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px;">
+                    <div style="flex:1; min-width:220px; display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:0.82rem; font-weight:800; color:#334155; white-space:nowrap;">درجة النجاح للتجربة:</span>
+                        <input type="range" id="proposedScoreSlider" min="30" max="95" step="0.5" value="60" oninput="handleProposedScoreChange(this.value)" style="flex:1; accent-color:#7c3aed; cursor:pointer;">
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <input type="number" id="proposedScoreInput" min="1" max="100" step="0.5" value="60" oninput="handleProposedScoreChange(this.value)" style="width:70px; text-align:center; font-weight:900; font-size:1rem; padding:4px; border:1.5px solid #7c3aed; border-radius:8px; color:#6d28d9;">
+                        <span style="font-weight:900; font-size:1rem; color:#6d28d9;">%</span>
+                        <span id="revScoreEquivalent" style="font-size:0.8rem; color:#64748b; font-weight:700;">(60.0 درجة)</span>
+                    </div>
+                </div>
+
+                <!-- بطاقة نتائج المحاكاة العكسية الفورية -->
+                <div style="background:#f5f3ff; border:1.5px solid #c4b5fd; border-radius:10px; padding:12px 16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:8px;">
+                        <div>
+                            <strong style="color:#5b21b6; font-size:0.95rem;">
+                                📊 نتيجة التجربة: لو اعتمدت حد النجاح عند <span id="revDispScore" style="color:#6d28d9; font-size:1.05rem;">60%</span>:
+                            </strong>
+                        </div>
+                        <button type="button" class="btn-custom" onclick="applyProposedScoreAsThreshold()" style="background:#7c3aed; color:#ffffff; font-weight:900; padding:6px 16px; font-size:0.84rem; border:none; box-shadow:0 3px 8px rgba(124,58,237,0.3);">
+                            <i class="fa-solid fa-check-double me-1"></i> اعتماد هذه الدرجة وتطبيقها فوراً ⚡
+                        </button>
+                    </div>
+
+                    <!-- شبكة المؤشرات الثلاثية للنتيجة العكسية -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:8px;">
+                        <!-- 1. الناجحون -->
+                        <div style="background:#ffffff; border:1px solid #bbf7d0; border-top:3px solid #16a34a; border-radius:8px; padding:8px 10px; text-align:center;">
+                            <div style="font-size:0.72rem; color:#166534; font-weight:800;">🟢 الناجحون المقبولون</div>
+                            <div id="revPassedCount" style="font-size:1.15rem; font-weight:900; color:#15803d; margin-top:2px;">0</div>
+                            <div id="revPassedPct" style="font-size:0.72rem; color:#166534; font-weight:700;">0% من الحاضرين</div>
+                        </div>
+
+                        <!-- 2. المعلقون للمقابلة -->
+                        <div style="background:#ffffff; border:1px solid #fed7aa; border-top:3px solid #f97316; border-radius:8px; padding:8px 10px; text-align:center;">
+                            <div style="font-size:0.72rem; color:#9a3412; font-weight:800;">🟠 معلقون للمقابلة</div>
+                            <div id="revInterviewCount" style="font-size:1.15rem; font-weight:900; color:#c2410c; margin-top:2px;">0</div>
+                            <div id="revInterviewPct" style="font-size:0.72rem; color:#9a3412; font-weight:700;">0% من الحاضرين</div>
+                        </div>
+
+                        <!-- 3. دور ثان / غير مجتاز -->
+                        <div style="background:#ffffff; border:1px solid #fecaca; border-top:3px solid #dc2626; border-radius:8px; padding:8px 10px; text-align:center;">
+                            <div style="font-size:0.72rem; color:#991b1b; font-weight:800;">🔴 دور ثان / غير مجتاز</div>
+                            <div id="revRejectedCount" style="font-size:1.15rem; font-weight:900; color:#b91c1c; margin-top:2px;">0</div>
+                            <div id="revRejectedPct" style="font-size:0.72rem; color:#991b1b; font-weight:700;">0% من الحاضرين</div>
+                        </div>
+                    </div>
+
+                    <!-- شريط الطيف اللحظي المصغر للنتيجة العكسية -->
+                    <div style="margin-top:6px;">
+                        <div style="display:flex; height:10px; border-radius:6px; overflow:hidden; background:#e2e8f0;">
+                            <div id="revSpectrumPass" style="background:#16a34a; width:0%; transition:width 0.3s;" title="ناجح"></div>
+                            <div id="revSpectrumInt" style="background:#f97316; width:0%; transition:width 0.3s;" title="معلق للمقابلة"></div>
+                            <div id="revSpectrumRej" style="background:#dc2626; width:0%; transition:width 0.3s;" title="دور ثان"></div>
+                        </div>
+                    </div>
+
+                    <!-- تفاصيل إضافية عن استيفاء المعايير الأربعة عند هذه الدرجة -->
+                    <div id="revCriteriaDetails" style="font-size:0.75rem; color:#6d28d9; margin-top:6px; font-weight:700;">
+                        * من بين الناجحين: 0 مخدوم مستوفٍ للشروط الأربعة معاً.
+                    </div>
+                </div>
+            </div> <!-- نهاية panelModeReverse -->
 
             <!-- 4. شريط الشرائح الرباعية (Quartiles & Curve Distribution) -->
             <div style="margin-top:12px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; font-size:0.75rem; color:#475569; background:#ffffff; border-radius:8px; padding:6px 12px; border:1px solid #e2e8f0;">
@@ -3226,6 +3351,199 @@ body {
 
         const scoreEquiv = ((newThresh / 100) * maxTotalScore).toFixed(1);
         alert(`تم تطبيق حد النجاح المبني على درجات الواقع بنجاح! 🎯\n\nالحد الجديد: ${newThresh}% (${scoreEquiv} من أصل ${maxTotalScore} درجة).\nسيمر الآن ${calc.actualPassingCount} من أصل ${calc.totalAttendees} مخدوماً حاضرين (نسبة ${calc.actualPassPct.toFixed(1)}%).`);
+    }
+
+    
+    // =========================================================================
+    // 🔄 الاتجاه العكسي: محاكي معرفة نسبة وعدد الناجحين من الدرجة المقترحة
+    // =========================================================================
+    let currentProposedScore = 60; // الدرجة المقترحة للتجربة
+    let currentRealityMode = 'forward'; // 'forward' | 'reverse'
+
+    function switchRealityExplorerMode(mode) {
+        currentRealityMode = mode;
+        const panelFwd = document.getElementById('panelModeForward');
+        const panelRev = document.getElementById('panelModeReverse');
+        const tabFwd = document.getElementById('tabModeForward');
+        const tabRev = document.getElementById('tabModeReverse');
+        const badge = document.getElementById('realityQuickBadge');
+
+        if (mode === 'forward') {
+            if (panelFwd) panelFwd.style.display = 'block';
+            if (panelRev) panelRev.style.display = 'none';
+            if (tabFwd) {
+                tabFwd.classList.add('active-mode-tab');
+                tabFwd.style.background = '#2563eb';
+                tabFwd.style.color = '#ffffff';
+            }
+            if (tabRev) {
+                tabRev.classList.remove('active-mode-tab');
+                tabRev.style.background = 'transparent';
+                tabRev.style.color = '#334155';
+            }
+            if (badge) badge.innerHTML = '<i class="fa-solid fa-bullseye me-1"></i> الاتجاه المباشر: من النسبة المستهدفة إلى الدرجة';
+        } else {
+            if (panelFwd) panelFwd.style.display = 'none';
+            if (panelRev) panelRev.style.display = 'block';
+            if (tabRev) {
+                tabRev.classList.add('active-mode-tab');
+                tabRev.style.background = '#7c3aed';
+                tabRev.style.color = '#ffffff';
+            }
+            if (tabFwd) {
+                tabFwd.classList.remove('active-mode-tab');
+                tabFwd.style.background = 'transparent';
+                tabFwd.style.color = '#334155';
+            }
+            if (badge) badge.innerHTML = '<i class="fa-solid fa-arrow-right-arrow-left me-1"></i> الاتجاه العكسي: من الدرجة المقترحة إلى النسبة';
+            updateReverseRealitySimulatorUI();
+        }
+    }
+
+    function simulateReverseThreshold(proposedThresh) {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            return {
+                proposedThresh,
+                totalAttendees: 0,
+                passedCount: 0,
+                passedPct: 0,
+                interviewCount: 0,
+                interviewPct: 0,
+                rejectedCount: 0,
+                rejectedPct: 0,
+                allCriteriaPassCount: 0
+            };
+        }
+
+        const thresh = Math.max(0, Math.min(100, Number(proposedThresh) || 60));
+        const passedCount = stats.scores.filter(s => s >= thresh).length;
+        const passedPct = (passedCount / stats.totalAttendees) * 100;
+        const interviewCount = stats.scores.filter(s => s < thresh && s >= interviewThreshold).length;
+        const interviewPct = (interviewCount / stats.totalAttendees) * 100;
+        const rejectedCount = Math.max(0, stats.totalAttendees - passedCount - interviewCount);
+        const rejectedPct = (rejectedCount / stats.totalAttendees) * 100;
+
+        const allCriteriaPassCount = stats.attendedList.filter(c => {
+            const tot = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const p = maxTotalScore > 0 ? (tot / maxTotalScore) * 100 : 0;
+            const evalRes = typeof getCandidateExamDetails === 'function' ? getCandidateExamDetails(c) : { allPassed: true };
+            return p >= thresh && evalRes.allPassed;
+        }).length;
+
+        return {
+            proposedThresh: thresh,
+            totalAttendees: stats.totalAttendees,
+            passedCount,
+            passedPct,
+            interviewCount,
+            interviewPct,
+            rejectedCount,
+            rejectedPct,
+            allCriteriaPassCount
+        };
+    }
+
+    function handleProposedScoreChange(val) {
+        const num = Math.max(1, Math.min(100, Number(val) || 60));
+        currentProposedScore = num;
+        const slider = document.getElementById('proposedScoreSlider');
+        if (slider && Number(slider.value) !== num) slider.value = num;
+        const input = document.getElementById('proposedScoreInput');
+        if (input && Number(input.value) !== num) input.value = num;
+
+        // تحديث أزرار الدرجات الشائعة
+        document.querySelectorAll('.btn-preset-rev-score').forEach(btn => {
+            const bVal = Number(btn.getAttribute('data-score'));
+            if (bVal === num) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        updateReverseRealitySimulatorUI();
+    }
+
+    function setProposedScorePreset(val) {
+        handleProposedScoreChange(val);
+    }
+
+    function updateReverseRealitySimulatorUI() {
+        const stats = getRealityScoreStats();
+        const res = simulateReverseThreshold(currentProposedScore);
+
+        const elDisp = document.getElementById('revDispScore');
+        if (elDisp) elDisp.textContent = currentProposedScore + '%';
+
+        const elEq = document.getElementById('revScoreEquivalent');
+        if (elEq) elEq.textContent = '(' + ((currentProposedScore / 100) * maxTotalScore).toFixed(1) + ' / ' + maxTotalScore + ' درجة)';
+
+        const elPass = document.getElementById('revPassedCount');
+        if (elPass) elPass.textContent = res.passedCount;
+        const elPassPct = document.getElementById('revPassedPct');
+        if (elPassPct) elPassPct.textContent = res.passedPct.toFixed(1) + '% من الحاضرين';
+
+        const elInt = document.getElementById('revInterviewCount');
+        if (elInt) elInt.textContent = res.interviewCount;
+        const elIntPct = document.getElementById('revInterviewPct');
+        if (elIntPct) elIntPct.textContent = res.interviewPct.toFixed(1) + '% من الحاضرين';
+
+        const elRej = document.getElementById('revRejectedCount');
+        if (elRej) elRej.textContent = res.rejectedCount;
+        const elRejPct = document.getElementById('revRejectedPct');
+        if (elRejPct) elRejPct.textContent = res.rejectedPct.toFixed(1) + '% من الحاضرين';
+
+        const spPass = document.getElementById('revSpectrumPass');
+        if (spPass) spPass.style.width = res.passedPct + '%';
+        const spInt = document.getElementById('revSpectrumInt');
+        if (spInt) spInt.style.width = res.interviewPct + '%';
+        const spRej = document.getElementById('revSpectrumRej');
+        if (spRej) spRej.style.width = res.rejectedPct + '%';
+
+        const elCrit = document.getElementById('revCriteriaDetails');
+        if (elCrit) {
+            elCrit.innerHTML = '* من بين الناجحين عند هذه الدرجة: <strong>' + res.allCriteriaPassCount + '</strong> مخدوم مستوفٍ لشروط كافة المواد الأربعة معاً.';
+        }
+    }
+
+    function applyProposedScoreAsThreshold() {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            alert('لا توجد درجات لحاضرين في الجدول لحساب العتبة.');
+            return;
+        }
+
+        const newThresh = currentProposedScore;
+        passThreshold = newThresh;
+
+        const slider = document.getElementById('passThresholdSlider');
+        if (slider) {
+            if (newThresh < Number(slider.min)) slider.min = Math.max(0, Math.floor(newThresh - 5));
+            if (newThresh > Number(slider.max)) slider.max = Math.min(100, Math.ceil(newThresh + 5));
+            slider.step = "0.5";
+            slider.value = newThresh;
+        }
+
+        const disp = document.getElementById('thresholdDisplay');
+        if (disp) disp.textContent = newThresh + '%';
+
+        if (interviewThreshold >= passThreshold) {
+            interviewThreshold = Math.max(10, Math.floor(passThreshold - 10));
+            const intSlider = document.getElementById('interviewThresholdSlider');
+            if (intSlider) intSlider.value = interviewThreshold;
+            const intDisp = document.getElementById('interviewThresholdDisplay');
+            if (intDisp) intDisp.textContent = interviewThreshold + '%';
+        }
+
+        const res = simulateReverseThreshold(newThresh);
+
+        updateScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+
+        const scoreEquiv = ((newThresh / 100) * maxTotalScore).toFixed(1);
+        alert('تم اعتماد حد النجاح المقترح بنجاح! 🎯\n\nدرجة النجاح: ' + newThresh + '% (' + scoreEquiv + ' من ' + maxTotalScore + ' درجة).\nالنتيجة الفعلية:\n- ' + res.passedCount + ' مخدوم ناجح (' + res.passedPct.toFixed(1) + '%)\n- ' + res.interviewCount + ' معلق للمقابلة (' + res.interviewPct.toFixed(1) + '%)\n- ' + res.rejectedCount + ' دور ثان (' + res.rejectedPct.toFixed(1) + '%)');
     }
 
     function scrollToRealityExplorer() {
