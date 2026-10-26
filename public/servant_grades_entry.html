@@ -1169,13 +1169,16 @@ body {
                 </div>
             </div>
 
-            <!-- أزرار التبديل التفاعلية ثنائية الاتجاه (المباشر والعكسي) -->
-            <div style="display:flex; gap:10px; margin-bottom:14px; background:#e2e8f0; padding:4px; border-radius:10px; flex-wrap:wrap;">
-                <button type="button" id="tabModeForward" class="btn-custom active-mode-tab" onclick="switchRealityExplorerMode('forward')" style="flex:1; min-width:260px; padding:9px 14px; font-weight:800; font-size:0.88rem; border-radius:8px; border:none; transition:all 0.2s;">
-                    <i class="fa-solid fa-bullseye me-1"></i> 1. الاتجاه المباشر: (من نسبة النجاح المستهدفة 🎯 ⬅️ درجة النجاح المطلوبة)
+            <!-- أزرار التبديل التفاعلية الثلاثية (المباشر والعكسي وسلم الشرائح) -->
+            <div style="display:flex; gap:8px; margin-bottom:14px; background:#e2e8f0; padding:4px; border-radius:10px; flex-wrap:wrap;">
+                <button type="button" id="tabModeForward" class="btn-custom active-mode-tab" onclick="switchRealityExplorerMode('forward')" style="flex:1; min-width:210px; padding:9px 12px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; transition:all 0.2s;">
+                    <i class="fa-solid fa-bullseye me-1"></i> 1. الاتجاه المباشر (مستهدف 🎯 ⬅️ حد النجاح)
                 </button>
-                <button type="button" id="tabModeReverse" class="btn-custom" onclick="switchRealityExplorerMode('reverse')" style="flex:1; min-width:260px; padding:9px 14px; font-weight:800; font-size:0.88rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
-                    <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> 2. الاتجاه العكسي 🔄: (من درجة مقترحة في بالك ⬅️ كم سينجح ويعلق؟)
+                <button type="button" id="tabModeReverse" class="btn-custom" onclick="switchRealityExplorerMode('reverse')" style="flex:1; min-width:210px; padding:9px 12px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
+                    <i class="fa-solid fa-arrow-right-arrow-left me-1"></i> 2. الاتجاه العكسي (جرّب درجة 🎚️ ⬅️ كم ينجح)
+                </button>
+                <button type="button" id="tabModeLadder" class="btn-custom" onclick="switchRealityExplorerMode('ladder')" style="flex:1; min-width:210px; padding:9px 12px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
+                    <i class="fa-solid fa-stairs me-1"></i> 3. خريطة شرائح الدفعة (20%، 30%، 80%...) 📊
                 </button>
             </div>
 
@@ -1243,6 +1246,17 @@ body {
                     </div>
                     <div id="realityDetailedSubText" style="font-size:0.76rem; color:#64748b; margin-top:2px;">
                         <!-- تفاصيل إضافية -->
+                    </div>
+                    <!-- 📌 ملخص درجات وشرائح الدفعة السريع (Forward Deciles Summary) -->
+                    <div id="forwardDecilesSummary" style="margin-top:6px; padding:6px 10px; background:#ffffff; border:1px solid #bfdbfe; border-radius:8px; font-size:0.77rem; color:#1e3a8a; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                        <span style="font-weight:800;"><i class="fa-solid fa-stairs text-primary me-1"></i> خريطة درجات الدفعة:</span>
+                        <span>أعلى 20%: ≥ <strong id="fwdDec20" style="color:#0f172a;">--%</strong></span> <span style="color:#cbd5e1;">|</span>
+                        <span>أعلى 50%: ≥ <strong id="fwdDec50" style="color:#0f172a;">--%</strong></span> <span style="color:#cbd5e1;">|</span>
+                        <span>أعلى 80%: ≥ <strong id="fwdDec80" style="color:#15803d; font-weight:900;">--%</strong></span>
+                        <a href="javascript:void(0)" onclick="switchRealityExplorerMode('ladder')" style="margin-right:auto; text-decoration:none; color:#2563eb; font-weight:800; display:flex; align-items:center; gap:3px;">
+                            <span>عرض سلم الشرائح كاملاً</span>
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </a>
                     </div>
                 </div>
 
@@ -1359,6 +1373,45 @@ body {
                     </div>
                 </div>
             </div> <!-- نهاية panelModeReverse -->
+
+            <!-- الحاوية الثالثة: سلم وخريطة شرائح الدفعة (Cohort Ladder Mode) -->
+            <div id="panelModeLadder" style="display:none; background:#ffffff; border:1.5px solid #0284c7; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 4px 14px rgba(2,132,199,0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1.5px dashed #bae6fd; padding-bottom:12px;">
+                    <div>
+                        <div style="font-size:0.96rem; font-weight:800; color:#0369a1; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-stairs text-info"></i>
+                            <span>خريطة وسلم توزيع درجات الدفعة بالمئينات (Deciles & Percentiles Ladder):</span>
+                        </div>
+                        <div style="font-size:0.77rem; color:#64748b; margin-top:2px;">
+                            تعرف على الحد الأدنى الذي حققته كل شريحة من المخدومين واضغط على أي شريحة لتطبيق حدها فوراً ⚡
+                        </div>
+                    </div>
+
+                    <!-- أزرار اختيار نطاق الشرائح -->
+                    <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                        <button type="button" class="btn-custom btn-ladder-scope active" id="btnScopeTotal" onclick="setLadderScope('total')" style="padding:4px 10px; font-size:0.78rem; font-weight:800; background:#0284c7; color:#fff; border-color:#0284c7;">
+                            🌟 المجموع العام
+                        </button>
+                        <button type="button" class="btn-custom btn-ladder-scope" id="btnScopeExam1" onclick="setLadderScope('exam1')" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc; color:#334155;">
+                            ✍️🕊️ تحريري روحي
+                        </button>
+                        <button type="button" class="btn-custom btn-ladder-scope" id="btnScopeExam2" onclick="setLadderScope('exam2')" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc; color:#334155;">
+                            ✍️🧠 تحريري نفسي
+                        </button>
+                        <button type="button" class="btn-custom btn-ladder-scope" id="btnScopeExam3" onclick="setLadderScope('exam3')" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc; color:#334155;">
+                            🗣️🕊️ شفوي روحي
+                        </button>
+                        <button type="button" class="btn-custom btn-ladder-scope" id="btnScopeExam4" onclick="setLadderScope('exam4')" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc; color:#334155;">
+                            🗣️🧠 شفوي نفسي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- حاوية شبكة الشرائح -->
+                <div id="cohortLadderContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:10px;">
+                    <!-- يتم توليده وتحديثه ديناميكياً بواسطة JavaScript -->
+                </div>
+            </div>
 
             <!-- 4. شريط الشرائح الرباعية (Quartiles & Curve Distribution) -->
             <div style="margin-top:12px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; font-size:0.75rem; color:#475569; background:#ffffff; border-radius:8px; padding:6px 12px; border:1px solid #e2e8f0;">
@@ -1622,6 +1675,11 @@ body {
                             <span>📈 نطاق درجات الحاضرين:</span>
                             <strong id="guideMinMax1" style="color:#0f172a;">0 - 0 د</strong>
                         </div>
+                        <!-- 🎯 مرشد نسبة الـ 80% للمادة -->
+                        <div style="background:#eff6ff; border-radius:6px; padding:4px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#1e40af;">
+                            <span>🎯 لنجاح <strong>80%</strong> من الدفعة:</span>
+                            <strong id="guideTarget80_1" style="color:#1d4ed8; font-weight:800;">-</strong>
+                        </div>
                         <!-- دليل الأثر المباشر: كم سينجح ويرسب بهذا الرقم المحدد -->
                         <div id="guideImpact1" style="border-top:1px dashed #cbd5e1; padding-top:4px; margin-top:4px; font-weight:800; color:#059669; font-size:0.76rem; line-height:1.4;">
                             <i class="fa-solid fa-circle-check me-1"></i> بهذا الرقم: سينجح 0 مخدوماً (0%)
@@ -1633,6 +1691,12 @@ body {
                         <span style="font-size:0.68rem; color:#64748b; font-weight:700;">مرشد سريع:</span>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(1, 50)" style="font-size:0.68rem; padding:2px 6px; background:#f1f5f9; color:#334155;" title="المعيار المعتاد للنجاح (50%)">
                             💡 معياري (50%)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(1, 80)" id="btnExamTarget80_1" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; font-weight:800;" title="اضبط الحد تلقائياً لتمرير 80% من المخدومين في هذا الامتحان">
+                            🎯 لنجاح 80%
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(1, 70)" id="btnExamTarget70_1" style="font-size:0.68rem; padding:2px 6px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;" title="اضبط الحد لتمرير 70%">
+                            🎯 70%
                         </button>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(1, 'mean')" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:800;" title="ضبط الحد مساوياً لمتوسط درجات الدفعة الفعلي">
                             📊 متوسط الدفعة
@@ -1671,6 +1735,11 @@ body {
                             <span>📈 نطاق درجات الحاضرين:</span>
                             <strong id="guideMinMax2" style="color:#0f172a;">0 - 0 د</strong>
                         </div>
+                        <!-- 🎯 مرشد نسبة الـ 80% للمادة -->
+                        <div style="background:#eff6ff; border-radius:6px; padding:4px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#1e40af;">
+                            <span>🎯 لنجاح <strong>80%</strong> من الدفعة:</span>
+                            <strong id="guideTarget80_2" style="color:#1d4ed8; font-weight:800;">-</strong>
+                        </div>
                         <!-- دليل الأثر المباشر: كم سينجح ويرسب بهذا الرقم المحدد -->
                         <div id="guideImpact2" style="border-top:1px dashed #cbd5e1; padding-top:4px; margin-top:4px; font-weight:800; color:#059669; font-size:0.76rem; line-height:1.4;">
                             <i class="fa-solid fa-circle-check me-1"></i> بهذا الرقم: سينجح 0 مخدوماً (0%)
@@ -1682,6 +1751,12 @@ body {
                         <span style="font-size:0.68rem; color:#64748b; font-weight:700;">مرشد سريع:</span>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(2, 50)" style="font-size:0.68rem; padding:2px 6px; background:#f1f5f9; color:#334155;" title="المعيار المعتاد للنجاح (50%)">
                             💡 معياري (50%)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(2, 80)" id="btnExamTarget80_2" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; font-weight:800;" title="اضبط الحد تلقائياً لتمرير 80% من المخدومين في هذا الامتحان">
+                            🎯 لنجاح 80%
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(2, 70)" id="btnExamTarget70_2" style="font-size:0.68rem; padding:2px 6px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;" title="اضبط الحد لتمرير 70%">
+                            🎯 70%
                         </button>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(2, 'mean')" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:800;" title="ضبط الحد مساوياً لمتوسط درجات الدفعة الفعلي">
                             📊 متوسط الدفعة
@@ -1720,6 +1795,11 @@ body {
                             <span>📈 نطاق درجات الحاضرين:</span>
                             <strong id="guideMinMax3" style="color:#0f172a;">0 - 0 د</strong>
                         </div>
+                        <!-- 🎯 مرشد نسبة الـ 80% للمادة -->
+                        <div style="background:#eff6ff; border-radius:6px; padding:4px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#1e40af;">
+                            <span>🎯 لنجاح <strong>80%</strong> من الدفعة:</span>
+                            <strong id="guideTarget80_3" style="color:#1d4ed8; font-weight:800;">-</strong>
+                        </div>
                         <!-- دليل الأثر المباشر: كم سينجح ويرسب بهذا الرقم المحدد -->
                         <div id="guideImpact3" style="border-top:1px dashed #cbd5e1; padding-top:4px; margin-top:4px; font-weight:800; color:#059669; font-size:0.76rem; line-height:1.4;">
                             <i class="fa-solid fa-circle-check me-1"></i> بهذا الرقم: سينجح 0 مخدوماً (0%)
@@ -1731,6 +1811,12 @@ body {
                         <span style="font-size:0.68rem; color:#64748b; font-weight:700;">مرشد سريع:</span>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(3, 50)" style="font-size:0.68rem; padding:2px 6px; background:#f1f5f9; color:#334155;" title="المعيار المعتاد للنجاح (50%)">
                             💡 معياري (50%)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(3, 80)" id="btnExamTarget80_3" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; font-weight:800;" title="اضبط الحد تلقائياً لتمرير 80% من المخدومين في هذا الامتحان">
+                            🎯 لنجاح 80%
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(3, 70)" id="btnExamTarget70_3" style="font-size:0.68rem; padding:2px 6px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;" title="اضبط الحد لتمرير 70%">
+                            🎯 70%
                         </button>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(3, 'mean')" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:800;" title="ضبط الحد مساوياً لمتوسط درجات الدفعة الفعلي">
                             📊 متوسط الدفعة
@@ -1769,6 +1855,11 @@ body {
                             <span>📈 نطاق درجات الحاضرين:</span>
                             <strong id="guideMinMax4" style="color:#0f172a;">0 - 0 د</strong>
                         </div>
+                        <!-- 🎯 مرشد نسبة الـ 80% للمادة -->
+                        <div style="background:#eff6ff; border-radius:6px; padding:4px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#1e40af;">
+                            <span>🎯 لنجاح <strong>80%</strong> من الدفعة:</span>
+                            <strong id="guideTarget80_4" style="color:#1d4ed8; font-weight:800;">-</strong>
+                        </div>
                         <!-- دليل الأثر المباشر: كم سينجح ويرسب بهذا الرقم المحدد -->
                         <div id="guideImpact4" style="border-top:1px dashed #cbd5e1; padding-top:4px; margin-top:4px; font-weight:800; color:#059669; font-size:0.76rem; line-height:1.4;">
                             <i class="fa-solid fa-circle-check me-1"></i> بهذا الرقم: سينجح 0 مخدوماً (0%)
@@ -1780,6 +1871,12 @@ body {
                         <span style="font-size:0.68rem; color:#64748b; font-weight:700;">مرشد سريع:</span>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(4, 50)" style="font-size:0.68rem; padding:2px 6px; background:#f1f5f9; color:#334155;" title="المعيار المعتاد للنجاح (50%)">
                             💡 معياري (50%)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(4, 80)" id="btnExamTarget80_4" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; font-weight:800;" title="اضبط الحد تلقائياً لتمرير 80% من المخدومين في هذا الامتحان">
+                            🎯 لنجاح 80%
+                        </button>
+                        <button type="button" class="btn-custom" onclick="applyExamTargetPassRate(4, 70)" id="btnExamTarget70_4" style="font-size:0.68rem; padding:2px 6px; background:#f0fdf4; color:#15803d; border-color:#bbf7d0;" title="اضبط الحد لتمرير 70%">
+                            🎯 70%
                         </button>
                         <button type="button" class="btn-custom" onclick="applyExamGuidePreset(4, 'mean')" style="font-size:0.68rem; padding:2px 7px; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:800;" title="ضبط الحد مساوياً لمتوسط درجات الدفعة الفعلي">
                             📊 متوسط الدفعة
@@ -3475,8 +3572,190 @@ body {
 
     
     // =========================================================================
-    // 🧭 مرشد ودليل معايير المواد الأربعة (Smart Exam Guide & Impact Mentor)
+    // 🧭 مرشد ودليل معايير المواد الأربعة وسلم شرائح الدفعة (Cohort Ladder)
     // =========================================================================
+    let currentLadderScope = 'total'; // 'total' | 'exam1' | 'exam2' | 'exam3' | 'exam4'
+
+    function setLadderScope(scope) {
+        currentLadderScope = scope;
+        document.querySelectorAll('.btn-ladder-scope').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#f8fafc';
+            btn.style.color = '#334155';
+            btn.style.borderColor = '#cbd5e1';
+            btn.style.fontWeight = 'normal';
+        });
+
+        const activeBtn = document.getElementById(scope === 'total' ? 'btnScopeTotal' : ('btnScope' + scope.charAt(0).toUpperCase() + scope.slice(1)));
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = '#0284c7';
+            activeBtn.style.color = '#ffffff';
+            activeBtn.style.borderColor = '#0284c7';
+            activeBtn.style.fontWeight = '800';
+        }
+
+        renderCohortLadderUI();
+    }
+
+    function getCohortPercentileLadder(scope = 'total') {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) return [];
+
+        let scoresList = [];
+        let maxScore = 100;
+        let label = 'المجموع الكلي';
+
+        if (scope === 'total') {
+            scoresList = stats.attendedList.map(c => {
+                return (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            });
+            maxScore = maxTotalScore > 0 ? maxTotalScore : 100;
+            label = 'المجموع الكلي العام';
+        } else {
+            const examIdx = parseInt(scope.replace('exam', '')) || 1;
+            scoresList = stats.attendedList.map(c => Number(c['g' + examIdx]) || 0);
+            maxScore = (Array.isArray(examMaxScores) && examMaxScores[examIdx - 1] > 0) ? examMaxScores[examIdx - 1] : 25;
+            const examNames = ['', 'تحريري روحي', 'تحريري نفسي', 'شفوي روحي', 'شفوي نفسي'];
+            label = examNames[examIdx] || ('مادة ' + examIdx);
+        }
+
+        scoresList.sort((a, b) => b - a); // descending: best first
+        const N = scoresList.length;
+        const brackets = [10, 20, 30, 40, 50, 60, 70, 80, 90];
+
+        return brackets.map(targetPct => {
+            const k = Math.max(1, Math.min(N, Math.round(N * (targetPct / 100))));
+            const rawScore = scoresList[k - 1];
+            const pct = maxScore > 0 ? (rawScore / maxScore) * 100 : 0;
+            const actualCount = scoresList.filter(s => s >= rawScore).length;
+            const actualPct = (actualCount / N) * 100;
+            return {
+                targetPct,
+                score: rawScore,
+                pct: Math.round(pct * 10) / 10,
+                actualCount,
+                actualPct: Math.round(actualPct * 10) / 10,
+                total: N,
+                maxScore,
+                scope,
+                label
+            };
+        });
+    }
+
+    function renderCohortLadderUI() {
+        const container = document.getElementById('cohortLadderContainer');
+        if (!container) return;
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1; padding:20px; text-align:center; color:#64748b; font-weight:700;"><i class="fa-solid fa-info-circle me-1"></i> لا توجد درجات لحاضرين في الجدول بعد لحساب شرائح وتوزيع الدفعة.</div>';
+            return;
+        }
+
+        const ladder = getCohortPercentileLadder(currentLadderScope);
+
+        container.innerHTML = ladder.map(item => {
+            let badgeBg = '#eff6ff', badgeColor = '#1e40af', badgeText = 'شريحة الدفعة';
+            let cardBorder = '#cbd5e1';
+            let isStarred = false;
+
+            if (item.targetPct === 10) {
+                badgeBg = '#fef3c7'; badgeColor = '#92400e'; badgeText = '🥇 أعلى 10% (نخبة المتفوقين)';
+                cardBorder = '#f59e0b';
+            } else if (item.targetPct === 20) {
+                badgeBg = '#f1f5f9'; badgeColor = '#334155'; badgeText = '🥈 خُمْس الدفعة (أعلى 20%)';
+                cardBorder = '#94a3b8';
+            } else if (item.targetPct === 30) {
+                badgeBg = '#fdf4ff'; badgeColor = '#86198f'; badgeText = '🥉 أعلى 30% من الدفعة';
+            } else if (item.targetPct === 50) {
+                badgeBg = '#f3e8ff'; badgeColor = '#6b21a8'; badgeText = '⚖️ منتصف الدفعة (الوسيط 50%)';
+                cardBorder = '#a855f7';
+            } else if (item.targetPct === 80) {
+                badgeBg = '#dcfce7'; badgeColor = '#166534'; badgeText = '⭐ المستهدف المعتاد (أعلى 80%)';
+                cardBorder = '#22c55e';
+                isStarred = true;
+            }
+
+            const scoreEquiv = item.score.toFixed(1);
+            const maxScoreDisp = item.maxScore;
+
+            return `
+                <div style="background:#ffffff; border:1.5px solid ${cardBorder}; ${isStarred ? 'box-shadow:0 4px 12px rgba(34,197,94,0.15);' : ''} border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; justify-content:space-between; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem; font-weight:800; padding:2px 8px; border-radius:6px; background:${badgeBg}; color:${badgeColor};">
+                            ${badgeText}
+                        </span>
+                        <strong style="font-size:0.88rem; color:#0f172a;">≥ ${item.pct}%</strong>
+                    </div>
+
+                    <div style="font-size:0.78rem; color:#334155; line-height:1.4;">
+                        <div>حاصلون على <strong>${scoreEquiv}</strong> من أصل <strong>${maxScoreDisp}</strong> درجة فأكثر.</div>
+                        <div style="color:#64748b; font-size:0.72rem; margin-top:2px;">
+                            العدد الفعلي: <strong style="color:#0f172a;">${item.actualCount}</strong> من ${item.total} مخدوم (${item.actualPct.toFixed(1)}%).
+                        </div>
+                    </div>
+
+                    <!-- شريط تقدم مرئي -->
+                    <div style="height:6px; background:#f1f5f9; border-radius:3px; overflow:hidden;">
+                        <div style="height:100%; width:${Math.min(100, item.actualPct)}%; background:${isStarred ? '#16a34a' : '#0284c7'};"></div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; margin-top:2px;">
+                        <button type="button" class="btn-custom" onclick="applyLadderThreshold('${item.scope}', ${item.pct})" style="font-size:0.72rem; padding:4px 9px; background:${isStarred ? '#16a34a' : '#0284c7'}; color:#ffffff; font-weight:800; border:none; border-radius:6px;" title="تطبيق هذا الحد كمعيار نجاح">
+                            ⚡ تطبيق هذا الحد (${item.pct}%)
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function applyLadderThreshold(scope, pct) {
+        if (scope === 'total') {
+            passThreshold = pct;
+            const sl = document.getElementById('passThresholdSlider'); if (sl) sl.value = pct;
+            const inp = document.getElementById('passThresholdInput'); if (inp) inp.value = pct;
+            const disp = document.getElementById('thresholdDisplay'); if (disp) disp.textContent = pct + '%';
+            updateScoreEquivalents();
+            saveGradesLocal(false);
+            renderTable();
+            alert('تم تطبيق حد النجاح العام (' + pct + '%) بناءً على شريحة الدفعة بنجاح! 🎯');
+        } else if (scope.startsWith('exam')) {
+            const examNum = parseInt(scope.replace('exam', '')) || 1;
+            examMinPassPercentages[examNum - 1] = pct;
+            const inp = document.getElementById('cfgPassPct' + examNum); if (inp) inp.value = pct;
+            const sl = document.getElementById('mixSlider' + examNum); if (sl) sl.value = pct;
+            updateExamPassScoreEquivalents();
+            saveGradesLocal(false);
+            renderTable();
+            alert('تم ضبط حد مادة ' + examNum + ' على (' + pct + '%) بناءً على شريحة الدفعة بنجاح! 🎯');
+        }
+    }
+
+    function applyExamTargetPassRate(examNum, targetPct = 80) {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            alert('لا توجد درجات لحاضرين في الجدول بعد لحساب النسبة المستهدفة.');
+            return;
+        }
+        const scores = stats.attendedList.map(c => Number(c['g' + examNum]) || 0).sort((a, b) => b - a);
+        const N = scores.length;
+        const max = (Array.isArray(examMaxScores) && examMaxScores[examNum - 1] > 0) ? examMaxScores[examNum - 1] : 25;
+        const k = Math.max(1, Math.min(N, Math.round(N * (targetPct / 100))));
+        const rawScore = scores[k - 1];
+        const reqPct = Math.max(1, Math.min(100, Math.round((rawScore / max) * 100)));
+
+        examMinPassPercentages[examNum - 1] = reqPct;
+        const inp = document.getElementById('cfgPassPct' + examNum); if (inp) inp.value = reqPct;
+        const sl = document.getElementById('mixSlider' + examNum); if (sl) sl.value = reqPct;
+
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
+        alert('تم ضبط حد امتحان ' + examNum + ' على (' + reqPct + '%) لتمرير حوالي ' + targetPct + '% من الدفعة! 🎯');
+    }
+
     function applyExamGuidePreset(examNum, presetVal) {
         let targetPct = 50;
         if (presetVal === 'mean') {
@@ -3486,9 +3765,13 @@ body {
             targetPct = Number(presetVal) || 50;
         }
 
-        handleExamPassPctChange(examNum, targetPct);
-        const inp = document.getElementById('cfgPassPct' + examNum);
-        if (inp) inp.value = targetPct;
+        examMinPassPercentages[examNum - 1] = targetPct;
+        const inp = document.getElementById('cfgPassPct' + examNum); if (inp) inp.value = targetPct;
+        const mixSl = document.getElementById('mixSlider' + examNum); if (mixSl) mixSl.value = targetPct;
+
+        updateExamPassScoreEquivalents();
+        saveGradesLocal(false);
+        renderTable();
     }
 
     function applyAllExamsToRealityAverages() {
@@ -3560,7 +3843,21 @@ body {
                 }
             }
 
-            // 3. تحديث دليل الأثر المباشر للرقم المدخل (كم سينجح ويرسب بهذا الرقم)
+            // 3. تحديث مرشد نجاح 80% في هذا الامتحان
+            const elTarget80 = document.getElementById('guideTarget80_' + i);
+            if (elTarget80) {
+                if (N === 0) {
+                    elTarget80.textContent = '-';
+                } else {
+                    const sorted = stats.attendedList.map(c => Number(c['g' + i]) || 0).sort((a, b) => b - a);
+                    const k80 = Math.max(1, Math.min(N, Math.round(N * 0.8)));
+                    const score80 = sorted[k80 - 1];
+                    const pct80 = Math.round((score80 / max) * 100);
+                    elTarget80.textContent = pct80 + '% (' + score80.toFixed(1) + ' د)';
+                }
+            }
+
+            // 4. تحديث دليل الأثر المباشر للرقم المدخل (كم سينجح ويرسب بهذا الرقم)
             const elImpact = document.getElementById('guideImpact' + i);
             if (elImpact) {
                 if (N === 0) {
@@ -3591,42 +3888,42 @@ body {
         const elAttendees = document.getElementById('realityStatAttendees');
         if (elAttendees) elAttendees.textContent = stats.totalAttendees;
         const elAbsents = document.getElementById('realityStatAbsents');
-        if (elAbsents) elAbsents.textContent = `(${stats.absentCount} غائب)`;
+        if (elAbsents) elAbsents.textContent = '(' + stats.absentCount + ' غائب)';
 
         const elMean = document.getElementById('realityStatMean');
-        if (elMean) elMean.textContent = stats.totalAttendees > 0 ? `${stats.mean.toFixed(1)}%` : '0%';
+        if (elMean) elMean.textContent = stats.totalAttendees > 0 ? (stats.mean.toFixed(1) + '%') : '0%';
         const elMeanScore = document.getElementById('realityStatMeanScore');
-        if (elMeanScore) elMeanScore.textContent = stats.totalAttendees > 0 ? `(${((stats.mean / 100) * maxTotalScore).toFixed(1)} / ${maxTotalScore} درجة)` : '(0.0 درجة)';
+        if (elMeanScore) elMeanScore.textContent = stats.totalAttendees > 0 ? ('(' + ((stats.mean / 100) * maxTotalScore).toFixed(1) + ' / ' + maxTotalScore + ' درجة)') : '(0.0 درجة)';
 
         const elMedian = document.getElementById('realityStatMedian');
-        if (elMedian) elMedian.textContent = stats.totalAttendees > 0 ? `${stats.median.toFixed(1)}%` : '0%';
+        if (elMedian) elMedian.textContent = stats.totalAttendees > 0 ? (stats.median.toFixed(1) + '%') : '0%';
         const elMedianScore = document.getElementById('realityStatMedianScore');
-        if (elMedianScore) elMedianScore.textContent = stats.totalAttendees > 0 ? `(${((stats.median / 100) * maxTotalScore).toFixed(1)} / ${maxTotalScore} درجة)` : '(0.0 درجة)';
+        if (elMedianScore) elMedianScore.textContent = stats.totalAttendees > 0 ? ('(' + ((stats.median / 100) * maxTotalScore).toFixed(1) + ' / ' + maxTotalScore + ' درجة)') : '(0.0 درجة)';
 
         const elMinMax = document.getElementById('realityStatMinMax');
-        if (elMinMax) elMinMax.textContent = stats.totalAttendees > 0 ? `${stats.max.toFixed(1)}% / ${stats.min.toFixed(1)}%` : '0% / 0%';
+        if (elMinMax) elMinMax.textContent = stats.totalAttendees > 0 ? (stats.max.toFixed(1) + '% / ' + stats.min.toFixed(1) + '%') : '0% / 0%';
         const elMinMaxScore = document.getElementById('realityStatMinMaxScore');
-        if (elMinMaxScore) elMinMaxScore.textContent = stats.totalAttendees > 0 ? `(${((stats.min / 100) * maxTotalScore).toFixed(1)} - ${((stats.max / 100) * maxTotalScore).toFixed(1)} درجة)` : '(0.0 - 0.0)';
+        if (elMinMaxScore) elMinMaxScore.textContent = stats.totalAttendees > 0 ? ('(' + ((stats.min / 100) * maxTotalScore).toFixed(1) + ' - ' + ((stats.max / 100) * maxTotalScore).toFixed(1) + ' درجة)') : '(0.0 - 0.0)';
 
         // 2. نسبة النجاح بالحد الحالي
         const currPassCount = stats.scores.filter(s => s >= passThreshold).length;
         const currPassPct = stats.totalAttendees > 0 ? (currPassCount / stats.totalAttendees) * 100 : 0;
         const elCurrPassThresh = document.getElementById('realityCurrPassThresh');
-        if (elCurrPassThresh) elCurrPassThresh.textContent = `${passThreshold}%`;
+        if (elCurrPassThresh) elCurrPassThresh.textContent = passThreshold + '%';
         const elCurrPassPct = document.getElementById('realityStatCurrPassPct');
-        if (elCurrPassPct) elCurrPassPct.textContent = stats.totalAttendees > 0 ? `${currPassPct.toFixed(1)}%` : '0%';
+        if (elCurrPassPct) elCurrPassPct.textContent = stats.totalAttendees > 0 ? (currPassPct.toFixed(1) + '%') : '0%';
         const elCurrPassCount = document.getElementById('realityStatCurrPassCount');
-        if (elCurrPassCount) elCurrPassCount.textContent = stats.totalAttendees > 0 ? `(${currPassCount} من ${stats.totalAttendees} حاضرين)` : '(0 مخدوم حاضر)';
+        if (elCurrPassCount) elCurrPassCount.textContent = stats.totalAttendees > 0 ? ('(' + currPassCount + ' من ' + stats.totalAttendees + ' حاضرين)') : '(0 مخدوم حاضر)';
 
         // 3. الربيعيات والانحراف المعياري
         const elQ1 = document.getElementById('realityStatQ1');
-        if (elQ1) elQ1.textContent = stats.totalAttendees > 0 ? `${stats.q1.toFixed(1)}% (${((stats.q1 / 100) * maxTotalScore).toFixed(1)} د)` : '-';
+        if (elQ1) elQ1.textContent = stats.totalAttendees > 0 ? (stats.q1.toFixed(1) + '% (' + ((stats.q1 / 100) * maxTotalScore).toFixed(1) + ' د)') : '-';
         const elQ2 = document.getElementById('realityStatQ2');
-        if (elQ2) elQ2.textContent = stats.totalAttendees > 0 ? `${stats.median.toFixed(1)}% (${((stats.median / 100) * maxTotalScore).toFixed(1)} د)` : '-';
+        if (elQ2) elQ2.textContent = stats.totalAttendees > 0 ? (stats.median.toFixed(1) + '% (' + ((stats.median / 100) * maxTotalScore).toFixed(1) + ' د)') : '-';
         const elQ3 = document.getElementById('realityStatQ3');
-        if (elQ3) elQ3.textContent = stats.totalAttendees > 0 ? `${stats.q3.toFixed(1)}% (${((stats.q3 / 100) * maxTotalScore).toFixed(1)} د)` : '-';
+        if (elQ3) elQ3.textContent = stats.totalAttendees > 0 ? (stats.q3.toFixed(1) + '% (' + ((stats.q3 / 100) * maxTotalScore).toFixed(1) + ' د)') : '-';
         const elStdDev = document.getElementById('realityStatStdDev');
-        if (elStdDev) elStdDev.textContent = stats.totalAttendees > 0 ? `±${stats.stdDev.toFixed(1)}%` : '-';
+        if (elStdDev) elStdDev.textContent = stats.totalAttendees > 0 ? ('±' + stats.stdDev.toFixed(1) + '%') : '-';
 
         // 4. نص النتيجة التحليلية الفورية
         const elResultText = document.getElementById('realityResultText');
@@ -3636,7 +3933,7 @@ body {
 
         if (stats.totalAttendees === 0) {
             if (elResultText) elResultText.innerHTML = '<span style="color:#64748b;"><i class="fa-solid fa-info-circle me-1"></i> لا توجد درجات لحاضرين مسجلين بعد. عند رصد الدرجات أو استيراد الإكسيل، سيتم حساب المنحنى الواقعي آلياً.</span>';
-            if (elBtnApplyText) elBtnApplyText.textContent = `تطبيق حد النجاح الافتراضي (60%) ⚡`;
+            if (elBtnApplyText) elBtnApplyText.textContent = 'تطبيق حد النجاح الافتراضي (60%) ⚡';
             if (elDetailedSub) elDetailedSub.innerHTML = '';
             return;
         }
@@ -3656,17 +3953,29 @@ body {
         }
 
         if (elDetailedSub) {
-            elDetailedSub.innerHTML = `
-                * من بين الناجحين: <strong>${calc.allCriteriaPassCount}</strong> مخدوم مستوفٍ لشروط النجاح في المواد الأربعة معاً بنسبة 100%.
-            `;
+            elDetailedSub.innerHTML = '* من بين الناجحين: <strong>' + calc.allCriteriaPassCount + '</strong> مخدوم مستوفٍ لشروط النجاح في المواد الأربعة معاً بنسبة 100%.';
         }
 
         if (elBtnApplyText) {
-            elBtnApplyText.textContent = `تطبيق حد النجاح الواقعي (${calc.requiredThreshold}%) فوراً ⚡`;
+            elBtnApplyText.textContent = 'تطبيق حد النجاح الواقعي (' + calc.requiredThreshold + '%) فوراً ⚡';
         }
 
         if (elQuickBadge) {
-            elQuickBadge.innerHTML = `<i class="fa-solid fa-chart-line me-1"></i> لتمرير ${currentTargetPassRate}%: حد الواقع = ${calc.requiredThreshold}%`;
+            elQuickBadge.innerHTML = '<i class="fa-solid fa-chart-line me-1"></i> لتمرير ' + currentTargetPassRate + '%: حد الواقع = ' + calc.requiredThreshold + '%';
+        }
+
+        // تحديث ملخص الشرائح في اللوحة المباشرة
+        const fwdDec20 = document.getElementById('fwdDec20');
+        const fwdDec50 = document.getElementById('fwdDec50');
+        const fwdDec80 = document.getElementById('fwdDec80');
+        if (fwdDec20 || fwdDec50 || fwdDec80) {
+            const ladder = getCohortPercentileLadder('total');
+            const d20 = ladder.find(x => x.targetPct === 20);
+            const d50 = ladder.find(x => x.targetPct === 50);
+            const d80 = ladder.find(x => x.targetPct === 80);
+            if (fwdDec20) fwdDec20.textContent = d20 ? (d20.pct + '%') : '--%';
+            if (fwdDec50) fwdDec50.textContent = d50 ? (d50.pct + '%') : '--%';
+            if (fwdDec80) fwdDec80.textContent = d80 ? (d80.pct + '%') : '--%';
         }
     
         // 5. تحديث بطاقات متوسطات الأقسام الأربعة
@@ -3721,96 +4030,8 @@ body {
         const tfTot = document.getElementById('tfAvgTotal'); if (tfTot) tfTot.innerHTML = '<strong>' + ((stats.mean / 100) * maxTotalScore).toFixed(1) + '</strong><br><small style="color:#64748b;">/ ' + maxTotalScore + '</small>';
         const tfPct = document.getElementById('tfAvgPct'); if (tfPct) tfPct.textContent = stats.mean.toFixed(1) + '%';
         const tfDec = document.getElementById('tfSummaryDec'); if (tfDec) tfDec.innerHTML = 'المجتازون بالحد الحالي (' + passThreshold + '%): <strong>' + currPassCount + '</strong> من <strong>' + stats.totalAttendees + '</strong> (' + currPassPct.toFixed(1) + '%)';
-    
-    }
 
-    function applyRealityCalculatedThreshold() {
-        const stats = getRealityScoreStats();
-        if (stats.totalAttendees === 0) {
-            alert('لا توجد درجات لحاضرين في الجدول لحساب العتبة.');
-            return;
-        }
-
-        const calc = calculateThresholdForTargetPassRate(currentTargetPassRate);
-        const newThresh = calc.requiredThreshold;
-
-        passThreshold = newThresh;
-
-        // ضبط السلايدر مع التأكد من استيعاب العتبة داخل مداه
-        const slider = document.getElementById('passThresholdSlider');
-        if (slider) {
-            if (newThresh < Number(slider.min)) slider.min = Math.max(0, Math.floor(newThresh - 5));
-            if (newThresh > Number(slider.max)) slider.max = Math.min(100, Math.ceil(newThresh + 5));
-            slider.step = "0.5";
-            slider.value = newThresh;
-        }
-
-        const disp = document.getElementById('thresholdDisplay');
-        if (disp) disp.textContent = `${newThresh}%`;
-
-        // تعيين حد المقابلة الشخصية ليكون متناسقاً تحت حد النجاح بـ 10 درجات مئوية
-        if (interviewThreshold >= passThreshold) {
-            interviewThreshold = Math.max(10, Math.floor(passThreshold - 10));
-            const intSlider = document.getElementById('interviewThresholdSlider');
-            if (intSlider) intSlider.value = interviewThreshold;
-            const intDisp = document.getElementById('interviewThresholdDisplay');
-            if (intDisp) intDisp.textContent = `${interviewThreshold}%`;
-        }
-
-        updateScoreEquivalents();
-        saveGradesLocal(false);
-        renderTable();
-
-        const scoreEquiv = ((newThresh / 100) * maxTotalScore).toFixed(1);
-        alert(`تم تطبيق حد النجاح المبني على درجات الواقع بنجاح! 🎯\n\nالحد الجديد: ${newThresh}% (${scoreEquiv} من أصل ${maxTotalScore} درجة).\nسيمر الآن ${calc.actualPassingCount} من أصل ${calc.totalAttendees} مخدوماً حاضرين (نسبة ${calc.actualPassPct.toFixed(1)}%).`);
-    }
-
-    
-    // =========================================================================
-    // 🔄 الاتجاه العكسي: محاكي معرفة نسبة وعدد الناجحين من الدرجة المقترحة
-    // =========================================================================
-    let currentProposedScore = 60; // الدرجة المقترحة للتجربة
-    let currentRealityMode = 'forward'; // 'forward' | 'reverse'
-
-    function switchRealityExplorerMode(mode) {
-        currentRealityMode = mode;
-        const panelFwd = document.getElementById('panelModeForward');
-        const panelRev = document.getElementById('panelModeReverse');
-        const tabFwd = document.getElementById('tabModeForward');
-        const tabRev = document.getElementById('tabModeReverse');
-        const badge = document.getElementById('realityQuickBadge');
-
-        if (mode === 'forward') {
-            if (panelFwd) panelFwd.style.display = 'block';
-            if (panelRev) panelRev.style.display = 'none';
-            if (tabFwd) {
-                tabFwd.classList.add('active-mode-tab');
-                tabFwd.style.background = '#2563eb';
-                tabFwd.style.color = '#ffffff';
-            }
-            if (tabRev) {
-                tabRev.classList.remove('active-mode-tab');
-                tabRev.style.background = 'transparent';
-                tabRev.style.color = '#334155';
-            }
-            if (badge) badge.innerHTML = '<i class="fa-solid fa-bullseye me-1"></i> الاتجاه المباشر: من النسبة المستهدفة إلى الدرجة';
-        } else {
-            if (panelFwd) panelFwd.style.display = 'none';
-            if (panelRev) panelRev.style.display = 'block';
-            if (tabRev) {
-                tabRev.classList.add('active-mode-tab');
-                tabRev.style.background = '#7c3aed';
-                tabRev.style.color = '#ffffff';
-            }
-            if (tabFwd) {
-                tabFwd.classList.remove('active-mode-tab');
-                tabFwd.style.background = 'transparent';
-                tabFwd.style.color = '#334155';
-            }
-            if (badge) badge.innerHTML = '<i class="fa-solid fa-arrow-right-arrow-left me-1"></i> الاتجاه العكسي: من الدرجة المقترحة إلى النسبة';
-            updateReverseRealitySimulatorUI();
-
-        // تحديث شريط متوسطات المواد اللحظي في اللوحتين المباشرة والعكسية
+        // 7. تحديث شريط متوسطات المواد في اللوحتين المباشرة والعكسية
         const rib1 = document.getElementById('ribbonAvg1'); if (rib1) rib1.textContent = stats.avgG1.toFixed(1) + ' (' + stats.avgPctG1.toFixed(1) + '%)';
         const rib2 = document.getElementById('ribbonAvg2'); if (rib2) rib2.textContent = stats.avgG2.toFixed(1) + ' (' + stats.avgPctG2.toFixed(1) + '%)';
         const rib3 = document.getElementById('ribbonAvg3'); if (rib3) rib3.textContent = stats.avgG3.toFixed(1) + ' (' + stats.avgPctG3.toFixed(1) + '%)';
@@ -3821,7 +4042,7 @@ body {
         const ribRev3 = document.getElementById('ribbonRevAvg3'); if (ribRev3) ribRev3.textContent = stats.avgG3.toFixed(1) + ' (' + stats.avgPctG3.toFixed(1) + '%)';
         const ribRev4 = document.getElementById('ribbonRevAvg4'); if (ribRev4) ribRev4.textContent = stats.avgG4.toFixed(1) + ' (' + stats.avgPctG4.toFixed(1) + '%)';
 
-        // تحديث ملخص نتيجة المكس الحالية
+        // 8. تحديث ملخص نتيجة المكس الحالية
         const mixResEl = document.getElementById('mixLiveResultText');
         if (mixResEl) {
             let modeName = 'مواد منفردة 🎯';
@@ -3841,6 +4062,69 @@ body {
             mixResEl.innerHTML = '<i class="fa-solid fa-sparkles text-warning me-1"></i> النمط النشط: <strong style="color:#0f172a;">' + modeName + '</strong> | سينجح بهذا المكس: <strong style="color:#059669;">' + passingMixCount + '</strong> من أصل ' + attendedCount + ' حاضرين (' + mixPassPct + '%)';
         }
 
+        // 9. تشغيل مرشد المواد الأربعة وسلم الشرائح
+        updateExamGuidesUI();
+        if (currentRealityMode === 'ladder') {
+            renderCohortLadderUI();
+        }
+    }
+
+    // =========================================================================
+    // 🔄 الاتجاه العكسي: محاكي معرفة نسبة وعدد الناجحين من الدرجة المقترحة
+    // =========================================================================
+    let currentProposedScore = 60; // الدرجة المقترحة للتجربة
+    let currentRealityMode = 'forward'; // 'forward' | 'reverse' | 'ladder'
+
+    function switchRealityExplorerMode(mode) {
+        currentRealityMode = mode;
+        const panelFwd = document.getElementById('panelModeForward');
+        const panelRev = document.getElementById('panelModeReverse');
+        const panelLadder = document.getElementById('panelModeLadder');
+        const tabFwd = document.getElementById('tabModeForward');
+        const tabRev = document.getElementById('tabModeReverse');
+        const tabLadder = document.getElementById('tabModeLadder');
+        const badge = document.getElementById('realityQuickBadge');
+
+        // إخفاء كافة اللوحات أولاً
+        if (panelFwd) panelFwd.style.display = 'none';
+        if (panelRev) panelRev.style.display = 'none';
+        if (panelLadder) panelLadder.style.display = 'none';
+
+        // إعادة ضبط أنماط التبويبات
+        [tabFwd, tabRev, tabLadder].forEach(t => {
+            if (t) {
+                t.classList.remove('active-mode-tab');
+                t.style.background = 'transparent';
+                t.style.color = '#334155';
+            }
+        });
+
+        if (mode === 'forward') {
+            if (panelFwd) panelFwd.style.display = 'block';
+            if (tabFwd) {
+                tabFwd.classList.add('active-mode-tab');
+                tabFwd.style.background = '#2563eb';
+                tabFwd.style.color = '#ffffff';
+            }
+            if (badge) badge.innerHTML = '<i class="fa-solid fa-bullseye me-1"></i> الاتجاه المباشر: من النسبة المستهدفة إلى الدرجة';
+        } else if (mode === 'reverse') {
+            if (panelRev) panelRev.style.display = 'block';
+            if (tabRev) {
+                tabRev.classList.add('active-mode-tab');
+                tabRev.style.background = '#7c3aed';
+                tabRev.style.color = '#ffffff';
+            }
+            if (badge) badge.innerHTML = '<i class="fa-solid fa-arrow-right-arrow-left me-1"></i> الاتجاه العكسي: من الدرجة المقترحة إلى النسبة';
+            updateReverseRealitySimulatorUI();
+        } else if (mode === 'ladder') {
+            if (panelLadder) panelLadder.style.display = 'block';
+            if (tabLadder) {
+                tabLadder.classList.add('active-mode-tab');
+                tabLadder.style.background = '#0284c7';
+                tabLadder.style.color = '#ffffff';
+            }
+            if (badge) badge.innerHTML = '<i class="fa-solid fa-stairs me-1"></i> سلم شرائح الدفعة: نسب ودرجات الدفعة بالمئينات';
+            renderCohortLadderUI();
         }
     }
 
