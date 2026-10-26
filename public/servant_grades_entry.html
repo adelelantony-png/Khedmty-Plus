@@ -730,7 +730,114 @@ body {
             box-shadow: 0 0 0 3px rgba(30, 55, 153, 0.12);
         }
 
-        .filter-status-summary {
+                /* أزرار وشارات الفلترة المتعددة لمعايير المواد الأربعة */
+        .multi-criteria-container {
+            position: relative;
+        }
+
+        .multi-crit-btn {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #64748b;
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 5px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .multi-crit-btn:hover {
+            border-color: #94a3b8;
+        }
+
+        .multi-crit-btn.active-any {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+            font-weight: 800 !important;
+            border-color: #94a3b8 !important;
+        }
+
+        .multi-crit-btn.active-pass {
+            background: #10b981 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border-color: #059669 !important;
+            box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+        }
+
+        .multi-crit-btn.active-fail {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border-color: #dc2626 !important;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+        }
+
+        .filter-chip {
+            font-size: 0.76rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s ease;
+        }
+
+        .filter-chip-default {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .filter-chip-success {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .filter-chip-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .filter-chip-close {
+            cursor: pointer;
+            opacity: 0.7;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            transition: all 0.15s ease;
+        }
+
+        .filter-chip-close:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-clear-all-chips {
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            color: #b91c1c;
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-clear-all-chips:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+.filter-status-summary {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1831,17 +1938,123 @@ body {
                 <option value="fail">⚠️ دون المقبول (أقل من 50%)</option>
             </select>
 
-            <!-- 6. فلترة تصنيف المشكلة الرعوية -->
-            <!-- فلترة المعايير الأربعة وسبب عدم الاجتياز -->
-            <select id="criteriaFilter" class="filter-select" onchange="renderTable()">
-                <option value="all">🎯 كل حالات المعايير الأربعة</option>
-                <option value="all_passed">✅ مستوفٍ لكافة النسب الأربعة</option>
-                <option value="failed_any">⚠️ غير مستوفٍ لأي عنصر من الأربعة</option>
-                <option value="failed_ex1">✍️ لم يتخطَ: تحريري روحي</option>
-                <option value="failed_ex2">✍️ لم يتخطَ: تحريري نفسي</option>
-                <option value="failed_ex3">🗣️ لم يتخطَ: شفوي روحي</option>
-                <option value="failed_ex4">🗣️ لم يتخطَ: شفوي نفسي</option>
-            </select>
+            <!-- 6. فلترة المعايير الأربعة والمواد المتعددة (Multi-Criteria Subject Filter) -->
+            <div class="multi-criteria-container">
+                <button type="button" id="btnToggleMultiCriteria" class="filter-select" onclick="toggleMultiCriteriaDropdown(event)" style="display:flex; align-items:center; justify-content:space-between; width:100%; cursor:pointer; background:#ffffff; text-align:right;">
+                    <span id="multiCriteriaButtonLabel" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        <i class="fa-solid fa-list-check text-primary me-1"></i> معايير المواد الأربعة
+                    </span>
+                    <div style="display:flex; align-items:center; gap:4px;">
+                        <span id="multiCriteriaBadge" style="display:none; background:#1e3799; color:#fff; font-size:0.72rem; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
+                        <i class="fa-solid fa-chevron-down" style="font-size:0.7rem; color:#64748b;"></i>
+                    </div>
+                </button>
+
+                <!-- قائمة الفلترة المتعددة المنبثقة -->
+                <div id="multiCriteriaDropdownMenu" style="display:none; position:absolute; top:calc(100% + 5px); right:0; z-index:1050; min-width:330px; max-width:92vw; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; box-shadow:0 14px 35px rgba(12,36,97,0.18); padding:14px; font-size:0.85rem;" onclick="event.stopPropagation()">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:8px; margin-bottom:10px;">
+                        <div style="font-weight:800; color:#0c2461; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-sliders text-primary"></i>
+                            <span>معايير المواد (متعددة)</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:3px; background:#f1f5f9; padding:2px 4px; border-radius:8px;">
+                            <span style="font-size:0.68rem; color:#64748b; font-weight:700;">الربط:</span>
+                            <button type="button" id="btnLogicAnd" onclick="setMultiCriteriaLogic('AND')" style="border:none; background:#1e3799; color:#fff; font-size:0.7rem; font-weight:800; padding:3px 7px; border-radius:6px; cursor:pointer;" title="يجب مطابقة كافة الشروط المحددة معاً">معاً AND</button>
+                            <button type="button" id="btnLogicOr" onclick="setMultiCriteriaLogic('OR')" style="border:none; background:transparent; color:#64748b; font-size:0.7rem; font-weight:700; padding:3px 7px; border-radius:6px; cursor:pointer;" title="يكفي مطابقة أي شرط واحد من الشروط">أحدهم OR</button>
+                        </div>
+                    </div>
+
+                    <!-- صفوف المواد الأربعة -->
+                    <div id="multiCriteriaSubjectsList" style="display:flex; flex-direction:column; gap:8px;">
+                        <!-- مادة 1: تحريري روحي -->
+                        <div class="multi-crit-exam-row" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-weight:800; color:#1e293b; font-size:0.82rem;">
+                                    ✍️ تحريري روحي <span style="font-size:0.7rem; color:#64748b; font-weight:600;">(النجاح: <span id="multiReqPct_1">50</span>%)</span>
+                                </span>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                                <button type="button" id="btnCrit_1_any" onclick="setExamCriteria(1, 'any')" class="multi-crit-btn active-any">الكل ⚪</button>
+                                <button type="button" id="btnCrit_1_pass" onclick="setExamCriteria(1, 'pass')" class="multi-crit-btn">تخطى ✅</button>
+                                <button type="button" id="btnCrit_1_fail" onclick="setExamCriteria(1, 'fail')" class="multi-crit-btn">لم يتخطَ ❌</button>
+                            </div>
+                        </div>
+
+                        <!-- مادة 2: تحريري نفسي -->
+                        <div class="multi-crit-exam-row" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-weight:800; color:#1e293b; font-size:0.82rem;">
+                                    ✍️ تحريري نفسي <span style="font-size:0.7rem; color:#64748b; font-weight:600;">(النجاح: <span id="multiReqPct_2">50</span>%)</span>
+                                </span>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                                <button type="button" id="btnCrit_2_any" onclick="setExamCriteria(2, 'any')" class="multi-crit-btn active-any">الكل ⚪</button>
+                                <button type="button" id="btnCrit_2_pass" onclick="setExamCriteria(2, 'pass')" class="multi-crit-btn">تخطى ✅</button>
+                                <button type="button" id="btnCrit_2_fail" onclick="setExamCriteria(2, 'fail')" class="multi-crit-btn">لم يتخطَ ❌</button>
+                            </div>
+                        </div>
+
+                        <!-- مادة 3: شفوي روحي -->
+                        <div class="multi-crit-exam-row" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-weight:800; color:#1e293b; font-size:0.82rem;">
+                                    🗣️ شفوي روحي <span style="font-size:0.7rem; color:#64748b; font-weight:600;">(النجاح: <span id="multiReqPct_3">50</span>%)</span>
+                                </span>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                                <button type="button" id="btnCrit_3_any" onclick="setExamCriteria(3, 'any')" class="multi-crit-btn active-any">الكل ⚪</button>
+                                <button type="button" id="btnCrit_3_pass" onclick="setExamCriteria(3, 'pass')" class="multi-crit-btn">تخطى ✅</button>
+                                <button type="button" id="btnCrit_3_fail" onclick="setExamCriteria(3, 'fail')" class="multi-crit-btn">لم يتخطَ ❌</button>
+                            </div>
+                        </div>
+
+                        <!-- مادة 4: شفوي نفسي -->
+                        <div class="multi-crit-exam-row" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:7px 10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-weight:800; color:#1e293b; font-size:0.82rem;">
+                                    🗣️ شفوي نفسي <span style="font-size:0.7rem; color:#64748b; font-weight:600;">(النجاح: <span id="multiReqPct_4">50</span>%)</span>
+                                </span>
+                            </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px;">
+                                <button type="button" id="btnCrit_4_any" onclick="setExamCriteria(4, 'any')" class="multi-crit-btn active-any">الكل ⚪</button>
+                                <button type="button" id="btnCrit_4_pass" onclick="setExamCriteria(4, 'pass')" class="multi-crit-btn">تخطى ✅</button>
+                                <button type="button" id="btnCrit_4_fail" onclick="setExamCriteria(4, 'fail')" class="multi-crit-btn">لم يتخطَ ❌</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- اختصارات الحالات العامة -->
+                    <div style="display:flex; gap:6px; margin-top:10px; margin-bottom:10px; border-top:1px solid #f1f5f9; padding-top:10px;">
+                        <button type="button" id="btnPresetAllPassed" onclick="setMultiCriteriaPreset('all_passed')" style="flex:1; border:1px solid #10b981; background:#f0fdf4; color:#15803d; font-size:0.75rem; font-weight:800; padding:6px; border-radius:8px; cursor:pointer;">
+                            <i class="fa-solid fa-circle-check"></i> الكل مستوفٍ (4 مواد)
+                        </button>
+                        <button type="button" id="btnPresetFailedAny" onclick="setMultiCriteriaPreset('failed_any')" style="flex:1; border:1px solid #ef4444; background:#fef2f2; color:#b91c1c; font-size:0.75rem; font-weight:800; padding:6px; border-radius:8px; cursor:pointer;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> راسب في أي مادة
+                        </button>
+                    </div>
+
+                    <!-- أزرار التحكم السفلية -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f1f5f9; padding-top:8px;">
+                        <button type="button" onclick="resetMultiCriteriaFilters()" style="border:none; background:transparent; color:#64748b; font-size:0.78rem; font-weight:700; cursor:pointer; text-decoration:underline;">
+                            <i class="fa-solid fa-rotate-left me-1"></i> تفريغ المعايير
+                        </button>
+                        <button type="button" onclick="closeMultiCriteriaDropdown()" style="border:none; background:#0c2461; color:#ffffff; font-size:0.78rem; font-weight:800; padding:5px 14px; border-radius:8px; cursor:pointer;">
+                            تطبيق وإغلاق
+                        </button>
+                    </div>
+                </div>
+
+                <!-- عنصر محاكاة لتوافق الكود والسكربتات القديمة -->
+                <select id="criteriaFilter" class="filter-select" style="display:none;" onchange="renderTable()">
+                    <option value="all">🎯 كل حالات المعايير الأربعة</option>
+                    <option value="all_passed">✅ مستوفٍ لكافة النسب الأربعة</option>
+                    <option value="failed_any">⚠️ غير مستوفٍ لأي عنصر من الأربعة</option>
+                    <option value="failed_ex1">✍️ لم يتخطَ: تحريري روحي</option>
+                    <option value="failed_ex2">✍️ لم يتخطَ: تحريري نفسي</option>
+                    <option value="failed_ex3">🗣️ لم يتخطَ: شفوي روحي</option>
+                    <option value="failed_ex4">🗣️ لم يتخطَ: شفوي نفسي</option>
+                </select>
+            </div>
 
             <select id="problemFilter" class="filter-select" onchange="renderTable()">
                 <option value="all">⚠️ كل التصنيفات الرعوية</option>
@@ -4447,6 +4660,337 @@ body {
 
 
     // =========================================================================
+    // منظومة الفلترة المتعددة لمعايير ومواد التقييم (Multi-Criteria Filter Engine)
+    // =========================================================================
+    let multiCriteriaFilterState = {
+        mode: 'AND', // 'AND' (معاً - الافتراضي) أو 'OR' (أحدهم)
+        ex1: 'any',  // 'any' | 'pass' | 'fail'
+        ex2: 'any',  // 'any' | 'pass' | 'fail'
+        ex3: 'any',  // 'any' | 'pass' | 'fail'
+        ex4: 'any',  // 'any' | 'pass' | 'fail'
+        preset: null // null | 'all_passed' | 'failed_any'
+    };
+
+    const examShortNames = ['تحريري روحي', 'تحريري نفسي', 'شفوي روحي', 'شفوي نفسي'];
+    const examIcons = ['✍️', '✍️', '🗣️', '🗣️'];
+
+    function toggleMultiCriteriaDropdown(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('multiCriteriaDropdownMenu');
+        if (!menu) return;
+        const isHidden = (menu.style.display === 'none' || menu.style.display === '');
+        menu.style.display = isHidden ? 'block' : 'none';
+
+        if (isHidden) {
+            // تحديث نسب النجاح المعروضة بجانب المواد
+            for (let i = 1; i <= 4; i++) {
+                const reqEl = document.getElementById('multiReqPct_' + i);
+                if (reqEl && typeof examMinPassPercentages !== 'undefined' && examMinPassPercentages[i - 1]) {
+                    reqEl.textContent = examMinPassPercentages[i - 1];
+                }
+            }
+        }
+    }
+
+    function closeMultiCriteriaDropdown() {
+        const menu = document.getElementById('multiCriteriaDropdownMenu');
+        if (menu) menu.style.display = 'none';
+    }
+
+    // إغلاق القائمة عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('multiCriteriaDropdownMenu');
+        const btn = document.getElementById('btnToggleMultiCriteria');
+        if (menu && menu.style.display === 'block') {
+            if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+                menu.style.display = 'none';
+            }
+        }
+    });
+
+    function setMultiCriteriaLogic(logic) {
+        multiCriteriaFilterState.mode = logic;
+        const btnAnd = document.getElementById('btnLogicAnd');
+        const btnOr = document.getElementById('btnLogicOr');
+        if (btnAnd && btnOr) {
+            if (logic === 'AND') {
+                btnAnd.style.background = '#1e3799';
+                btnAnd.style.color = '#ffffff';
+                btnOr.style.background = 'transparent';
+                btnOr.style.color = '#64748b';
+            } else {
+                btnOr.style.background = '#1e3799';
+                btnOr.style.color = '#ffffff';
+                btnAnd.style.background = 'transparent';
+                btnAnd.style.color = '#64748b';
+            }
+        }
+        updateMultiCriteriaUI();
+        renderTable();
+    }
+
+    function setExamCriteria(examIdx, state) {
+        // إذا ضغط نفس الزر النشط حالياً، يعود إلى الوضع المحايد (any)
+        const current = multiCriteriaFilterState['ex' + examIdx];
+        if (current === state && state !== 'any') {
+            multiCriteriaFilterState['ex' + examIdx] = 'any';
+        } else {
+            multiCriteriaFilterState['ex' + examIdx] = state;
+        }
+
+        // إلغاء البريسيت العام إن كان مفعلاً لأن المستخدم اختار مادة محددة
+        multiCriteriaFilterState.preset = null;
+
+        updateMultiCriteriaUI();
+        renderTable();
+    }
+
+    function setMultiCriteriaPreset(preset) {
+        if (multiCriteriaFilterState.preset === preset) {
+            // إلغاء التفعيل
+            multiCriteriaFilterState.preset = null;
+        } else {
+            multiCriteriaFilterState.preset = preset;
+            // تصفير المواد الفردية
+            multiCriteriaFilterState.ex1 = 'any';
+            multiCriteriaFilterState.ex2 = 'any';
+            multiCriteriaFilterState.ex3 = 'any';
+            multiCriteriaFilterState.ex4 = 'any';
+        }
+
+        updateMultiCriteriaUI();
+        renderTable();
+    }
+
+    function resetMultiCriteriaFilters(triggerRender = true) {
+        multiCriteriaFilterState = {
+            mode: 'AND',
+            ex1: 'any',
+            ex2: 'any',
+            ex3: 'any',
+            ex4: 'any',
+            preset: null
+        };
+        const legacySelect = document.getElementById('criteriaFilter');
+        if (legacySelect) legacySelect.value = 'all';
+
+        setMultiCriteriaLogic('AND');
+        updateMultiCriteriaUI();
+        if (triggerRender) renderTable();
+    }
+
+    function updateMultiCriteriaUI() {
+        const m = multiCriteriaFilterState;
+
+        // تحديث أزرار المواد الأربعة
+        for (let i = 1; i <= 4; i++) {
+            const st = m['ex' + i];
+            const btnAny = document.getElementById('btnCrit_' + i + '_any');
+            const btnPass = document.getElementById('btnCrit_' + i + '_pass');
+            const btnFail = document.getElementById('btnCrit_' + i + '_fail');
+
+            if (btnAny && btnPass && btnFail) {
+                btnAny.className = 'multi-crit-btn' + (st === 'any' ? ' active-any' : '');
+                btnPass.className = 'multi-crit-btn' + (st === 'pass' ? ' active-pass' : '');
+                btnFail.className = 'multi-crit-btn' + (st === 'fail' ? ' active-fail' : '');
+            }
+        }
+
+        // تحديث أزرار البريسيتس العامة
+        const btnAllPass = document.getElementById('btnPresetAllPassed');
+        const btnFailAny = document.getElementById('btnPresetFailedAny');
+        if (btnAllPass && btnFailAny) {
+            if (m.preset === 'all_passed') {
+                btnAllPass.style.background = '#10b981';
+                btnAllPass.style.color = '#ffffff';
+                btnAllPass.style.borderColor = '#059669';
+            } else {
+                btnAllPass.style.background = '#f0fdf4';
+                btnAllPass.style.color = '#15803d';
+                btnAllPass.style.borderColor = '#10b981';
+            }
+
+            if (m.preset === 'failed_any') {
+                btnFailAny.style.background = '#ef4444';
+                btnFailAny.style.color = '#ffffff';
+                btnFailAny.style.borderColor = '#dc2626';
+            } else {
+                btnFailAny.style.background = '#fef2f2';
+                btnFailAny.style.color = '#b91c1c';
+                btnFailAny.style.borderColor = '#ef4444';
+            }
+        }
+
+        // عد الشروط النشطة
+        let activeCount = 0;
+        const activeLabels = [];
+        for (let i = 1; i <= 4; i++) {
+            const st = m['ex' + i];
+            if (st !== 'any') {
+                activeCount++;
+                const name = examShortNames[i - 1];
+                activeLabels.push((st === 'pass' ? 'تخطى ' : 'لم يتخطَ ') + name);
+            }
+        }
+
+        const badge = document.getElementById('multiCriteriaBadge');
+        const label = document.getElementById('multiCriteriaButtonLabel');
+
+        if (label && badge) {
+            if (m.preset === 'all_passed') {
+                label.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i> استوفى كافة المواد (4)';
+                badge.style.display = 'inline-block';
+                badge.textContent = '4';
+                badge.style.background = '#10b981';
+            } else if (m.preset === 'failed_any') {
+                label.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i> راسب في أي مادة';
+                badge.style.display = 'inline-block';
+                badge.textContent = '!';
+                badge.style.background = '#ef4444';
+            } else if (activeCount === 0) {
+                label.innerHTML = '<i class="fa-solid fa-list-check text-primary me-1"></i> معايير المواد الأربعة';
+                badge.style.display = 'none';
+            } else if (activeCount === 1) {
+                label.innerHTML = '🎯 ' + activeLabels[0];
+                badge.style.display = 'inline-block';
+                badge.textContent = '1';
+                badge.style.background = '#1e3799';
+            } else if (activeCount === 2) {
+                label.innerHTML = '🎯 ' + activeLabels[0] + ' + ' + activeLabels[1];
+                badge.style.display = 'inline-block';
+                badge.textContent = '2';
+                badge.style.background = '#1e3799';
+            } else {
+                label.innerHTML = '🎯 معايير المواد (' + activeCount + ' محدد)';
+                badge.style.display = 'inline-block';
+                badge.textContent = String(activeCount);
+                badge.style.background = '#1e3799';
+            }
+        }
+    }
+
+    function escapeFilterHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function updateActiveFilterTags(filteredCount, totalCount) {
+        const container = document.getElementById('activeFilterTags');
+        if (!container) return;
+
+        const chips = [];
+
+        // 1. بحث
+        const searchInput = document.getElementById('searchInput');
+        const searchVal = searchInput ? searchInput.value.trim() : '';
+        if (searchVal) {
+            chips.push('<span class="filter-chip filter-chip-default"><i class="fa-solid fa-magnifying-glass"></i> بحث: "' + escapeFilterHtml(searchVal) + '" <span class="filter-chip-close" onclick="clearFilterField(\'search\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 2. قرار القبول
+        const statusEl = document.getElementById('statusFilter');
+        if (statusEl && statusEl.value !== 'all') {
+            const text = statusEl.options[statusEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'status\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 3. النوع
+        const genderEl = document.getElementById('genderFilter');
+        if (genderEl && genderEl.value !== 'all') {
+            const text = genderEl.options[genderEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'gender\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 4. الاعتراف
+        const confEl = document.getElementById('confessionFilter');
+        if (confEl && confEl.value !== 'all') {
+            const text = confEl.options[confEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'confession\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 5. الحضور
+        const attEl = document.getElementById('attendanceFilter');
+        if (attEl && attEl.value !== 'all') {
+            const text = attEl.options[attEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'attendance\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 6. شريحة الدرجات
+        const scoreEl = document.getElementById('scoreBracketFilter');
+        if (scoreEl && scoreEl.value !== 'all') {
+            const text = scoreEl.options[scoreEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'score\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 7. المشكلة الرعوية
+        const probEl = document.getElementById('problemFilter');
+        if (probEl && probEl.value !== 'all') {
+            const text = probEl.options[probEl.selectedIndex].text;
+            chips.push('<span class="filter-chip filter-chip-default">' + text + ' <span class="filter-chip-close" onclick="clearFilterField(\'problem\')" title="إزالة">&times;</span></span>');
+        }
+
+        // 8. معايير المواد الأربعة المتعددة
+        const m = multiCriteriaFilterState;
+        if (m.preset === 'all_passed') {
+            chips.push('<span class="filter-chip filter-chip-success"><i class="fa-solid fa-circle-check"></i> كافة المعايير مستوفاة <span class="filter-chip-close" onclick="setMultiCriteriaPreset(null)" title="إزالة">&times;</span></span>');
+        } else if (m.preset === 'failed_any') {
+            chips.push('<span class="filter-chip filter-chip-danger"><i class="fa-solid fa-triangle-exclamation"></i> غير مستوفٍ لأي مادة <span class="filter-chip-close" onclick="setMultiCriteriaPreset(null)" title="إزالة">&times;</span></span>');
+        }
+
+        const activeExamList = [];
+        for (let i = 1; i <= 4; i++) {
+            const st = m['ex' + i];
+            if (st !== 'any') {
+                activeExamList.push(i);
+                const isPass = (st === 'pass');
+                const chipClass = isPass ? 'filter-chip-success' : 'filter-chip-danger';
+                const icon = examIcons[i - 1];
+                const name = examShortNames[i - 1];
+                const label = isPass ? ('تخطى: ' + name + ' ✅') : ('لم يتخطَ: ' + name + ' ❌');
+                chips.push('<span class="filter-chip ' + chipClass + '">' + icon + ' ' + label + ' <span class="filter-chip-close" onclick="setExamCriteria(' + i + ', \'any\')" title="إزالة">&times;</span></span>');
+            }
+        }
+
+        if (activeExamList.length > 1) {
+            chips.push('<span class="badge" style="background:#f1f5f9; color:#475569; font-size:0.72rem; padding:4px 6px; border-radius:6px; font-weight:700;">(الربط: ' + (m.mode === 'AND' ? 'معاً AND' : 'أحدهم OR') + ')</span>');
+        }
+
+        // زر تفريغ كافة الفلاتر إن وجد أي فلتر نشط
+        if (chips.length > 0) {
+            chips.push('<button type="button" class="btn-clear-all-chips" onclick="resetAllFilters()" title="تفريغ كافة خيارات الفلترة"><i class="fa-solid fa-rotate-left me-1"></i> مسح الكل</button>');
+            container.innerHTML = chips.join('');
+        } else {
+            container.innerHTML = '<span style="color:#94a3b8; font-size:0.74rem; font-weight:600;"><i class="fa-solid fa-circle-check me-1 text-success"></i> عرض كافة الدفعة بدون فلاتر تقييدية</span>';
+        }
+    }
+
+    function clearFilterField(fieldType) {
+        if (fieldType === 'search') {
+            const el = document.getElementById('searchInput');
+            if (el) el.value = '';
+        } else if (fieldType === 'status') {
+            const el = document.getElementById('statusFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'gender') {
+            const el = document.getElementById('genderFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'confession') {
+            const el = document.getElementById('confessionFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'attendance') {
+            const el = document.getElementById('attendanceFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'score') {
+            const el = document.getElementById('scoreBracketFilter');
+            if (el) el.value = 'all';
+        } else if (fieldType === 'problem') {
+            const el = document.getElementById('problemFilter');
+            if (el) el.value = 'all';
+        }
+        renderTable();
+    }
+
+    // =========================================================================
     // منظومة الفلترة الشاملة المتقدمة لجميع بيانات المخدومين
     // =========================================================================
     function resetAllFilters() {
@@ -4458,6 +5002,7 @@ body {
         document.getElementById('scoreBracketFilter').value = 'all';
         document.getElementById('problemFilter').value = 'all';
         if (document.getElementById('criteriaFilter')) document.getElementById('criteriaFilter').value = 'all';
+        if (typeof resetMultiCriteriaFilters === 'function') resetMultiCriteriaFilters(false);
         renderTable();
     }
 
@@ -4470,6 +5015,14 @@ body {
         const scoreVal = document.getElementById('scoreBracketFilter').value;
         const problemVal = document.getElementById('problemFilter').value;
         const criteriaVal = (document.getElementById('criteriaFilter') ? document.getElementById('criteriaFilter').value : 'all');
+
+        const mCrit = (typeof multiCriteriaFilterState !== 'undefined') ? multiCriteriaFilterState : { mode:'AND', ex1:'any', ex2:'any', ex3:'any', ex4:'any', preset:null };
+        const activeExamFilters = [];
+        for (let i = 1; i <= 4; i++) {
+            if (mCrit['ex' + i] && mCrit['ex' + i] !== 'any') {
+                activeExamFilters.push({ index: i, state: mCrit['ex' + i] });
+            }
+        }
 
         return candidatesList.filter(c => {
             const name = String(c.name || '').toLowerCase();
@@ -4490,8 +5043,31 @@ body {
             // 2. فلترة قرار القبول
             if (statusVal !== 'all' && dec.key !== statusVal) return false;
 
-            // 2.1 فلترة المعايير الأربعة
-            if (criteriaVal !== 'all') {
+            // 2.1 منظومة الفلترة المتعددة لمعايير المواد الأربعة
+            if (activeExamFilters.length > 0 || mCrit.preset) {
+                const evalRes = getCandidateExamDetails(c);
+                if (mCrit.preset === 'all_passed' && !evalRes.allPassed) return false;
+                if (mCrit.preset === 'failed_any' && evalRes.allPassed) return false;
+
+                if (activeExamFilters.length > 0) {
+                    if (mCrit.mode === 'OR') {
+                        // مطابقة أي شرط واحد على الأقل
+                        const anyMatch = activeExamFilters.some(f => {
+                            const passed = evalRes.details[f.index - 1].isPassed;
+                            return f.state === 'pass' ? passed : !passed;
+                        });
+                        if (!anyMatch) return false;
+                    } else {
+                        // الوضع الافتراضي AND: يجب مطابقة كافة الشروط المحددة معاً
+                        const allMatch = activeExamFilters.every(f => {
+                            const passed = evalRes.details[f.index - 1].isPassed;
+                            return f.state === 'pass' ? passed : !passed;
+                        });
+                        if (!allMatch) return false;
+                    }
+                }
+            } else if (criteriaVal !== 'all') {
+                // توافق تراجعي مع القائمة الكلاسيكية
                 const evalRes = getCandidateExamDetails(c);
                 if (criteriaVal === 'all_passed' && !evalRes.allPassed) return false;
                 if (criteriaVal === 'failed_any' && evalRes.allPassed) return false;
@@ -5333,6 +5909,9 @@ body {
         const filterLabel = document.getElementById('filterCountLabel');
         if (filterLabel) {
             filterLabel.innerHTML = `يتم عرض: <strong>${filtered.length}</strong> من أصل <strong>${totalCandidates}</strong> مخدوم`;
+        }
+        if (typeof updateActiveFilterTags === 'function') {
+            updateActiveFilterTags(filtered.length, totalCandidates);
         }
 
         if (filtered.length === 0) {
