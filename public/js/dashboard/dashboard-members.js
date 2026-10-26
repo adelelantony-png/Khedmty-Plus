@@ -292,115 +292,96 @@ return "بنين";
 // ==========================================
 
 function renderMembersList() {
-
 const tbody = document.querySelector('#membersTable tbody');
-
 if (!tbody) return;
 
 const searchBox = document.getElementById('searchBox');
-
-const search = searchBox ? searchBox.value.toLowerCase() : '';
-
+const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
 const stageFilterSelect = document.getElementById('stageFilterSelect');
-
 const stageFilter = stageFilterSelect ? stageFilterSelect.value : 'all';
-
 const gradFilterSelect = document.getElementById('gradFilterSelect');
-
 const gradFilter = gradFilterSelect ? gradFilterSelect.value : 'all';
 
 tbody.innerHTML = '';
 
+// تسريع فائق: خريطة حضور اليوم O(1)
+const todayAttendedSet = new Set(
+    (attendanceRecord[activeSelectedDate] || []).map(a => a && a.id ? a.id.toString() : '')
+);
+
+// كاش مؤقت لنتائج التخرج O(1) خلال دورة الرسم الحالية لمنع O(N^2)
+const gradStatusCache = new Map();
+function getGrad(id) {
+    const k = String(id);
+    if (!gradStatusCache.has(k)) {
+        gradStatusCache.set(k, calculateGraduationStatus(id));
+    }
+    return gradStatusCache.get(k);
+}
+
+const targetStage = stageFilter === 'all' ? 'all' : normalizeStageText(stageFilter);
+
 let filtered = members.filter(m => {
+    let matchesSearch = !search ||
+        (m.name || '').toLowerCase().includes(search) ||
+        (m.code && m.code.toString().toLowerCase().includes(search)) ||
+        (m.phone && m.phone.includes(search));
 
-let matchesSearch = (m.name || '').toLowerCase().includes(search) ||
+    if (!matchesSearch) return false;
 
-(m.code && m.code.toString().toLowerCase().includes(search)) ||
+    let mStage = normalizeStageText(m.stage);
+    let matchesStage = (targetStage === 'all') || (mStage === targetStage);
+    if (!matchesStage) return false;
 
-(m.phone && m.phone.includes(search));
+    if (gradFilter !== 'all') {
+        let grad = getGrad(m.id);
+        if (gradFilter === 'qualified' && !grad.qualified) return false;
+        if (gradFilter === 'unqualified' && grad.qualified) return false;
+    }
 
-let mStage = normalizeStageText(m.stage);
-
-let targetStage = stageFilter === 'all' ? 'all' : normalizeStageText(stageFilter);
-
-let matchesStage = (targetStage === 'all') || (mStage === targetStage);
-
-let grad = calculateGraduationStatus(m.id);
-
-let matchesGrad = (gradFilter === 'all') ||
-
-(gradFilter === 'qualified' && grad.qualified) ||
-
-(gradFilter === 'unqualified' && !grad.qualified);
-
-return matchesSearch && matchesStage && matchesGrad;
-
+    return true;
 });
 
 if (filtered.length === 0) {
-
-tbody.innerHTML = '<tr><td colspan="9" class="empty-state">لا توجد نتائج مطابقة للبحث أو الفلاتر المحددة.</td></tr>';
-
-updateRoleUI();
-
-return;
-
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-state">لا توجد نتائج مطابقة للبحث أو الفلاتر المحددة.</td></tr>';
+    updateRoleUI();
+    return;
 }
 
+// تجميع عناصر الـ DOM في DocumentFragment لحماية الـ 60 FPS
+const fragment = document.createDocumentFragment();
+
 filtered.forEach(m => {
+    let grad = getGrad(m.id);
+    let gradBadge = grad.qualified
+        ? `<span class="role-badge" style="background:var(--success);">مؤهل للتخرج 🎓</span>`
+        : `<span class="role-badge" style="background:var(--warning);">${grad.percent}% (غير مؤهل)</span>`;
 
-let grad = calculateGraduationStatus(m.id);
+    let isAttendedToday = todayAttendedSet.has(m.id.toString());
+    let manualBtn = isAttendedToday
+        ? `<span style="color:green; font-weight:bold; font-size:11px;">مسجل ✔️</span>`
+        : `<button class="btn-mini btn-success can-attend" onclick="registerMemberAttendanceFromTable('${m.id}')">تسجيل حضور ✔️</button>`;
 
-let gradBadge = grad.qualified
-
-? `<span class="role-badge" style="background:var(--success);">مؤهل للتخرج 🎓</span>`
-
-: `<span class="role-badge" style="background:var(--warning);">${grad.percent}% (غير مؤهل)</span>`;
-
-let isAttendedToday = (attendanceRecord[activeSelectedDate] || []).some(a => a.id.toString() === m.id.toString());
-
-let manualBtn = isAttendedToday
-
-? `<span style="color:green; font-weight:bold; font-size:11px;">مسجل ✔️</span>`
-
-: `<button class="btn-mini btn-success can-attend" onclick="registerMemberAttendanceFromTable('${m.id}')">تسجيل حضور ✔️</button>`;
-
-let tr = document.createElement('tr');
-
-tr.innerHTML = `
-
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
 <td data-label="كود الامتحان"><strong style="color:var(--primary); font-size:14px;">${escapeHtml(m.code) || '-'}</strong></td>
-
 <td data-label="الاسم"><strong>${escapeHtml(m.name)}</strong></td>
-
 <td data-label="المرحلة">${escapeHtml(normalizeStageText(m.stage))}</td>
-
 <td data-label="التليفون">${escapeHtml(m.phone)}</td>
-
 <td data-label="حضور الجمعة الرسمي">
-
 <div style="font-weight:bold; font-size:11px;">${grad.percent}% (${grad.attended}/${grad.total})</div>
-
 <div class="progress-bar-container"><div class="progress-bar" style="width:${grad.percent}%; background:${grad.qualified ? 'var(--success)' : 'var(--warning)'}"></div></div>
-
 </td>
-
 <td data-label="نقاط بونص ⭐"><strong style="color:var(--purple);">+${grad.bonus} نقطة</strong></td>
-
 <td data-label="أهلية التخرج">${gradBadge}</td>
-
 <td data-label="تسجيل يدوي">${manualBtn}</td>
-
 <td data-label="الملف"><button class="btn-primary" style="padding:4px 8px; margin:0; font-size:11px;" onclick="openProfile('${m.id}')">الملف 🪪</button></td>
-
 `;
-
-tbody.appendChild(tr);
-
+    fragment.appendChild(tr);
 });
 
+tbody.appendChild(fragment);
 updateRoleUI();
-
 }
 
 function registerMemberAttendanceFromTable(memberId) {
@@ -1591,7 +1572,11 @@ data.forEach(r => {
 
 let name = r['الاسم'] || r['Name'] || "بدون اسم";
 
-let examCode = r['كود الامتحان'] || r['كود'] || r['Code'] || "";
+let examCode = r['كود الامتحانات'] || r['كود الامتحان'] || r['كود'] || r['Code'] || r['رقم الجلوس'] || "";
+let rawStage = r['الفرقة'] || r['المرحلة'] || r['السنة'] || "سنة أولى";
+let stageVal = normalizeStageText(rawStage);
+let rawGender = r['النوع'] || r['الجنس'] || "بنين";
+let genderVal = (String(rawGender).includes('بنت') || String(rawGender).includes('أنثى') || String(rawGender).toLowerCase().includes('female')) ? "بنات" : "بنين";
 
 let rawP = r['رقم التليون'] || r['رقم الهاتف'] || r['الهاتف'] || "";
 
@@ -1649,7 +1634,7 @@ code: examCode ? examCode.toString().trim() : (Date.now() % 10000).toString(),
 
 qrCode: qrCodeVal, name: name,
 
-stage: "سنة أولى", gender: "بنين",
+stage: stageVal, gender: genderVal,
 
 phone: cleanPhone, parent_phone: cleanParentPhone,
 

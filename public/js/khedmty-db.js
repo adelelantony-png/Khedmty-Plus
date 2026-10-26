@@ -216,7 +216,7 @@
             const keysToSync = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const k = localStorage.key(i);
-                if (k && k.startsWith('khedmety_')) {
+                if (k && (k.startsWith('khedmety_') || k.startsWith('my_church_') || k === 'auth_token')) {
                     keysToSync.push(k);
                 }
             }
@@ -265,6 +265,38 @@
         };
     }
 
+
+    /**
+     * غلاف تخزين آمن مقاوم لأخطاء الامتلاء (QuotaExceededError)
+     * يوفر وصولاً سريعاً متزامناً مع حفظ دائم في IndexedDB
+     */
+    const SafeStorage = {
+        setItem: function (key, value) {
+            try {
+                const s = (typeof value === 'string') ? value : JSON.stringify(value);
+                localStorage.setItem(key, s);
+            } catch (err) {
+                console.warn(`[SafeStorage] LocalStorage quota reached for [${key}], saving directly to IndexedDB.`);
+            }
+            setItem(key, value).catch(() => {});
+        },
+        getItem: function (key, defaultValue = null) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw !== null) {
+                    try { return JSON.parse(raw); } catch (e) { return raw; }
+                }
+            } catch (e) {}
+            return defaultValue;
+        },
+        removeItem: function (key) {
+            try { localStorage.removeItem(key); } catch (e) {}
+            removeItem(key).catch(() => {});
+        }
+    };
+
+    if (typeof root !== 'undefined') { root.SafeStorage = SafeStorage; }
+
     // تهيئة فورية تلقائية بمجرد تضمين السكربت
     if (typeof window !== 'undefined') {
         init().catch(() => {});
@@ -278,6 +310,7 @@
         removeItem: removeItem,
         clear: clear,
         autoMigrate: autoMigrateFromLocalStorage,
-        getStorageEstimate: getStorageEstimate
+        getStorageEstimate: getStorageEstimate,
+        SafeStorage: SafeStorage
     };
 }));
