@@ -571,6 +571,106 @@ body {
             color: #991b1b;
         }
 
+        .card-notes {
+            background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+            border-color: #d8b4fe;
+            color: #6b21a8;
+        }
+
+        .criteria-card {
+            border-radius: 14px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1.5px solid;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .criteria-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+
+        .criteria-card.active-criteria-filter {
+            box-shadow: 0 0 0 3px #2563eb, 0 8px 20px rgba(37,99,235,0.25);
+            transform: translateY(-2px);
+        }
+
+        /* شريط التبويبات السريعة لتصنيفات المخدومين */
+        .status-quick-tabs-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .status-quick-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .status-quick-tab-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .status-quick-tab-btn.active {
+            background: #0c2461;
+            color: #ffffff;
+            border-color: #0c2461;
+            box-shadow: 0 3px 8px rgba(12,36,97,0.25);
+        }
+
+        .status-quick-tab-btn.tab-notes.active {
+            background: #6b21a8;
+            border-color: #6b21a8;
+            box-shadow: 0 3px 8px rgba(107,33,168,0.25);
+        }
+
+        .status-quick-tab-btn.tab-pending.active {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            box-shadow: 0 3px 8px rgba(124,58,237,0.25);
+        }
+
+        .status-quick-tab-btn .tab-count-badge {
+            background: rgba(0, 0, 0, 0.08);
+            color: inherit;
+            font-size: 0.72rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .status-quick-tab-btn.active .tab-count-badge {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+        }
+
         .card-badge-title {
             font-size: 0.88rem;
             font-weight: 900;
@@ -1207,6 +1307,9 @@ body {
                 </button>
                 <button type="button" id="tabStudioRules" class="btn-custom" onclick="switchStudioTab('rules')" style="padding:8px 14px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
                     <i class="fa-solid fa-sliders me-1"></i> 4. حدود القبول والدرجات العظمى ⚙️
+                </button>
+                <button type="button" id="tabStudioNotes" class="btn-custom" onclick="switchStudioTab('notes')" style="padding:8px 14px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
+                    <i class="fa-solid fa-clipboard-list me-1"></i> 5. حصر ومتابعة أصحاب الملاحظات والمعلقين 📝✂️
                 </button>
             </div>
 
@@ -1868,7 +1971,7 @@ body {
 
                     <!-- شبكة البطاقات الأربعة لمعايير الشرائح -->
                     <div class="criteria-grid-4" style="margin-bottom: 14px;">
-                        <div class="criteria-card card-acc">
+                        <div class="criteria-card card-acc" id="cardAcceptedBox" onclick="selectQuickFilterTab('accepted')" title="اضغط لفلترة المقبولين نهائياً">
                             <div class="card-badge-title">
                                 <span>مقبول نهائياً 🟢</span>
                                 <i class="fa-solid fa-circle-check fs-6 text-success"></i>
@@ -1878,7 +1981,7 @@ body {
                             <div class="card-sub-pct" id="cardAcceptedPct">0% من المتقدمين</div>
                         </div>
 
-                        <div class="criteria-card card-cond">
+                        <div class="criteria-card card-cond" id="cardConditionalBox" onclick="selectQuickFilterTab('conditional')" title="اضغط لفلترة المقبولين بمتابعة الاعتراف">
                             <div class="card-badge-title">
                                 <span>مقبول مع متابعة الاعتراف 🕊️</span>
                                 <i class="fa-solid fa-triangle-exclamation fs-6" style="color:#d97706;"></i>
@@ -1888,7 +1991,7 @@ body {
                             <div class="card-sub-pct" id="cardConditionalPct">0% من المتقدمين</div>
                         </div>
 
-                        <div class="criteria-card card-int">
+                        <div class="criteria-card card-int" id="cardInterviewBox" onclick="selectQuickFilterTab('interview')" title="اضغط لفلترة المعلقين للمقابلة">
                             <div class="card-badge-title">
                                 <span>معلق للمقابلة 🟠</span>
                                 <i class="fa-solid fa-user-clock fs-6 text-warning"></i>
@@ -1898,7 +2001,17 @@ body {
                             <div class="card-sub-pct" id="cardInterviewPct">0% من المتقدمين</div>
                         </div>
 
-                        <div class="criteria-card card-rej">
+                        <div class="criteria-card card-notes" id="cardNotesBox" onclick="selectQuickFilterTab('has_notes')" title="اضغط لفلترة من لديهم ملاحظات روحية/نفسية أو استيفاء شفوي معلق">
+                            <div class="card-badge-title">
+                                <span>لديهم ملاحظات / معلقون 📝✂️</span>
+                                <i class="fa-solid fa-clipboard-list fs-6" style="color:#7e22ce;"></i>
+                            </div>
+                            <div class="card-rule-desc" id="cardNotesRange">ملاحظات روحية/نفسية أو استيفاء الشفوي</div>
+                            <div class="card-live-count" id="cardNotesCount" style="color:#7e22ce;">0</div>
+                            <div class="card-sub-pct" id="cardNotesPct">0% من المتقدمين</div>
+                        </div>
+
+                        <div class="criteria-card card-rej" id="cardRejectedBox" onclick="selectQuickFilterTab('rejected')" title="اضغط لفلترة غير المجتازين">
                             <div class="card-badge-title">
                                 <span>غير مجتاز / دور ثان 🔴</span>
                                 <i class="fa-solid fa-circle-xmark fs-6 text-danger"></i>
@@ -1940,11 +2053,84 @@ body {
                     </div>
                 </div>
 
+                <!-- 5. تبويب حصر ومتابعة أصحاب الملاحظات والمعلقين -->
+                <div id="paneStudioNotes" style="display:none;">
+                    <div style="background:#ffffff; border:1.5px solid #d8b4fe; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(107,33,168,0.05);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1.5px solid #f3e8ff; padding-bottom:10px;">
+                            <div>
+                                <h4 style="margin:0; font-size:1.05rem; font-weight:900; color:#6b21a8;">
+                                    <i class="fa-solid fa-clipboard-list me-2"></i> سجل ومتابعة أصحاب الملاحظات الروحية والنفسية والمعلقين 📝✂️
+                                </h4>
+                                <div style="font-size:0.8rem; color:#64748b; margin-top:3px;">
+                                    حصر تفصيلي شامل لكافة الحالات التي تتطلب استيفاءً رعوياً أو روحيّاً أو شفويّاً مع أمين الخدمة وأب الاعتراف.
+                                </div>
+                            </div>
+                            <button type="button" class="btn-custom" onclick="selectQuickFilterTab('has_notes')" style="background:#7e22ce; color:#ffffff; font-weight:800; font-size:0.82rem; padding:6px 14px; border:none; border-radius:8px;">
+                                <i class="fa-solid fa-filter me-1"></i> تصفية الجدول على هؤلاء المخدومين 🔍
+                            </button>
+                        </div>
+
+                        <!-- شبكة إحصائيات الملاحظات -->
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:16px;">
+                            <div style="background:#faf5ff; border:1px solid #d8b4fe; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#6b21a8; margin-bottom:4px;">📝 إجمالي أصحاب الملاحظات</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#581c87;" id="studioNotesTotalCount">0</div>
+                                <div style="font-size:0.72rem; color:#7e22ce;" id="studioNotesTotalPct">0% من المتقدمين</div>
+                            </div>
+                            <div style="background:#fdf4ff; border:1px solid #f0abfc; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#a21caf; margin-bottom:4px;">✂️🕊️ معلق شفوي (شعر/اعتراف)</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#86198f;" id="studioNotesPendingSpCount">0</div>
+                                <div style="font-size:0.72rem; color:#a21caf;">حاضرون بدرجة تحريري وشفوي معلق</div>
+                            </div>
+                            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#1d4ed8; margin-bottom:4px;">🕊️ ملاحظات روحية عامة</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#1e40af;" id="studioNotesSpCount">0</div>
+                                <div style="font-size:0.72rem; color:#2563eb;">اعتراف وتناول / اعتراف فقط / مخصصة</div>
+                            </div>
+                            <div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:12px; text-align:center;">
+                                <div style="font-size:0.78rem; font-weight:800; color:#c2410c; margin-bottom:4px;">🧠 ملاحظات نفسية وسلوكية</div>
+                                <div style="font-size:1.6rem; font-weight:900; color:#9a3412;" id="studioNotesPsCount">0</div>
+                                <div style="font-size:0.72rem; color:#ea580c;">سمات وتوصيات المقابلة النفسية</div>
+                            </div>
+                        </div>
+
+                        <!-- قائمة مصغرة سريعة لأصحاب الملاحظات -->
+                        <div id="studioNotesListView" style="max-height:280px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px; background:#f8fafc; padding:8px;">
+                            <!-- يتم بناؤها ديناميكياً في JS -->
+                        </div>
+                    </div>
+                </div>
+
             </div> <!-- نهاية حاويات التبويبات -->
         </div></div> <!-- نهاية unifiedStudioPanel -->
 
         <!-- منظومة الفلاتر الاحترافية المتقدمة لجميع بيانات المخدومين -->
     <div class="filters-toolbar-box">
+        <!-- شريط التبويبات السريعة لتصنيفات وملاحظات المخدومين -->
+        <div class="status-quick-tabs-bar" id="statusQuickTabsBar">
+            <button type="button" class="status-quick-tab-btn active" id="tabQuick_all" onclick="selectQuickFilterTab('all')">
+                <i class="fa-solid fa-users text-primary me-1"></i> كل المخدومين <span class="tab-count-badge" id="badgeQuick_all">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn" id="tabQuick_accepted" onclick="selectQuickFilterTab('accepted')">
+                🟢 مقبول نهائياً <span class="tab-count-badge" id="badgeQuick_accepted">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn" id="tabQuick_conditional" onclick="selectQuickFilterTab('conditional')">
+                🕊️ مقبول بمتابعة <span class="tab-count-badge" id="badgeQuick_conditional">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn" id="tabQuick_interview" onclick="selectQuickFilterTab('interview')">
+                🟠 معلق للمقابلة <span class="tab-count-badge" id="badgeQuick_interview">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn tab-pending" id="tabQuick_pending_spiritual" onclick="selectQuickFilterTab('pending_spiritual')">
+                ✂️🕊️ معلق لملاحظة روحية <span class="tab-count-badge" id="badgeQuick_pending_spiritual">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn tab-notes" id="tabQuick_has_notes" onclick="selectQuickFilterTab('has_notes')">
+                📝 لديهم ملاحظات (روحي/نفسي) <span class="tab-count-badge" id="badgeQuick_has_notes">0</span>
+            </button>
+            <button type="button" class="status-quick-tab-btn" id="tabQuick_rejected" onclick="selectQuickFilterTab('rejected')">
+                🔴 غير مجتاز / دور ثان <span class="tab-count-badge" id="badgeQuick_rejected">0</span>
+            </button>
+        </div>
+
         <div class="filter-row-top">
             <div style="position:relative; flex: 1; min-width: 250px;">
                 <input type="text" id="searchInput" placeholder="🔍 بحث فوري باسم المخدوم، كود الامتحان، رقم الهاتف، أو أب الاعتراف..." style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-family: inherit; font-weight: 700; font-size: 0.9rem; box-sizing: border-box;" onkeyup="renderTable()">
@@ -1982,6 +2168,7 @@ body {
                 <option value="interview">معلق للمقابلة الشخصية 🟠</option>
                 <option value="pending_spiritual">معلق لملاحظة روحية (شعر/اعتراف - شفوي 0) ✂️🕊️</option>
                 <option value="all_pending">كل المعلقين (مقابلة + ملاحظة روحية) 🟠✂️</option>
+                <option value="has_notes">📝 كل من لديهم ملاحظات (روحية أو نفسية)</option>
                 <option value="rejected">غير مجتاز / دور ثان 🔴</option>
             </select>
 
@@ -3214,7 +3401,12 @@ body {
         if (elIntEq) elIntEq.textContent = `(${intScore} / ${maxTotalScore} درجة)`;
     }
 
-    function updateCriteriaCards(totalCount, acceptedCount, conditionalCount, interviewCount, rejectedCount) {
+    function updateCriteriaCards(totalCount, acceptedCount, conditionalCount, interviewCount, rejectedCount, notesCount = 0, pendingSpiritualCount = 0) {
+        // بطاقة لديهم ملاحظات / معلقون
+        const elCardNotesCount = document.getElementById('cardNotesCount');
+        if (elCardNotesCount) elCardNotesCount.textContent = notesCount;
+        const elCardNotesPct = document.getElementById('cardNotesPct');
+        if (elCardNotesPct) elCardNotesPct.textContent = totalCount > 0 ? `${((notesCount / totalCount) * 100).toFixed(1)}% من الدفعة` : '0%';
         const minPassScore = maxTotalScore > 0 ? (passThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
         const minInterviewScore = maxTotalScore > 0 ? (interviewThreshold / 100 * maxTotalScore).toFixed(1) : "0.0";
 
@@ -4491,13 +4683,15 @@ body {
             reality: document.getElementById('paneStudioReality'),
             ladder: document.getElementById('paneStudioLadder'),
             exams: document.getElementById('paneStudioExams'),
-            rules: document.getElementById('paneStudioRules')
+            rules: document.getElementById('paneStudioRules'),
+            notes: document.getElementById('paneStudioNotes')
         };
         const tabs = {
             reality: document.getElementById('tabStudioReality'),
             ladder: document.getElementById('tabStudioLadder'),
             exams: document.getElementById('tabStudioExams'),
-            rules: document.getElementById('tabStudioRules')
+            rules: document.getElementById('tabStudioRules'),
+            notes: document.getElementById('tabStudioNotes')
         };
 
         // تبديل ظهور الحاويات
@@ -4526,6 +4720,8 @@ body {
             }
         } else if (tab === 'exams') {
             updateExamGuidesUI();
+        } else if (tab === 'notes') {
+            renderStudioNotesList();
         }
     }
 
@@ -5966,6 +6162,7 @@ body {
         activeBracketFilterCodes = null;
         document.getElementById('searchInput').value = '';
         document.getElementById('statusFilter').value = 'all';
+        syncQuickTabsUI('all');
         document.getElementById('genderFilter').value = 'all';
         document.getElementById('confessionFilter').value = 'all';
         document.getElementById('attendanceFilter').value = 'all';
@@ -6020,10 +6217,21 @@ body {
                 if (!match) return false;
             }
 
-            // 2. فلترة قرار القبول (مع دعم المعلقين لملاحظة روحية وفئة كل المعلقين)
-            if (statusVal === 'pending_spiritual' && dec.key !== 'pending_spiritual') return false;
-            if (statusVal === 'all_pending' && (dec.key !== 'interview' && dec.key !== 'pending_spiritual')) return false;
-            if (statusVal !== 'all' && statusVal !== 'pending_spiritual' && statusVal !== 'all_pending' && dec.key !== statusVal) return false;
+            // 2. فلترة قرار القبول والتبويبات (مع دعم المعلقين لملاحظة روحية وفئة كل المعلقين ولديهم ملاحظات)
+            if (statusVal === 'has_notes') {
+                const hasSp = !!(c.spiritualNotes && c.spiritualNotes.trim().length > 0);
+                const hasPs = !!(c.psychNotes && c.psychNotes.trim().length > 0);
+                const prob = String(c.problemType || '').trim();
+                const hasProb = (prob && !prob.includes('لا توجد') && !prob.includes('طبيعي'));
+                const isPendingSp = isCandidatePendingSpiritualOral(c);
+                if (!hasSp && !hasPs && !hasProb && !isPendingSp) return false;
+            } else if (statusVal === 'pending_spiritual' && dec.key !== 'pending_spiritual') {
+                return false;
+            } else if (statusVal === 'all_pending' && (dec.key !== 'interview' && dec.key !== 'pending_spiritual')) {
+                return false;
+            } else if (statusVal !== 'all' && statusVal !== 'pending_spiritual' && statusVal !== 'all_pending' && statusVal !== 'has_notes' && dec.key !== statusVal) {
+                return false;
+            }
 
             // 2.1 منظومة الفلترة المتعددة لمعايير المواد الأربعة
             if (activeExamFilters.length > 0 || mCrit.preset) {
@@ -6113,6 +6321,109 @@ body {
 
             return true;
         });
+    }
+
+    // =========================================================================
+    // إدارة التبويبات السريعة لحالات المخدومين والملاحظات
+    // =========================================================================
+    function selectQuickFilterTab(tabKey) {
+        const statusSelect = document.getElementById('statusFilter');
+        if (statusSelect) {
+            statusSelect.value = tabKey;
+        }
+        syncQuickTabsUI(tabKey);
+        renderTable();
+    }
+
+    function syncQuickTabsUI(activeKey) {
+        const tabs = ['all', 'accepted', 'conditional', 'interview', 'pending_spiritual', 'has_notes', 'rejected'];
+        tabs.forEach(key => {
+            const btn = document.getElementById('tabQuick_' + key);
+            if (btn) {
+                if (key === activeKey) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        // مزامنة تمييز البطاقات الإحصائية
+        const cardAcc = document.getElementById('cardAcceptedBox');
+        const cardCond = document.getElementById('cardConditionalBox');
+        const cardInt = document.getElementById('cardInterviewBox');
+        const cardNotes = document.getElementById('cardNotesBox');
+        const cardRej = document.getElementById('cardRejectedBox');
+
+        if (cardAcc) cardAcc.classList.toggle('active-criteria-filter', activeKey === 'accepted');
+        if (cardCond) cardCond.classList.toggle('active-criteria-filter', activeKey === 'conditional');
+        if (cardInt) cardInt.classList.toggle('active-criteria-filter', activeKey === 'interview');
+        if (cardNotes) cardNotes.classList.toggle('active-criteria-filter', activeKey === 'has_notes' || activeKey === 'pending_spiritual');
+        if (cardRej) cardRej.classList.toggle('active-criteria-filter', activeKey === 'rejected');
+    }
+
+    function renderStudioNotesList() {
+        const listContainer = document.getElementById('studioNotesListView');
+        if (!listContainer) return;
+
+        const notesCandidates = candidatesList.filter(c => {
+            const hasSp = !!(c.spiritualNotes && c.spiritualNotes.trim().length > 0);
+            const hasPs = !!(c.psychNotes && c.psychNotes.trim().length > 0);
+            const prob = String(c.problemType || '').trim();
+            const hasProb = (prob && !prob.includes('لا توجد') && !prob.includes('طبيعي'));
+            const isPendingSp = isCandidatePendingSpiritualOral(c);
+            return hasSp || hasPs || hasProb || isPendingSp;
+        });
+
+        if (notesCandidates.length === 0) {
+            listContainer.innerHTML = '<div style="text-align:center; padding:16px; color:#64748b; font-weight:700;"><i class="fa-solid fa-circle-check text-success me-1"></i> لا توجد أي ملاحظات مسجلة على الدفعة الحالية.</div>';
+            return;
+        }
+
+        listContainer.innerHTML = `
+            <table style="width:100%; border-collapse:collapse; font-size:0.8rem; text-align:right;">
+                <thead>
+                    <tr style="border-bottom:1.5px solid #cbd5e1; color:#475569; background:#e2e8f0;">
+                        <th style="padding:6px 8px;">كود</th>
+                        <th style="padding:6px 8px;">الاسم</th>
+                        <th style="padding:6px 8px;">الملاحظة الروحية والسلوكية</th>
+                        <th style="padding:6px 8px;">الملاحظة النفسية</th>
+                        <th style="padding:6px 8px; text-align:center;">شفوي روحي</th>
+                        <th style="padding:6px 8px; text-align:center;">الحالة</th>
+                        <th style="padding:6px 8px; text-align:center;">إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${notesCandidates.map(c => {
+                        const isPending = isCandidatePendingSpiritualOral(c);
+                        const spBadge = c.spiritualNotes ? `<span style="background:#f3e8ff; color:#6b21a8; padding:2px 6px; border-radius:4px; font-weight:700;">${c.spiritualNotes}</span>` : '<span style="color:#94a3b8;">-</span>';
+                        const psBadge = c.psychNotes ? `<span style="background:#ffedd5; color:#9a3412; padding:2px 6px; border-radius:4px; font-weight:700;">${c.psychNotes}</span>` : '<span style="color:#94a3b8;">-</span>';
+                        const oralBadge = isPending 
+                            ? `<span style="background:#fef2f2; color:#b91c1c; border:1px solid #fca5a5; padding:2px 6px; border-radius:4px; font-weight:900;">0 (معلق) ✂️</span>` 
+                            : `<span style="font-weight:800;">${Number(c.g3) || 0}</span>`;
+                        const statusBadge = isPending
+                            ? `<span class="badge status-pending-spiritual" style="padding:3px 6px; font-size:0.7rem;">معلق لملاحظة روحية ✂️🕊️</span>`
+                            : `<span class="badge bg-light text-dark border" style="padding:3px 6px; font-size:0.7rem;">ملاحظة استرشادية 📝</span>`;
+
+                        return `
+                            <tr style="border-bottom:1px solid #e2e8f0; background:#ffffff;">
+                                <td style="padding:6px 8px; font-weight:800; color:#1e3a8a;">${c.code}</td>
+                                <td style="padding:6px 8px; font-weight:800;">${c.name}</td>
+                                <td style="padding:6px 8px;">${spBadge}</td>
+                                <td style="padding:6px 8px;">${psBadge}</td>
+                                <td style="padding:6px 8px; text-align:center;">${oralBadge}</td>
+                                <td style="padding:6px 8px; text-align:center;">${statusBadge}</td>
+                                <td style="padding:6px 8px; text-align:center;">
+                                    <button type="button" class="btn-custom" onclick="openModernGradeEntryModal('${c.code}')" style="font-size:0.72rem; padding:2px 8px; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:6px;">
+                                        رصد / تعديل ✍️
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
     // =========================================================================
@@ -6888,15 +7199,51 @@ body {
         document.getElementById('kpiPassed').textContent = passedCount;
         document.getElementById('kpiInterview').textContent = interviewCount;
 
-        // تحديث شبكة معايير الحالات الأربعة وشريط الطيف
+        // تحديث شبكة معايير الحالات وشريط الطيف والتبويبات
         const rejCount = totalCandidates - passedCount - interviewCount;
-        let accClean = 0, accCond = 0;
+        let accClean = 0, accCond = 0, pendingSpCount = 0, notesTotalCount = 0, spGeneralCount = 0, psGeneralCount = 0;
         candidatesList.forEach(c => {
             const dec = computeDecision(c);
             if (dec.key === 'accepted') accClean++;
             if (dec.key === 'conditional') accCond++;
+            if (dec.key === 'pending_spiritual') pendingSpCount++;
+
+            const hasSp = !!(c.spiritualNotes && c.spiritualNotes.trim().length > 0);
+            const hasPs = !!(c.psychNotes && c.psychNotes.trim().length > 0);
+            const prob = String(c.problemType || '').trim();
+            const hasProb = (prob && !prob.includes('لا توجد') && !prob.includes('طبيعي'));
+            const isPendingSp = isCandidatePendingSpiritualOral(c);
+
+            if (hasSp) spGeneralCount++;
+            if (hasPs) psGeneralCount++;
+            if (hasSp || hasPs || hasProb || isPendingSp) {
+                notesTotalCount++;
+            }
         });
-        updateCriteriaCards(totalCandidates, accClean, accCond, interviewCount, rejCount);
+        updateCriteriaCards(totalCandidates, accClean, accCond, interviewCount, rejCount, notesTotalCount, pendingSpCount);
+
+        // تحديث عدادات شريط التبويبات السريعة (Quick Tabs Badges)
+        const bAll = document.getElementById('badgeQuick_all'); if (bAll) bAll.textContent = totalCandidates;
+        const bAcc = document.getElementById('badgeQuick_accepted'); if (bAcc) bAcc.textContent = accClean;
+        const bCond = document.getElementById('badgeQuick_conditional'); if (bCond) bCond.textContent = accCond;
+        const bInt = document.getElementById('badgeQuick_interview'); if (bInt) bInt.textContent = interviewCount;
+        const bPending = document.getElementById('badgeQuick_pending_spiritual'); if (bPending) bPending.textContent = pendingSpCount;
+        const bNotes = document.getElementById('badgeQuick_has_notes'); if (bNotes) bNotes.textContent = notesTotalCount;
+        const bRej = document.getElementById('badgeQuick_rejected'); if (bRej) bRej.textContent = rejCount;
+
+        // تحديث إحصائيات تبويب الاستوديو 5 (سجل الملاحظات)
+        const sTot = document.getElementById('studioNotesTotalCount'); if (sTot) sTot.textContent = notesTotalCount;
+        const sTotPct = document.getElementById('studioNotesTotalPct'); if (sTotPct) sTotPct.textContent = totalCandidates > 0 ? `${((notesTotalCount / totalCandidates) * 100).toFixed(1)}% من المتقدمين` : '0%';
+        const sPend = document.getElementById('studioNotesPendingSpCount'); if (sPend) sPend.textContent = pendingSpCount;
+        const sSp = document.getElementById('studioNotesSpCount'); if (sSp) sSp.textContent = spGeneralCount;
+        const sPs = document.getElementById('studioNotesPsCount'); if (sPs) sPs.textContent = psGeneralCount;
+        if (typeof renderStudioNotesList === 'function' && currentStudioTab === 'notes') {
+            renderStudioNotesList();
+        }
+
+        // مزامنة التبويب النشط
+        const curStatusVal = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'all';
+        syncQuickTabsUI(curStatusVal);
         updateScoreEquivalents();
         updateRealityCurveUI();
 

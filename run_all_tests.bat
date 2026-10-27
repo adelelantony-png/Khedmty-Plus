@@ -68,12 +68,16 @@ echo [13/14] تشغيل اختبارات جدول التوزيع التكرار�
 "%NODE_EXE%" test_subject_distribution_table.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
-echo [14/14] تشغيل اختبارات عزل الملاحظات الروحية (الشعر والاعتراف) مع الشفوي المعلق...
+echo [14/15] تشغيل اختبارات عزل الملاحظات الروحية (الشعر والاعتراف) مع الشفوي المعلق...
 "%NODE_EXE%" test_spiritual_oral_pending_isolation.js
+if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
+
+echo [15/15] تشغيل اختبارات تبويب وفئة "لديهم ملاحظات" وشريط التبويبات السريعة...
+"%NODE_EXE%" test_notes_tab_and_category.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
 echo.
 echo ================================================================
-echo   تهانينا! جميع الاختبارات الـ 14 نجحت بنسبة 100%% بنجاح تام!
+echo   تهانينا! جميع الاختبارات الـ 15 نجحت بنسبة 100%% بنجاح تام!
 echo ================================================================
 pause
