@@ -1162,6 +1162,135 @@ body {
             50% { opacity: 0.85; transform: scale(1.02); }
         }
 
+        /* ----------------------------------------------------------------- */
+        /* تصميم شريط التبديل السريع للاستوديو (Collapsible Studio Bar)       */
+        /* ----------------------------------------------------------------- */
+        .studio-toggle-bar {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .studio-toggle-bar:hover {
+            border-color: #2563eb;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+            transform: translateY(-1px);
+        }
+
+        .studio-toggle-icon-box {
+            background: #eff6ff;
+            color: #2563eb;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* ----------------------------------------------------------------- */
+        /* درج الفلاتر التفصيلية القابل للطي (Advanced Filters Drawer)        */
+        /* ----------------------------------------------------------------- */
+        .advanced-filters-drawer {
+            display: none;
+            margin-top: 10px;
+            padding: 14px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----------------------------------------------------------------- */
+        /* وضع الرصد فائق السرعة (Fast Entry Mode Overlay)                   */
+        /* ----------------------------------------------------------------- */
+        .fast-entry-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .fast-entry-card {
+            background: #ffffff;
+            border-radius: 18px;
+            max-width: 780px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #2563eb;
+        }
+
+        /* ----------------------------------------------------------------- */
+        /* بطاقة المخدوم الرعوية الشاملة (Candidate 360 Drawer)             */
+        /* ----------------------------------------------------------------- */
+        .candidate-360-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 9990;
+        }
+
+        .candidate-360-drawer {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            right: -480px;
+            width: 460px;
+            max-width: 95vw;
+            background: #ffffff;
+            z-index: 9995;
+            box-shadow: -10px 0 35px rgba(0,0,0,0.2);
+            transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .candidate-360-drawer.open {
+            right: 0;
+        }
+
+        /* ----------------------------------------------------------------- */
+        /* شريط الترقيم السلس (Pagination Bar)                                */
+        /* ----------------------------------------------------------------- */
+        .table-pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-top: 1.5px solid #e2e8f0;
+            font-size: 0.84rem;
+        }
+
     </style>
 </head>
 <body>
@@ -1274,8 +1403,34 @@ body {
             </div>
         </div>
 
+        <!-- شريط التبديل السريع لاستوديو التحليل والواقع (Collapsible Studio Bar) -->
+        <div class="studio-toggle-bar" id="studioToggleBar" onclick="toggleUnifiedStudio()">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span class="studio-toggle-icon-box">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </span>
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <strong style="color:#0c2461; font-size:0.95rem;">استوديو ضبط القبول والواقع الإحصائي (5 تبويبات)</strong>
+                        <span id="studioStateBadge" style="font-size:0.7rem; font-weight:800; background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:12px;">انقر للفتح/الإغلاق</span>
+                    </div>
+                    <div style="font-size:0.76rem; color:#64748b; margin-top:2px;" id="studioSummaryStats">
+                        نسبة القبول: <b id="studioBarPassPct">60%</b> | حد المقابلة: <b id="studioBarIntPct">50%</b> | المجموع الكلي: <b id="studioBarMax">100</b> د | متوسط الدفعة: <b id="studioBarAvg">0.0</b>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn-custom" onclick="event.stopPropagation(); autoOptimizeThresholds()" style="background:#f5f3ff; color:#7e22ce; border-color:#d8b4fe; font-size:0.76rem; padding:5px 12px; font-weight:800;" title="اقتراح أفضل حد للقبول يضمن أعلى نسبة نجاح للدفعة">
+                    🪄 اقتراح النطاق الأمثل
+                </button>
+                <button type="button" class="btn-custom" id="btnToggleStudioVisual" style="background:#2563eb; color:#ffffff; border:none; font-size:0.78rem; padding:6px 14px; font-weight:800;">
+                    <i class="fa-solid fa-chevron-down me-1" id="studioChevronIcon"></i> <span id="studioToggleActionText">فتح الاستوديو والشرائح</span>
+                </button>
+            </div>
+        </div>
+
         <!-- 🏛️ مركز القيادة الموحد لمعايير القبول والواقع الإحصائي (Unified Reality & Criteria Studio) -->
-        <div id="unifiedStudioPanel" data-panel="realityCurveExplorerPanel"><div id="realityCurveExplorerPanel" style="display:contents;" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:18px;">
+        <div id="unifiedStudioPanel" data-panel="realityCurveExplorerPanel" style="display:none;"><div id="realityCurveExplorerPanel" style="display:contents;" style="background:#ffffff; border:1.5px solid #cbd5e1; border-radius:14px; box-shadow:0 4px 16px rgba(0,0,0,0.06); overflow:hidden; margin-bottom:18px;">
             <!-- ترويسة الاستوديو والتبويبات الرئيسية الأربعة -->
             <div style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); padding: 14px 18px; color:#ffffff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                 <div style="display:flex; align-items:center; gap:10px;">
@@ -2131,35 +2286,65 @@ body {
             </button>
         </div>
 
-        <div class="filter-row-top">
+        <div class="filter-row-top" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             <div style="position:relative; flex: 1; min-width: 250px;">
-                <input type="text" id="searchInput" placeholder="🔍 بحث فوري باسم المخدوم، كود الامتحان، رقم الهاتف، أو أب الاعتراف..." style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-family: inherit; font-weight: 700; font-size: 0.9rem; box-sizing: border-box;" onkeyup="renderTable()">
+                <input type="text" id="searchInput" placeholder="🔍 بحث فوري بالاسم، الكود، الهاتف، الملاحظة، أو أب الاعتراف..." style="width: 100%; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-family: inherit; font-weight: 700; font-size: 0.9rem; box-sizing: border-box;" onkeyup="tableCurrentPage=1; renderTable()">
+                <span id="searchClearBtn" onclick="document.getElementById('searchInput').value=''; renderTable();" style="display:none; position:absolute; left:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#94a3b8; font-weight:bold;">&times;</span>
             </div>
-            <button type="button" class="btn-custom" style="background:#fee2e2; color:#991b1b; border-color:#fecaca;" onclick="openPdfExportModal()">
-                <i class="fa-solid fa-file-pdf me-1"></i> تقرير PDF 📄
+
+            <!-- زر وضع الرصد السريع -->
+            <button type="button" class="btn-custom" onclick="openFastEntryMode()" style="background:#2563eb; color:#ffffff; border:none; font-weight:800; box-shadow:0 3px 8px rgba(37,99,235,0.25);" title="فتح شاشة الرصد فائق السرعة بالكيبورد أو الباركود">
+                <i class="fa-solid fa-bolt me-1"></i> وضع الرصد السريع ⚡
             </button>
-            <button type="button" class="btn-custom" style="background:#047857; color:#ffffff; border:none; font-weight:800;" onclick="exportDetailedCriteriaExcel()">
-                <i class="fa-solid fa-file-excel me-1"></i> تقرير المعايير التفصيلي (Excel) 📊
-            </button>
-            <button type="button" class="btn-custom" style="background:#25d366; color:#ffffff; border:none;" onclick="openWhatsappCampaignModal()">
-                <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
-            </button>
+
+            <!-- القائمة المجمعة للتقارير والتصدير -->
+            <div style="position:relative; display:inline-block;" id="exportDropdownContainer">
+                <button type="button" class="btn-custom" onclick="toggleExportMenu(event)" style="background:#047857; color:#ffffff; border:none; font-weight:800;" title="قائمة التقارير والتصدير">
+                    <i class="fa-solid fa-file-export me-1"></i> تقارير وتصدير ▾
+                </button>
+                <div id="exportDropdownMenu" style="display:none; position:absolute; top:calc(100% + 5px); right:0; z-index:1050; min-width:240px; background:#ffffff; border:1.5px solid #cbd5e1; border-radius:10px; box-shadow:0 10px 25px rgba(0,0,0,0.15); padding:6px;" onclick="event.stopPropagation()">
+                    <a href="javascript:void(0)" onclick="closeExportMenu(); exportDetailedCriteriaExcel()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#15803d; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='transparent'">
+                        <i class="fa-solid fa-file-excel fs-5 text-success"></i> شيت إكسيل معتمد (Excel XLSX) 📊
+                    </a>
+                    <a href="javascript:void(0)" onclick="closeExportMenu(); openPdfExportModal()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#dc2626; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
+                        <i class="fa-solid fa-file-pdf fs-5 text-danger"></i> تقرير PDF رسمي للطباعة 📄
+                    </a>
+                    <a href="javascript:void(0)" onclick="closeExportMenu(); openWhatsappCampaignModal()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#16a34a; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='transparent'">
+                        <i class="fa-brands fa-whatsapp fs-5 text-success"></i> رسائل الواتساب الرعوية 📲
+                    </a>
+                </div>
+            </div>
+
+            <!-- زر الاستيراد -->
             <button type="button" class="btn-custom" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;" onclick="openImportModal()">
-                <i class="fa-solid fa-cloud-arrow-down me-1"></i> استيراد من استمارة جوجل / كشف إكسيل 📥
+                <i class="fa-solid fa-cloud-arrow-down me-1"></i> استيراد 📥
             </button>
-            <button type="button" class="btn-custom btn-navy" onclick="openModernGradeEntryModal()">
-                <i class="fa-solid fa-pen-to-square me-1"></i> رصد درجات التأهيل للمخدومين ✍️
-            </button>
+
+            <!-- زر إضافة مخدوم -->
             <button type="button" class="btn-custom" onclick="addNewCandidateModal()">
-                <i class="fa-solid fa-plus text-primary"></i> إضافة مخدوم
+                <i class="fa-solid fa-plus text-primary me-1"></i> إضافة مخدوم
             </button>
-            <button type="button" class="btn-custom" onclick="resetAllFilters()" style="background:#f1f5f9; color:#475569;" title="تفريغ كافة خيارات الفلترة">
-                <i class="fa-solid fa-rotate-left"></i> تفريغ الفلاتر
+
+            <!-- زر فتح الفلاتر التفصيلية المتقدمة -->
+            <button type="button" class="btn-custom" id="btnToggleAdvFilters" onclick="toggleAdvancedFilters()" style="background:#f1f5f9; color:#1e293b; border-color:#cbd5e1; font-weight:800;" title="إظهار / إخفاء القوائم المنسدلة للفلترة التفصيلية">
+                <i class="fa-solid fa-sliders me-1"></i> فلاتر متقدمة (8)
+                <span id="advFilterBadge" style="display:none; background:#2563eb; color:#fff; font-size:0.7rem; padding:2px 6px; border-radius:10px; margin-right:4px;">0</span>
+                <i class="fa-solid fa-chevron-down ms-1" id="advFilterChevron"></i>
+            </button>
+
+            <!-- زر تفريغ الفلاتر -->
+            <button type="button" class="btn-custom" onclick="resetAllFilters()" style="background:#f8fafc; color:#64748b;" title="تفريغ كافة خيارات الفلترة">
+                <i class="fa-solid fa-rotate-left"></i> تفريغ
             </button>
         </div>
 
-        <!-- صف القوائم المنسدلة للفلترة متعددة الأبعاد -->
-        <div class="filter-row-dropdowns">
+        <!-- صف القوائم المنسدلة للفلترة متعددة الأبعاد داخل درج قابل للطي -->
+        <div class="advanced-filters-drawer" id="advancedFiltersDrawer">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+                <span style="font-size:0.78rem; font-weight:800; color:#475569;"><i class="fa-solid fa-filter me-1"></i> اختر المعايير التفصيلية لتضييق نطاق البحث:</span>
+                <button type="button" onclick="toggleAdvancedFilters()" style="border:none; background:transparent; font-size:0.75rem; color:#64748b; font-weight:700; cursor:pointer;">إغلاق الدرج ✖</button>
+            </div>
+            <div class="filter-row-dropdowns" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:8px;">
             <!-- 1. فلترة قرار القبول -->
             <select id="statusFilter" class="filter-select" onchange="renderTable()">
                 <option value="all">🎯 كل قرارات القبول</option>
@@ -2349,7 +2534,8 @@ body {
                 <option value="has_notes">📝 لديه ملاحظة نفسية مسجلة</option>
                 <option value="no_notes">✨ بدون ملاحظات نفسية (خالية)</option>
             </select>
-        </div>
+            </div> <!-- نهاية filter-row-dropdowns -->
+        </div> <!-- نهاية advancedFiltersDrawer -->
 
         <!-- شريط حالة الفلترة النشطة والعداد -->
         <div class="filter-status-summary">
@@ -2404,6 +2590,32 @@ body {
                     </tr>
                 </tfoot>
             </table>
+        </div>
+
+        <!-- شريط الترقيم السلس وإدارة حجم الصفحة (Pagination Bar) -->
+        <div class="table-pagination-bar" id="tablePaginationBar">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span id="paginationSummaryLabel" style="font-weight:700; color:#475569;">عرض 0 إلى 0 من 0 مخدوم</span>
+                <span style="color:#cbd5e1;">|</span>
+                <span style="font-size:0.78rem; color:#64748b;">لكل صفحة:</span>
+                <select id="tablePageSizeSelect" onchange="changeTablePageSize(this.value)" style="border:1px solid #cbd5e1; border-radius:6px; padding:3px 8px; font-weight:800; font-size:0.8rem; background:#f8fafc;">
+                    <option value="25">25 مخدوم</option>
+                    <option value="50" selected>50 مخدوم</option>
+                    <option value="100">100 مخدوم</option>
+                    <option value="all">عرض الكل 📜</option>
+                </select>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-custom" id="btnPagePrev" onclick="goToPage(tableCurrentPage - 1)" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc;">
+                    <i class="fa-solid fa-chevron-right me-1"></i> السابق
+                </button>
+                <span id="paginationPageNumbers" style="font-weight:800; padding:4px 8px; font-size:0.82rem; color:#0c2461;">
+                    صفحة 1 من 1
+                </span>
+                <button type="button" class="btn-custom" id="btnPageNext" onclick="goToPage(tableCurrentPage + 1)" style="padding:4px 10px; font-size:0.78rem; background:#f8fafc;">
+                    التالي <i class="fa-solid fa-chevron-left ms-1"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -6163,6 +6375,8 @@ body {
         document.getElementById('searchInput').value = '';
         document.getElementById('statusFilter').value = 'all';
         syncQuickTabsUI('all');
+        tableCurrentPage = 1;
+        updateAdvFiltersBadge();
         document.getElementById('genderFilter').value = 'all';
         document.getElementById('confessionFilter').value = 'all';
         document.getElementById('attendanceFilter').value = 'all';
@@ -6321,6 +6535,445 @@ body {
 
             return true;
         });
+    }
+
+    // =========================================================================
+    // 🏛️ إدارة استوديو التحليلات الذكي القابل للطي (Collapsible Studio)
+    // =========================================================================
+    let isUnifiedStudioExpanded = false;
+
+    function toggleUnifiedStudio(forceState = null) {
+        const panel = document.getElementById('unifiedStudioPanel');
+        const icon = document.getElementById('studioChevronIcon');
+        const text = document.getElementById('studioToggleActionText');
+        const badge = document.getElementById('studioStateBadge');
+        if (!panel) return;
+
+        isUnifiedStudioExpanded = (forceState !== null) ? forceState : !isUnifiedStudioExpanded;
+        panel.style.display = isUnifiedStudioExpanded ? 'block' : 'none';
+
+        if (icon) icon.className = isUnifiedStudioExpanded ? 'fa-solid fa-chevron-up me-1' : 'fa-solid fa-chevron-down me-1';
+        if (text) text.textContent = isUnifiedStudioExpanded ? 'طي وإخفاء الاستوديو ▴' : 'فتح الاستوديو والشرائح ▾';
+        if (badge) {
+            badge.textContent = isUnifiedStudioExpanded ? 'الاستوديو مفتوح ✅' : 'انقر للفتح/الإغلاق';
+            badge.style.background = isUnifiedStudioExpanded ? '#eff6ff' : '#f1f5f9';
+            badge.style.color = isUnifiedStudioExpanded ? '#1d4ed8' : '#475569';
+        }
+
+        try { localStorage.setItem('khedmty_studio_expanded', isUnifiedStudioExpanded ? '1' : '0'); } catch(e){}
+    }
+
+    // 🪄 مساعد الضبط الذكي للقبول (Sweet Spot Optimizer)
+    function autoOptimizeThresholds() {
+        const stats = getRealityScoreStats();
+        if (!stats || stats.totalCandidates === 0 || stats.attendedCount === 0) {
+            alert('يرجى رصد درجات أو استيراد بيانات الدفعة أولاً لتحليل النطاق الأمثل.');
+            return;
+        }
+
+        const pcts = stats.attendedList.map(c => {
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            return maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
+        }).sort((a, b) => a - b);
+
+        const targetP80Idx = Math.floor(pcts.length * 0.22);
+        let suggestedPass = Math.round(pcts[targetP80Idx] || 55);
+        if (suggestedPass < 45) suggestedPass = 50;
+        if (suggestedPass > 75) suggestedPass = 65;
+
+        let suggestedInterview = Math.max(35, suggestedPass - 10);
+
+        let expectedPass = 0, expectedInt = 0, expectedRej = 0;
+        stats.attendedList.forEach(c => {
+            const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            const p = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
+            if (p >= suggestedPass) expectedPass++;
+            else if (p >= suggestedInterview) expectedInt++;
+            else expectedRej++;
+        });
+
+        const confirmMsg = `🪄 [المساعد الذكي لتحديد معيار القبول]\n` +
+            `----------------------------------------\n` +
+            `بناءً على توزيع درجات الحاضرين (${stats.attendedCount} مخدوم):\n` +
+            `• متوسط درجات الدفعة الفعلي: ${stats.meanScore.toFixed(1)} من ${maxTotalScore} (${stats.meanPct.toFixed(1)}%)\n\n` +
+            `🎯 النطاق المقترح:\n` +
+            `  - نسبة القبول المباشر: ${suggestedPass}%\n` +
+            `  - حد المقابلة الشخصية: ${suggestedInterview}%\n\n` +
+            `📊 التوزيع المتوقع بهذا المعيار:\n` +
+            `  ✅ مقبولون: ${expectedPass} (${((expectedPass / stats.attendedCount) * 100).toFixed(1)}%)\n` +
+            `  🟠 معلقون للمقابلة: ${expectedInt} (${((expectedInt / stats.attendedCount) * 100).toFixed(1)}%)\n` +
+            `  🔴 دون الحد: ${expectedRej}\n\n` +
+            `هل تريد تطبيق هذا النطاق المقترح الآن؟`;
+
+        if (confirm(confirmMsg)) {
+            applyPresetThresholds(suggestedPass, suggestedInterview);
+        }
+    }
+
+    // =========================================================================
+    // ⚙️ إدارة الفلاتر التفصيلية القابلة للطي (Collapsible Advanced Filters)
+    // =========================================================================
+    let isAdvancedFiltersOpen = false;
+
+    function toggleAdvancedFilters() {
+        const drawer = document.getElementById('advancedFiltersDrawer');
+        const chevron = document.getElementById('advFilterChevron');
+        if (!drawer) return;
+        isAdvancedFiltersOpen = !isAdvancedFiltersOpen;
+        drawer.style.display = isAdvancedFiltersOpen ? 'block' : 'none';
+        if (chevron) chevron.className = isAdvancedFiltersOpen ? 'fa-solid fa-chevron-up ms-1' : 'fa-solid fa-chevron-down ms-1';
+    }
+
+    function updateAdvFiltersBadge() {
+        const badge = document.getElementById('advFilterBadge');
+        const btn = document.getElementById('btnToggleAdvFilters');
+        if (!badge) return;
+
+        let activeCount = 0;
+        const gEl = document.getElementById('genderFilter'); if (gEl && gEl.value !== 'all') activeCount++;
+        const cEl = document.getElementById('confessionFilter'); if (cEl && cEl.value !== 'all') activeCount++;
+        const aEl = document.getElementById('attendanceFilter'); if (aEl && aEl.value !== 'all') activeCount++;
+        const sEl = document.getElementById('scoreBracketFilter'); if (sEl && sEl.value !== 'all') activeCount++;
+        const pEl = document.getElementById('problemFilter'); if (pEl && pEl.value !== 'all') activeCount++;
+        const spEl = document.getElementById('spiritualNotesFilter'); if (spEl && spEl.value !== 'all') activeCount++;
+        const psEl = document.getElementById('psychNotesFilter'); if (psEl && psEl.value !== 'all') activeCount++;
+        const mCrit = (typeof multiCriteriaFilterState !== 'undefined') ? multiCriteriaFilterState : null;
+        if (mCrit && (mCrit.preset || mCrit.ex1 !== 'any' || mCrit.ex2 !== 'any' || mCrit.ex3 !== 'any' || mCrit.ex4 !== 'any')) activeCount++;
+
+        if (activeCount > 0) {
+            badge.style.display = 'inline-block';
+            badge.textContent = activeCount;
+            if (btn) {
+                btn.style.background = '#eff6ff';
+                btn.style.color = '#1d4ed8';
+                btn.style.borderColor = '#93c5fd';
+            }
+        } else {
+            badge.style.display = 'none';
+            if (btn) {
+                btn.style.background = '#f1f5f9';
+                btn.style.color = '#1e293b';
+                btn.style.borderColor = '#cbd5e1';
+            }
+        }
+    }
+
+    // =========================================================================
+    // 📤 قائمة التصدير والتقارير الموحدة
+    // =========================================================================
+    function toggleExportMenu(e) {
+        if (e) e.stopPropagation();
+        const menu = document.getElementById('exportDropdownMenu');
+        if (menu) {
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+    }
+
+    function closeExportMenu() {
+        const menu = document.getElementById('exportDropdownMenu');
+        if (menu) menu.style.display = 'none';
+    }
+
+    document.addEventListener('click', () => {
+        closeExportMenu();
+    });
+
+    // =========================================================================
+    // 📑 الترقيم السلس لجدول الرصد (Pagination / Virtual Slicing)
+    // =========================================================================
+    let tableCurrentPage = 1;
+    let tablePageSize = '50';
+
+    function changeTablePageSize(size) {
+        tablePageSize = size;
+        tableCurrentPage = 1;
+        renderTable();
+    }
+
+    function goToPage(page) {
+        tableCurrentPage = page;
+        renderTable();
+    }
+
+    function renderPaginationUI(totalItems, pageSize, currentPage, totalPages) {
+        const summaryLabel = document.getElementById('paginationSummaryLabel');
+        const pageNumbers = document.getElementById('paginationPageNumbers');
+        const btnPrev = document.getElementById('btnPagePrev');
+        const btnNext = document.getElementById('btnPageNext');
+
+        if (summaryLabel) {
+            if (totalItems === 0) {
+                summaryLabel.textContent = 'لا توجد بيانات للعرض';
+            } else if (pageSize === 'all') {
+                summaryLabel.textContent = `يتم عرض كافة المخدومين (${totalItems} مخدوم)`;
+            } else {
+                const start = (currentPage - 1) * parseInt(pageSize) + 1;
+                const end = Math.min(currentPage * parseInt(pageSize), totalItems);
+                summaryLabel.textContent = `عرض ${start} إلى ${end} من أصل ${totalItems} مخدوم`;
+            }
+        }
+
+        if (pageNumbers) {
+            pageNumbers.textContent = `صفحة ${currentPage} من ${totalPages}`;
+        }
+
+        if (btnPrev) btnPrev.disabled = (currentPage <= 1);
+        if (btnNext) btnNext.disabled = (currentPage >= totalPages);
+    }
+
+    // =========================================================================
+    // ⚡ وضع الرصد فائق السرعة (Fast Entry Mode)
+    // =========================================================================
+    let feCurrentStudentIndex = 0;
+
+    function openFastEntryMode() {
+        const overlay = document.getElementById('fastEntryOverlay');
+        if (!overlay) return;
+        overlay.style.display = 'flex';
+        feCurrentStudentIndex = 0;
+        feLoadStudentByIndex(0);
+        setTimeout(() => {
+            const codeInput = document.getElementById('feSearchCodeInput');
+            if (codeInput) codeInput.focus();
+        }, 100);
+    }
+
+    function closeFastEntryMode() {
+        const overlay = document.getElementById('fastEntryOverlay');
+        if (overlay) overlay.style.display = 'none';
+        renderTable();
+    }
+
+    function feLoadStudentByIndex(index) {
+        if (!candidatesList || candidatesList.length === 0) return;
+        if (index < 0) index = 0;
+        if (index >= candidatesList.length) index = candidatesList.length - 1;
+        feCurrentStudentIndex = index;
+
+        const c = candidatesList[index];
+        const nameEl = document.getElementById('feStudentName');
+        const codeBadge = document.getElementById('feStudentCodeBadge');
+        const confEl = document.getElementById('feStudentConf');
+
+        if (nameEl) nameEl.textContent = c.name;
+        if (codeBadge) codeBadge.textContent = `كود: ${c.code}`;
+        if (confEl) confEl.textContent = `أب الاعتراف: ${c.confessor || 'لم يحدد'}`;
+
+        const g1El = document.getElementById('fe_g1'); if (g1El) g1El.value = c.g1 ?? '';
+        const g2El = document.getElementById('fe_g2'); if (g2El) g2El.value = c.g2 ?? '';
+        const g3El = document.getElementById('fe_g3'); if (g3El) g3El.value = c.g3 ?? '';
+        const g4El = document.getElementById('fe_g4'); if (g4El) g4El.value = c.g4 ?? '';
+
+        const spEl = document.getElementById('feSpNotes'); if (spEl) spEl.value = c.spiritualNotes || '';
+        const psEl = document.getElementById('fePsNotes'); if (psEl) psEl.value = c.psychNotes || '';
+
+        feUpdateLiveDecision(c);
+        if (g1El) g1El.focus();
+    }
+
+    function feOnCodeInput(val) {
+        val = (val || '').trim().toLowerCase();
+        if (!val) return;
+        const idx = candidatesList.findIndex(c => String(c.code).toLowerCase() === val || String(c.name).toLowerCase().includes(val));
+        if (idx !== -1) {
+            feLoadStudentByIndex(idx);
+        }
+    }
+
+    function fePrevStudent() {
+        if (feCurrentStudentIndex > 0) {
+            feLoadStudentByIndex(feCurrentStudentIndex - 1);
+        }
+    }
+
+    function feNextStudent() {
+        if (feCurrentStudentIndex < candidatesList.length - 1) {
+            feLoadStudentByIndex(feCurrentStudentIndex + 1);
+        }
+    }
+
+    function feHandleGradeKey(e, currentFieldNum) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentFieldNum < 4) {
+                const nextField = document.getElementById('fe_g' + (currentFieldNum + 1));
+                if (nextField) nextField.focus();
+            } else {
+                feSaveAndNext();
+            }
+        }
+    }
+
+    function feOnGradeChange() {
+        const c = candidatesList[feCurrentStudentIndex];
+        if (!c) return;
+        const g1 = Number(document.getElementById('fe_g1').value) || 0;
+        const g2 = Number(document.getElementById('fe_g2').value) || 0;
+        const g3 = Number(document.getElementById('fe_g3').value) || 0;
+        const g4 = Number(document.getElementById('fe_g4').value) || 0;
+        const temp = { ...c, g1, g2, g3, g4, attended: true };
+        feUpdateLiveDecision(temp);
+    }
+
+    function feUpdateLiveDecision(c) {
+        const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
+        const dec = computeDecision(c);
+
+        const badge = document.getElementById('feLiveDecisionBadge');
+        const tot = document.getElementById('feLiveTotalDisplay');
+
+        if (badge) {
+            badge.textContent = dec.label;
+            badge.className = `badge-status ${dec.class}`;
+        }
+        if (tot) {
+            tot.textContent = `المجموع: ${total.toFixed(1)} / ${maxTotalScore} (${pct}%)`;
+        }
+    }
+
+    function feSaveAndNext() {
+        const c = candidatesList[feCurrentStudentIndex];
+        if (!c) return;
+
+        c.g1 = Number(document.getElementById('fe_g1').value) || 0;
+        c.g2 = Number(document.getElementById('fe_g2').value) || 0;
+        c.g3 = Number(document.getElementById('fe_g3').value) || 0;
+        c.g4 = Number(document.getElementById('fe_g4').value) || 0;
+        c.spiritualNotes = document.getElementById('feSpNotes').value.trim();
+        c.psychNotes = document.getElementById('fePsNotes').value.trim();
+        c.attended = true;
+
+        saveGradesLocal(false);
+
+        // الانتقال التلقائي للمخدوم التالي
+        if (feCurrentStudentIndex < candidatesList.length - 1) {
+            feLoadStudentByIndex(feCurrentStudentIndex + 1);
+        } else {
+            alert('🎉 تم الوصول إلى نهاية قائمة المخدومين!');
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const overlay = document.getElementById('fastEntryOverlay');
+        if (overlay && overlay.style.display === 'flex') {
+            if (e.key === 'Escape') closeFastEntryMode();
+        }
+        const drawer = document.getElementById('candidate360Drawer');
+        if (drawer && drawer.classList.contains('open')) {
+            if (e.key === 'Escape') closeCandidate360Drawer();
+        }
+    });
+
+    // =========================================================================
+    // 🪪 بطاقة المخدوم الرعوية الشاملة (Candidate 360 Drawer)
+    // =========================================================================
+    function openCandidate360Drawer(code) {
+        const c = candidatesList.find(x => String(x.code) === String(code));
+        if (!c) return;
+
+        const backdrop = document.getElementById('candidate360Backdrop');
+        const drawer = document.getElementById('candidate360Drawer');
+        const container = document.getElementById('candidate360Content');
+        if (!drawer || !container) return;
+
+        const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+        const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
+        const dec = computeDecision(c);
+        const evalRes = getCandidateExamDetails(c);
+        const isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+
+        container.innerHTML = `
+            <div style="text-align:center; padding-bottom:14px; border-bottom:1.5px solid #f1f5f9; margin-bottom:16px;">
+                <div style="width:58px; height:58px; border-radius:50%; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:1.6rem; margin:0 auto 8px auto; border:2px solid #bfdbfe;">
+                    ${isF ? '👩' : '👨'}
+                </div>
+                <h3 style="margin:0; font-size:1.25rem; font-weight:900; color:#0c2461;">${c.name}</h3>
+                <div style="font-size:0.84rem; color:#64748b; margin-top:3px;">
+                    كود: <strong>${c.code}</strong> | ${isF ? 'خادمة (بنات)' : 'خادم (بنين)'}
+                </div>
+                <div style="margin-top:8px;">
+                    <span class="badge-status ${dec.class}" style="font-size:0.85rem; padding:4px 12px;">${dec.label}</span>
+                </div>
+            </div>
+
+            <!-- بطاقة النتيجة والمجموع -->
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-weight:800; font-size:0.84rem; color:#1e293b;">المجموع الإجمالي والنسبة:</span>
+                    <strong style="font-size:1.15rem; color:#2563eb;">${total.toFixed(1)} / ${maxTotalScore} (${pct}%)</strong>
+                </div>
+                <div style="background:#e2e8f0; border-radius:10px; height:8px; overflow:hidden;">
+                    <div style="width:${Math.min(100, Math.max(0, pct))}%; height:100%; background:${pct >= passThreshold ? '#10b981' : (pct >= interviewThreshold ? '#f97316' : '#ef4444')};"></div>
+                </div>
+            </div>
+
+            <!-- تفاصيل المواد الأربعة -->
+            <div style="margin-bottom:14px;">
+                <h5 style="font-size:0.84rem; font-weight:800; color:#0c2461; margin-bottom:8px;">
+                    <i class="fa-solid fa-list-check me-1"></i> درجات الامتحانات الأربعة:
+                </h5>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    ${evalRes.details.map((d, i) => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#ffffff; border:1px solid #e2e8f0; border-radius:8px;">
+                            <span style="font-size:0.8rem; font-weight:700;">${d.name}:</span>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <strong style="color:${d.isPassed ? '#15803d' : '#b91c1c'};">${d.score.toFixed(1)} / ${d.maxScore}</strong>
+                                <span class="badge" style="background:${d.isPassed ? '#f0fdf4' : '#fef2f2'}; color:${d.isPassed ? '#15803d' : '#b91c1c'}; font-size:0.7rem;">
+                                    ${d.isPassed ? 'مستوفٍ ✅' : 'لم يتخطَ ❌'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
+            <!-- الجانب الرعوي والروحي -->
+            <div style="background:#faf5ff; border:1px solid #d8b4fe; border-radius:12px; padding:12px; margin-bottom:14px;">
+                <h5 style="font-size:0.84rem; font-weight:800; color:#6b21a8; margin-bottom:8px;">
+                    <i class="fa-solid fa-cross me-1"></i> الرعاية الروحية والنفسية:
+                </h5>
+                <div style="font-size:0.8rem; line-height:1.6; color:#475569;">
+                    <div>• <strong>أب الاعتراف:</strong> ${c.confessor || 'غير محدد'}</div>
+                    ${c.spiritualNotes ? `<div style="color:#6b21a8;">• <strong>الملاحظة الروحية:</strong> ${c.spiritualNotes}</div>` : ''}
+                    ${c.psychNotes ? `<div style="color:#9a3412;">• <strong>الملاحظة النفسية:</strong> ${c.psychNotes}</div>` : ''}
+                    ${c.problemType ? `<div>• <strong>التصنيف الرعوي:</strong> ${c.problemType}</div>` : ''}
+                </div>
+            </div>
+
+            <!-- أزرار الإجراء السريع -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button type="button" class="btn-custom" onclick="c360SendWhatsapp('${c.code}')" style="background:#2563eb; color:#fff; font-weight:800; padding:8px; border:none; justify-content:center;">
+                    <i class="fa-brands fa-whatsapp fs-5 me-1"></i> إرسال رسالة القبول المباشرة (WhatsApp) 📲
+                </button>
+                <button type="button" class="btn-custom btn-navy" onclick="closeCandidate360Drawer(); openModernGradeEntryModal('${c.code}')" style="justify-content:center; padding:8px;">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> تعديل كامل الدرجات والملاحظات ✍️
+                </button>
+            </div>
+        `;
+
+        if (backdrop) backdrop.style.display = 'block';
+        drawer.classList.add('open');
+    }
+
+    function closeCandidate360Drawer() {
+        const backdrop = document.getElementById('candidate360Backdrop');
+        const drawer = document.getElementById('candidate360Drawer');
+        if (backdrop) backdrop.style.display = 'none';
+        if (drawer) drawer.classList.remove('open');
+    }
+
+    function c360SendWhatsapp(code) {
+        const c = candidatesList.find(x => String(x.code) === String(code));
+        if (!c) return;
+        let p = (c.phone || '').replace(/[^0-9]/g, '');
+        if (p.startsWith('01')) p = '2' + p;
+        if (!p) {
+            alert('لا يوجد رقم هاتف مسجل لهذا المخدوم!');
+            return;
+        }
+        const msg = encodeURIComponent(buildStudentWhatsappMessage(c));
+        window.open(`https://wa.me/${p}?text=${msg}`, '_blank');
     }
 
     // =========================================================================
@@ -7263,12 +7916,34 @@ body {
             updateActiveFilterTags(filtered.length, totalCandidates);
         }
 
+        // تحديث شريط ملخص الاستوديو العلوي
+        const barPass = document.getElementById('studioBarPassPct'); if (barPass) barPass.textContent = passThreshold + '%';
+        const barInt = document.getElementById('studioBarIntPct'); if (barInt) barInt.textContent = interviewThreshold + '%';
+        const barMax = document.getElementById('studioBarMax'); if (barMax) barMax.textContent = maxTotalScore;
+        const barAvg = document.getElementById('studioBarAvg'); if (barAvg) barAvg.textContent = attendedCount > 0 ? (sumTotal / attendedCount).toFixed(1) : "0.0";
+        updateAdvFiltersBadge();
+
         if (filtered.length === 0) {
             tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-muted fw-bold">لا يوجد مخدومين يطابقون خيارات الفلترة المحددة. <button type="button" class="btn-custom ms-2" onclick="resetAllFilters()">تفريغ الفلاتر</button></td></tr>`;
+            renderPaginationUI(0, tablePageSize, 1, 1);
             return;
         }
 
-        tbody.innerHTML = filtered.map((c, idx) => {
+        // تطبيق التقطيع السلس والترقيم (Pagination Slice)
+        let pageSlice = filtered;
+        if (tablePageSize !== 'all') {
+            const pageSizeNum = parseInt(tablePageSize) || 50;
+            const totalPages = Math.ceil(filtered.length / pageSizeNum) || 1;
+            if (tableCurrentPage > totalPages) tableCurrentPage = totalPages;
+            if (tableCurrentPage < 1) tableCurrentPage = 1;
+            const start = (tableCurrentPage - 1) * pageSizeNum;
+            pageSlice = filtered.slice(start, start + pageSizeNum);
+            renderPaginationUI(filtered.length, tablePageSize, tableCurrentPage, totalPages);
+        } else {
+            renderPaginationUI(filtered.length, 'all', 1, 1);
+        }
+
+        tbody.innerHTML = pageSlice.map((c, idx) => {
             const total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
             const pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
             const dec = computeDecision(c);
@@ -7289,9 +7964,19 @@ body {
                 <tr>
                     <td class="fw-bold text-primary">${c.code}</td>
                     <td class="text-end fw-bold">
-                        <a href="javascript:void(0)" onclick="openModernGradeEntryModal('${c.code}')" style="color:#0c2461; text-decoration:none;" title="اضغط لفتح فورم رصد الدرجات للمخدوم">
-                            ${c.name} <i class="fa-solid fa-pen-to-square text-muted ms-1" style="font-size:0.75rem;"></i>
-                        </a>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+                            <a href="javascript:void(0)" onclick="openCandidate360Drawer('${c.code}')" style="color:#0c2461; text-decoration:none; font-weight:800;" title="اضغط لعرض ملف المخدوم الشامل (360°)">
+                                ${c.name}
+                            </a>
+                            <div style="display:flex; align-items:center; gap:3px;">
+                                <button type="button" onclick="openCandidate360Drawer('${c.code}')" style="border:none; background:transparent; color:#2563eb; cursor:pointer; font-size:0.8rem; padding:2px;" title="ملف المخدوم الشامل (360°)">
+                                    <i class="fa-solid fa-address-card"></i>
+                                </button>
+                                <button type="button" onclick="openModernGradeEntryModal('${c.code}')" style="border:none; background:transparent; color:#64748b; cursor:pointer; font-size:0.75rem; padding:2px;" title="رصد وتعديل الدرجات">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                            </div>
+                        </div>
                     </td>
                     <td class="text-center">
                         ${(c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى')
@@ -8506,5 +9191,140 @@ body {
     }
 </script>
 <script src="js/pwa-helper.js"></script>
+
+<!-- ===================================================================== -->
+<!-- وضع الرصد فائق السرعة (Fast Entry Mode Overlay)                       -->
+<!-- ===================================================================== -->
+<div class="fast-entry-overlay" id="fastEntryOverlay" onclick="if(event.target===this) closeFastEntryMode()">
+    <div class="fast-entry-card" onclick="event.stopPropagation()">
+        <!-- الترويسة -->
+        <div style="background: linear-gradient(135deg, #0c2461 0%, #1e3a8a 100%); padding: 14px 20px; color:#ffffff; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="background:#2563eb; color:#fff; width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                    ⚡
+                </span>
+                <div>
+                    <h3 style="margin:0; font-size:1.1rem; font-weight:900;">وضع الرصد فائق السرعة (Fast Entry Mode)</h3>
+                    <div style="font-size:0.75rem; color:#cbd5e1; margin-top:2px;">
+                        اكتب الكود أو امسح الباركود، ورصّد بالـ Enter والتنقل التلقائي الفوري 🎯
+                    </div>
+                </div>
+            </div>
+            <button type="button" onclick="closeFastEntryMode()" style="border:none; background:rgba(255,255,255,0.15); color:#ffffff; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">
+                &times;
+            </button>
+        </div>
+
+        <!-- جسم النافذة -->
+        <div style="padding: 20px; max-height: 80vh; overflow-y: auto;">
+            <!-- حقل مسح الكود أو الاختيار السريع -->
+            <div style="display:flex; gap:10px; margin-bottom:16px;">
+                <div style="position:relative; flex:1;">
+                    <input type="text" id="feSearchCodeInput" placeholder="🔍 اكتب كود المخدوم أو امسح الباركود..." style="width:100%; font-size:1.05rem; font-weight:800; padding:10px 14px; border:2px solid #2563eb; border-radius:10px; box-sizing:border-box;" oninput="feOnCodeInput(this.value)">
+                </div>
+                <button type="button" class="btn-custom" onclick="fePrevStudent()" style="background:#f1f5f9; padding:10px 14px; font-weight:800;" title="المخدوم السابق">
+                    <i class="fa-solid fa-arrow-right"></i> السابق
+                </button>
+                <button type="button" class="btn-custom" onclick="feNextStudent()" style="background:#f1f5f9; padding:10px 14px; font-weight:800;" title="المخدوم التالي">
+                    التالي <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- بطاقة المخدوم الحالي النشط -->
+            <div id="feStudentCard" style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:14px; padding:16px; margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                    <div>
+                        <span id="feStudentCodeBadge" style="background:#0c2461; color:#fff; font-size:0.8rem; font-weight:900; padding:3px 8px; border-radius:6px;">كود: 000</span>
+                        <h4 id="feStudentName" style="margin:4px 0 0 0; font-size:1.25rem; font-weight:900; color:#0f172a;">اختر مخدوماً للبدء</h4>
+                        <div id="feStudentConf" style="font-size:0.8rem; color:#64748b; margin-top:2px;">أب الاعتراف: -</div>
+                    </div>
+                    <div style="text-align:left;">
+                        <div id="feLiveDecisionBadge" style="font-size:0.85rem; font-weight:900; padding:5px 12px; border-radius:8px; background:#e2e8f0; color:#475569;">
+                            في انتظار الرصد
+                        </div>
+                        <div id="feLiveTotalDisplay" style="font-size:0.82rem; font-weight:800; color:#0369a1; margin-top:4px;">
+                            المجموع: 0.0 / 100 (0.0%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شبكة إدخال الدرجات الأربعة الكبيرة -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px; margin-bottom:14px;">
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px; text-align:center;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:#0c2461; margin-bottom:4px;">✍️ تحريري روحي</label>
+                        <input type="number" step="0.5" id="fe_g1" min="0" max="25" style="width:100%; font-size:1.3rem; font-weight:900; text-align:center; padding:6px; border:2px solid #cbd5e1; border-radius:8px;" onkeydown="feHandleGradeKey(event, 1)" oninput="feOnGradeChange()">
+                    </div>
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:10px; padding:10px; text-align:center;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:#0c2461; margin-bottom:4px;">✍️ تحريري نفسي</label>
+                        <input type="number" step="0.5" id="fe_g2" min="0" max="25" style="width:100%; font-size:1.3rem; font-weight:900; text-align:center; padding:6px; border:2px solid #cbd5e1; border-radius:8px;" onkeydown="feHandleGradeKey(event, 2)" oninput="feOnGradeChange()">
+                    </div>
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-top:3.5px solid #1e3a8a; border-radius:10px; padding:10px; text-align:center;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:#1e3a8a; margin-bottom:4px;">🗣️ شفوي روحي</label>
+                        <input type="number" step="0.5" id="fe_g3" min="0" max="25" style="width:100%; font-size:1.3rem; font-weight:900; text-align:center; padding:6px; border:2px solid #cbd5e1; border-radius:8px;" onkeydown="feHandleGradeKey(event, 3)" oninput="feOnGradeChange()">
+                    </div>
+                    <div style="background:#ffffff; border:1.5px solid #cbd5e1; border-top:3.5px solid #1e3a8a; border-radius:10px; padding:10px; text-align:center;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:#1e3a8a; margin-bottom:4px;">🗣️ شفوي نفسي</label>
+                        <input type="number" step="0.5" id="fe_g4" min="0" max="25" style="width:100%; font-size:1.3rem; font-weight:900; text-align:center; padding:6px; border:2px solid #cbd5e1; border-radius:8px;" onkeydown="feHandleGradeKey(event, 4)" oninput="feOnGradeChange()">
+                    </div>
+                </div>
+
+                <!-- شريط الملاحظات السريعة -->
+                <div style="display:flex; gap:10px; flex-wrap:wrap; font-size:0.78rem;">
+                    <div style="flex:1; min-width:180px;">
+                        <label style="font-weight:700; color:#475569; display:block; margin-bottom:2px;">🕊️ ملاحظة روحية (مظهر شعر / اعتراف):</label>
+                        <input type="text" id="feSpNotes" placeholder="اكتب ملاحظة روحية إن وجدت..." style="width:100%; padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                    <div style="flex:1; min-width:180px;">
+                        <label style="font-weight:700; color:#475569; display:block; margin-bottom:2px;">🧠 ملاحظة نفسية وسلوكية:</label>
+                        <input type="text" id="fePsNotes" placeholder="اكتب ملاحظة نفسية إن وجدت..." style="width:100%; padding:5px 8px; border:1px solid #cbd5e1; border-radius:6px; font-size:0.8rem; box-sizing:border-box;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار الإجراء السفلية -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:0.75rem; color:#64748b;">
+                    💡 تلميح: اضغط <strong>Enter</strong> في الخانة الرابعة للحفظ التلقائي والانتقال للمخدوم التالي فوراً!
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn-custom" onclick="feSaveAndNext()" style="background:#15803d; color:#fff; font-weight:800; padding:8px 20px; font-size:0.9rem; border:none; box-shadow:0 3px 10px rgba(21,128,61,0.25);">
+                        حفظ ومتابعة (Enter) 💾
+                    </button>
+                    <button type="button" class="btn-custom" onclick="closeFastEntryMode()" style="background:#f1f5f9; padding:8px 14px; font-weight:700;">
+                        خروج (Esc)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- بطاقة المخدوم الرعوية الشاملة (Candidate 360 Slide-over Drawer)       -->
+<!-- ===================================================================== -->
+<div class="candidate-360-backdrop" id="candidate360Backdrop" onclick="closeCandidate360Drawer()"></div>
+<div class="candidate-360-drawer" id="candidate360Drawer">
+    <!-- ترويسة الدرج -->
+    <div style="background: linear-gradient(135deg, #0c2461 0%, #1e3a8a 100%); color:#ffffff; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="background:rgba(255,255,255,0.15); width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                🪪
+            </div>
+            <div>
+                <h4 style="margin:0; font-size:1.05rem; font-weight:900;">ملف المخدوم الشامل (360°)</h4>
+                <div style="font-size:0.72rem; color:#cbd5e1; margin-top:2px;">الرصد الأكاديمي والرعاية الروحية والنفسية</div>
+            </div>
+        </div>
+        <button type="button" onclick="closeCandidate360Drawer()" style="border:none; background:rgba(255,255,255,0.18); color:#fff; width:30px; height:30px; border-radius:8px; cursor:pointer; font-size:1.1rem; display:flex; align-items:center; justify-content:center;">
+            &times;
+        </button>
+    </div>
+
+    <!-- المحتوى -->
+    <div style="padding:18px; flex:1; overflow-y:auto;" id="candidate360Content">
+        <!-- يتم ملؤها ديناميكياً بالجافاسكريبت -->
+    </div>
+</div>
+
 </body>
 </html>

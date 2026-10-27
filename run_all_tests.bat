@@ -72,12 +72,16 @@ echo [14/15] تشغيل اختبارات عزل الملاحظات الروحي�
 "%NODE_EXE%" test_spiritual_oral_pending_isolation.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
-echo [15/15] تشغيل اختبارات تبويب وفئة "لديهم ملاحظات" وشريط التبويبات السريعة...
+echo [15/16] تشغيل اختبارات تبويب وفئة "لديهم ملاحظات" وشريط التبويبات السريعة...
 "%NODE_EXE%" test_notes_tab_and_category.js
+if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
+
+echo [16/16] تشغيل اختبارات تبسيط وتطوير تجربة المستخدم الشاملة (الاستوديو، الرصد السريع، كارت 360، الترقيم)...
+"%NODE_EXE%" test_ux_declutter_and_enhancements.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
 echo.
 echo ================================================================
-echo   تهانينا! جميع الاختبارات الـ 15 نجحت بنسبة 100%% بنجاح تام!
+echo   تهانينا! جميع الاختبارات الـ 16 نجحت بنسبة 100%% بنجاح تام!
 echo ================================================================
 pause
