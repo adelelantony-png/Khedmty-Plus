@@ -64,12 +64,16 @@ echo [12/13] تشغيل اختبارات ثبات وحفظ واسترجاع ال
 "%NODE_EXE%" test_exam_max_scores_persistence.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
-echo [13/13] تشغيل اختبارات جدول التوزيع التكراري للنسب والمواد (0%، 1-10%...)...
+echo [13/14] تشغيل اختبارات جدول التوزيع التكراري للنسب والمواد (0%، 1-10%...)...
 "%NODE_EXE%" test_subject_distribution_table.js
+if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
+
+echo [14/14] تشغيل اختبارات عزل الملاحظات الروحية (الشعر والاعتراف) مع الشفوي المعلق...
+"%NODE_EXE%" test_spiritual_oral_pending_isolation.js
 if %ERRORLEVEL% neq 0 ( echo فشل الاختبار! & pause & exit /b %ERRORLEVEL% )
 
 echo.
 echo ================================================================
-echo   تهانينا! جميع الاختبارات الـ 13 نجحت بنسبة 100%% بنجاح تام!
+echo   تهانينا! جميع الاختبارات الـ 14 نجحت بنسبة 100%% بنجاح تام!
 echo ================================================================
 pause

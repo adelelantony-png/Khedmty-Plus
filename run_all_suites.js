@@ -14,11 +14,12 @@ const tests = [
   'test_notes_filtering.js',
   'test_excel_formulas_and_notes.js',
   'test_exam_max_scores_persistence.js',
-  'test_subject_distribution_table.js'
+  'test_subject_distribution_table.js',
+  'test_spiritual_oral_pending_isolation.js'
 ];
 
 console.log('================================================================');
-console.log('🚀 Running ALL 13 Test Suites in Khedmety-Plus');
+console.log('🚀 Running ALL 14 Test Suites in Khedmety-Plus');
 console.log('================================================================\n');
 
 let failed = 0;
@@ -37,7 +38,7 @@ for (let i = 0; i < tests.length; i++) {
 
 console.log('\n================================================================');
 if (failed === 0) {
-  console.log('🎉 ALL 13 TEST SUITES PASSED (100%) SUCCESSFULLY!');
+  console.log('🎉 ALL 14 TEST SUITES PASSED (100%) SUCCESSFULLY!');
   console.log('================================================================\n');
   process.exit(0);
 } else {

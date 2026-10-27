@@ -336,6 +336,7 @@ body {
         .status-conditional { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
         .status-interview { background: #ffedd5; color: #9a3412; border: 1px solid #fed7aa; }
         .status-rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .status-pending-spiritual { background: #f3e8ff; color: #6b21a8; border: 1.5px solid #d8b4fe; font-weight: 800; }
 
         .search-bar {
             display: flex;
@@ -1979,6 +1980,8 @@ body {
                 <option value="accepted">مقبول نهائياً 🟢</option>
                 <option value="conditional">مقبول مع رعاية ومتابعة الاعتراف 🕊️</option>
                 <option value="interview">معلق للمقابلة الشخصية 🟠</option>
+                <option value="pending_spiritual">معلق لملاحظة روحية (شعر/اعتراف - شفوي 0) ✂️🕊️</option>
+                <option value="all_pending">كل المعلقين (مقابلة + ملاحظة روحية) 🟠✂️</option>
                 <option value="rejected">غير مجتاز / دور ثان 🔴</option>
             </select>
 
@@ -2146,6 +2149,7 @@ body {
                 <option value="all">🕊️ كل الملاحظات الروحية والسلوكية</option>
                 <option value="has_notes">📝 لديه ملاحظة روحية مسجلة</option>
                 <option value="no_notes">✨ بدون ملاحظات (خالية)</option>
+                <option value="spiritual_zero_oral">✂️🕊️ ملاحظة روحية (شعر/اعتراف) مع شفوي صفر معلق</option>
                 <option value="اعتراف وتناول">🍞 اعتراف وتناول</option>
                 <option value="اعتراف فقط">✝️ اعتراف فقط</option>
                 <option value="اعتراف ومظهر الشعر">✂️ اعتراف ومظهر الشعر</option>
@@ -2426,6 +2430,7 @@ body {
                             <option value="clean_accepted">المقبولون نهائياً فقط 🟢</option>
                             <option value="conditional_only">المقبولون بشرط الاعتراف فقط (تنبيه مهلة أسبوع) 🟡</option>
                             <option value="interview_only">المعلقون للمقابلة الشخصية 🟠</option>
+                            <option value="pending_spiritual">المعلقون لملاحظة روحية (مظهر الشعر / اعتراف) ✂️🕊️</option>
                             <option value="all_candidates">جميع المتقدمين في الكشف</option>
                         </select>
                     </div>
@@ -3129,7 +3134,8 @@ body {
         { code: "2203", name: "كيرلس مايكل سامي نصيف", gender: "بنين", phone: "01145678901", parentPhone: "", dob: "2002-08-04", confessor: "لا يوجد", attended: true, g1: 18.0, g2: 19.5, g3: 17.0, g4: 17.5, email: "cyril.michael@gmail.com", address: "8 ش الخليفة المأمون روكسي" },
         { code: "2204", name: "سارة سمير فريد بطرس", gender: "بنات", phone: "01233445566", parentPhone: "01233445500", dob: "2005-01-28", confessor: "أبونا بطرس", attended: true, g1: 15.0, g2: 16.0, g3: 14.5, g4: 14.5, email: "sara.samir@gmail.com", address: "12 ش الحرية هليوبوليس" },
         { code: "2205", name: "بيتر هاني شكري أسعد", gender: "بنين", phone: "01011223344", parentPhone: "", dob: "2001-12-10", confessor: "أبونا يوحنا", attended: true, g1: 13.0, g2: 14.0, g3: 13.5, g4: 13.5, email: "peter.hany@gmail.com", address: "55 ش جسر السويس النزهة" },
-        { code: "2206", name: "ديفيد نبيل كمال صليب", gender: "بنين", phone: "01255667788", parentPhone: "01255667700", dob: "2006-03-18", confessor: "أبونا توماس", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, email: "david.nabil@gmail.com", address: "3 ش المطرية محطة المترو" }
+        { code: "2206", name: "ديفيد نبيل كمال صليب", gender: "بنين", phone: "01255667788", parentPhone: "01255667700", dob: "2006-03-18", confessor: "أبونا توماس", attended: false, g1: 0, g2: 0, g3: 0, g4: 0, email: "david.nabil@gmail.com", address: "3 ش المطرية محطة المترو" },
+        { code: "2207", name: "مينا أشرف شكري ميخائيل", gender: "بنين", phone: "01077889900", parentPhone: "01077889911", dob: "2005-09-14", confessor: "أبونا يوسف", attended: true, g1: 20.0, g2: 19.0, g3: 0, g4: 18.0, email: "mina.ashraf@gmail.com", address: "10 ش الترعة البولاقية", spiritualNotes: "اعتراف ومظهر الشعر", psychNotes: "شاب محب للخدمة وملتزم", problemType: "مظهر الشعر والاعتراف ✂️" }
     ];
 
 
@@ -3345,7 +3351,12 @@ body {
 
             let badgeBg = '#d1fae5', badgeColor = '#065f46';
             if (dec.key === 'conditional') { badgeBg = '#fef08a'; badgeColor = '#854d0e'; }
-            if (dec.key === 'interview') { badgeBg = '#ffedd5'; badgeColor = '#9a3412'; }
+            if (dec.key === 'pending_spiritual') {
+            const pronoun = isMsgF ? 'تقدمكِ' : 'تقدمك';
+            return `${salutation}\nبخصوص ${pronoun} لـ ${familyTitle} (اجتماع القديس بولس الرسول)، تم تعليق نتيجتك لمراجعة الملاحظة الروحية (استيفاء الشفوي الروحي) مع مسؤولي الخدمة وأب الاعتراف.\nبرجاء التواجد يوم الجمعة القادمة بعد القداس الإلهي مباشرة لمقابلة أمين الخدمة لاستيفاء الرصد، الرب يبارك حياتك وخدمتك 🕊️`;
+        }
+
+        if (dec.key === 'interview') { badgeBg = '#ffedd5'; badgeColor = '#9a3412'; }
             if (dec.key === 'rejected') { badgeBg = '#fee2e2'; badgeColor = '#991b1b'; }
 
             return `
@@ -3966,6 +3977,7 @@ body {
                 targetIdx = 10; // 91-100%
             }
 
+            const isPendingSp = isCandidatePendingSpiritualOral(c);
             brackets[targetIdx].students.push({
                 code: c.code,
                 name: c.name,
@@ -3973,7 +3985,9 @@ body {
                 phone: c.phone || '',
                 confessor: c.confessor || '',
                 score: rawScore,
-                pct: Math.round(pct * 10) / 10
+                pct: Math.round(pct * 10) / 10,
+                isPendingSpiritualOral: isPendingSp,
+                spiritualNotes: c.spiritualNotes || c.problemType || ''
             });
             brackets[targetIdx].count++;
         });
@@ -4116,6 +4130,15 @@ body {
                             <span style="font-weight:900; font-size:1.05rem; color:${hasStudents ? '#1d4ed8' : '#94a3b8'}; background:${hasStudents ? '#eff6ff' : 'transparent'}; padding:2px 10px; border-radius:12px; display:inline-block;">
                                 ${b.count}
                             </span>
+                            ${(() => {
+                                if (b.index === 0 && b.students) {
+                                    const spCount = b.students.filter(s => s.isPendingSpiritualOral).length;
+                                    if (spCount > 0) {
+                                        return '<div style="font-size:0.68rem; color:#7e22ce; font-weight:800; margin-top:2px;"><i class="fa-solid fa-scissors me-1"></i> منهم ' + spCount + ' معلق لملاحظة شعر/اعتراف</div>';
+                                    }
+                                }
+                                return '';
+                            })()}
                         </td>
                         <td style="padding:8px; text-align:center; font-weight:800; color:${hasStudents ? '#0f172a' : '#94a3b8'};">
                             ${b.pct}%
@@ -4313,7 +4336,10 @@ body {
                             </a>
                         </td>
                         <td style="padding:6px 8px; text-align:center;">${gBadge}</td>
-                        <td style="padding:6px 8px; text-align:center; font-weight:900; color:#1d4ed8;">${s.score.toFixed(1)} / ${dist.maxScore}</td>
+                        <td style="padding:6px 8px; text-align:center;">
+                            <div style="font-weight:900; color:${s.isPendingSpiritualOral ? '#7e22ce' : '#1d4ed8'};">${s.score.toFixed(1)} / ${dist.maxScore}</div>
+                            ${s.isPendingSpiritualOral ? '<div style="font-size:0.67rem; color:#7e22ce; font-weight:800;"><i class="fa-solid fa-scissors me-1"></i> معلق لملاحظة (حاضر تحريري)</div>' : ''}
+                        </td>
                         <td style="padding:6px 8px; text-align:center; font-weight:800; color:#059669;">${s.pct}%</td>
                     </tr>
                 `;
@@ -5461,6 +5487,30 @@ body {
         if (sel) sel.value = detected;
     }
 
+    function isCandidatePendingSpiritualOral(candidate) {
+        if (!candidate || !candidate.attended) return false;
+        const g3 = Number(candidate.g3) || 0;
+        if (g3 > 0) return false; // الشفوي الروحي مرصود بنجاح أكبر من صفر
+
+        const g1 = Number(candidate.g1) || 0;
+        const g2 = Number(candidate.g2) || 0;
+        const hasWrittenGrades = (g1 > 0 || g2 > 0);
+        if (!hasWrittenGrades) return false; // ليس لديه درجات تحريري (غالباً غائب عن كل شيء)
+
+        const spNotes = String(candidate.spiritualNotes || '').trim().toLowerCase();
+        const prob = String(candidate.problemType || '').trim().toLowerCase();
+        const conf = String(candidate.confessor || '').trim().toLowerCase();
+        const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none' || conf === 'لم يحدد');
+
+        // هل لديه ملاحظة شعر أو اعتراف أو أي ملاحظة روحية مسجلة؟
+        return (
+            spNotes.length > 0 ||
+            prob.includes('اعتراف') ||
+            prob.includes('شعر') ||
+            hasConfIssue
+        );
+    }
+
     function computeDecision(candidate) {
         if (!candidate.attended) {
             return {
@@ -5469,28 +5519,47 @@ body {
                 class: "status-rejected",
                 failReason: "غائب عن الامتحان",
                 failedExams: [],
-                allPassed: false
+                allPassed: false,
+                isPendingSpiritualOral: false
             };
         }
 
         const total = (Number(candidate.g1) || 0) + (Number(candidate.g2) || 0) + (Number(candidate.g3) || 0) + (Number(candidate.g4) || 0);
         const overallPct = maxTotalScore > 0 ? (total / maxTotalScore) * 100 : 0;
         const conf = String(candidate.confessor || '').trim().toLowerCase();
-        const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none');
+        const hasConfIssue = (!conf || conf === 'لا يوجد' || conf === 'none' || conf === 'لم يحدد');
 
         const evalResult = getCandidateExamDetails(candidate);
         const failedExams = evalResult.failedExams;
         const allPassed = evalResult.allPassed;
+        const pendingSpiritual = isCandidatePendingSpiritualOral(candidate);
 
         // صياغة سبب عدم النجاح بدقة بحسب أي عنصر لم يتخطاه
         let failReason = "";
-        if (!allPassed) {
+        if (pendingSpiritual) {
+            const spText = String(candidate.spiritualNotes || candidate.problemType || 'مظهر الشعر / الاعتراف');
+            failReason = "معلق لمراجعة: " + spText + " (الشفوي الروحي 0 معلق ولديه درجات تحريري)";
+        } else if (!allPassed) {
             failReason = "لم يتخطَ نسبة: " + failedExams.map(f => f.name + ' (' + f.pct.toFixed(1) + '% < ' + f.reqPct + '%)').join('، ');
         } else if (overallPct < passThreshold) {
             failReason = 'المجموع الكلي (' + overallPct.toFixed(1) + '%) أقل من نسبة القبول (' + passThreshold + '%)';
         }
 
-        // شرط القبول: اجتياز النسب الأربعة معاً + تجاوز نسبة القبول المباشر الكلية
+        // 1. حالة المخدوم المعلق لملاحظة روحية (مظهر الشعر / اعتراف) مع صفر بالشفوي ولديه تحريري
+        // يُفصل تماماً عن الغياب والدور الثاني ويوضع في فئة المعلقين لملاحظة
+        if (pendingSpiritual) {
+            return {
+                label: "معلق لملاحظة روحية ✂️🕊️",
+                key: "pending_spiritual",
+                class: "status-pending-spiritual",
+                failReason: failReason,
+                failedExams: failedExams,
+                allPassed: false,
+                isPendingSpiritualOral: true
+            };
+        }
+
+        // 2. شرط القبول: اجتياز النسب الأربعة معاً + تجاوز نسبة القبول المباشر الكلية
         if (allPassed && overallPct >= passThreshold) {
             if (hasConfIssue) {
                 return {
@@ -5499,7 +5568,8 @@ body {
                     class: "status-conditional",
                     failReason: "مشكلة اعتراف (مهلة أسبوع)",
                     failedExams: [],
-                    allPassed: true
+                    allPassed: true,
+                    isPendingSpiritualOral: false
                 };
             }
             return {
@@ -5508,7 +5578,8 @@ body {
                 class: "status-accepted",
                 failReason: "لا يوجد (اجتاز كافة المعايير الأربعة بنجاح ✅)",
                 failedExams: [],
-                allPassed: true
+                allPassed: true,
+                isPendingSpiritualOral: false
             };
         } else if (overallPct >= interviewThreshold) {
             return {
@@ -5517,7 +5588,8 @@ body {
                 class: "status-interview",
                 failReason: failReason || "في نطاق المقابلة الشخصية",
                 failedExams: failedExams,
-                allPassed: allPassed
+                allPassed: allPassed,
+                isPendingSpiritualOral: false
             };
         } else {
             return {
@@ -5526,7 +5598,8 @@ body {
                 class: "status-rejected",
                 failReason: failReason || ('أقل من حد المقابلة (' + interviewThreshold + '%)'),
                 failedExams: failedExams,
-                allPassed: allPassed
+                allPassed: allPassed,
+                isPendingSpiritualOral: false
             };
         }
     }
@@ -5947,8 +6020,10 @@ body {
                 if (!match) return false;
             }
 
-            // 2. فلترة قرار القبول
-            if (statusVal !== 'all' && dec.key !== statusVal) return false;
+            // 2. فلترة قرار القبول (مع دعم المعلقين لملاحظة روحية وفئة كل المعلقين)
+            if (statusVal === 'pending_spiritual' && dec.key !== 'pending_spiritual') return false;
+            if (statusVal === 'all_pending' && (dec.key !== 'interview' && dec.key !== 'pending_spiritual')) return false;
+            if (statusVal !== 'all' && statusVal !== 'pending_spiritual' && statusVal !== 'all_pending' && dec.key !== statusVal) return false;
 
             // 2.1 منظومة الفلترة المتعددة لمعايير المواد الأربعة
             if (activeExamFilters.length > 0 || mCrit.preset) {
@@ -6017,12 +6092,14 @@ body {
             // 8. فلترة ملاحظات الجانب الروحي والسلوكي
             if (spiritualNotesVal !== 'all') {
                 const sp = String(c.spiritualNotes || '').trim();
-                if (spiritualNotesVal === 'has_notes' && !sp) return false;
-                if (spiritualNotesVal === 'no_notes' && sp) return false;
-                if (spiritualNotesVal === 'custom') {
+                if (spiritualNotesVal === 'spiritual_zero_oral') {
+                    if (!isCandidatePendingSpiritualOral(c)) return false;
+                } else if (spiritualNotesVal === 'has_notes' && !sp) return false;
+                else if (spiritualNotesVal === 'no_notes' && sp) return false;
+                else if (spiritualNotesVal === 'custom') {
                     const isPreset = (sp === 'اعتراف وتناول' || sp === 'اعتراف فقط' || sp === 'اعتراف ومظهر الشعر');
                     if (!sp || isPreset) return false;
-                } else if (spiritualNotesVal !== 'has_notes' && spiritualNotesVal !== 'no_notes') {
+                } else if (spiritualNotesVal !== 'has_notes' && spiritualNotesVal !== 'no_notes' && spiritualNotesVal !== 'spiritual_zero_oral') {
                     if (!sp.includes(spiritualNotesVal)) return false;
                 }
             }
@@ -6645,6 +6722,7 @@ body {
             if (targetType === 'clean_accepted') return dec.key === 'accepted';
             if (targetType === 'conditional_only') return dec.key === 'conditional';
             if (targetType === 'interview_only') return dec.key === 'interview';
+            if (targetType === 'pending_spiritual') return dec.key === 'pending_spiritual';
             return true;
         });
     }
@@ -6800,7 +6878,7 @@ body {
             }
             const dec = computeDecision(c);
             if (dec.key === 'accepted' || dec.key === 'conditional') passedCount++;
-            if (dec.key === 'interview') interviewCount++;
+            if (dec.key === 'interview' || dec.key === 'pending_spiritual') interviewCount++;
         });
 
         // تحديث مؤشرات الـ KPIs
@@ -6877,13 +6955,36 @@ body {
                     <td class="text-end">${confBadge}</td>
                     <td><input type="number" step="0.5" min="0" max="${examMaxScores[0]}" class="grade-input" style="${(c.attended && !evalRes.details[0].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[0].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[0].reqPct + '%)' : ''}" value="${c.g1 ?? ''}" onchange="updateGrade('${c.code}', 1, this.value)"></td>
                     <td><input type="number" step="0.5" min="0" max="${examMaxScores[1]}" class="grade-input" style="${(c.attended && !evalRes.details[1].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[1].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[1].reqPct + '%)' : ''}" value="${c.g2 ?? ''}" onchange="updateGrade('${c.code}', 2, this.value)"></td>
-                    <td><input type="number" step="0.5" min="0" max="${examMaxScores[2]}" class="grade-input" style="${(c.attended && !evalRes.details[2].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[2].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[2].reqPct + '%)' : ''}" value="${c.g3 ?? ''}" onchange="updateGrade('${c.code}', 3, this.value)"></td>
+                    <td>
+                        ${(() => {
+                            const isPendingSp = isCandidatePendingSpiritualOral(c);
+                            let g3Style = '';
+                            let g3Extra = '';
+                            if (isPendingSp) {
+                                g3Style = 'border:2px solid #a855f7; background:#faf5ff; color:#6b21a8; font-weight:900;';
+                                g3Extra = '<div style="font-size:0.67rem; color:#7e22ce; font-weight:800; margin-top:2px;" title="الشفوي 0 معلق لملاحظة: ' + (c.spiritualNotes || 'مظهر الشعر/اعتراف') + ' ولديه درجات تحريري"><i class="fa-solid fa-scissors me-1"></i> معلق لملاحظة</div>';
+                            } else if (c.attended && !evalRes.details[2].isPassed) {
+                                g3Style = 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;';
+                            }
+                            return '<input type="number" step="0.5" min="0" max="' + examMaxScores[2] + '" class="grade-input" style="' + g3Style + '" title="' + (isPendingSp ? 'الشفوي 0 معلق لملاحظة روحية ولديه تحريري' : (c.attended && !evalRes.details[2].isPassed ? 'لم يتخطَ نسبة النجاح المطلوبة' : '')) + '" value="' + (c.g3 ?? '') + '" onchange="updateGrade(\'' + c.code + '\', 3, this.value)">' + g3Extra;
+                        })()}
+                    </td>
                     <td><input type="number" step="0.5" min="0" max="${examMaxScores[3]}" class="grade-input" style="${(c.attended && !evalRes.details[3].isPassed) ? 'border:1.5px solid #ef4444; background:#fef2f2; color:#b91c1c; font-weight:800;' : ''}" title="${(c.attended && !evalRes.details[3].isPassed) ? 'لم يتخطَ نسبة النجاح المطلوبة (' + evalRes.details[3].reqPct + '%)' : ''}" value="${c.g4 ?? ''}" onchange="updateGrade('${c.code}', 4, this.value)"></td>
                     <td class="fw-bold fs-6" style="background:#fef3c7;">${c.attended ? total.toFixed(1) : 'غائب'}</td>
                     <td class="fw-bold">${c.attended ? pct + '%' : '-'}</td>
                     <td class="text-end" style="font-size:0.8rem; line-height:1.3;">
                         ${c.problemType ? `<div style="font-weight:bold; color:#b45309; margin-bottom:2px;">${c.problemType}</div>` : ''}
                         ${c.spiritualNotes ? `<div style="color:#0369a1; font-size:0.74rem; background:#e0f2fe; border:1px solid #bae6fd; border-radius:4px; padding:2px 6px; margin-top:2px; display:inline-block;" title="${c.spiritualNotes}">🕊️ ${c.spiritualNotes}</div>` : ''}
+                        ${isCandidatePendingSpiritualOral(c) ? `
+                            <div style="margin-top:3px;">
+                                <span class="badge" style="background:#f3e8ff; color:#6b21a8; border:1.5px solid #d8b4fe; font-size:0.72rem; font-weight:800; padding:2px 6px;">
+                                    <i class="fa-solid fa-scissors me-1"></i> معلق لملاحظة: ${c.spiritualNotes || 'مظهر الشعر'}
+                                </span>
+                                <button type="button" class="btn-custom" onclick="openModernGradeEntryModal('${c.code}')" style="padding:2px 6px; font-size:0.71rem; background:#faf5ff; color:#7e22ce; border-color:#d8b4fe; margin-top:3px; font-weight:800;" title="فتح الشاشة لتعديل واعتماد درجة الشفوي الروحي بعد استيفاء الملاحظة">
+                                    <i class="fa-solid fa-pen-to-square me-1"></i> استيفاء ورصد الشفوي
+                                </button>
+                            </div>
+                        ` : ''}
                         ${c.psychNotes ? `<div style="color:#78350f; font-size:0.73rem; background:#fef3c7; border:1px solid #fde68a; border-radius:4px; padding:2px 6px; margin-top:2px; display:inline-block;" title="${c.psychNotes}">🧠 ${c.psychNotes}</div>` : ''}
                         ${getConfessionCountdownBadge(c)}
                         ${dec.key === 'conditional' ? `<button type="button" class="btn-custom" onclick="quickResolveConfession('${c.code}')" style="padding:2px 6px; font-size:0.72rem; background:#ecfdf5; color:#047857; border-color:#a7f3d0; margin-top:3px;" title="تسجيل حل مشكلة الاعتراف وترقية المخدوم لمقبول نهائي"><i class="fa-solid fa-check-double text-success me-1"></i> حل الاعتراف</button>` : ''}
