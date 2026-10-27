@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدليل التفاعلي المصور لمنظومة رصد الدرجات | خدمة القديس بولس</title>
+    <meta name="theme-color" content="#0c2461">
+    <link rel="icon" type="image/png" href="icons/favicon-48.png">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0c2461;
+            --accent: #1e3799;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0284c7;
+            --dark-bg: #0f172a;
+            --card-border: #cbd5e1;
+        }
+
+        html, body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding-bottom: 70px;
+        }
+
+        .guide-container {
+            max-width: 1240px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        /* Hero Banner */
+        .guide-hero {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 55%, #0284c7 100%);
+            color: #ffffff;
+            border-radius: 20px;
+            padding: 30px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 32px rgba(12, 36, 97, 0.22);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guide-hero::after {
+            content: '📖';
+            position: absolute;
+            left: 20px;
+            bottom: -15px;
+            font-size: 8rem;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .guide-hero h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.85rem;
+            font-weight: 900;
+        }
+
+        .guide-hero p {
+            margin: 0 0 16px 0;
+            font-size: 1rem;
+            opacity: 0.92;
+            max-width: 820px;
+            line-height: 1.6;
+        }
+
+        /* Sticky Navigation Bar */
+        .guide-sticky-nav {
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .nav-links-scroll {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 4px 2px;
+            scrollbar-width: none;
+        }
+        .nav-links-scroll::-webkit-scrollbar { display: none; }
+
+        .guide-nav-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 7px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .guide-nav-btn:hover, .guide-nav-btn.active {
+            background: #0c2461;
+            color: #ffffff;
+            border-color: #0c2461;
+            box-shadow: 0 4px 12px rgba(12, 36, 97, 0.2);
+        }
+
+        .search-box-guide {
+            position: relative;
+            min-width: 200px;
+            flex-grow: 1;
+            max-width: 320px;
+        }
+
+        .search-box-guide input {
+            width: 100%;
+            padding: 8px 34px 8px 12px;
+            border-radius: 10px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 0.82rem;
+            font-family: inherit;
+            background: #f8fafc;
+            outline: none;
+        }
+        .search-box-guide input:focus {
+            border-color: #2563eb;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        }
+
+        .search-box-guide i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* Mockup Containers */
+        .mockup-card {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 18px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+            margin-bottom: 26px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .mockup-header {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            color: #ffffff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .mockup-title {
+            font-size: 1.12rem;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mockup-badge {
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 20px;
+            padding: 3px 12px;
+            font-size: 0.74rem;
+            font-weight: 800;
+        }
+
+        .mockup-body {
+            padding: 20px;
+        }
+
+        .interactive-screen-preview {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 16px;
+            margin: 16px 0;
+            position: relative;
+        }
+
+        .screen-label-tag {
+            position: absolute;
+            top: -12px;
+            right: 16px;
+            background: #0c2461;
+            color: #f8fafc;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* Interactive Topbar Mockup */
+        .mock-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mock-btn {
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            border: 1.5px solid;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        .mock-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        /* KPIs Demo */
+        .mock-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .mock-kpi-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .mock-kpi-title {
+            font-size: 0.74rem;
+            color: #64748b;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .mock-kpi-val {
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+
+        /* Spectrum Bar Demo */
+        .mock-spectrum-bar {
+            height: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            background: #e2e8f0;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+            margin: 12px 0 8px;
+        }
+
+        .mock-seg {
+            height: 100%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 900;
+        }
+        .seg-acc { background: #10b981; }
+        .seg-con { background: #eab308; }
+        .seg-int { background: #f97316; }
+        .seg-rej { background: #ef4444; }
+
+        /* Studio Tabs Mockup */
+        .mock-studio-tabs {
+            display: flex;
+            gap: 6px;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            overflow-x: auto;
+            margin-bottom: 12px;
+        }
+
+        .mock-studio-tab-btn {
+            border: none;
+            background: transparent;
+            color: #475569;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .mock-studio-tab-btn.active {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(37,99,235,0.3);
+        }
+
+        /* Interactive Simulator Table */
+        .mock-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .mock-table th {
+            background: #0c2461;
+            color: #ffffff;
+            padding: 10px 8px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .mock-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .mock-table tr:hover td {
+            background: #f8fafc;
+        }
+
+        .table-input-score {
+            width: 48px;
+            text-align: center;
+            padding: 4px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            outline: none;
+        }
+        .table-input-score:focus {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        /* Callout Box */
+        .callout-box {
+            background: #f0fdf4;
+            border-right: 4px solid #16a34a;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 16px;
+            margin: 12px 0;
+            font-size: 0.88rem;
+            color: #14532d;
+            line-height: 1.6;
+        }
+
+        .callout-box.info {
+            background: #eff6ff;
+            border-right-color: #2563eb;
+            color: #1e3a8a;
+        }
+
+        .callout-box.warn {
+            background: #fffbeb;
+            border-right-color: #d97706;
+            color: #78350f;
+        }
+
+        /* Badges */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.74rem;
+            font-weight: 900;
+        }
+        .badge-acc { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .badge-con { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+        .badge-int { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+        .badge-rej { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+        /* Accordion */
+        .faq-item {
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .faq-q {
+            padding: 12px 16px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            cursor: pointer;
+            background: #f8fafc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .faq-q:hover { background: #f1f5f9; color: #0c2461; }
+        .faq-a {
+            display: none;
+            padding: 14px 16px;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #334155;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+
+        /* Live Decision Calculator */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .calc-field {
+            background: #ffffff;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+
+        .calc-field label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .calc-field input, .calc-field select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .calc-field input:focus, .calc-field select:focus {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .calc-result-box {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            color: #ffffff;
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        /* Tooltip Box for Button Inspector */
+        #inspectorToast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.94);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1.5px solid #3b82f6;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: toastPop 0.25s ease-out;
+        }
+        @keyframes toastPop {
+            from { transform: translate(-50%, 20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        @media print {
+            .guide-sticky-nav, .search-box-guide, #inspectorToast, .guide-hero .btn-custom { display: none !important; }
+            body { background: #ffffff; }
+            .mockup-card { box-shadow: none; border-color: #cbd5e1; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="guide-container">
+
+    <!-- 1. Hero Header -->
+    <div class="guide-hero">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+            <div>
+                <h1><i class="fa-solid fa-graduation-cap me-2 text-warning"></i> الدليل التفاعلي المصور لمنظومة رصد الدرجات</h1>
+                <p>
+                    مرجع بصري وعملي شامل يحاكي شاشات وصفحات رصد درجات إعداد الخدام (<span style="text-decoration:underline;">servant_grades_entry.html</span>) بنفس لغة التصميم، ويوفر محاكاة حية لكل زر، وقائمة، ومعادلة، ومعيار رعوي وأكاديمي.
+                </p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <a href="servant_grades_entry.html" class="mock-btn" style="background:#fef08a; color:#854d0e; border-color:#fde047; text-decoration:none; font-size:0.86rem; padding:8px 16px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> فتح شاشة الرصد الآن 🚀
+                </a>
+                <button type="button" class="mock-btn" onclick="window.print()" style="background:#ffffff; color:#0c2461; border-color:#ffffff; font-size:0.86rem; padding:8px 14px;">
+                    <i class="fa-solid fa-print me-1"></i> طباعة الدليل 🖨️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Sticky Navigation Bar & Quick Filter -->
+    <div class="guide-sticky-nav">
+        <div class="nav-links-scroll">
+            <a href="#sec-overview" class="guide-nav-btn active"><i class="fa-solid fa-map"></i> الخريطة البصرية</a>
+            <a href="#sec-topbar" class="guide-nav-btn"><i class="fa-solid fa-compass"></i> شريط التنقل (Topbar)</a>
+            <a href="#sec-kpis" class="guide-nav-btn"><i class="fa-solid fa-chart-line"></i> نبض الدفعة والطيف</a>
+            <a href="#sec-studio" class="guide-nav-btn"><i class="fa-solid fa-sliders"></i> الاستوديو والشرائح</a>
+            <a href="#sec-filters" class="guide-nav-btn"><i class="fa-solid fa-filter"></i> الفلاتر والتبويبات</a>
+            <a href="#sec-table" class="guide-nav-btn"><i class="fa-solid fa-table"></i> جدول الرصد التفاعلي</a>
+            <a href="#sec-advanced" class="guide-nav-btn"><i class="fa-solid fa-bolt"></i> الرصد السريع و 360°</a>
+            <a href="#sec-calculator" class="guide-nav-btn" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe;"><i class="fa-solid fa-gamepad"></i> محاكي اتخاذ القرار 🎮</a>
+            <a href="#sec-faq" class="guide-nav-btn"><i class="fa-solid fa-circle-question"></i> الأسئلة الشائعة</a>
+        </div>
+        <div class="search-box-guide">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="guideSearchInput" placeholder="ابحث عن زر، معادلة، أو شرط رعوي..." oninput="filterGuideSections()">
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 1: الخريطة الهيكلية البصرية (Visual UI Map)               -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-overview">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-sitemap"></i> 1. الخريطة الهيكلية لتوزيع الشاشة (UI Blueprint)</div>
+            <span class="mockup-badge">نظرة عامة على المناطق الـ 8</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.92rem; color:#475569;">
+                تم تنظيم شاشة رصد الدرجات في مناطق وظيفية متناسقة لتمكين الخادم وأمين الخدمة من العمل بسرعة فائقة دون تشتت بصري:
+            </p>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #0c2461;">
+                    <strong style="color:#0c2461; display:block; margin-bottom:4px;"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> المنطقة 1: شريط التنقل (Topbar)</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">العودة للوحة الخدمة، استيراد شيتات الإكسيل، حملات الواتساب، والاعتماد المحلي الفوري.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #d97706;">
+                    <strong style="color:#d97706; display:block; margin-bottom:4px;"><i class="fa-solid fa-heart-pulse me-1"></i> المنطقة 2: النبض والطيف البصري</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">5 عدادات KPI تنفيذية مع شريط طيف نسبي متصل 100% يعكس توزيع قرارات الدفعة الأربعة.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #2563eb;">
+                    <strong style="color:#2563eb; display:block; margin-bottom:4px;"><i class="fa-solid fa-chart-pie me-1"></i> المنطقة 3: الاستوديو الذكي (5 تبويبات)</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">شريط تنفيذي قابل للطي يضم مستكشف الواقع، جدول الـ 11 شريحة، خلاط المواد، وضبط القبول.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #10b981;">
+                    <strong style="color:#10b981; display:block; margin-bottom:4px;"><i class="fa-solid fa-layer-group me-1"></i> المنطقة 4: التبويبات السريعة والفلاتر</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">7 تبويبات سريعة للتنقل اللحظي بين الفئات، مع درج الفلاتر التفصيلية الـ 8 المدمج.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #7e22ce;">
+                    <strong style="color:#7e22ce; display:block; margin-bottom:4px;"><i class="fa-solid fa-table-cells me-1"></i> المنطقة 5: جدول الرصد الـ 12 عموداً</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">رصد درجات المواد الأربعة، التحقق اللحظي، الإجماليات، الملاحظات، والترقيم الموزع بصفحات.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #ea580c;">
+                    <strong style="color:#ea580c; display:block; margin-bottom:4px;"><i class="fa-solid fa-bolt me-1"></i> المنطقة 6: وضع الرصد السريع (Fast Entry)</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">واجهة رصد عريضة مركزة مخصصة للإدخال الصاروخي بالكيبورد وقارئ الباركود بزر Enter.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #0284c7;">
+                    <strong style="color:#0284c7; display:block; margin-bottom:4px;"><i class="fa-solid fa-id-badge me-1"></i> المنطقة 7: بطاقة المخدوم الرعوية (360°)</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">ملف شامل ينزلق جانبياً يوضح بيانات الطالب، حالته، درجاته، ملاحظاته، ورابط واتساب مباشر.</div>
+                </div>
+                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #16a34a;">
+                    <strong style="color:#16a34a; display:block; margin-bottom:4px;"><i class="fa-solid fa-file-excel me-1"></i> المنطقة 8: التصدير الذكي بالمعادلات</strong>
+                    <div style="font-size:0.8rem; color:#64748b;">تصدير إكسيل حقيقي يحتوي على معادلات حية (=SUM, =AVERAGE) وملخص إحصائي كامل.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 2: شريط التنقل العلوي التفاعلي (Topbar)                     -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-topbar">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-compass"></i> 2. شريط التنقل العلوي والإجراءات السريعة (Topbar)</div>
+            <span class="mockup-badge">شاشة تفاعلية حية — انقر على أي زر للشرح</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                هذه محاكاة مطابقة لشريط التنقل في أعلى الصفحة. <strong>جرّب النقر على أي زر لمعاينة وظيفته البرمجية ودوره الرعوي:</strong>
+            </p>
+
+            <div class="interactive-screen-preview">
+                <span class="screen-label-tag">محاكاة شريط التنقل الحقيقي (Topbar)</span>
+                <div class="mock-topbar">
+                    <button type="button" class="mock-btn" onclick="inspectButton('العودة للوحة الخدمة', 'data-smart-back: يعود للشاشة السابقة أو يتجه تلقائياً لتبويب الكورسات بلوحة الخادم مع حفظ أية مسودات.')" style="background:#ffffff; color:#0c2461; border-color:#cbd5e1;">
+                        <i class="fa-solid fa-arrow-right"></i> العودة للوحة الخدمة
+                    </button>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <button type="button" class="mock-btn" onclick="inspectButton('استيراد البيانات', 'openImportModal(): نافذة ذكية تتيح رفع شيت Excel أو سحب كشوف جوجل فورمس لمطابقة الأسماء والأكواد والهواتف برمجياً.')" style="background:#ecfdf5; color:#047857; border-color:#a7f3d0;">
+                            <i class="fa-solid fa-cloud-arrow-down text-success"></i> استيراد البيانات 📥
+                        </button>
+                        <button type="button" class="mock-btn" onclick="inspectButton('كشف رسائل الواتساب', 'openWhatsappCampaignModal(): إطلاق حملات إشعارات موجهة للطلاب المقبولين والمعلقين عبر واتساب بنقرة واحدة.')" style="background:#25d366; color:#ffffff; border:none;">
+                            <i class="fa-brands fa-whatsapp"></i> رسائل الواتساب 📲
+                        </button>
+                        <button type="button" class="mock-btn" onclick="inspectButton('تصدير PDF رسمي', 'openPdfExportModal(): توليد وطباعة كشف رسمي معتمد بالدرجات والقرارات لتقديمه لقدس أبونا وأمين الخدمة.')" style="background:#dc2626; color:#ffffff; border:none;">
+                            <i class="fa-solid fa-file-pdf"></i> تصدير PDF 📄
+                        </button>
+                        <button type="button" class="mock-btn" onclick="inspectButton('تصدير إكسيل معتمد', 'exportDetailedCriteriaExcel(): تصدير شيت إكسيل احترافي يتضمن معادلات حية SUM وAVERAGE والملاحظات وملخص الأعداد.')" style="background:#f0fdf4; color:#15803d; border-color:#86efac;">
+                            <i class="fa-solid fa-file-excel text-success"></i> إكسيل معتمد 📊
+                        </button>
+                        <button type="button" class="mock-btn" onclick="inspectButton('اعتماد ورصد الدرجات', 'saveGradesLocal(true): حفظ وتثبيت كافة الدرجات والملاحظات المدخلة فوراً في الذاكرة المحلية لجهازك مع رسالة نجاح.')" style="background:#0c2461; color:#ffffff; border:none;">
+                            <i class="fa-solid fa-floppy-disk"></i> اعتماد ورصد الدرجات ✍️
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout-box info" id="topbarActionExplainer">
+                <i class="fa-solid fa-lightbulb me-1"></i> <strong>معلومة سريعة:</strong> انقر فوق أي زر أعلاه لمعرفة الإجراء البرمجي الذي ينفذه داخل الكود.
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 3: لوحة النبض وشريط الطيف (KPIs & Visual Spectrum)        -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-kpis">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-chart-line"></i> 3. لوحة النبض التنفيذي وشريط الطيف البصري</div>
+            <span class="mockup-badge">توزيع قرارات الدفعة بنسبة 100%</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                يعطي هذا الشريط قراءة بصرية فورية لأداء الدفعة دون الحاجة لقراءة الأرقام سطراً بسطر. <strong>جرّب اختيار سيناريو لمشاهدة كيف يتغير الطيف والعدادات:</strong>
+            </p>
+
+            <!-- Scenario Switcher Buttons -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                <span style="font-size:0.82rem; font-weight:800; align-self:center; color:#334155;">اختر نموذج محاكاة:</span>
+                <button type="button" class="mock-btn" onclick="simulateCohort('excellent')" style="background:#ecfdf5; color:#065f46; border-color:#a7f3d0;">🌟 دفعة متفوقة (أغلبها قبول)</button>
+                <button type="button" class="mock-btn" onclick="simulateCohort('average')" style="background:#eff6ff; color:#1e40af; border-color:#bfdbfe;">⚖️ دفعة متوازنة (طبيعية)</button>
+                <button type="button" class="mock-btn" onclick="simulateCohort('tight')" style="background:#fff7ed; color:#9a3412; border-color:#fed7aa;">🟠 دفعة متقاربة (معلقون كُثر)</button>
+            </div>
+
+            <div class="interactive-screen-preview">
+                <span class="screen-label-tag">محاكاة النبض والطيف الحي (Executive Pulse)</span>
+                
+                <!-- Mock KPI Cards -->
+                <div class="mock-kpi-grid">
+                    <div class="mock-kpi-card" style="border-top:3.5px solid #64748b;">
+                        <div class="mock-kpi-title"><i class="fa-solid fa-users"></i> إجمالي المسجلين</div>
+                        <div class="mock-kpi-val" id="demoKpiTotal">120</div>
+                    </div>
+                    <div class="mock-kpi-card" style="border-top:3.5px solid #d97706;">
+                        <div class="mock-kpi-title"><i class="fa-solid fa-chart-line"></i> متوسط الدفعة</div>
+                        <div class="mock-kpi-val" id="demoKpiAvg" style="color:#d97706;">74.8</div>
+                    </div>
+                    <div class="mock-kpi-card" style="border-top:3.5px solid #10b981;">
+                        <div class="mock-kpi-title"><i class="fa-solid fa-trophy"></i> أعلى درجة</div>
+                        <div class="mock-kpi-val" id="demoKpiMax" style="color:#10b981;">98</div>
+                    </div>
+                    <div class="mock-kpi-card" style="border-top:3.5px solid #2563eb;">
+                        <div class="mock-kpi-title"><i class="fa-solid fa-circle-check"></i> المقبولون 🟢</div>
+                        <div class="mock-kpi-val" id="demoKpiPassed" style="color:#2563eb;">78</div>
+                    </div>
+                    <div class="mock-kpi-card" style="border-top:3.5px solid #ea580c;">
+                        <div class="mock-kpi-title"><i class="fa-solid fa-user-clock"></i> معلقون 🟠</div>
+                        <div class="mock-kpi-val" id="demoKpiInterview" style="color:#ea580c;">26</div>
+                    </div>
+                </div>
+
+                <!-- Mock Spectrum Bar -->
+                <div class="mock-spectrum-bar" id="demoSpectrumBar">
+                    <div class="mock-seg seg-acc" id="demoSegAcc" style="width: 65%;">65%</div>
+                    <div class="mock-seg seg-con" id="demoSegCon" style="width: 15%;">15%</div>
+                    <div class="mock-seg seg-int" id="demoSegInt" style="width: 12%;">12%</div>
+                    <div class="mock-seg seg-rej" id="demoSegRej" style="width: 8%;">8%</div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:0.75rem; font-weight:800; margin-top:6px;">
+                    <span style="color:#10b981;"><i class="fa-solid fa-circle"></i> مقبول نهائياً 🟢</span>
+                    <span style="color:#ca8a04;"><i class="fa-solid fa-circle"></i> مقبول مع متابعة اعتراف 🕊️</span>
+                    <span style="color:#f97316;"><i class="fa-solid fa-circle"></i> معلق للمقابلة الشخصية 🟠</span>
+                    <span style="color:#ef4444;"><i class="fa-solid fa-circle"></i> غير مجتاز / دور ثان 🔴</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 4: استوديو التحكم الذكي والشرائح الـ 11 (Unified Studio)  -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-studio">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-sliders"></i> 4. استوديو التحكم الذكي في الواقع والشرائح (5 تبويبات)</div>
+            <span class="mockup-badge">تحكم ديناميكي كامل بالمعايير والنسب</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                تم جمع كافة أدوات الضبط والتحليل داخل شريط قابل للطي <strong>(Collapsible Studio Bar)</strong> يوفر مساحة الشاشة. 
+                <strong>انقر على التبويبات بالأسفل لاستكشاف ما يقدمه كل تبويب:</strong>
+            </p>
+
+            <div class="interactive-screen-preview">
+                <span class="screen-label-tag">محاكاة استوديو الواقع الحقيقي (Unified Studio)</span>
+
+                <!-- Studio Tabs Header -->
+                <div class="mock-studio-tabs">
+                    <button type="button" class="mock-studio-tab-btn active" onclick="switchMockStudioTab(1)">1. مستكشف الواقع 🎯</button>
+                    <button type="button" class="mock-studio-tab-btn" onclick="switchMockStudioTab(2)">2. جدول توزيع الـ 11 شريحة 📊</button>
+                    <button type="button" class="mock-studio-tab-btn" onclick="switchMockStudioTab(3)">3. خلاط المواد الأربعة ✍️</button>
+                    <button type="button" class="mock-studio-tab-btn" onclick="switchMockStudioTab(4)">4. حدود القبول والدرجات العظمى ⚙️</button>
+                    <button type="button" class="mock-studio-tab-btn" onclick="switchMockStudioTab(5)">5. سجل الملاحظات والمعلقين 📝✂️</button>
+                </div>
+
+                <!-- Pane 1: Reality Explorer -->
+                <div id="mockPane1" style="display:block;">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                        <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-chart-pie me-1"></i> محاكي المنحنى الطبيعي واقتراح نسبة النجاح</h4>
+                        <p style="font-size:0.84rem; color:#64748b; margin:0 0 10px 0;">
+                            يقوم بحساب المنحنى التكراري للدفعة. إذا اخترت استهداف نسبة نجاح 80%، يقترح عليك النظام تلقائياً الدرجة الدقيقة التي تحقق هذا الهدف دون أي تخمين.
+                        </p>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <span style="font-size:0.8rem; font-weight:800;">نسبة النجاح المستهدفة:</span>
+                            <span style="background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:6px; font-weight:900;">80%</span>
+                            <span style="font-size:0.8rem; color:#64748b;">الدرجة المقترحة تلقائياً: <strong>58 من 100</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pane 2: 11 Deciles Table -->
+                <div id="mockPane2" style="display:none;">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                            <h4 style="margin:0; color:#0c2461;"><i class="fa-solid fa-table-cells me-1"></i> جدول الـ 11 شريحة وتوزيع النسب</h4>
+                            <select id="mockSubjectSelector" onchange="renderMockDeciles()" style="padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.78rem; border:1.5px solid #cbd5e1;">
+                                <option value="total">المجموع الكلي (100 د)</option>
+                                <option value="sp_wr">تحريري روحي (30 د)</option>
+                                <option value="ps_wr">تحريري نفسي (20 د)</option>
+                                <option value="sp_or">شفوي روحي (30 د)</option>
+                                <option value="ps_or">شفوي نفسي (20 د)</option>
+                            </select>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table class="mock-table">
+                                <thead>
+                                    <tr>
+                                        <th>الشريحة المئوية</th>
+                                        <th>نطاق الدرجات</th>
+                                        <th>العدد</th>
+                                        <th>النسبة من الدفعة</th>
+                                        <th>الرسم البياني</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mockDecilesTbody">
+                                    <!-- Rendered dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pane 3: Exam Mixer -->
+                <div id="mockPane3" style="display:none;">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                        <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-book-bookmark me-1"></i> خلاط المواد الأربعة وتوزيع الأوزان</h4>
+                        <p style="font-size:0.84rem; color:#64748b; margin:0 0 12px 0;">
+                            يسمح بتحديد وزن نسبي لكل مادة بحيث يكون المجموع الكلي 100%. التوزيع القياسي المعتمد:
+                        </p>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:800;">✍️🕊️ تحريري روحي</div>
+                                <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">30 درجة (30%)</div>
+                            </div>
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:800;">✍️🧠 تحريري نفسي</div>
+                                <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">20 درجة (20%)</div>
+                            </div>
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:800;">🗣️🕊️ شفوي روحي</div>
+                                <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">30 درجة (30%)</div>
+                            </div>
+                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                                <div style="font-size:0.75rem; color:#64748b; font-weight:800;">🗣️🧠 شفوي نفسي</div>
+                                <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">20 درجة (20%)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pane 4: Rules & Scale Config -->
+                <div id="mockPane4" style="display:none;">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                        <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-sliders me-1"></i> حفظ وتثبيت الدرجات العظمى في الذاكرة</h4>
+                        <div class="callout-box info" style="margin-top:0;">
+                            <strong>تثبيت دائم:</strong> أي تعديل على الدرجات العظمى أو حدود القبول يُحفظ فوراً في الذاكرة المحلية (<code style="background:#ffffff; padding:2px 6px; border-radius:4px;">localStorage</code>) بمفتاح <code style="background:#ffffff; padding:2px 6px; border-radius:4px;">khedmty_servant_exam_scale_v1</code> ولا يضيع حتى بعد إعادة تحميل الصفحة أو قفل المتصفح.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pane 5: Notes & Holdouts Tracker -->
+                <div id="mockPane5" style="display:none;">
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                        <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-clipboard-list me-1"></i> حصر ومتابعة أصحاب الملاحظات والمعلقين</h4>
+                        <p style="font-size:0.84rem; color:#64748b; margin:0 0 10px 0;">
+                            <strong>قاعدة العزل الرعوي:</strong> المخدوم الذي يمتلك ملاحظة روحية (مثل تهذيب الشعر، المظهر، أو استيفاء الاعتراف) حتى لو حصل على 0 في الشفوي الروحي لا يُعامل كـ "غائب"، بل يُفصل تلقائياً في فئة خاصة: <strong>معلق لملاحظة روحية (استيفاء شفوي)</strong> ليتابعه أبونا بروح الأبوة.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 5: منظومة الفلترة متعددة الأبعاد (Filters & Tabs)         -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-filters">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-filter"></i> 5. شريط التبويبات الـ 7 ودرج الفلاتر الـ 8 المتقدم</div>
+            <span class="mockup-badge">تصفية فائقة للوصول لأي مخدوم</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                تتكامل الفلترة عبر مستويين: <strong>التبويبات السريعة بنقرة واحدة</strong> للمجموعات الرئيسية، و<strong>درج الفلاتر المتقدم القابل للطي</strong> للفلاتر المركبة:
+            </p>
+
+            <div class="interactive-screen-preview">
+                <span class="screen-label-tag">محاكاة شريط التبويبات السريعة الـ 7</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+                    <span class="mock-btn" style="background:#0c2461; color:#ffffff; border-color:#0c2461;">الكل (120)</span>
+                    <span class="mock-btn" style="background:#dcfce7; color:#15803d; border-color:#86efac;">المقبولون نهائياً 🟢 (78)</span>
+                    <span class="mock-btn" style="background:#ffedd5; color:#9a3412; border-color:#fdba74;">المعلقون للمقابلة 🟠 (18)</span>
+                    <span class="mock-btn" style="background:#fef9c3; color:#854d0e; border-color:#fde047;">مقبول مع اعتراف 🕊️ (12)</span>
+                    <span class="mock-btn" style="background:#f3e8ff; color:#6b21a8; border-color:#d8b4fe;">لديهم ملاحظات معلقة 📝✂️ (6)</span>
+                    <span class="mock-btn" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5;">غير المجتازين 🔴 (4)</span>
+                    <span class="mock-btn" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;">الغياب ⚪ (2)</span>
+                </div>
+
+                <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:800; font-size:0.85rem; color:#0c2461;">
+                            <i class="fa-solid fa-sliders me-1"></i> درج الفلاتر التفصيلية (8 قوائم منسدلة)
+                        </span>
+                        <span style="background:#eff6ff; color:#1d4ed8; font-size:0.75rem; font-weight:900; padding:2px 8px; border-radius:12px; border:1px solid #bfdbfe;">
+                            شارة نشطة: 0 فلاتر مفعلة
+                        </span>
+                    </div>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:4px;">
+                        يحتوي على: فلترة حسب الكورس، التحريري الروحي، التحريري النفسي، الشفوي الروحي، الشفوي النفسي، فلترة الملاحظات، وحالة الحضور.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 6: جدول الرصد التفاعلي الحي (Interactive Grades Table)    -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-table">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-table"></i> 6. جدول الرصد والتقييم الرئيسي (Interactive Table Demo)</div>
+            <span class="mockup-badge">محاكاة حية بالكامل — غيّر أي درجة بيدك وشاهد القرار فوراً!</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                هذا نموذج حي يحاكي الجدول الرئيسي في الصفحة. <strong>جرّب تعديل درجات أي طالب في الجدول، وسترى المجموع والنسبة وشارة القرار يعاد حسابها لحظياً:</strong>
+            </p>
+
+            <div class="interactive-screen-preview">
+                <span class="screen-label-tag">محاكاة جدول الرصد الحي (Live Table Playground)</span>
+                
+                <div style="overflow-x:auto;">
+                    <table class="mock-table" id="interactiveLiveTable">
+                        <thead>
+                            <tr>
+                                <th>م</th>
+                                <th>اسم الخادم / الخادمة</th>
+                                <th>تحريري روحي<br><small>(30)</small></th>
+                                <th>تحريري نفسي<br><small>(20)</small></th>
+                                <th>شفوي روحي<br><small>(30)</small></th>
+                                <th>شفوي نفسي<br><small>(20)</small></th>
+                                <th>المجموع<br><small>(100)</small></th>
+                                <th>النسبة</th>
+                                <th>القرار المعتمد</th>
+                                <th>الملاحظات الرعوية</th>
+                                <th>بطاقة 360°</th>
+                            </tr>
+                        </thead>
+                        <tbody id="demoTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:0.8rem; color:#64748b; font-weight:800;">
+                    <span>معايير القبول الحالية: قبول &ge; 60% | مقابلة &ge; 50%</span>
+                    <button type="button" class="mock-btn" onclick="resetLiveTableDemo()" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1; font-size:0.75rem; padding:4px 10px;">
+                        <i class="fa-solid fa-rotate-left"></i> استعادة البيانات الافتراضية
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 7: الأنظمة المتقدمة (⚡ وضع الرصد السريع & 🪪 بطاقة 360°)   -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-advanced">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-bolt"></i> 7. الأنظمة المتقدمة: وضع الرصد السريع ⚡ وبطاقة المخدوم 🪪</div>
+            <span class="mockup-badge">تجربة مستخدم بدون ماوس (Keyboard-First)</span>
+        </div>
+        <div class="mockup-body">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+                
+                <!-- Fast Entry Card -->
+                <div style="background:#f8fafc; border:1.5px solid #2563eb; border-radius:14px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <strong style="color:#1d4ed8; font-size:1.05rem;"><i class="fa-solid fa-bolt me-1"></i> وضع الرصد السريع (Fast Entry Mode)</strong>
+                        <span style="background:#eff6ff; color:#1d4ed8; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:900;">مخصص للامتحانات</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:#475569; line-height:1.6; margin-top:0;">
+                        شاشة مركزة داكنة تُفتح بمفتاح <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:900;">Ctrl + K</code> أو زر ⚡.
+                        تمنحك خانات إدخال عملاقة تنتقل تلقائياً بمفتاح <strong>Enter</strong> أو <strong>Tab</strong> من مادة لأخرى، وبمجرد إدخال المادة الرابعة والضغط على Enter:
+                    </p>
+                    <ul style="font-size:0.82rem; color:#334155; margin:0 0 10px 0; padding-right:18px; line-height:1.6;">
+                        <li>تُحفظ درجات الطالب الحالي فوراً.</li>
+                        <li>يُحسب قراره ومجموعه.</li>
+                        <li>ينتقل النظام تلقائياً للطالب التالي مع التركيز على خانة المادة الأولى!</li>
+                    </ul>
+                    <div class="callout-box" style="margin-bottom:0; font-size:0.82rem;">
+                        <strong>فائدة رعوية:</strong> إمكانية رصد درجات 100 خادم في دقائق معدودة باستخدام الكيبورد فقط أو قارئ الباركود.
+                    </div>
+                </div>
+
+                <!-- Candidate 360 Card -->
+                <div style="background:#f8fafc; border:1.5px solid #0284c7; border-radius:14px; padding:16px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <strong style="color:#0369a1; font-size:1.05rem;"><i class="fa-solid fa-id-badge me-1"></i> بطاقة المخدوم الشاملة (Candidate 360°)</strong>
+                        <span style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:900;">درج جانبي</span>
+                    </div>
+                    <p style="font-size:0.84rem; color:#475569; line-height:1.6; margin-top:0;">
+                        بالنقر على اسم أي مخدوم أو زر 🪪، ينزلق درج جانبي أنيق يجمع الرؤية الشاملة للطالب في مكان واحد:
+                    </p>
+                    <ul style="font-size:0.82rem; color:#334155; margin:0 0 10px 0; padding-right:18px; line-height:1.6;">
+                        <li><strong>المعلومات الأساسية:</strong> الاسم، الكود، رقم الهاتف، والكورس.</li>
+                        <li><strong>تفصيل الدرجات:</strong> رسم بياني شريطي لدرجات المواد الأربعة.</li>
+                        <li><strong>الملاحظات الرعوية والنفسية:</strong> توثيق ملاحظة الاعتراف والمظهر والمهلة.</li>
+                        <li><strong>تواصل فوري عبر واتساب:</strong> زر مباشر يفتح محادثة واتساب موجهة مع نص جاهز مخصص لحالة المخدوم.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 8: محاكي ومختبر اتخاذ القرار الرعوي (Decision Playground) -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-calculator">
+        <div class="mockup-header" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a8a 100%);">
+            <div class="mockup-title"><i class="fa-solid fa-gamepad text-warning"></i> 8. محاكي اتخاذ القرار الرعوي الحي (Live Decision Playground)</div>
+            <span class="mockup-badge" style="background:rgba(234,179,8,0.25); color:#fef08a; border-color:#fef08a;">المنطق البرمجي الحقيقي</span>
+        </div>
+        <div class="mockup-body">
+            <p style="margin-top:0; font-size:0.9rem; color:#475569;">
+                هذه الأداة تشغّل نفس دالة اتخاذ القرار <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-weight:900;">computeDecision()</code> المعتمدة في كود البرنامج.
+                <strong>أدخل درجات وملاحظات تجريبية وشاهد القرار الرعوي الفوري:</strong>
+            </p>
+
+            <div class="calc-grid">
+                <div class="calc-field">
+                    <label>✍️🕊️ تحريري روحي (من 30):</label>
+                    <input type="number" id="calcSpWr" min="0" max="30" value="24" oninput="runDecisionSimulator()">
+                </div>
+                <div class="calc-field">
+                    <label>✍️🧠 تحريري نفسي (من 20):</label>
+                    <input type="number" id="calcPsWr" min="0" max="20" value="16" oninput="runDecisionSimulator()">
+                </div>
+                <div class="calc-field">
+                    <label>🗣️🕊️ شفوي روحي (من 30):</label>
+                    <input type="number" id="calcSpOr" min="0" max="30" value="22" oninput="runDecisionSimulator()">
+                </div>
+                <div class="calc-field">
+                    <label>🗣️🧠 شفوي نفسي (من 20):</label>
+                    <input type="number" id="calcPsOr" min="0" max="20" value="14" oninput="runDecisionSimulator()">
+                </div>
+                <div class="calc-field">
+                    <label>🕊️ ملاحظة اعتراف / أب اعتراف:</label>
+                    <select id="calcConfNote" onchange="runDecisionSimulator()">
+                        <option value="none">منتظم ولا توجد ملاحظة</option>
+                        <option value="has_note">توجد ملاحظة / مطلوب متابعة</option>
+                    </select>
+                </div>
+                <div class="calc-field">
+                    <label>✂️ ملاحظة مظهر أو شعر / سلوك:</label>
+                    <select id="calcHairNote" onchange="runDecisionSimulator()">
+                        <option value="none">مظهر لائق ومنضبط</option>
+                        <option value="has_note">ملاحظة شعر أو مظهر تحتاج استيفاء</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Simulator Output Box -->
+            <div class="calc-result-box" id="calcResultDisplay">
+                <div>
+                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800;">النتيجة الإجمالية والمجموع:</div>
+                    <div style="font-size:1.6rem; font-weight:900; margin-top:2px;">
+                        <span id="calcTotalScore">76</span> / 100 (<span id="calcPctScore">76.0%</span>)
+                    </div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800; margin-bottom:4px;">شارة القرار الرعوي المعتمدة:</div>
+                    <div id="calcBadgeOutput">
+                        <span class="badge-status badge-acc" style="font-size:1rem; padding:6px 16px;">🟢 مقبول نهائياً</span>
+                    </div>
+                </div>
+                <div style="max-width:380px;">
+                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800;">التفسير الرعوي للقرار:</div>
+                    <div id="calcReasonOutput" style="font-size:0.82rem; line-height:1.5; color:#f8fafc; margin-top:2px;">
+                        المجموع أعلى من حد القبول (60%) والدرجات مستوفية لكافة المواد بدون ملاحظات معلقة.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- SECTION 9: بنك الأسئلة الشائعة ودليل الطوارئ (Troubleshooting)     -->
+    <!-- ================================================================= -->
+    <div class="mockup-card" id="sec-faq">
+        <div class="mockup-header">
+            <div class="mockup-title"><i class="fa-solid fa-circle-question"></i> 9. بنك الأسئلة الشائعة والأخطاء وحلولها (Troubleshooting)</div>
+            <span class="mockup-badge">إجابات فورية لمسؤولي الكنترول</span>
+        </div>
+        <div class="mockup-body">
+            
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                    <span>❓ هل تضيع الدرجات العظمى أو نسب القبول إذا قفلت المتصفح؟</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-a">
+                    <strong>الإجابة:</strong> لا إطلاقاً. كافة الدرجات العظمى (30، 20، 30، 20) ونسب القبول والمقابلة تُحفظ فوراً في الذاكرة المحلية لجهازك (<code style="background:#f1f5f9; padding:2px 4px;">localStorage</code>) بمفتاح مخصص، وتبقى ثابتة في كل مرة تفتح فيها الصفحة.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                    <span>❓ كيف يتعامل النظام مع شاب له ملاحظة شعر أو مظهر ودرجة الشفوي 0؟</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-a">
+                    <strong>الإجابة:</strong> لا يُعتبر غائباً ولا يُستبعد! النظام يفصله تلقائياً في فئة خاصة: <strong>معلق لملاحظة روحية (استيفاء شفوي)</strong> حتى تتاح له فرصة استيفاء المقابلة مع أبونا بعد توفيق مظهره دون ظلم لمجهوده في التحريري.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                    <span>❓ هل شيت الإكسيل المصدر يحتوي على أرقام جامدة أم معادلات حية؟</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-a">
+                    <strong>الإجابة:</strong> يحتوي على معادلات حية معتمدة (<code style="background:#f1f5f9; padding:2px 4px;">=SUM(D2:G2)</code> و<code style="background:#f1f5f9; padding:2px 4px;">=AVERAGE()</code> و<code style="background:#f1f5f9; padding:2px 4px;">=MAX()</code>) مع حفظ كافة الملاحظات الروحية والنفسية وملخص أعداد الحالات.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                    <span>❓ كيف أفعّل وضع الرصد السريع بالكيبورد؟</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-a">
+                    <strong>الإجابة:</strong> اضغط على زر <strong>[ ⚡ وضع الرصد السريع ]</strong> في شريط الأدوات، أو اضغط اختصار الكيبورد <code style="background:#f1f5f9; padding:2px 4px;">Ctrl + K</code>، وستفتح لك الشاشة العريضة مباشرة.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                    <span>❓ هل يعمل النظام بدون إنترنت (Offline)؟</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="faq-a">
+                    <strong>الإجابة:</strong> نعم، 100% بدون أي حاجة للإنترنت. كافة العمليات الحسابية، التصدير، الفلاتر، والتخزين تعمل محلياً داخل المتصفح وبأعلى درجات الخصوصية والأمان.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Inspector Toast Popup -->
+<div id="inspectorToast">
+    <i class="fa-solid fa-circle-info text-info"></i>
+    <span id="toastText"></span>
+</div>
+
+<script>
+// --- Interactive Logic for Guide Mockups ---
+
+function inspectButton(name, desc) {
+    const toast = document.getElementById('inspectorToast');
+    const text = document.getElementById('toastText');
+    const explainer = document.getElementById('topbarActionExplainer');
+    
+    text.innerHTML = '<strong>' + name + ':</strong> ' + desc;
+    toast.style.display = 'inline-flex';
+    
+    explainer.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i> <strong>' + name + ':</strong> ' + desc;
+    explainer.className = 'callout-box info';
+
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 4500);
+}
+
+// Cohort Spectrum Simulation
+function simulateCohort(type) {
+    const kpiTotal = document.getElementById('demoKpiTotal');
+    const kpiAvg = document.getElementById('demoKpiAvg');
+    const kpiMax = document.getElementById('demoKpiMax');
+    const kpiPassed = document.getElementById('demoKpiPassed');
+    const kpiInterview = document.getElementById('demoKpiInterview');
+    
+    const segAcc = document.getElementById('demoSegAcc');
+    const segCon = document.getElementById('demoSegCon');
+    const segInt = document.getElementById('demoSegInt');
+    const segRej = document.getElementById('demoSegRej');
+
+    if (type === 'excellent') {
+        kpiTotal.innerText = '120';
+        kpiAvg.innerText = '82.4';
+        kpiMax.innerText = '99';
+        kpiPassed.innerText = '92';
+        kpiInterview.innerText = '16';
+        
+        segAcc.style.width = '75%'; segAcc.innerText = '75%';
+        segCon.style.width = '12%'; segCon.innerText = '12%';
+        segInt.style.width = '10%'; segInt.innerText = '10%';
+        segRej.style.width = '3%';  segRej.innerText = '3%';
+    } else if (type === 'average') {
+        kpiTotal.innerText = '120';
+        kpiAvg.innerText = '74.8';
+        kpiMax.innerText = '98';
+        kpiPassed.innerText = '78';
+        kpiInterview.innerText = '26';
+        
+        segAcc.style.width = '65%'; segAcc.innerText = '65%';
+        segCon.style.width = '15%'; segCon.innerText = '15%';
+        segInt.style.width = '12%'; segInt.innerText = '12%';
+        segRej.style.width = '8%';  segRej.innerText = '8%';
+    } else if (type === 'tight') {
+        kpiTotal.innerText = '120';
+        kpiAvg.innerText = '62.1';
+        kpiMax.innerText = '91';
+        kpiPassed.innerText = '48';
+        kpiInterview.innerText = '44';
+        
+        segAcc.style.width = '40%'; segAcc.innerText = '40%';
+        segCon.style.width = '12%'; segCon.innerText = '12%';
+        segInt.style.width = '35%'; segInt.innerText = '35%';
+        segRej.style.width = '13%'; segRej.innerText = '13%';
+    }
+}
+
+// Studio Mock Tabs
+function switchMockStudioTab(index) {
+    const tabs = document.querySelectorAll('.mock-studio-tab-btn');
+    tabs.forEach((t, i) => {
+        if (i === index - 1) t.classList.add('active');
+        else t.classList.remove('active');
+    });
+
+    for (let i = 1; i <= 5; i++) {
+        const pane = document.getElementById('mockPane' + i);
+        if (pane) pane.style.display = (i === index) ? 'block' : 'none';
+    }
+
+    if (index === 2) {
+        renderMockDeciles();
+    }
+}
+
+// 11 Deciles Data Mock
+const sampleDecileDistributions = {
+    total: [
+        { label: '0% (غياب تام أو صفري)', range: '0 - 0', count: 2, pct: '1.7%', fill: '#ef4444' },
+        { label: '1% - 10%', range: '1 - 10', count: 0, pct: '0.0%', fill: '#f87171' },
+        { label: '11% - 20%', range: '11 - 20', count: 1, pct: '0.8%', fill: '#fb923c' },
+        { label: '21% - 30%', range: '21 - 30', count: 2, pct: '1.7%', fill: '#facc15' },
+        { label: '31% - 40%', range: '31 - 40', count: 3, pct: '2.5%', fill: '#a3e635' },
+        { label: '41% - 50%', range: '41 - 50', count: 8, pct: '6.7%', fill: '#4ade80' },
+        { label: '51% - 60%', range: '51 - 60', count: 18, pct: '15.0%', fill: '#2dd4bf' },
+        { label: '61% - 70%', range: '61 - 70', count: 28, pct: '23.3%', fill: '#38bdf8' },
+        { label: '71% - 80%', range: '71 - 80', count: 32, pct: '26.7%', fill: '#60a5fa' },
+        { label: '81% - 90%', range: '81 - 90', count: 19, pct: '15.8%', fill: '#818cf8' },
+        { label: '91% - 100%', range: '91 - 100', count: 7, pct: '5.8%', fill: '#c084fc' }
+    ],
+    sp_wr: [
+        { label: '0% (غياب)', range: '0 - 0', count: 2, pct: '1.7%', fill: '#ef4444' },
+        { label: '1% - 10%', range: '1 - 3', count: 0, pct: '0.0%', fill: '#f87171' },
+        { label: '11% - 20%', range: '4 - 6', count: 1, pct: '0.8%', fill: '#fb923c' },
+        { label: '21% - 30%', range: '7 - 9', count: 2, pct: '1.7%', fill: '#facc15' },
+        { label: '31% - 40%', range: '10 - 12', count: 4, pct: '3.3%', fill: '#a3e635' },
+        { label: '41% - 50%', range: '13 - 15', count: 10, pct: '8.3%', fill: '#4ade80' },
+        { label: '51% - 60%', range: '16 - 18', count: 20, pct: '16.7%', fill: '#2dd4bf' },
+        { label: '61% - 70%', range: '19 - 21', count: 30, pct: '25.0%', fill: '#38bdf8' },
+        { label: '71% - 80%', range: '22 - 24', count: 27, pct: '22.5%', fill: '#60a5fa' },
+        { label: '81% - 90%', range: '25 - 27', count: 16, pct: '13.3%', fill: '#818cf8' },
+        { label: '91% - 100%', range: '28 - 30', count: 8, pct: '6.7%', fill: '#c084fc' }
+    ]
+};
+
+function renderMockDeciles() {
+    const sel = document.getElementById('mockSubjectSelector').value;
+    const tbody = document.getElementById('mockDecilesTbody');
+    const data = sampleDecileDistributions[sel] || sampleDecileDistributions.total;
+    
+    let html = '';
+    data.forEach(row => {
+        html += '<tr>' +
+            '<td style="font-weight:800;">' + row.label + '</td>' +
+            '<td>' + row.range + '</td>' +
+            '<td style="font-weight:900; color:#0c2461;">' + row.count + '</td>' +
+            '<td>' + row.pct + '</td>' +
+            '<td style="width:200px;"><div style="background:#e2e8f0; height:10px; border-radius:5px; overflow:hidden;"><div style="background:' + row.fill + '; height:100%; width:' + row.pct + ';"></div></div></td>' +
+        '</tr>';
+    });
+    tbody.innerHTML = html;
+}
+
+// Live Interactive Grades Table Demo
+const initialDemoStudents = [
+    { id: 1, name: 'بيتر ميخائيل جرجس', spWr: 28, psWr: 18, spOr: 29, psOr: 19, note: 'لا توجد ملاحظات', hasConf: false, hasHair: false },
+    { id: 2, name: 'مارينا سامي عازر', spWr: 24, psWr: 16, spOr: 22, psOr: 15, note: 'متابعة سر الاعتراف', hasConf: true, hasHair: false },
+    { id: 3, name: 'يوسف كامل فهيم', spWr: 16, psWr: 11, spOr: 15, psOr: 12, note: 'معلق للمقابلة الشخصية', hasConf: false, hasHair: false },
+    { id: 4, name: 'ديفيد نادر بولس', spWr: 22, psWr: 15, spOr: 0, psOr: 14, note: 'ملاحظة تهذيب الشعر واستيفاء الشفوي', hasConf: false, hasHair: true },
+    { id: 5, name: 'كيرلس عاطف فؤاد', spWr: 0, psWr: 0, spOr: 0, psOr: 0, note: 'غائب بعذر مسبق', hasConf: false, hasHair: false }
+];
+
+let liveDemoStudents = JSON.parse(JSON.stringify(initialDemoStudents));
+
+function renderLiveTableDemo() {
+    const tbody = document.getElementById('demoTableBody');
+    let html = '';
+
+    liveDemoStudents.forEach((st, idx) => {
+        const total = (st.spWr || 0) + (st.psWr || 0) + (st.spOr || 0) + (st.psOr || 0);
+        const pct = (total / 100) * 100;
+        
+        let badgeHtml = '';
+        if (total === 0 && !st.hasHair) {
+            badgeHtml = '<span class="badge-status" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">⚪ غائب</span>';
+        } else if (st.hasHair) {
+            badgeHtml = '<span class="badge-status badge-con" title="معلق لاستيفاء الشفوي بعد تهذيب الشعر">✂️🕊️ معلق لملاحظة شعر</span>';
+        } else if (st.hasConf && pct >= 60) {
+            badgeHtml = '<span class="badge-status badge-con">🕊️ مقبول مع متابعة</span>';
+        } else if (pct >= 60) {
+            badgeHtml = '<span class="badge-status badge-acc">🟢 مقبول نهائياً</span>';
+        } else if (pct >= 50) {
+            badgeHtml = '<span class="badge-status badge-int">🟠 معلق للمقابلة</span>';
+        } else {
+            badgeHtml = '<span class="badge-status badge-rej">🔴 غير مجتاز</span>';
+        }
+
+        html += '<tr>' +
+            '<td>' + (idx + 1) + '</td>' +
+            '<td style="text-align:right; font-weight:800; color:#0c2461;">' + st.name + '</td>' +
+            '<td><input type="number" class="table-input-score" value="' + st.spWr + '" min="0" max="30" onchange="updateDemoScore(' + idx + ', 'spWr', this.value)"></td>' +
+            '<td><input type="number" class="table-input-score" value="' + st.psWr + '" min="0" max="20" onchange="updateDemoScore(' + idx + ', 'psWr', this.value)"></td>' +
+            '<td><input type="number" class="table-input-score" value="' + st.spOr + '" min="0" max="30" onchange="updateDemoScore(' + idx + ', 'spOr', this.value)"></td>' +
+            '<td><input type="number" class="table-input-score" value="' + st.psOr + '" min="0" max="20" onchange="updateDemoScore(' + idx + ', 'psOr', this.value)"></td>' +
+            '<td style="font-weight:900; font-size:0.95rem; color:#0c2461;">' + total + '</td>' +
+            '<td style="font-weight:800;">' + pct.toFixed(1) + '%</td>' +
+            '<td>' + badgeHtml + '</td>' +
+            '<td style="font-size:0.75rem; color:#64748b;">' + st.note + '</td>' +
+            '<td><button type="button" class="mock-btn" onclick="inspectButton('بطاقة 360° للمخدوم ' + st.name + '', 'تعرض تفاصيل درجاته وملاحظاته، ورابط واتساب فوري لإرسال النتيجة بلمسة واحدة.')" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-size:0.72rem; padding:3px 8px;">🪪 عرض</button></td>' +
+        '</tr>';
+    });
+
+    tbody.innerHTML = html;
+}
+
+function updateDemoScore(idx, subject, val) {
+    let num = parseInt(val, 10);
+    if (isNaN(num) || num < 0) num = 0;
+    liveDemoStudents[idx][subject] = num;
+    renderLiveTableDemo();
+}
+
+function resetLiveTableDemo() {
+    liveDemoStudents = JSON.parse(JSON.stringify(initialDemoStudents));
+    renderLiveTableDemo();
+}
+
+// Live Decision Simulator
+function runDecisionSimulator() {
+    const spWr = parseInt(document.getElementById('calcSpWr').value, 10) || 0;
+    const psWr = parseInt(document.getElementById('calcPsWr').value, 10) || 0;
+    const spOr = parseInt(document.getElementById('calcSpOr').value, 10) || 0;
+    const psOr = parseInt(document.getElementById('calcPsOr').value, 10) || 0;
+    const confNote = document.getElementById('calcConfNote').value;
+    const hairNote = document.getElementById('calcHairNote').value;
+
+    const total = spWr + psWr + spOr + psOr;
+    const pct = (total / 100) * 100;
+
+    document.getElementById('calcTotalScore').innerText = total;
+    document.getElementById('calcPctScore').innerText = pct.toFixed(1) + '%';
+
+    const badgeDiv = document.getElementById('calcBadgeOutput');
+    const reasonDiv = document.getElementById('calcReasonOutput');
+
+    if (total === 0 && hairNote === 'none') {
+        badgeDiv.innerHTML = '<span class="badge-status" style="background:#f1f5f9; color:#64748b; font-size:1rem; padding:6px 16px;">⚪ غائب</span>';
+        reasonDiv.innerText = 'لم يتم رصد أي درجات في المواد الأربعة ويُسجل غائباً.';
+    } else if (hairNote === 'has_note') {
+        badgeDiv.innerHTML = '<span class="badge-status badge-con" style="font-size:1rem; padding:6px 16px;">✂️🕊️ معلق لملاحظة روحية</span>';
+        reasonDiv.innerText = 'يوجد تحفظ رعوي على المظهر/الشعر؛ تم تعليق القرار واستيفاء الشفوي بروح الاحتواء دون اعتباره غائباً.';
+    } else if (confNote === 'has_note' && pct >= 60) {
+        badgeDiv.innerHTML = '<span class="badge-status badge-con" style="font-size:1rem; padding:6px 16px;">🕊️ مقبول مع متابعة الاعتراف</span>';
+        reasonDiv.innerText = 'اجتاز معيار النجاح الأكاديمي، لكن يحتاج رعاية ومتابعة منتظمة مع أب الاعتراف خلال الكورس.';
+    } else if (pct >= 60) {
+        badgeDiv.innerHTML = '<span class="badge-status badge-acc" style="font-size:1rem; padding:6px 16px;">🟢 مقبول نهائياً</span>';
+        reasonDiv.innerText = 'حقق نسبة القبول المطلوبة (60% فما فوق) ومستوفٍ لكافة المعايير الأكاديمية والروحية والنفسية.';
+    } else if (pct >= 50) {
+        badgeDiv.innerHTML = '<span class="badge-status badge-int" style="font-size:1rem; padding:6px 16px;">🟠 معلق للمقابلة الشخصية</span>';
+        reasonDiv.innerText = 'المجموع يقع في نطاق المقابلة (بين 50% و 59.9%)؛ يُحال للمقابلة لتحديد إمكانية قبوله.';
+    } else {
+        badgeDiv.innerHTML = '<span class="badge-status badge-rej" style="font-size:1rem; padding:6px 16px;">🔴 غير مجتاز / دور ثان</span>';
+        reasonDiv.innerText = 'المجموع أقل من حد المقابلة الشخصية (أقل من 50%)؛ يُتاح له دور ثانٍ أو كورس قادم.';
+    }
+}
+
+// FAQ Accordion
+function toggleFaq(elem) {
+    const ans = elem.nextElementSibling;
+    const icon = elem.querySelector('i');
+    if (ans.style.display === 'block') {
+        ans.style.display = 'none';
+        icon.className = 'fa-solid fa-chevron-down';
+    } else {
+        ans.style.display = 'block';
+        icon.className = 'fa-solid fa-chevron-up';
+    }
+}
+
+// Search Filter in Guide
+function filterGuideSections() {
+    const q = document.getElementById('guideSearchInput').value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.mockup-card');
+    
+    cards.forEach(card => {
+        if (!q) {
+            card.style.display = 'block';
+            return;
+        }
+        const text = card.innerText.toLowerCase();
+        if (text.includes(q)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Init on Load
+window.addEventListener('DOMContentLoaded', () => {
+    renderMockDeciles();
+    renderLiveTableDemo();
+    runDecisionSimulator();
+});
+</script>
+
+</body>
+</html>

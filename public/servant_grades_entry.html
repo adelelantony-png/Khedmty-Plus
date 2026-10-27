@@ -1303,7 +1303,10 @@ body {
             <i class="fa-solid fa-arrow-right"></i> العودة للوحة الخدمة
         </a>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
+            <button type="button" class="btn-custom" onclick="openSystemInteractiveGuide()" style="background:#e0e7ff; color:#3730a3; border-color:#c7d2fe; font-weight:800;" title="دليل تفاعلي مصور لشرح كل تفصيلة في شاشة رصد الدرجات">
+                <i class="fa-solid fa-book-open-reader me-1"></i> دليل الشاشات التفاعلي 📖
+            </button>
+            <button type="button" class="btn-custom" onclick="openImportModal()" style="background: #ecfdf5; color: #047857; border-color: #a7f3d0;">
                 <i class="fa-solid fa-cloud-arrow-down text-success"></i> استيراد البيانات من استمارة جوجل / كشف إكسيل 📥
             </button>
                                     <button type="button" class="btn-custom" onclick="openWhatsappCampaignModal()" style="background: #25d366; color: #ffffff; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);">
@@ -9189,6 +9192,24 @@ body {
     } else {
         initApp();
     }
+
+    function openSystemInteractiveGuide() {
+        const modal = document.getElementById('systemGuideModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            const iframe = document.getElementById('systemGuideIframe');
+            if (iframe && (!iframe.src || iframe.src === 'about:blank' || iframe.src.endsWith('/'))) {
+                iframe.src = 'servant_grades_guide.html';
+            }
+        } else {
+            window.open('servant_grades_guide.html', '_blank');
+        }
+    }
+
+    function closeSystemInteractiveGuide() {
+        const modal = document.getElementById('systemGuideModal');
+        if (modal) modal.style.display = 'none';
+    }
 </script>
 <script src="js/pwa-helper.js"></script>
 
@@ -9323,6 +9344,34 @@ body {
     <!-- المحتوى -->
     <div style="padding:18px; flex:1; overflow-y:auto;" id="candidate360Content">
         <!-- يتم ملؤها ديناميكياً بالجافاسكريبت -->
+    </div>
+</div>
+
+<!-- ===================================================================== -->
+<!-- نافذة الدليل التفاعلي المصور المدمج (Interactive Guide In-App Modal)  -->
+<!-- ===================================================================== -->
+<div id="systemGuideModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); z-index:10000; align-items:center; justify-content:center; padding:12px;">
+    <div style="background:#ffffff; border-radius:18px; width:98%; max-width:1300px; height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:2px solid #3b82f6;">
+        <div style="background:linear-gradient(135deg, #0c2461 0%, #1e3a8a 100%); color:#ffffff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.3rem;">📖</span>
+                <div>
+                    <h3 style="margin:0; font-size:1.05rem; font-weight:900;">الدليل التفاعلي المصور لمنظومة رصد الدرجات</h3>
+                    <div style="font-size:0.75rem; color:#cbd5e1;">محاكاة حية وشرح تفصيلي لكافة أزرار وقوائم ومعايير المنظومة</div>
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <a href="servant_grades_guide.html" target="_blank" class="btn-custom" style="background:rgba(255,255,255,0.18); color:#ffffff; border:1px solid rgba(255,255,255,0.3); font-size:0.78rem; padding:5px 12px; text-decoration:none; font-weight:800;">
+                    <i class="fa-solid fa-up-right-from-square me-1"></i> فتح في نافذة مستقلة ↗️
+                </a>
+                <button type="button" onclick="closeSystemInteractiveGuide()" style="border:none; background:rgba(255,255,255,0.2); color:#ffffff; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center;">
+                    &times;
+                </button>
+            </div>
+        </div>
+        <div style="flex:1; width:100%; height:100%; background:#f8fafc;">
+            <iframe id="systemGuideIframe" src="servant_grades_guide.html" style="width:100%; height:100%; border:none;" title="الدليل التفاعلي المصور"></iframe>
+        </div>
     </div>
 </div>
 
