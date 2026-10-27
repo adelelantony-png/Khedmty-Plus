@@ -1199,7 +1199,7 @@ body {
                     <i class="fa-solid fa-chart-pie me-1"></i> 1. مستكشف ومحاكي الواقع (المباشر والعكسي) 🎯
                 </button>
                 <button type="button" id="tabStudioLadder" class="btn-custom" onclick="switchStudioTab('ladder')" style="padding:8px 14px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
-                    <i class="fa-solid fa-stairs me-1"></i> 2. خريطة شرائح الدفعة (20%، 30%، 80%...) 📊
+                    <i class="fa-solid fa-table-cells me-1"></i> 2. جدول توزيع النسب والمواد (0%، 1-10%...) 📊
                 </button>
                 <button type="button" id="tabStudioExams" class="btn-custom" onclick="switchStudioTab('exams')" style="padding:8px 14px; font-weight:800; font-size:0.86rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
                     <i class="fa-solid fa-book-bookmark me-1"></i> 3. معايير وخلاط المواد الأربعة ✍️
@@ -1452,10 +1452,82 @@ body {
                 </div>
 
                 <!-- ========================================================= -->
-                <!-- 📊 التبويب 2: سلم وشرائح الدفعة (Deciles Ladder) -->
+                <!-- 📊 التبويب 2: جدول توزيع النسب بالمئينات وسلّم الدفعة (Deciles Distribution & Ladder) -->
                 <!-- ========================================================= -->
                 <div id="paneStudioLadder" style="display:none;">
-                    <div id="panelModeLadder">
+                    <!-- شريط التبديل بين جدول التوزيع التكراري وسلّم المئينات -->
+                    <div style="display:flex; gap:8px; margin-bottom:14px; background:#e2e8f0; padding:4px; border-radius:10px; flex-wrap:wrap;">
+                        <button type="button" id="tabLadderDist" class="btn-custom active-mode-tab" onclick="switchLadderSubView('distribution')" style="flex:1; min-width:200px; padding:8px 12px; font-weight:800; font-size:0.85rem; border-radius:8px; border:none; background:#0284c7; color:#ffffff; transition:all 0.2s;">
+                            <i class="fa-solid fa-table-list me-1"></i> 📊 جدول التوزيع التكراري للنسب (0%، 1-10%، 11-20%... إلى 91-100%)
+                        </button>
+                        <button type="button" id="tabLadderPercentiles" class="btn-custom" onclick="switchLadderSubView('percentiles')" style="flex:1; min-width:200px; padding:8px 12px; font-weight:800; font-size:0.85rem; border-radius:8px; border:none; background:transparent; color:#334155; transition:all 0.2s;">
+                            <i class="fa-solid fa-stairs me-1"></i> 🪜 سلّم مئينات الدفعة (أعلى 10%، 20%، 30%، 80%...)
+                        </button>
+                    </div>
+
+                    <!-- 1. لوحة جدول التوزيع التكراري للمواد (Distribution Table View) -->
+                    <div id="panelLadderDistribution">
+                        <!-- شريط اختيار المادة والتحكم -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px; background:#f8fafc; border:1px solid #cbd5e1; padding:10px 14px; border-radius:10px;">
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <strong style="font-size:0.88rem; color:#0c2461;">
+                                    <i class="fa-solid fa-book-open-reader text-primary me-1"></i> اختر المادة:
+                                </strong>
+                                <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                    <button type="button" class="btn-custom btn-dist-scope active" id="btnDistTotal" onclick="setDistributionScope('total')" style="padding:4px 10px; font-size:0.78rem; font-weight:800; background:#0284c7; color:#fff; border-color:#0284c7; border-radius:8px;">
+                                        🌟 المجموع العام
+                                    </button>
+                                    <button type="button" class="btn-custom btn-dist-scope" id="btnDistExam1" onclick="setDistributionScope('exam1')" style="padding:4px 10px; font-size:0.78rem; background:#fff; color:#334155; border:1px solid #cbd5e1; border-radius:8px;">
+                                        ✍️🕊️ تحريري روحي
+                                    </button>
+                                    <button type="button" class="btn-custom btn-dist-scope" id="btnDistExam2" onclick="setDistributionScope('exam2')" style="padding:4px 10px; font-size:0.78rem; background:#fff; color:#334155; border:1px solid #cbd5e1; border-radius:8px;">
+                                        ✍️🧠 تحريري نفسي
+                                    </button>
+                                    <button type="button" class="btn-custom btn-dist-scope" id="btnDistExam3" onclick="setDistributionScope('exam3')" style="padding:4px 10px; font-size:0.78rem; background:#fff; color:#334155; border:1px solid #cbd5e1; border-radius:8px;">
+                                        🗣️🕊️ شفوي روحي
+                                    </button>
+                                    <button type="button" class="btn-custom btn-dist-scope" id="btnDistExam4" onclick="setDistributionScope('exam4')" style="padding:4px 10px; font-size:0.78rem; background:#fff; color:#334155; border:1px solid #cbd5e1; border-radius:8px;">
+                                        🗣️🧠 شفوي نفسي
+                                    </button>
+                                    <button type="button" class="btn-custom btn-dist-scope" id="btnDistMatrix" onclick="setDistributionScope('matrix')" style="padding:4px 10px; font-size:0.78rem; background:#eff6ff; color:#1d4ed8; border:1.5px solid #93c5fd; border-radius:8px; font-weight:800;" title="عرض كافة المواد جنباً إلى جنب في جدول واحد">
+                                        📑 مقارنة كافة المواد (Matrix)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" class="btn-custom" onclick="exportDistributionToExcel()" style="padding:4px 10px; font-size:0.76rem; background:#f0fdf4; color:#15803d; border-color:#86efac; font-weight:800;" title="تنزيل جدول التوزيع كملف إكسيل">
+                                    <i class="fa-solid fa-file-excel me-1"></i> إكسيل
+                                </button>
+                                <button type="button" class="btn-custom" onclick="copyDistributionTable()" style="padding:4px 10px; font-size:0.76rem; background:#f8fafc; color:#334155; border-color:#cbd5e1; font-weight:700;" title="نسخ بيانات الجدول">
+                                    <i class="fa-solid fa-copy me-1"></i> نسخ
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- شريط خيارات أعمدة مصفوفة المقارنة (تظهر فقط عند اختيار matrix) -->
+                        <div id="distMatrixSubjectSelector" style="display:none; background:#ffffff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin-bottom:12px; font-size:0.8rem; flex-wrap:wrap; gap:12px; align-items:center;">
+                            <span style="font-weight:800; color:#1e3a8a;"><i class="fa-solid fa-check-double me-1"></i> حدد المواد التي تريد تضمينها بالمقارنة:</span>
+                            <label style="cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><input type="checkbox" id="chkMatTotal" checked onchange="renderDistributionUI()"> 🌟 المجموع العام</label>
+                            <label style="cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><input type="checkbox" id="chkMatEx1" checked onchange="renderDistributionUI()"> ✍️🕊️ تحريري روحي</label>
+                            <label style="cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><input type="checkbox" id="chkMatEx2" checked onchange="renderDistributionUI()"> ✍️🧠 تحريري نفسي</label>
+                            <label style="cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><input type="checkbox" id="chkMatEx3" checked onchange="renderDistributionUI()"> 🗣️🕊️ شفوي روحي</label>
+                            <label style="cursor:pointer; font-weight:700; display:inline-flex; align-items:center; gap:4px;"><input type="checkbox" id="chkMatEx4" checked onchange="renderDistributionUI()"> 🗣️🧠 شفوي نفسي</label>
+                        </div>
+
+                        <!-- شريط المؤشرات السريعة للمادة المحددة -->
+                        <div id="distSubjectSummaryBar" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:8px; margin-bottom:12px;">
+                            <!-- يتم بناؤه بالجافاسكريبت -->
+                        </div>
+
+                        <!-- حاوية الجدول -->
+                        <div id="distTableContainer">
+                            <!-- يتم بناؤه بالجافاسكريبت -->
+                        </div>
+                    </div>
+
+                    <!-- 2. لوحة سلّم مئينات الدفعة (Percentiles Ladder View) -->
+                    <div id="panelLadderPercentiles" style="display:none;"><div id="panelModeLadder">
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; border-bottom:1.5px dashed #bae6fd; padding-bottom:10px;">
                             <div>
                                 <div style="font-size:0.96rem; font-weight:800; color:#0369a1; display:flex; align-items:center; gap:6px;">
@@ -1467,7 +1539,7 @@ body {
                                 </div>
                             </div>
 
-                            <!-- أزرار اختيار نطاق الشرائح -->
+                            <!-- أزرار اختيار نطاق الشرائح للسلّم -->
                             <div style="display:flex; gap:5px; flex-wrap:wrap;">
                                 <button type="button" class="btn-custom btn-ladder-scope active" id="btnScopeTotal" onclick="setLadderScope('total')" style="padding:4px 10px; font-size:0.78rem; font-weight:800; background:#0284c7; color:#fff; border-color:#0284c7;">
                                     🌟 المجموع العام
@@ -1491,7 +1563,7 @@ body {
                         <div id="cohortLadderContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(290px, 1fr)); gap:10px;">
                             <!-- يتم توليده بواسطة renderCohortLadderUI -->
                         </div>
-                    </div>
+                    </div></div>
                 </div>
 
                 <!-- ========================================================= -->
@@ -2149,6 +2221,43 @@ body {
 
 
 
+
+    <!-- نافذة قائمة المخدومين في شريحة التوزيع التكراري -->
+    <div id="distStudentListModal" class="royal-modal-overlay">
+        <div class="royal-modal-card" style="max-width: 600px;">
+            <div class="royal-modal-header" style="background: linear-gradient(135deg, #0c2461, #0284c7);">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-users fs-5 text-warning"></i>
+                    <strong style="font-size: 1.05rem;" id="distModalTitle">المخدومون في الشريحة</strong>
+                </div>
+                <button type="button" onclick="closeBracketStudentsModal()" class="import-close-btn">&times;</button>
+            </div>
+            <div style="padding: 16px 20px; overflow-y: auto; flex: 1;">
+                <div id="distModalSubtext" style="font-size: 0.85rem; color: #475569; margin-bottom: 12px; font-weight: 700;"></div>
+                <div style="max-height: 350px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem;">
+                        <thead style="background: #f1f5f9; color: #0f172a; position: sticky; top: 0;">
+                            <tr>
+                                <th style="padding: 8px; text-align: center; width: 45px;">كود</th>
+                                <th style="padding: 8px; text-align: right;">اسم المخدوم</th>
+                                <th style="padding: 8px; text-align: center; width: 75px;">النوع</th>
+                                <th style="padding: 8px; text-align: center; width: 90px;">الدرجة</th>
+                                <th style="padding: 8px; text-align: center; width: 80px;">النسبة %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="distModalTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                    <button type="button" class="btn-custom btn-navy" onclick="filterMainTableByBracketStudents()" style="flex: 1; padding: 8px;">
+                        <i class="fa-solid fa-filter me-1"></i> تصفية الجدول الرئيسي على هؤلاء المخدومين فقط 🔍
+                    </button>
+                    <button type="button" class="btn-custom" onclick="closeBracketStudentsModal()">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- نافذة بطاقة التهنئة الرقمية الشخصية الفاخرة (Personalized Acceptance E-Card) -->
     <div id="acceptanceCardModal" class="card-modal-overlay">
@@ -3677,6 +3786,679 @@ body {
     let currentStudioTab = 'reality'; // 'reality' | 'ladder' | 'exams' | 'rules'
     let currentLadderScope = 'total'; // 'total' | 'exam1' | 'exam2' | 'exam3' | 'exam4'
 
+    let currentLadderSubView = 'distribution'; // 'distribution' | 'percentiles'
+    let currentDistributionScope = 'total'; // 'total' | 'exam1' | 'exam2' | 'exam3' | 'exam4' | 'matrix'
+    let activeBracketFilterCodes = null; // فلترة الجدول الرئيسي على مخدومي شريحة معينة
+    let currentModalBracketData = null; // بيانات الشريحة المفتوحة بالنافذة
+
+    function switchLadderSubView(subView) {
+        currentLadderSubView = subView;
+        const panelDist = document.getElementById('panelLadderDistribution');
+        const panelPerc = document.getElementById('panelLadderPercentiles');
+        const btnDist = document.getElementById('tabLadderDist');
+        const btnPerc = document.getElementById('tabLadderPercentiles');
+
+        if (subView === 'distribution') {
+            if (panelDist) panelDist.style.display = 'block';
+            if (panelPerc) panelPerc.style.display = 'none';
+            if (btnDist) {
+                btnDist.style.background = '#0284c7';
+                btnDist.style.color = '#ffffff';
+            }
+            if (btnPerc) {
+                btnPerc.style.background = 'transparent';
+                btnPerc.style.color = '#334155';
+            }
+            renderDistributionUI();
+        } else {
+            if (panelDist) panelDist.style.display = 'none';
+            if (panelPerc) panelPerc.style.display = 'block';
+            if (btnPerc) {
+                btnPerc.style.background = '#0284c7';
+                btnPerc.style.color = '#ffffff';
+            }
+            if (btnDist) {
+                btnDist.style.background = 'transparent';
+                btnDist.style.color = '#334155';
+            }
+            renderCohortLadderUI();
+        }
+    }
+
+    function setDistributionScope(scope) {
+        currentDistributionScope = scope;
+        document.querySelectorAll('.btn-dist-scope').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = '#ffffff';
+            btn.style.color = '#334155';
+            btn.style.borderColor = '#cbd5e1';
+            btn.style.fontWeight = 'normal';
+        });
+
+        const activeId = scope === 'total' ? 'btnDistTotal' : (scope === 'matrix' ? 'btnDistMatrix' : ('btnDistExam' + scope.replace('exam', '')));
+        const activeBtn = document.getElementById(activeId);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.style.background = (scope === 'matrix') ? '#1e3799' : '#0284c7';
+            activeBtn.style.color = '#ffffff';
+            activeBtn.style.borderColor = activeBtn.style.background;
+            activeBtn.style.fontWeight = '800';
+        }
+
+        const matrixSelector = document.getElementById('distMatrixSubjectSelector');
+        if (matrixSelector) {
+            matrixSelector.style.display = (scope === 'matrix') ? 'flex' : 'none';
+        }
+
+        renderDistributionUI();
+    }
+
+    function getDistributionBracketsDefinition(maxScore) {
+        return [
+            { index: 0, label: '0%', minPct: 0, maxPct: 0, color: '#94a3b8', scoreRange: '0.0 من ' + maxScore },
+            { index: 1, label: '1% - 10%', minPct: 0, maxPct: 10, color: '#ef4444', scoreRange: '0.1 - ' + (maxScore * 0.10).toFixed(1) + ' د' },
+            { index: 2, label: '11% - 20%', minPct: 10, maxPct: 20, color: '#f87171', scoreRange: (maxScore * 0.10 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.20).toFixed(1) + ' د' },
+            { index: 3, label: '21% - 30%', minPct: 20, maxPct: 30, color: '#fb923c', scoreRange: (maxScore * 0.20 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.30).toFixed(1) + ' د' },
+            { index: 4, label: '31% - 40%', minPct: 30, maxPct: 40, color: '#f97316', scoreRange: (maxScore * 0.30 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.40).toFixed(1) + ' د' },
+            { index: 5, label: '41% - 50%', minPct: 40, maxPct: 50, color: '#f59e0b', scoreRange: (maxScore * 0.40 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.50).toFixed(1) + ' د' },
+            { index: 6, label: '51% - 60%', minPct: 50, maxPct: 60, color: '#eab308', scoreRange: (maxScore * 0.50 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.60).toFixed(1) + ' د' },
+            { index: 7, label: '61% - 70%', minPct: 60, maxPct: 70, color: '#84cc16', scoreRange: (maxScore * 0.60 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.70).toFixed(1) + ' د' },
+            { index: 8, label: '71% - 80%', minPct: 70, maxPct: 80, color: '#22c55e', scoreRange: (maxScore * 0.70 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.80).toFixed(1) + ' د' },
+            { index: 9, label: '81% - 90%', minPct: 80, maxPct: 90, color: '#10b981', scoreRange: (maxScore * 0.80 + 0.1).toFixed(1) + ' - ' + (maxScore * 0.90).toFixed(1) + ' د' },
+            { index: 10, label: '91% - 100%', minPct: 90, maxPct: 100, color: '#059669', scoreRange: (maxScore * 0.90 + 0.1).toFixed(1) + ' - ' + Number(maxScore).toFixed(1) + ' د' }
+        ];
+    }
+
+    function calculateSubjectDistribution(scopeKey) {
+        const stats = getRealityScoreStats();
+        let maxScore = 100;
+        let label = 'المجموع العام';
+        let icon = '🌟';
+        let passReqPct = passThreshold;
+
+        if (scopeKey === 'total') {
+            maxScore = maxTotalScore > 0 ? maxTotalScore : 100;
+            label = 'المجموع العام';
+            icon = '🌟';
+            passReqPct = passThreshold;
+        } else {
+            const examIdx = parseInt(scopeKey.replace('exam', '')) || 1;
+            maxScore = (Array.isArray(examMaxScores) && examMaxScores[examIdx - 1] > 0) ? examMaxScores[examIdx - 1] : 25;
+            const examNames = ['', 'تحريري روحي', 'تحريري نفسي', 'شفوي روحي', 'شفوي نفسي'];
+            const examIcons = ['', '✍️🕊️', '✍️🧠', '🗣️🕊️', '🗣️🧠'];
+            label = examNames[examIdx] || ('مادة ' + examIdx);
+            icon = examIcons[examIdx] || '✍️';
+            passReqPct = (Array.isArray(examMinPassPercentages) && examMinPassPercentages[examIdx - 1]) ? examMinPassPercentages[examIdx - 1] : 50;
+        }
+
+        const attendedList = stats.attendedList;
+        const totalAttendees = attendedList.length;
+        const absentCount = stats.absentCount;
+
+        const rawBrackets = getDistributionBracketsDefinition(maxScore);
+        const brackets = rawBrackets.map(b => ({
+            ...b,
+            students: [],
+            count: 0,
+            pct: 0,
+            cumCount: 0,
+            cumPct: 0
+        }));
+
+        if (totalAttendees === 0) {
+            return {
+                scopeKey,
+                label,
+                icon,
+                maxScore,
+                totalAttendees: 0,
+                absentCount,
+                passReqPct,
+                passCount: 0,
+                passRate: 0,
+                brackets,
+                meanScore: 0,
+                meanPct: 0,
+                medianScore: 0,
+                medianPct: 0,
+                minScore: 0,
+                maxScoreObs: 0,
+                modalBracket: brackets[0]
+            };
+        }
+
+        const extractedScores = [];
+
+        attendedList.forEach(c => {
+            let rawScore = 0;
+            if (scopeKey === 'total') {
+                rawScore = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            } else {
+                const examIdx = parseInt(scopeKey.replace('exam', '')) || 1;
+                rawScore = Number(c['g' + examIdx]) || 0;
+            }
+
+            const pct = maxScore > 0 ? (rawScore / maxScore) * 100 : 0;
+            extractedScores.push({ score: rawScore, pct, candidate: c });
+
+            let targetIdx = 0;
+            if (rawScore <= 0 || pct <= 0) {
+                targetIdx = 0; // 0%
+            } else if (pct <= 10) {
+                targetIdx = 1; // 1-10%
+            } else if (pct <= 20) {
+                targetIdx = 2; // 11-20%
+            } else if (pct <= 30) {
+                targetIdx = 3; // 21-30%
+            } else if (pct <= 40) {
+                targetIdx = 4; // 31-40%
+            } else if (pct <= 50) {
+                targetIdx = 5; // 41-50%
+            } else if (pct <= 60) {
+                targetIdx = 6; // 51-60%
+            } else if (pct <= 70) {
+                targetIdx = 7; // 61-70%
+            } else if (pct <= 80) {
+                targetIdx = 8; // 71-80%
+            } else if (pct <= 90) {
+                targetIdx = 9; // 81-90%
+            } else {
+                targetIdx = 10; // 91-100%
+            }
+
+            brackets[targetIdx].students.push({
+                code: c.code,
+                name: c.name,
+                gender: c.gender || 'بنين',
+                phone: c.phone || '',
+                confessor: c.confessor || '',
+                score: rawScore,
+                pct: Math.round(pct * 10) / 10
+            });
+            brackets[targetIdx].count++;
+        });
+
+        // حساب التراكمي العكسي (من 100% تنازلياً)
+        let runningCum = 0;
+        for (let i = brackets.length - 1; i >= 0; i--) {
+            runningCum += brackets[i].count;
+            brackets[i].cumCount = runningCum;
+            brackets[i].cumPct = totalAttendees > 0 ? Math.round((runningCum / totalAttendees) * 1000) / 10 : 0;
+            brackets[i].pct = totalAttendees > 0 ? Math.round((brackets[i].count / totalAttendees) * 1000) / 10 : 0;
+        }
+
+        const scoresArr = extractedScores.map(x => x.score).sort((a, b) => a - b);
+        const sum = scoresArr.reduce((a, b) => a + b, 0);
+        const meanScore = sum / totalAttendees;
+        const meanPct = maxScore > 0 ? (meanScore / maxScore) * 100 : 0;
+        const medianScore = totalAttendees % 2 !== 0 
+            ? scoresArr[Math.floor(totalAttendees / 2)] 
+            : (scoresArr[Math.floor(totalAttendees / 2) - 1] + scoresArr[Math.floor(totalAttendees / 2)]) / 2;
+        const medianPct = maxScore > 0 ? (medianScore / maxScore) * 100 : 0;
+        const minScore = scoresArr[0];
+        const maxScoreObs = scoresArr[scoresArr.length - 1];
+
+        let maxCount = -1;
+        let modalBracket = brackets[0];
+        brackets.forEach(b => {
+            if (b.count > maxCount) {
+                maxCount = b.count;
+                modalBracket = b;
+            }
+        });
+
+        const passCount = extractedScores.filter(x => x.pct >= passReqPct).length;
+        const passRate = totalAttendees > 0 ? (passCount / totalAttendees) * 100 : 0;
+
+        return {
+            scopeKey,
+            label,
+            icon,
+            maxScore,
+            totalAttendees,
+            absentCount,
+            passReqPct,
+            passCount,
+            passRate,
+            brackets,
+            meanScore,
+            meanPct,
+            medianScore,
+            medianPct,
+            minScore,
+            maxScoreObs,
+            modalBracket
+        };
+    }
+
+    function renderDistributionUI() {
+        const container = document.getElementById('distTableContainer');
+        const summaryBar = document.getElementById('distSubjectSummaryBar');
+        if (!container) return;
+
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            container.innerHTML = '<div style="background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:24px; text-align:center; color:#64748b; font-weight:700;"><i class="fa-solid fa-info-circle me-1"></i> لا توجد درجات لحاضرين في الجدول بعد لحساب جدول التوزيع التكراري.</div>';
+            if (summaryBar) summaryBar.innerHTML = '';
+            return;
+        }
+
+        if (currentDistributionScope !== 'matrix') {
+            // نمط عرض المادة الواحدة تفصيلياً
+            const dist = calculateSubjectDistribution(currentDistributionScope);
+
+            // تحديث بطاقات الـ KPIs العلوية للمادة
+            if (summaryBar) {
+                summaryBar.innerHTML = `
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #0c2461; border-radius:8px; padding:8px 10px; text-align:center;">
+                        <div style="font-size:0.7rem; color:#64748b; font-weight:700;">المادة والدرجة العظمى</div>
+                        <div style="font-size:0.92rem; font-weight:900; color:#0c2461; margin-top:2px;">${dist.icon} ${dist.label}</div>
+                        <div style="font-size:0.68rem; color:#475569;">(العظمى: ${dist.maxScore} درجة)</div>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #2563eb; border-radius:8px; padding:8px 10px; text-align:center;">
+                        <div style="font-size:0.7rem; color:#64748b; font-weight:700;">متوسط درجات المادة (Mean)</div>
+                        <div style="font-size:0.95rem; font-weight:900; color:#1d4ed8; margin-top:2px;">${dist.meanScore.toFixed(1)} / ${dist.maxScore}</div>
+                        <div style="font-size:0.68rem; color:#1d4ed8; font-weight:800;">(${dist.meanPct.toFixed(1)}%)</div>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #7c3aed; border-radius:8px; padding:8px 10px; text-align:center;">
+                        <div style="font-size:0.7rem; color:#64748b; font-weight:700;">وسيط الدفعة (Median 50%)</div>
+                        <div style="font-size:0.95rem; font-weight:900; color:#7c3aed; margin-top:2px;">${dist.medianScore.toFixed(1)} / ${dist.maxScore}</div>
+                        <div style="font-size:0.68rem; color:#7c3aed; font-weight:800;">(${dist.medianPct.toFixed(1)}%)</div>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #d97706; border-radius:8px; padding:8px 10px; text-align:center;">
+                        <div style="font-size:0.7rem; color:#64748b; font-weight:700;">أعلى / أدنى درجات الحاضرين</div>
+                        <div style="font-size:0.92rem; font-weight:900; color:#b45309; margin-top:2px;">${dist.maxScoreObs.toFixed(1)} / ${dist.minScore.toFixed(1)} د</div>
+                        <div style="font-size:0.68rem; color:#64748b;">(المدى: ${(dist.maxScoreObs - dist.minScore).toFixed(1)} د)</div>
+                    </div>
+                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-top:3.5px solid #059669; border-radius:8px; padding:8px 10px; text-align:center;">
+                        <div style="font-size:0.7rem; color:#64748b; font-weight:700;">الشريحة الأكثر تكراراً (Mode)</div>
+                        <div style="font-size:0.92rem; font-weight:900; color:#059669; margin-top:2px;">${dist.modalBracket ? dist.modalBracket.label : '-'}</div>
+                        <div style="font-size:0.68rem; color:#059669; font-weight:800;">(${dist.modalBracket ? dist.modalBracket.count : 0} مخدومين = ${dist.modalBracket ? dist.modalBracket.pct : 0}%)</div>
+                    </div>
+                `;
+            }
+
+            // بناء جدول التوزيع التكراري الفردي
+            let tableHtml = `
+                <div class="table-card" style="box-shadow:none; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.86rem;">
+                        <thead style="background:#0c2461; color:#ffffff;">
+                            <tr>
+                                <th style="padding:10px 8px; width:130px; text-align:center;">الشريحة المئوية %</th>
+                                <th style="padding:10px 8px; width:150px; text-align:center;">الدرجة المكافئة</th>
+                                <th style="padding:10px 8px; width:110px; text-align:center;">عدد المخدومين</th>
+                                <th style="padding:10px 8px; width:100px; text-align:center;">النسبة من الدفعة</th>
+                                <th style="padding:10px 8px; text-align:center;">التمثيل البياني البصري</th>
+                                <th style="padding:10px 8px; width:120px; text-align:center;">التراكمي (فأعلى) ≥</th>
+                                <th style="padding:10px 8px; width:115px; text-align:center;">الأسماء والتفاصيل</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            dist.brackets.forEach(b => {
+                const hasStudents = b.count > 0;
+                const rowBg = hasStudents ? '#ffffff' : '#f8fafc';
+                const opacity = hasStudents ? '1' : '0.65';
+                const barWidth = Math.min(100, Math.max(b.pct > 0 ? 3 : 0, b.pct));
+
+                tableHtml += `
+                    <tr style="background:${rowBg}; opacity:${opacity}; border-bottom:1px solid #e2e8f0; cursor:${hasStudents ? 'pointer' : 'default'};" ${hasStudents ? `onclick="openBracketStudentsModal('${dist.scopeKey}', ${b.index})"` : ''} title="${hasStudents ? 'اضغط لعرض قائمة المخدومين في هذه الشريحة' : ''}">
+                        <td style="padding:8px; text-align:center; font-weight:800; color:#0f172a;">
+                            <span style="display:inline-block; padding:2px 8px; border-radius:6px; background:${hasStudents ? '#f1f5f9' : '#ffffff'}; border:1px solid #e2e8f0;">
+                                ${b.label}
+                            </span>
+                        </td>
+                        <td style="padding:8px; text-align:center; font-weight:700; color:#475569;">
+                            ${b.scoreRange}
+                        </td>
+                        <td style="padding:8px; text-align:center;">
+                            <span style="font-weight:900; font-size:1.05rem; color:${hasStudents ? '#1d4ed8' : '#94a3b8'}; background:${hasStudents ? '#eff6ff' : 'transparent'}; padding:2px 10px; border-radius:12px; display:inline-block;">
+                                ${b.count}
+                            </span>
+                        </td>
+                        <td style="padding:8px; text-align:center; font-weight:800; color:${hasStudents ? '#0f172a' : '#94a3b8'};">
+                            ${b.pct}%
+                        </td>
+                        <td style="padding:8px 12px; vertical-align:middle;">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="flex:1; height:10px; background:#e2e8f0; border-radius:6px; overflow:hidden;">
+                                    <div style="height:100%; width:${barWidth}%; background:${b.color}; border-radius:6px; transition:width 0.3s ease;"></div>
+                                </div>
+                                <span style="font-size:0.72rem; color:#64748b; width:35px; text-align:left; font-weight:700;">${b.pct}%</span>
+                            </div>
+                        </td>
+                        <td style="padding:8px; text-align:center; font-size:0.78rem; color:#334155; font-weight:700;">
+                            ≥ ${b.cumCount} مخدوم <span style="color:#15803d; font-weight:800;">(${b.cumPct}%)</span>
+                        </td>
+                        <td style="padding:8px; text-align:center;">
+                            ${hasStudents ? `
+                                <button type="button" class="btn-custom" onclick="event.stopPropagation(); openBracketStudentsModal('${dist.scopeKey}', ${b.index})" style="padding:3px 8px; font-size:0.74rem; background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-weight:800; border-radius:6px;">
+                                    <i class="fa-solid fa-users me-1"></i> عرض (${b.count})
+                                </button>
+                            ` : '<span style="color:#cbd5e1; font-size:0.75rem;">-</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `
+                        </tbody>
+                        <tfoot style="background:#f8fafc; font-weight:900; border-top:2.5px solid #0c2461;">
+                            <tr>
+                                <td colspan="2" style="padding:10px 12px; text-align:right; font-size:0.88rem; color:#0c2461;">
+                                    <i class="fa-solid fa-calculator text-primary me-1"></i> إجمالي الحاضرين للمادة:
+                                </td>
+                                <td style="padding:10px 8px; text-align:center; color:#1d4ed8; font-size:1.1rem;">
+                                    ${dist.totalAttendees}
+                                </td>
+                                <td style="padding:10px 8px; text-align:center; color:#1d4ed8; font-size:1rem;">
+                                    100%
+                                </td>
+                                <td colspan="3" style="padding:10px 12px; text-align:right; font-size:0.8rem; color:#64748b;">
+                                    (الغائبون عن الامتحان: ${dist.absentCount} مخدوم | حد النجاح بالمادة: ${dist.passReqPct}%)
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = tableHtml;
+
+        } else {
+            // نمط جدول مقارنة كافة المواد جنباً إلى جنب (Matrix Comparison View)
+            if (summaryBar) summaryBar.innerHTML = '';
+
+            const chkTotal = document.getElementById('chkMatTotal') ? document.getElementById('chkMatTotal').checked : true;
+            const chkEx1 = document.getElementById('chkMatEx1') ? document.getElementById('chkMatEx1').checked : true;
+            const chkEx2 = document.getElementById('chkMatEx2') ? document.getElementById('chkMatEx2').checked : true;
+            const chkEx3 = document.getElementById('chkMatEx3') ? document.getElementById('chkMatEx3').checked : true;
+            const chkEx4 = document.getElementById('chkMatEx4') ? document.getElementById('chkMatEx4').checked : true;
+
+            const selectedScopes = [];
+            if (chkTotal) selectedScopes.push('total');
+            if (chkEx1) selectedScopes.push('exam1');
+            if (chkEx2) selectedScopes.push('exam2');
+            if (chkEx3) selectedScopes.push('exam3');
+            if (chkEx4) selectedScopes.push('exam4');
+
+            if (selectedScopes.length === 0) {
+                container.innerHTML = '<div style="background:#fff; border:1px solid #cbd5e1; border-radius:12px; padding:20px; text-align:center; color:#b91c1c; font-weight:800;">يرجى تحديد مادة واحدة على الأقل من مربعات الاختيار أعلاه لعرض المقارنة.</div>';
+                return;
+            }
+
+            const distMap = {};
+            selectedScopes.forEach(sc => {
+                distMap[sc] = calculateSubjectDistribution(sc);
+            });
+
+            const rawBrackets = getDistributionBracketsDefinition(100);
+
+            let matrixHtml = `
+                <div class="table-card" style="box-shadow:none; border:1px solid #cbd5e1; border-radius:12px; overflow:hidden;">
+                    <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.84rem;">
+                        <thead style="background:#0c2461; color:#ffffff;">
+                            <tr>
+                                <th style="padding:10px 8px; width:110px; text-align:center; background:#071a47;">الشريحة %</th>
+            `;
+
+            selectedScopes.forEach(sc => {
+                const d = distMap[sc];
+                let thBg = '#1e3799';
+                if (sc === 'total') thBg = '#0f172a';
+                if (sc === 'exam1' || sc === 'exam2') thBg = '#0a2558';
+                matrixHtml += `<th style="padding:10px 8px; text-align:center; background:${thBg};">${d.icon} ${d.label}<br><small style="opacity:0.85; font-size:0.75rem;">(العظمى: ${d.maxScore})</small></th>`;
+            });
+
+            matrixHtml += `
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            rawBrackets.forEach(b => {
+                matrixHtml += `
+                    <tr style="border-bottom:1px solid #e2e8f0; background:#ffffff;">
+                        <td style="padding:8px; text-align:center; font-weight:900; background:#f8fafc; color:#0f172a; border-left:1px solid #e2e8f0;">
+                            ${b.label}
+                        </td>
+                `;
+
+                selectedScopes.forEach(sc => {
+                    const br = distMap[sc].brackets[b.index];
+                    const hasStudents = br && br.count > 0;
+                    matrixHtml += `
+                        <td style="padding:8px 6px; text-align:center; cursor:${hasStudents ? 'pointer' : 'default'};" ${hasStudents ? `onclick="openBracketStudentsModal('${sc}', ${b.index})"` : ''} title="${hasStudents ? 'اضغط لعرض المخدومين' : ''}">
+                            ${hasStudents ? `
+                                <div style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; padding:2px 8px; border-radius:8px; border:1px solid #bfdbfe;">
+                                    <strong style="color:#1d4ed8; font-size:0.95rem;">${br.count}</strong>
+                                    <span style="color:#64748b; font-size:0.72rem;">(${br.pct}%)</span>
+                                </div>
+                            ` : '<span style="color:#cbd5e1;">0</span>'}
+                        </td>
+                    `;
+                });
+
+                matrixHtml += '</tr>';
+            });
+
+            matrixHtml += `
+                        </tbody>
+                        <tfoot style="background:#f8fafc; font-weight:900; border-top:2px solid #0c2461;">
+                            <tr>
+                                <td style="padding:10px; text-align:center; background:#f1f5f9; color:#0c2461;">الإجمالي</td>
+            `;
+
+            selectedScopes.forEach(sc => {
+                const d = distMap[sc];
+                matrixHtml += `
+                    <td style="padding:10px; text-align:center; color:#1d4ed8; font-size:0.95rem;">
+                        <strong>${d.totalAttendees}</strong> <small style="color:#64748b;">(100%)</small>
+                    </td>
+                `;
+            });
+
+            matrixHtml += `
+                            </tr>
+                        </tfoot>
+                    </table>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = matrixHtml;
+        }
+    }
+
+    function openBracketStudentsModal(scopeKey, bracketIndex) {
+        const dist = calculateSubjectDistribution(scopeKey);
+        const bracket = dist.brackets[bracketIndex];
+        if (!bracket || bracket.students.length === 0) return;
+
+        currentModalBracketData = {
+            scopeKey,
+            scopeLabel: dist.label,
+            bracketIndex,
+            bracketLabel: bracket.label,
+            scoreRange: bracket.scoreRange,
+            students: bracket.students
+        };
+
+        const modal = document.getElementById('distStudentListModal');
+        const titleEl = document.getElementById('distModalTitle');
+        const subtextEl = document.getElementById('distModalSubtext');
+        const tbody = document.getElementById('distModalTableBody');
+
+        if (titleEl) {
+            titleEl.textContent = 'المخدومون في شريحة: ' + bracket.label + ' (' + dist.label + ')';
+        }
+        if (subtextEl) {
+            subtextEl.innerHTML = 'عدد المخدومين: <strong>' + bracket.count + '</strong> مخدوم (' + bracket.pct + '% من الدفعة) | نطاق الدرجات: <strong>' + bracket.scoreRange + '</strong>';
+        }
+
+        if (tbody) {
+            tbody.innerHTML = bracket.students.map((s, idx) => {
+                const isF = (s.gender === 'بنات' || s.gender === 'female' || s.gender === 'أنثى');
+                const gBadge = isF 
+                    ? '<span class="badge" style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8; font-size:0.75rem;">بنات</span>'
+                    : '<span class="badge" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-size:0.75rem;">بنين</span>';
+                return `
+                    <tr style="border-bottom:1px solid #e2e8f0; background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+                        <td style="padding:6px 8px; text-align:center; font-weight:800; color:#0c2461;">${s.code}</td>
+                        <td style="padding:6px 8px; text-align:right; font-weight:800;">
+                            <a href="javascript:void(0)" onclick="closeBracketStudentsModal(); openModernGradeEntryModal('${s.code}')" style="color:#0f172a; text-decoration:none;" title="رصد درجات هذا المخدوم">
+                                ${s.name} <i class="fa-solid fa-pen-to-square text-muted ms-1" style="font-size:0.72rem;"></i>
+                            </a>
+                        </td>
+                        <td style="padding:6px 8px; text-align:center;">${gBadge}</td>
+                        <td style="padding:6px 8px; text-align:center; font-weight:900; color:#1d4ed8;">${s.score.toFixed(1)} / ${dist.maxScore}</td>
+                        <td style="padding:6px 8px; text-align:center; font-weight:800; color:#059669;">${s.pct}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeBracketStudentsModal() {
+        const modal = document.getElementById('distStudentListModal');
+        if (modal) modal.style.display = 'none';
+        currentModalBracketData = null;
+    }
+
+    function filterMainTableByBracketStudents() {
+        if (!currentModalBracketData || !currentModalBracketData.students) return;
+        activeBracketFilterCodes = currentModalBracketData.students.map(s => String(s.code));
+        closeBracketStudentsModal();
+        renderTable();
+        const gradesTable = document.getElementById('gradesTable');
+        if (gradesTable) gradesTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function exportDistributionToExcel() {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            alert('لا توجد بيانات حاضرة للتصدير.');
+            return;
+        }
+
+        if (typeof XLSX === 'undefined') {
+            alert('مكتبة الإكسيل غير متوفرة حالياً.');
+            return;
+        }
+
+        const wb = XLSX.utils.book_new();
+
+        if (currentDistributionScope !== 'matrix') {
+            const dist = calculateSubjectDistribution(currentDistributionScope);
+            const headers = ["الشريحة المئوية %", "نطاق الدرجات المكافئ", "عدد المخدومين", "النسبة من الدفعة %", "التراكمي (فأعلى)"];
+            const rows = [
+                [`تقرير التوزيع التكراري للدرجات - ${dist.label}`, ""],
+                [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, ""],
+                [`الدرجة العظمى للمادة: ${dist.maxScore} درجة`, ""],
+                ["", ""],
+                headers
+            ];
+
+            dist.brackets.forEach(b => {
+                rows.push([
+                    b.label,
+                    b.scoreRange,
+                    b.count,
+                    b.pct + '%',
+                    '≥ ' + b.cumCount + ' (' + b.cumPct + '%)'
+                ]);
+            });
+
+            rows.push([
+                "الإجمالي (المخدومين الحاضرين)",
+                `من 0 إلى ${dist.maxScore} درجة`,
+                dist.totalAttendees,
+                "100%",
+                `الغائبون: ${dist.absentCount}`
+            ]);
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!views'] = [{ RTL: true }];
+            ws['!cols'] = [{ wch: 20 }, { wch: 22 }, { wch: 16 }, { wch: 18 }, { wch: 22 }];
+            XLSX.utils.book_append_sheet(wb, ws, "جدول_التوزيع_التكراري");
+            XLSX.writeFile(wb, `توزيع_درجات_${dist.label.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        } else {
+            // تصدير مصفوفة مقارنة المواد
+            const scopes = ['total', 'exam1', 'exam2', 'exam3', 'exam4'];
+            const distMap = {};
+            scopes.forEach(sc => distMap[sc] = calculateSubjectDistribution(sc));
+
+            const headers = ["الشريحة المئوية %", "المجموع العام (عدد)", "المجموع %", "تحريري روحي (عدد)", "روحي %", "تحريري نفسي (عدد)", "نفسي %", "شفوي روحي (عدد)", "شفوي روحي %", "شفوي نفسي (عدد)", "شفوي نفسي %"];
+            const rows = [
+                ["تقرير مقارنة التوزيع التكراري لكافة المواد الأربعة والمجموع العام", ""],
+                [`تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}`, ""],
+                ["", ""],
+                headers
+            ];
+
+            const rawBrackets = getDistributionBracketsDefinition(100);
+            rawBrackets.forEach(b => {
+                rows.push([
+                    b.label,
+                    distMap.total.brackets[b.index].count,
+                    distMap.total.brackets[b.index].pct + '%',
+                    distMap.exam1.brackets[b.index].count,
+                    distMap.exam1.brackets[b.index].pct + '%',
+                    distMap.exam2.brackets[b.index].count,
+                    distMap.exam2.brackets[b.index].pct + '%',
+                    distMap.exam3.brackets[b.index].count,
+                    distMap.exam3.brackets[b.index].pct + '%',
+                    distMap.exam4.brackets[b.index].count,
+                    distMap.exam4.brackets[b.index].pct + '%'
+                ]);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!views'] = [{ RTL: true }];
+            XLSX.utils.book_append_sheet(wb, ws, "مصفوفة_مقارنة_المواد");
+            XLSX.writeFile(wb, `مقارنة_توزيع_كافة_المواد_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        alert('تم تصدير ملف الإكسيل بنجاح! 📊✅');
+    }
+
+    function copyDistributionTable() {
+        const stats = getRealityScoreStats();
+        if (stats.totalAttendees === 0) {
+            alert('لا توجد بيانات لنسخها.');
+            return;
+        }
+
+        let text = '';
+        if (currentDistributionScope !== 'matrix') {
+            const dist = calculateSubjectDistribution(currentDistributionScope);
+            text += `جدول التوزيع التكراري - ${dist.label} (العظمى: ${dist.maxScore})\n`;
+            text += `الشريحة\tنطاق الدرجات\tالعدد\tالنسبة%\tالتراكمي\n`;
+            dist.brackets.forEach(b => {
+                text += `${b.label}\t${b.scoreRange}\t${b.count}\t${b.pct}%\t≥ ${b.cumCount} (${b.cumPct}%)\n`;
+            });
+            text += `الإجمالي:\t-\t${dist.totalAttendees}\t100%\t-\n`;
+        } else {
+            text += "مصفوفة مقارنة التوزيع التكراري لكافة المواد\n";
+            const scopes = ['total', 'exam1', 'exam2', 'exam3', 'exam4'];
+            const distMap = {};
+            scopes.forEach(sc => distMap[sc] = calculateSubjectDistribution(sc));
+            text += "الشريحة\tالمجموع\tتحريري روحي\tتحريري نفسي\tشفوي روحي\tشفوي نفسي\n";
+            const rawBrackets = getDistributionBracketsDefinition(100);
+            rawBrackets.forEach(b => {
+                text += `${b.label}\t${distMap.total.brackets[b.index].count} (${distMap.total.brackets[b.index].pct}%)\t${distMap.exam1.brackets[b.index].count} (${distMap.exam1.brackets[b.index].pct}%)\t${distMap.exam2.brackets[b.index].count} (${distMap.exam2.brackets[b.index].pct}%)\t${distMap.exam3.brackets[b.index].count} (${distMap.exam3.brackets[b.index].pct}%)\t${distMap.exam4.brackets[b.index].count} (${distMap.exam4.brackets[b.index].pct}%)\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('تم نسخ بيانات الجدول إلى الحافظة بنجاح! 📋');
+        });
+    }
+
     function switchStudioTab(tab) {
         currentStudioTab = tab;
         const panes = {
@@ -3711,7 +4493,11 @@ body {
         });
 
         if (tab === 'ladder') {
-            renderCohortLadderUI();
+            if (currentLadderSubView === 'distribution') {
+                renderDistributionUI();
+            } else {
+                renderCohortLadderUI();
+            }
         } else if (tab === 'exams') {
             updateExamGuidesUI();
         }
@@ -4215,7 +5001,11 @@ body {
 
         updateExamGuidesUI();
         if (currentStudioTab === 'ladder') {
-            renderCohortLadderUI();
+            if (currentLadderSubView === 'distribution') {
+                renderDistributionUI();
+            } else {
+                renderCohortLadderUI();
+            }
         }
     }
 
@@ -4962,6 +5752,9 @@ body {
         if (!container) return;
 
         const chips = [];
+        if (activeBracketFilterCodes && activeBracketFilterCodes.length > 0) {
+            chips.push('<span class="filter-chip filter-chip-success"><i class="fa-solid fa-table-list"></i> شريحة تكرارية محددة (' + activeBracketFilterCodes.length + ' مخدوم) <span class="filter-chip-close" onclick="activeBracketFilterCodes=null; renderTable();" title="إزالة">&times;</span></span>');
+        }
 
         // 1. بحث
         const searchInput = document.getElementById('searchInput');
@@ -5097,6 +5890,7 @@ body {
     // منظومة الفلترة الشاملة المتقدمة لجميع بيانات المخدومين
     // =========================================================================
     function resetAllFilters() {
+        activeBracketFilterCodes = null;
         document.getElementById('searchInput').value = '';
         document.getElementById('statusFilter').value = 'all';
         document.getElementById('genderFilter').value = 'all';
@@ -5132,6 +5926,10 @@ body {
         }
 
         return candidatesList.filter(c => {
+            // فلترة المخدومين التابعين لشريحة محددة عند اختيارها
+            if (activeBracketFilterCodes && activeBracketFilterCodes.length > 0) {
+                if (!activeBracketFilterCodes.includes(String(c.code))) return false;
+            }
             const name = String(c.name || '').toLowerCase();
             const code = String(c.code || '').toLowerCase();
             const phone = String(c.phone || '').toLowerCase();
