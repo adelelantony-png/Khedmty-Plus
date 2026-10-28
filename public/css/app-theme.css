@@ -13,7 +13,7 @@
  * - جداول متجاوبة بتثبيت العمود الأول، ونماذج بتركيز ناعم ومسودات آمنة.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap');
 
 /* ========================================================
    1. متغيرات النظام والهوية البصرية (Design Tokens)
@@ -25,7 +25,20 @@
     --k-primary-700: #1e3799;
     --k-primary-600: #2749be;
     --k-primary-500: #3867d6;
-    --k-primary-gradient: linear-gradient(135deg, #081a42 0%, #0c2461 45%, #1e3799 100%);
+    --k-primary-gradient: linear-gradient(135deg, #0a1c28 0%, #123d58 45%, #197d80 100%);
+    --k-header-gradient: linear-gradient(135deg, #123d58 0%, #197d80 60%, #22506d 100%);
+
+    /* درجات التيل والسيان الكنسي المعاصر (مستوحى من الخادم الذكي AI) */
+    --k-teal-900: #09141d;
+    --k-teal-800: #123d58;
+    --k-teal-700: #197d80;
+    --k-teal-600: #22506d;
+    --k-teal-500: #2a6f8f;
+    --k-teal-accent: #75d5c5;
+    --k-teal-light: #cce8e3;
+    --k-teal-glow: rgba(117, 213, 197, 0.22);
+    --k-gold-amber: #d5a947;
+    --k-border-teal: rgba(25, 125, 128, 0.35);
     --k-header-gradient: linear-gradient(135deg, #0c2461 0%, #1e3799 60%, #0984e3 100%);
 
     /* لوحة الذهبي الهادئ الموقر */
@@ -48,19 +61,19 @@
     --k-info: #0284c7;
 
     /* الخلفيات والأسطح */
-    --k-bg-body: #f8fafc;
+    --k-bg-body: #fbfaf6;
     --k-bg-card: #ffffff;
-    --k-bg-muted: #f1f5f9;
+    --k-bg-muted: #f4f1ea;
     --k-bg-glass: rgba(255, 255, 255, 0.85);
 
     /* النصوص */
-    --k-text-main: #0f172a;
+    --k-text-main: #193244;
     --k-text-muted: #64748b;
     --k-text-light: #94a3b8;
     --k-text-white: #ffffff;
 
     /* الحدود والظلال الفائقة الدقة */
-    --k-border-subtle: #e2e8f0;
+    --k-border-subtle: #e8e4dc;
     --k-border-strong: #cbd5e1;
     --k-border-gold: rgba(212, 175, 55, 0.45);
 
@@ -86,7 +99,7 @@
     --radius-full: 9999px;
 
     /* الخطوط والانتقالات */
-    --font-arabic: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    --font-arabic: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
     --transition-fast: 0.16s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-smooth: 0.38s cubic-bezier(0.16, 1, 0.3, 1);

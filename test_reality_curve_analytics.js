@@ -5,7 +5,8 @@ console.log('================================================================');
 console.log('🚀 تشغيل حزمة اختبارات سلم شرائح الدفعة والمرشد الإحصائي (Ladder & Deciles)');
 console.log('================================================================');
 
-const htmlContent = fs.readFileSync('D:/StPaul_Service_System/03_Web_Khedmty_Plus/public/servant_grades_entry.html', 'utf8');
+const path = require('path');
+const htmlContent = fs.readFileSync(path.join(__dirname, 'public', 'servant_grades_entry.html'), 'utf8');
 
 // --- 1. فحص عناصر واجهة المستخدم في HTML ---
 console.log('\n--- 1. فحص عناصر واجهة سلم الشرائح والمرشد الذكي في HTML ---');

@@ -8,6 +8,7 @@
     <link rel="icon" type="image/png" href="icons/favicon-48.png">
     <link rel="stylesheet" href="css/app-theme.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -19,6 +20,11 @@
             --info: #0284c7;
             --dark-bg: #0f172a;
             --card-border: #cbd5e1;
+            /* Coptic Smart Palette */
+            --teal-midnight: #123d58;
+            --teal-primary: #197d80;
+            --teal-accent: #75d5c5;
+            --bg-warm: #fbfaf6;
         }
 
         html, body {
@@ -30,9 +36,9 @@
 
         body {
             margin: 0;
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: #fbfaf6;
+            color: #193244;
             padding-bottom: 70px;
         }
 
@@ -44,7 +50,7 @@
 
         /* Hero Banner */
         .guide-hero {
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 55%, #0284c7 100%);
+            background: linear-gradient(135deg, #123d58 0%, #197d80 50%, #0c2461 100%);
             color: #ffffff;
             border-radius: 20px;
             padding: 30px 24px;
@@ -85,7 +91,7 @@
             z-index: 1000;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 16px;
             padding: 8px 12px;
             margin-bottom: 24px;
@@ -108,7 +114,7 @@
 
         .guide-nav-btn {
             background: #f8fafc;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2ded4;
             color: #334155;
             padding: 7px 12px;
             border-radius: 10px;
@@ -141,7 +147,7 @@
             width: 100%;
             padding: 8px 34px 8px 12px;
             border-radius: 10px;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             font-size: 0.82rem;
             font-family: inherit;
             background: #f8fafc;
@@ -165,7 +171,7 @@
         /* Mockup Containers */
         .mockup-card {
             background: #ffffff;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 18px;
             box-shadow: 0 4px 18px rgba(0,0,0,0.05);
             margin-bottom: 26px;
@@ -174,7 +180,7 @@
         }
 
         .mockup-header {
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            background: linear-gradient(135deg, #123d58 0%, #197d80 100%);
             color: #ffffff;
             padding: 14px 20px;
             display: flex;
@@ -207,7 +213,7 @@
 
         .interactive-screen-preview {
             background: #f8fafc;
-            border: 2px dashed #cbd5e1;
+            border: 2px dashed #e2ded4;
             border-radius: 14px;
             padding: 16px;
             margin: 16px 0;
@@ -233,7 +239,7 @@
             justify-content: space-between;
             align-items: center;
             background: #ffffff;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 12px;
             padding: 10px 14px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
@@ -268,7 +274,7 @@
 
         .mock-kpi-card {
             background: #ffffff;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2ded4;
             border-radius: 12px;
             padding: 12px;
             text-align: center;
@@ -320,7 +326,7 @@
             background: #f1f5f9;
             padding: 6px;
             border-radius: 10px;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2ded4;
             overflow-x: auto;
             margin-bottom: 12px;
         }
@@ -377,7 +383,7 @@
             width: 48px;
             text-align: center;
             padding: 4px;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 6px;
             font-weight: 800;
             font-size: 0.85rem;
@@ -429,7 +435,7 @@
 
         /* Accordion */
         .faq-item {
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2ded4;
             border-radius: 12px;
             margin-bottom: 8px;
             overflow: hidden;
@@ -468,7 +474,7 @@
 
         .calc-field {
             background: #ffffff;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 12px;
             padding: 10px 14px;
         }
@@ -484,7 +490,7 @@
         .calc-field input, .calc-field select {
             width: 100%;
             padding: 8px 10px;
-            border: 1.5px solid #cbd5e1;
+            border: 1.5px solid #e2ded4;
             border-radius: 8px;
             font-weight: 800;
             font-size: 0.9rem;
@@ -538,7 +544,7 @@
         @media print {
             .guide-sticky-nav, .search-box-guide, #inspectorToast, .guide-hero .btn-custom { display: none !important; }
             body { background: #ffffff; }
-            .mockup-card { box-shadow: none; border-color: #cbd5e1; page-break-inside: avoid; }
+            .mockup-card { box-shadow: none; border-color: #e2ded4; page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -599,35 +605,35 @@
             </p>
 
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px;">
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #0c2461;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #0c2461;">
                     <strong style="color:#0c2461; display:block; margin-bottom:4px;"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> المنطقة 1: شريط التنقل (Topbar)</strong>
                     <div style="font-size:0.8rem; color:#64748b;">العودة للوحة الخدمة، استيراد شيتات الإكسيل، حملات الواتساب، والاعتماد المحلي الفوري.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #d97706;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #d97706;">
                     <strong style="color:#d97706; display:block; margin-bottom:4px;"><i class="fa-solid fa-heart-pulse me-1"></i> المنطقة 2: النبض والطيف البصري</strong>
                     <div style="font-size:0.8rem; color:#64748b;">5 عدادات KPI تنفيذية مع شريط طيف نسبي متصل 100% يعكس توزيع قرارات الدفعة الأربعة.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #2563eb;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #2563eb;">
                     <strong style="color:#2563eb; display:block; margin-bottom:4px;"><i class="fa-solid fa-chart-pie me-1"></i> المنطقة 3: الاستوديو الذكي (5 تبويبات)</strong>
                     <div style="font-size:0.8rem; color:#64748b;">شريط تنفيذي قابل للطي يضم مستكشف الواقع، جدول الـ 11 شريحة، خلاط المواد، وضبط القبول.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #10b981;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #10b981;">
                     <strong style="color:#10b981; display:block; margin-bottom:4px;"><i class="fa-solid fa-layer-group me-1"></i> المنطقة 4: التبويبات السريعة والفلاتر</strong>
                     <div style="font-size:0.8rem; color:#64748b;">7 تبويبات سريعة للتنقل اللحظي بين الفئات، مع درج الفلاتر التفصيلية الـ 8 المدمج.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #7e22ce;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #7e22ce;">
                     <strong style="color:#7e22ce; display:block; margin-bottom:4px;"><i class="fa-solid fa-table-cells me-1"></i> المنطقة 5: جدول الرصد الـ 12 عموداً</strong>
                     <div style="font-size:0.8rem; color:#64748b;">رصد درجات المواد الأربعة، التحقق اللحظي، الإجماليات، الملاحظات، والترقيم الموزع بصفحات.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #ea580c;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #ea580c;">
                     <strong style="color:#ea580c; display:block; margin-bottom:4px;"><i class="fa-solid fa-bolt me-1"></i> المنطقة 6: وضع الرصد السريع (Fast Entry)</strong>
                     <div style="font-size:0.8rem; color:#64748b;">واجهة رصد عريضة مركزة مخصصة للإدخال الصاروخي بالكيبورد وقارئ الباركود بزر Enter.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #0284c7;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #0284c7;">
                     <strong style="color:#0284c7; display:block; margin-bottom:4px;"><i class="fa-solid fa-id-badge me-1"></i> المنطقة 7: بطاقة المخدوم الرعوية (360°)</strong>
                     <div style="font-size:0.8rem; color:#64748b;">ملف شامل ينزلق جانبياً يوضح بيانات الطالب، حالته، درجاته، ملاحظاته، ورابط واتساب مباشر.</div>
                 </div>
-                <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:12px; border-right:4px solid #16a34a;">
+                <div style="background:#f8fafc; border:1.5px solid #e2ded4; border-radius:12px; padding:12px; border-right:4px solid #16a34a;">
                     <strong style="color:#16a34a; display:block; margin-bottom:4px;"><i class="fa-solid fa-file-excel me-1"></i> المنطقة 8: التصدير الذكي بالمعادلات</strong>
                     <div style="font-size:0.8rem; color:#64748b;">تصدير إكسيل حقيقي يحتوي على معادلات حية (=SUM, =AVERAGE) وملخص إحصائي كامل.</div>
                 </div>
@@ -651,7 +657,7 @@
             <div class="interactive-screen-preview">
                 <span class="screen-label-tag">محاكاة شريط التنقل الحقيقي (Topbar)</span>
                 <div class="mock-topbar">
-                    <button type="button" class="mock-btn" onclick="inspectButton('العودة للوحة الخدمة', 'data-smart-back: يعود للشاشة السابقة أو يتجه تلقائياً لتبويب الكورسات بلوحة الخادم مع حفظ أية مسودات.')" style="background:#ffffff; color:#0c2461; border-color:#cbd5e1;">
+                    <button type="button" class="mock-btn" onclick="inspectButton('العودة للوحة الخدمة', 'data-smart-back: يعود للشاشة السابقة أو يتجه تلقائياً لتبويب الكورسات بلوحة الخادم مع حفظ أية مسودات.')" style="background:#ffffff; color:#0c2461; border-color:#e2ded4;">
                         <i class="fa-solid fa-arrow-right"></i> العودة للوحة الخدمة
                     </button>
                     <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -774,7 +780,7 @@
 
                 <!-- Pane 1: Reality Explorer -->
                 <div id="mockPane1" style="display:block;">
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                    <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:14px;">
                         <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-chart-pie me-1"></i> محاكي المنحنى الطبيعي واقتراح نسبة النجاح</h4>
                         <p style="font-size:0.84rem; color:#64748b; margin:0 0 10px 0;">
                             يقوم بحساب المنحنى التكراري للدفعة. إذا اخترت استهداف نسبة نجاح 80%، يقترح عليك النظام تلقائياً الدرجة الدقيقة التي تحقق هذا الهدف دون أي تخمين.
@@ -789,10 +795,10 @@
 
                 <!-- Pane 2: 11 Deciles Table -->
                 <div id="mockPane2" style="display:none;">
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                    <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:14px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
                             <h4 style="margin:0; color:#0c2461;"><i class="fa-solid fa-table-cells me-1"></i> جدول الـ 11 شريحة وتوزيع النسب</h4>
-                            <select id="mockSubjectSelector" onchange="renderMockDeciles()" style="padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.78rem; border:1.5px solid #cbd5e1;">
+                            <select id="mockSubjectSelector" onchange="renderMockDeciles()" style="padding:4px 8px; border-radius:6px; font-weight:800; font-size:0.78rem; border:1.5px solid #e2ded4;">
                                 <option value="total">المجموع الكلي (100 د)</option>
                                 <option value="sp_wr">تحريري روحي (30 د)</option>
                                 <option value="ps_wr">تحريري نفسي (20 د)</option>
@@ -821,25 +827,25 @@
 
                 <!-- Pane 3: Exam Mixer -->
                 <div id="mockPane3" style="display:none;">
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                    <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:14px;">
                         <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-book-bookmark me-1"></i> خلاط المواد الأربعة وتوزيع الأوزان</h4>
                         <p style="font-size:0.84rem; color:#64748b; margin:0 0 12px 0;">
                             يسمح بتحديد وزن نسبي لكل مادة بحيث يكون المجموع الكلي 100%. التوزيع القياسي المعتمد:
                         </p>
                         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;">
-                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="background:#f8fafc; border:1px solid #e2ded4; border-radius:8px; padding:10px; text-align:center;">
                                 <div style="font-size:0.75rem; color:#64748b; font-weight:800;">✍️🕊️ تحريري روحي</div>
                                 <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">30 درجة (30%)</div>
                             </div>
-                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="background:#f8fafc; border:1px solid #e2ded4; border-radius:8px; padding:10px; text-align:center;">
                                 <div style="font-size:0.75rem; color:#64748b; font-weight:800;">✍️🧠 تحريري نفسي</div>
                                 <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">20 درجة (20%)</div>
                             </div>
-                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="background:#f8fafc; border:1px solid #e2ded4; border-radius:8px; padding:10px; text-align:center;">
                                 <div style="font-size:0.75rem; color:#64748b; font-weight:800;">🗣️🕊️ شفوي روحي</div>
                                 <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">30 درجة (30%)</div>
                             </div>
-                            <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; text-align:center;">
+                            <div style="background:#f8fafc; border:1px solid #e2ded4; border-radius:8px; padding:10px; text-align:center;">
                                 <div style="font-size:0.75rem; color:#64748b; font-weight:800;">🗣️🧠 شفوي نفسي</div>
                                 <div style="font-size:1.2rem; font-weight:900; color:#0c2461;">20 درجة (20%)</div>
                             </div>
@@ -849,7 +855,7 @@
 
                 <!-- Pane 4: Rules & Scale Config -->
                 <div id="mockPane4" style="display:none;">
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                    <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:14px;">
                         <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-sliders me-1"></i> حفظ وتثبيت الدرجات العظمى في الذاكرة</h4>
                         <div class="callout-box info" style="margin-top:0;">
                             <strong>تثبيت دائم:</strong> أي تعديل على الدرجات العظمى أو حدود القبول يُحفظ فوراً في الذاكرة المحلية (<code style="background:#ffffff; padding:2px 6px; border-radius:4px;">localStorage</code>) بمفتاح <code style="background:#ffffff; padding:2px 6px; border-radius:4px;">khedmty_servant_exam_scale_v1</code> ولا يضيع حتى بعد إعادة تحميل الصفحة أو قفل المتصفح.
@@ -859,7 +865,7 @@
 
                 <!-- Pane 5: Notes & Holdouts Tracker -->
                 <div id="mockPane5" style="display:none;">
-                    <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:14px;">
+                    <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:14px;">
                         <h4 style="margin:0 0 6px 0; color:#0c2461;"><i class="fa-solid fa-clipboard-list me-1"></i> حصر ومتابعة أصحاب الملاحظات والمعلقين</h4>
                         <p style="font-size:0.84rem; color:#64748b; margin:0 0 10px 0;">
                             <strong>قاعدة العزل الرعوي:</strong> المخدوم الذي يمتلك ملاحظة روحية (مثل تهذيب الشعر، المظهر، أو استيفاء الاعتراف) حتى لو حصل على 0 في الشفوي الروحي لا يُعامل كـ "غائب"، بل يُفصل تلقائياً في فئة خاصة: <strong>معلق لملاحظة روحية (استيفاء شفوي)</strong> ليتابعه أبونا بروح الأبوة.
@@ -893,10 +899,10 @@
                     <span class="mock-btn" style="background:#fef9c3; color:#854d0e; border-color:#fde047;">مقبول مع اعتراف 🕊️ (12)</span>
                     <span class="mock-btn" style="background:#f3e8ff; color:#6b21a8; border-color:#d8b4fe;">لديهم ملاحظات معلقة 📝✂️ (6)</span>
                     <span class="mock-btn" style="background:#fee2e2; color:#991b1b; border-color:#fca5a5;">غير المجتازين 🔴 (4)</span>
-                    <span class="mock-btn" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1;">الغياب ⚪ (2)</span>
+                    <span class="mock-btn" style="background:#f1f5f9; color:#475569; border-color:#e2ded4;">الغياب ⚪ (2)</span>
                 </div>
 
-                <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
+                <div style="background:#ffffff; border:1px solid #e2ded4; border-radius:10px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; font-size:0.85rem; color:#0c2461;">
                             <i class="fa-solid fa-sliders me-1"></i> درج الفلاتر التفصيلية (8 قوائم منسدلة)
@@ -954,7 +960,7 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:0.8rem; color:#64748b; font-weight:800;">
                     <span>معايير القبول الحالية: قبول &ge; 60% | مقابلة &ge; 50%</span>
-                    <button type="button" class="mock-btn" onclick="resetLiveTableDemo()" style="background:#f1f5f9; color:#475569; border-color:#cbd5e1; font-size:0.75rem; padding:4px 10px;">
+                    <button type="button" class="mock-btn" onclick="resetLiveTableDemo()" style="background:#f1f5f9; color:#475569; border-color:#e2ded4; font-size:0.75rem; padding:4px 10px;">
                         <i class="fa-solid fa-rotate-left"></i> استعادة البيانات الافتراضية
                     </button>
                 </div>
@@ -1064,19 +1070,19 @@
             <!-- Simulator Output Box -->
             <div class="calc-result-box" id="calcResultDisplay">
                 <div>
-                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800;">النتيجة الإجمالية والمجموع:</div>
+                    <div style="font-size:0.8rem; color:#e2ded4; font-weight:800;">النتيجة الإجمالية والمجموع:</div>
                     <div style="font-size:1.6rem; font-weight:900; margin-top:2px;">
                         <span id="calcTotalScore">76</span> / 100 (<span id="calcPctScore">76.0%</span>)
                     </div>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800; margin-bottom:4px;">شارة القرار الرعوي المعتمدة:</div>
+                    <div style="font-size:0.8rem; color:#e2ded4; font-weight:800; margin-bottom:4px;">شارة القرار الرعوي المعتمدة:</div>
                     <div id="calcBadgeOutput">
                         <span class="badge-status badge-acc" style="font-size:1rem; padding:6px 16px;">🟢 مقبول نهائياً</span>
                     </div>
                 </div>
                 <div style="max-width:380px;">
-                    <div style="font-size:0.8rem; color:#cbd5e1; font-weight:800;">التفسير الرعوي للقرار:</div>
+                    <div style="font-size:0.8rem; color:#e2ded4; font-weight:800;">التفسير الرعوي للقرار:</div>
                     <div id="calcReasonOutput" style="font-size:0.82rem; line-height:1.5; color:#f8fafc; margin-top:2px;">
                         المجموع أعلى من حد القبول (60%) والدرجات مستوفية لكافة المواد بدون ملاحظات معلقة.
                     </div>
@@ -1311,7 +1317,7 @@ function renderLiveTableDemo() {
         
         let badgeHtml = '';
         if (total === 0 && !st.hasHair) {
-            badgeHtml = '<span class="badge-status" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">⚪ غائب</span>';
+            badgeHtml = '<span class="badge-status" style="background:#f1f5f9; color:#64748b; border:1px solid #e2ded4;">⚪ غائب</span>';
         } else if (st.hasHair) {
             badgeHtml = '<span class="badge-status badge-con" title="معلق لاستيفاء الشفوي بعد تهذيب الشعر">✂️🕊️ معلق لملاحظة شعر</span>';
         } else if (st.hasConf && pct >= 60) {

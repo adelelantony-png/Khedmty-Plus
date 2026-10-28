@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="css/app-theme.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="auth-client.js"></script>
     <script src="js/khedmty-db.js"></script>
@@ -18,20 +18,27 @@
     <script>if (typeof XLSX === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>'); }</script>
     <style>
         :root {
-            --primary: #0c2461;
-            --accent: #1e3799;
+            --primary: #123d58;
+            --primary-navy: #0c2461;
+            --accent: #197d80;
+            --accent-hover: #123d58;
+            --teal-mint: #75d5c5;
+            --teal-light: #cce8e3;
+            --gold-amber: #d5a947;
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #0284c7;
+            --bg-warm: #fbfaf6;
+            --card-border: #e8e4dc;
         }
 
         html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }
 body {
             margin: 0;
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f1f5f9;
-            color: #1e293b;
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: #fbfaf6;
+            color: #193244;
             padding-bottom: 50px;
         }
 
@@ -387,7 +394,7 @@ body {
         }
 
         .import-modal-header {
-            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            background: linear-gradient(135deg, #123d58 0%, #197d80 50%, #0c2461 100%);
             color: #ffffff;
             padding: 16px 20px;
             display: flex;
@@ -470,11 +477,11 @@ body {
 
         /* لوحة معايير القبول والجو العام المطورة وشريط الطيف */
         .curve-panel-modern {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #fcfbf9 100%);
             border-radius: 20px;
             padding: 22px 24px;
             margin-bottom: 22px;
-            border: 1.5px solid #e2e8f0;
+            border: 1.5px solid #e8e4dc;
             box-shadow: 0 4px 20px rgba(12, 36, 97, 0.06);
         }
 

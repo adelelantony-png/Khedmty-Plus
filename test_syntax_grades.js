@@ -1,5 +1,6 @@
 const fs = require('fs');
-const content = fs.readFileSync('D:/StPaul_Service_System/03_Web_Khedmty_Plus/public/servant_grades_entry.html', 'utf8');
+const path = require('path');
+const content = fs.readFileSync(path.join(__dirname, 'public', 'servant_grades_entry.html'), 'utf8');
 
 const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
 let match;

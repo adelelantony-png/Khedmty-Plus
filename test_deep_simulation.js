@@ -44,7 +44,8 @@ runTest('1. استيراد الإكسيل: التعرف التلقائي على 
 // 2. اختبار ضبط توقيت اجتماع الجمعة بالواتساب
 // -------------------------------------------------------------
 runTest('2. محرك الواتساب: موعد اجتماع الجمعة الرسمي 1:00 ظهراً (13:00 / 780 دقيقة)', () => {
-    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    const whatsPath = path.join(__dirname, '..', '02_WhatsApp_NewWhats', 'Backend_Node', 'services', 'whatsapp.js');
+    const whatsCode = fs.readFileSync(fs.existsSync(whatsPath) ? whatsPath : 'D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
     assert(whatsCode.includes('(13 * 60) + 0'), 'يجب أن يبدأ موعد الاجتماع من الساعة 1:00 ظهراً');
     assert(!whatsCode.includes('(10 * 60) + 0'), 'يجب ألا يحتوي على الموعد القديم 10:00 صباحاً');
 });
@@ -145,7 +146,8 @@ runTest('6. كاش الـ Service Worker محدث لإصدار v2.6 مع الح�
 // 7. فحص إعادة الاتصال المستمر دون توقف في الواتساب
 // -------------------------------------------------------------
 runTest('7. محرك الواتساب: إعادة الاتصال المستمر (Persistent Reconnect) دون توقف عند الفشل المتكرر', () => {
-    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    const whatsPath = path.join(__dirname, '..', '02_WhatsApp_NewWhats', 'Backend_Node', 'services', 'whatsapp.js');
+    const whatsCode = fs.readFileSync(fs.existsSync(whatsPath) ? whatsPath : 'D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
     assert(whatsCode.includes('45000'), 'يجب أن يعيد المحاولة دورياً كل 45 ثانية عند انقطاع النت الطويل');
     assert(!whatsCode.includes("engineState = 'update_required'"), 'يجب ألا يقفل السيرفر على update_required بعد 6 محاولات');
 });
@@ -154,7 +156,8 @@ runTest('7. محرك الواتساب: إعادة الاتصال المستمر 
 // 8. فحص كاش إعادة إرسال الرسائل (msgRetryCounterCache & getMessage)
 // -------------------------------------------------------------
 runTest('8. محرك الواتساب: دعم كاش الرسائل وحل مشكلة Waiting for this message', () => {
-    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    const whatsPath = path.join(__dirname, '..', '02_WhatsApp_NewWhats', 'Backend_Node', 'services', 'whatsapp.js');
+    const whatsCode = fs.readFileSync(fs.existsSync(whatsPath) ? whatsPath : 'D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
     assert(whatsCode.includes('msgRetryCounterCache'), 'يجب تفعيل كاش إعادة المحاولة msgRetryCounterCache');
     assert(whatsCode.includes('getMessage'), 'يجب توفير دالة getMessage لاسترجاع الرسائل المفقودة');
 });
@@ -163,8 +166,10 @@ runTest('8. محرك الواتساب: دعم كاش الرسائل وحل مش�
 // 9. فحص دعم كود الاقتران السريع برقم الهاتف (Pairing Code)
 // -------------------------------------------------------------
 runTest('9. محرك الواتساب: دعم كود الاقتران بالهاتف (Pairing Code) ونقطة API المخصصة', () => {
-    const whatsCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
-    const serverCode = fs.readFileSync('D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/server.mjs', 'utf8');
+    const whatsPath = path.join(__dirname, '..', '02_WhatsApp_NewWhats', 'Backend_Node', 'services', 'whatsapp.js');
+    const serverPath = path.join(__dirname, '..', '02_WhatsApp_NewWhats', 'Backend_Node', 'server.mjs');
+    const whatsCode = fs.readFileSync(fs.existsSync(whatsPath) ? whatsPath : 'D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/services/whatsapp.js', 'utf8');
+    const serverCode = fs.readFileSync(fs.existsSync(serverPath) ? serverPath : 'D:/StPaul_Service_System/02_WhatsApp_NewWhats/Backend_Node/server.mjs', 'utf8');
     assert(whatsCode.includes('requestPhonePairingCode'), 'يجب تصدير دالة requestPhonePairingCode');
     assert(serverCode.includes('/api/pairing-code'), 'يجب توفير مسار /api/pairing-code في server.mjs');
 });
