@@ -389,7 +389,7 @@ h2, h3 { color: var(--primary); margin-top: 10px; border-bottom: 2px solid var(-
 
 .tab-content { display: none; }
 
-.tab-content.active { display: block; }
+.tab-content.active { display: block !important; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
 
@@ -850,7 +850,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <div class="tabs">
 
 <div class="tab-btn active" onclick="switchTab('dashTab', this)">الرئيسية 📊</div>
-<div class="tab-btn" id="tabBtn_smartPrep" onclick="switchTab('smartPrepTab', this)" style="border:1.5px solid #197d80; color:#123d58; font-weight:800; background:#f0fdfa;">
+<div class="tab-btn" id="tabBtn_smartPrep" data-group="home" onclick="switchTab('smartPrepTab', this)" style="border:1.5px solid #197d80; color:#123d58; font-weight:800; background:#f0fdfa;">
     <i class="fa-solid fa-wand-magic-sparkles me-1 text-teal" style="color:#0d9488;"></i> حضّر خدمتك ذكياً ✍️🕊️
 </div>
 <a href="quiz.html" class="tab-btn" id="tabBtn_quiz" style="text-decoration:none; display:flex; align-items:center; justify-content:center; border:1.5px solid #d5a947; color:#854d0e; font-weight:800; background:#fffdf5;">
@@ -1196,6 +1196,23 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <!-- 1. الرئيسية -->
 
 <div id="dashTab" class="tab-content active">
+
+<!-- Quick Smart Prep Banner in Home Tab -->
+<div style="background: linear-gradient(135deg, #123d58 0%, #197d80 100%); color: #fff; padding: 16px 20px; border-radius: 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(18,61,88,0.15); border: 1.5px solid rgba(213,169,71,0.4);">
+    <div style="display:flex; align-items:center; gap:12px;">
+        <div style="font-size:2rem; width:48px; height:48px; background:rgba(255,255,255,0.15); border-radius:12px; display:flex; align-items:center; justify-content:center;">✍️🕊️</div>
+        <div>
+            <div style="font-weight:800; font-size:1.1rem; color:#fff;">مساعد تحضير الخدمة الذكي (Smart Prep) &amp; وضع الإلقاء 🎙️</div>
+            <div style="font-size:0.85rem; color:#e0f2fe; margin-top:2px;">تحضير دروس الخدمة بتفاسير الآباء الأرثوذكس، ألعاب تفاعلية، وقوالب إلقاء للمحاضرين</div>
+        </div>
+    </div>
+    <div style="display:flex; gap:8px;">
+        <button type="button" class="btn" onclick="switchTab('smartPrepTab')" style="background:linear-gradient(135deg, #d5a947 0%, #e5b958 100%); color:#0b2230; font-weight:800; border:none; padding:9px 18px; border-radius:10px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> فتح محضر الخدمة الآن
+        </button>
+    </div>
+</div>
+
 
 <div id="myNextEventBanner" style="display:none; background:#e8f4fd; border:1px solid #74b9ff; color:#0984e3; padding:12px; border-radius:8px; margin-bottom:12px;">
 
@@ -8322,7 +8339,7 @@ if (document.readyState === 'loading') {
 <!-- ===================================================================== -->
 <!-- 🕊️ تبويب: حضّر خدمتك ودرسك ذكياً (Smart Lesson Prep Assistant)        -->
 <!-- ===================================================================== -->
-<div id="smartPrepTab" class="tab-content" style="display:none; animation:fadeIn 0.25s ease-out;">
+<div id="smartPrepTab" class="tab-content" style="animation:fadeIn 0.25s ease-out;">
     <div style="background:#ffffff; border:1.5px solid #e8e4dc; border-radius:20px; padding:22px; box-shadow:0 6px 24px rgba(18,61,88,0.06); margin-bottom:20px;">
         
         <!-- الترويسة -->

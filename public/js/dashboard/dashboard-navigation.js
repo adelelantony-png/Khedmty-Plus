@@ -20,7 +20,7 @@ const GROUPS = [
 
 const TAB_GROUP = {
 
-dashTab: 'home', planTab: 'home',
+dashTab: 'home', planTab: 'home', smartPrepTab: 'home',
 
 attendanceTab: 'attend', servantsAttendanceTab: 'attend',
 
