@@ -1071,6 +1071,40 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">يحتاجون افتقاداً ورعاية عاجلة</div>
                 </div>
 
+            <!-- نبض الاجتماع ومعدل الاستقرار الإحصائي (Meeting Pulse & Trends) -->
+            <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-color: #cbd5e1; margin-bottom: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-chart-line text-primary fs-5"></i>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0c2461;">
+                                نبض الاجتماع والنمو الإحصائي (Meeting Attendance Pulse)
+                            </h4>
+                            <div style="font-size: 0.78rem; color: #64748b;">
+                                رصد بياني متتابع لنسب الحضور والتناول بالقداس الإلهي لآخر جلسات الخدمة
+                            </div>
+                        </div>
+                    </div>
+                    <div id="radar_pulseOverallStability" style="background: #eff6ff; color: #1d4ed8; padding: 4px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 800; border: 1px solid #bfdbfe;">
+                        📈 متوسط الاستقرار: جاري الحساب...
+                    </div>
+                </div>
+
+                <!-- حاوية الأعمدة البيانية التفاعلية لنبض الاجتماع -->
+                <div id="radar_attendancePulseBars" style="display: flex; gap: 14px; align-items: flex-end; min-height: 140px; padding: 15px 10px 8px; border-bottom: 2px solid #e2e8f0; overflow-x: auto;">
+                    <!-- يتم بناؤها آلياً بواسطة JS -->
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; gap: 14px; align-items: center;">
+                        <span><span style="display:inline-block; width:12px; height:12px; background:#3b82f6; border-radius:3px; vertical-align:middle; margin-left:4px;"></span>حضور الاجتماع</span>
+                        <span><span style="display:inline-block; width:12px; height:12px; background:#10b981; border-radius:3px; vertical-align:middle; margin-left:4px;"></span>التناول بالقداس</span>
+                    </div>
+                    <span id="radar_pulseTrendComment" style="font-weight: bold; color: #0f172a;">📊 جاري تحليل اتجاه الحضور...</span>
+                </div>
+            </div>
+
+
                 <!-- 2. مهلة الاعتراف -->
                 <div class="radar-kpi-card" style="border-right: 5px solid #f59e0b !important;">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⏳ في مهلة الاعتراف</div>
@@ -1109,7 +1143,21 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     </span>
                 </div>
 
-                <div class="table-responsive-wrapper">
+                
+                <!-- شريط تصفية حالات الغياب وإجراءات الزيارة -->
+                <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
+                    <button type="button" class="btn-custom" onclick="filterRadarAbsence('all')" id="btnRadarAbsFilterAll" style="background: #0c2461; color: white; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">
+                        عرض جميع المتغيبين
+                    </button>
+                    <button type="button" class="btn-custom" onclick="filterRadarAbsence('critical')" id="btnRadarAbsFilterCritical" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                        🔴 انقطاع حرج فقط (3+ أسابيع)
+                    </button>
+                    <button type="button" class="btn-custom" onclick="printCriticalAbsenceList()" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: auto;">
+                        <i class="fa-solid fa-print me-1"></i> طباعة كشف الافتقاد المنزلي
+                    </button>
+                </div>
+
+<div class="table-responsive-wrapper">
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
@@ -1168,7 +1216,56 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
-            <!-- القسم الثالث: أداة معالجة نسيان كلمة المرور للمخدوم (Offline Password Reset) -->
+            
+            <!-- القسم الثالث: رادار أعياد الميلاد والمناسبات والتهاني مع واتساب الخدمة -->
+            <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border-color: #fde047; margin-bottom: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.5rem;">🎂</span>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #78350f;">
+                                رادار أعياد الميلاد والمناسبات (ربط ذكي بواتساب الخدمة 📲)
+                            </h4>
+                            <div style="font-size: 0.78rem; color: #92400e;">
+                                رصد استباقي لمواليد المخدومين والخدام مع إرسال تهنئة مباركة بنقرة واحدة عبر محرك الواتساب
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-custom" onclick="filterRadarBirthdays('week')" id="btnRadarBdayFilterWeek" style="background: #b45309; color: white; border: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            أعياد ميلاد هذا الأسبوع (±4 أيام)
+                        </button>
+                        <button type="button" class="btn-custom" onclick="filterRadarBirthdays('month')" id="btnRadarBdayFilterMonth" style="background: #fef3c7; color: #92400e; border: 1px solid #fde047; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            مواليد الشهر الحالي كامل
+                        </button>
+                        <button type="button" class="btn-custom" onclick="sendBatchWeeklyBirthdays(this)" id="btnRadarBatchBday" style="background: #166534; color: white; border: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-paper-plane"></i> تهنئة جماعية لمواليد الأسبوع عبر واتساب ✨
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive-wrapper">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                        <thead>
+                            <tr style="background: #fefce8; border-bottom: 2px solid #fde047; color: #78350f;">
+                                <th style="padding: 10px 8px; text-align: right;">الاسم</th>
+                                <th style="padding: 10px 8px;">الصفة / الفرقة</th>
+                                <th style="padding: 10px 8px;">تاريخ الميلاد</th>
+                                <th style="padding: 10px 8px;">الموعد</th>
+                                <th style="padding: 10px 8px;">الهاتف</th>
+                                <th style="padding: 10px 8px;">إجراء التهنئة بواتساب</th>
+                            </tr>
+                        </thead>
+                        <tbody id="radar_birthdaysTableBody">
+                            <tr>
+                                <td colspan="6" style="padding: 20px; color: #92400e; font-weight: bold;">جاري رصد أعياد الميلاد عبر الرادار... 🎂</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+<!-- القسم الثالث: أداة معالجة نسيان كلمة المرور للمخدوم (Offline Password Reset) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border-color: #86efac;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                     <i class="fa-solid fa-key text-success fs-5"></i>

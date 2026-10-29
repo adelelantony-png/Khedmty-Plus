@@ -189,7 +189,24 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
     <!-- تنبيه ذكي للالتزام الرعوي -->
 
-    <div id="student-warning-banner" class="alert alert-warning border-0 shadow-sm d-none mb-3 rounded-4" style="border-right: 5px solid #d97706 !important;">
+    
+    <!-- 🎂 بطاقة الاحتفال الملكي بعيد ميلاد المخدوم -->
+    <div id="student-birthday-banner" class="alert border-0 shadow-lg d-none mb-3 rounded-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #92400e 0%, #b45309 35%, #d97706 70%, #f59e0b 100%); border: 1.5px solid #fde047 !important; box-shadow: 0 8px 24px rgba(217,119,6,0.3) !important;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center">
+                <span class="fs-1 me-2" style="display:inline-block; animation: bdayBounce 1.2s infinite alternate;">🎂</span>
+                <div>
+                    <h5 class="fw-bold mb-1 text-white" style="text-shadow: 0 1px 2px rgba(0,0,0,0.2);">عيد ميلاد مبارك يا خادم المسيح! 🎉</h5>
+                    <p class="mb-0 small opacity-95">كل سنة وأنت طيب وفي حضن فادينا الصالح.. أسرة الخدمة تصلي لك بعام مبارك ملئ بالنعمة 🕊️</p>
+                </div>
+            </div>
+            <button type="button" class="btn btn-light fw-bold rounded-pill px-3 shadow-sm" onclick="triggerBirthdayCelebration(true)" style="color: #92400e; font-size: 0.85rem;">
+                <i class="fa-solid fa-sparkles text-warning me-1"></i> احتفل ثانية 🎆
+            </button>
+        </div>
+    </div>
+
+<div id="student-warning-banner" class="alert alert-warning border-0 shadow-sm d-none mb-3 rounded-4" style="border-right: 5px solid #d97706 !important;">
 
         <div class="d-flex align-items-center">
 
@@ -2008,6 +2025,261 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
 
+
+<!-- ========================================== -->
+<!-- 🎆 محرك ومودال احتفال عيد الميلاد (Fireworks & Confetti) -->
+<!-- ========================================== -->
+<canvas id="birthdayFireworksCanvas" style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:999999; display:none;"></canvas>
+
+<div class="modal fade" id="studentBirthdayModal" tabindex="-1" aria-hidden="true" style="z-index: 1000000;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="border: 2px solid #fde047 !important; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 40%);">
+            <!-- رأس المودال الاحتفالي -->
+            <div class="text-center pt-4 pb-2 px-3 position-relative" style="background: linear-gradient(135deg, #78350f 0%, #b45309 50%, #d97706 100%); color: white;">
+                <div style="font-size: 3.5rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));" class="bday-icon-anim">🎂</div>
+                <h3 class="fw-bold mb-1 text-white" style="letter-spacing:-0.5px;">عيد ميلاد مبارك وسعيد! 🎉</h3>
+                <p class="mb-0 small opacity-95" style="color: #fef3c7;">من أسرة خدمة القديس بولس لإعداد الخدام</p>
+            </div>
+            
+            <!-- جسم المودال -->
+            <div class="modal-body p-4 text-center">
+                <h4 class="fw-bold mb-2" style="color: #0c2461;" id="bdayModalStudentName">حبيبنا الغالي خادم المسيح</h4>
+                
+                <p class="text-muted small mb-3" style="line-height: 1.6;">
+                    نهنئك من كل قلوبنا بيوم ميلادك المبارك، ونصلي إلى إلهنا الحبيب يسوع المسيح أن يفيض عليك بنعمه وبركاته وحكمته، لتكون على الدوام منارة مضيئة وخادماً أميناً لمجده الأقدس.
+                </p>
+
+                <!-- الآية الذهبية التذكارية -->
+                <div class="p-3 rounded-4 mb-3" style="background: #fefce8; border: 1.5px dashed #ca8a04;">
+                    <div style="font-size: 0.78rem; color: #a16207; font-weight: bold; margin-bottom: 4px;">🕊️ آية وبركة عيد ميلادك:</div>
+                    <div class="fw-bold fs-6" style="color: #713f12; font-style: italic;">
+                        « يُعْطِيكَ حَسَبَ قَلْبِكَ، وَيُتَمِّمُ كُلَّ رَأْيِكَ »
+                    </div>
+                    <div style="font-size: 0.75rem; color: #854d0e; margin-top: 4px; font-weight: 800;">(مزمور 20 : 4)</div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <button type="button" class="btn btn-warning fw-bold px-4 rounded-pill shadow-sm text-dark" onclick="triggerFireworksCanvas(3000); playCelebrationFanfare();">
+                        <i class="fa-solid fa-fireworks me-1"></i> إطلاق الألعاب النارية 🎆
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary fw-bold px-4 rounded-pill" data-bs-dismiss="modal">
+                        ✝️ شكراً ومجداً للرب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes bdayBounce {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-6px) scale(1.1); }
+}
+.bday-icon-anim {
+    animation: bdayBounce 1s infinite alternate;
+}
+</style>
+
+<script>
+// ---------- 🎂 محرك الاحتفال بعيد الميلاد والألعاب النارية الذاتي (100% Offline) ----------
+function playCelebrationFanfare() {
+    try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const notes = [
+            { f: 523.25, d: 0.15, wait: 0.00 }, // C5
+            { f: 659.25, d: 0.15, wait: 0.12 }, // E5
+            { f: 783.99, d: 0.18, wait: 0.24 }, // G5
+            { f: 1046.50, d: 0.50, wait: 0.38 } // C6
+        ];
+        notes.forEach(n => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(n.f, ctx.currentTime + n.wait);
+            gain.gain.setValueAtTime(0, ctx.currentTime + n.wait);
+            gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + n.wait + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n.wait + n.d);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + n.wait);
+            osc.stop(ctx.currentTime + n.wait + n.d + 0.05);
+        });
+    } catch(e) {
+        console.warn('[BirthdayFanfare] يتعذر تشغيل الصوت:', e);
+    }
+}
+
+function triggerFireworksCanvas(durationMs = 4000) {
+    const canvas = document.getElementById('birthdayFireworksCanvas');
+    if (!canvas) return;
+    canvas.style.display = 'block';
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#fde047', '#38bdf8'];
+    let particles = [];
+
+    function createFirework(x, y) {
+        const count = 50 + Math.floor(Math.random() * 30);
+        for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 2 + Math.random() * 6;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - 1.5,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                size: 3 + Math.random() * 4,
+                alpha: 1,
+                decay: 0.012 + Math.random() * 0.015,
+                gravity: 0.12
+            });
+        }
+    }
+
+    // إطلاق دفعات من عدة نقاط
+    createFirework(canvas.width * 0.25, canvas.height * 0.4);
+    createFirework(canvas.width * 0.75, canvas.height * 0.4);
+    createFirework(canvas.width * 0.50, canvas.height * 0.3);
+
+    let launchInterval = setInterval(() => {
+        const rx = canvas.width * (0.2 + Math.random() * 0.6);
+        const ry = canvas.height * (0.2 + Math.random() * 0.4);
+        createFirework(rx, ry);
+    }, 450);
+
+    let animId;
+    function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.alpha -= p.decay;
+            if (p.alpha <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+            ctx.save();
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        if (particles.length > 0 || launchInterval) {
+            animId = requestAnimationFrame(render);
+        } else {
+            canvas.style.display = 'none';
+        }
+    }
+    render();
+
+    setTimeout(() => {
+        clearInterval(launchInterval);
+        launchInterval = null;
+        setTimeout(() => {
+            cancelAnimationFrame(animId);
+            canvas.style.display = 'none';
+        }, 1500);
+    }, durationMs);
+}
+
+function checkAndCelebrateBirthday() {
+    try {
+        const code = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+        const user = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
+        let dob = (user && user.dob) || localStorage.getItem('student_dob') || '';
+        let sName = (user && user.name) || localStorage.getItem('student_name') || 'خادم المسيح';
+
+        // محاولة جلب تاريخ الميلاد من كشف الفصل إذا لم يكن مخزناً بالجلسة
+        if (!dob && code) {
+            try {
+                const members = JSON.parse(localStorage.getItem('my_church_class')) || [];
+                const found = members.find(m => String(m.code || m.id || '').trim() === code);
+                if (found && found.dob) dob = found.dob;
+            } catch(e) {}
+        }
+
+        if (!dob) return;
+
+        // تحليل تاريخ الميلاد
+        let dobParts = null;
+        const cleanDob = String(dob).trim();
+        if (cleanDob.includes('-')) {
+            const p = cleanDob.split('-');
+            dobParts = p[0].length === 4 ? { m: parseInt(p[1]), d: parseInt(p[2]) } : { d: parseInt(p[0]), m: parseInt(p[1]) };
+        } else if (cleanDob.includes('/')) {
+            const p = cleanDob.split('/');
+            dobParts = p[0].length === 4 ? { m: parseInt(p[1]), d: parseInt(p[2]) } : { d: parseInt(p[0]), m: parseInt(p[1]) };
+        }
+
+        if (!dobParts || isNaN(dobParts.m) || isNaN(dobParts.d)) return;
+
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentDay = now.getDate();
+
+        // هل اليوم هو عيد ميلاد المخدوم؟
+        const isBirthdayToday = (dobParts.m === currentMonth && dobParts.d === currentDay);
+
+        if (isBirthdayToday) {
+            // إظهار البانر الاحتفالي الدائم في الصفحة
+            const banner = document.getElementById('student-birthday-banner');
+            if (banner) banner.classList.remove('d-none');
+
+            // فحص هل تم الاحتفال به تلقائياً اليوم أم لا
+            const todayKey = `${now.getFullYear()}-${currentMonth}-${currentDay}`;
+            const storageKey = `khedmety_celebrated_bday_${code}_${todayKey}`;
+            const alreadyCelebrated = localStorage.getItem(storageKey);
+
+            if (!alreadyCelebrated) {
+                localStorage.setItem(storageKey, 'true');
+                // تشغيل الاحتفال التلقائي بعد ثانية واحدة من تحميل الصفحة لضمان اكتمال الريندر
+                setTimeout(() => {
+                    triggerBirthdayCelebration(false);
+                }, 1000);
+            }
+        }
+    } catch(err) {
+        console.warn('[BirthdayRadar] خطأ في فحص عيد ميلاد المخدوم:', err);
+    }
+}
+
+function triggerBirthdayCelebration(isManual = false) {
+    const user = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
+    const sName = (user && user.name) || localStorage.getItem('student_name') || 'خادم المسيح';
+    
+    const nameEl = document.getElementById('bdayModalStudentName');
+    if (nameEl) nameEl.textContent = `حبيبنا الغالي ${sName} ❤️`;
+
+    // 1. إطلاق الألعاب النارية
+    triggerFireworksCanvas(isManual ? 4500 : 5000);
+
+    // 2. تشغيل اللحن الموسيقي الاحتفالي
+    playCelebrationFanfare();
+
+    // 3. فتح المودال التكريمي
+    if (window.bootstrap && bootstrap.Modal) {
+        const modalEl = document.getElementById('studentBirthdayModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+}
+
+// تشغيل الفحص عند اكتمال تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    checkAndCelebrateBirthday();
+});
+</script>
 </body>
 
 </html>

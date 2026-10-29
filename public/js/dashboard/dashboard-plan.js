@@ -608,6 +608,66 @@ myBanner.style.display = 'none';
 
 }
 
+
+// ==========================================
+// 🚀 جسر واتساب الذكي المباشر (Direct WhatsApp Bridge)
+// ==========================================
+async function sendWhatsAppDirectMessage(phone, message, btnEl) {
+    let cleanPhone = String(phone || '').replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+    if (!cleanPhone) {
+        alert('لا يوجد رقم هاتف صالح للمخدوم.');
+        return false;
+    }
+
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+    }
+
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+        const res = await fetch('http://127.0.0.1:3000/api/send-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone: cleanPhone, message: message }),
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.success) {
+                if (btnEl) {
+                    btnEl.innerHTML = '✅ تم الإرسال من الواتساب!';
+                    btnEl.style.background = '#15803d';
+                    btnEl.style.color = '#ffffff';
+                }
+                return true;
+            }
+        }
+        throw new Error('Engine returned error');
+    } catch (err) {
+        console.warn('[WhatsAppDirect] تعذر الإرسال الآلي من المحرك، جاري الفتح عبر wa.me:', err);
+        const waUrl = 'https://wa.me/' + encodeURIComponent(cleanPhone) + '?text=' + encodeURIComponent(message);
+        window.open(waUrl, '_blank');
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = '📲 تم فتح المحادثة';
+            btnEl.style.background = '#0284c7';
+            btnEl.style.color = '#ffffff';
+        }
+        return false;
+    }
+}
+
+function sendWhatsAppBirthdayDirect(name, phone, btnEl) {
+    const rawMsg = 'كل سنة وأنت طيب يا ' + name + ' وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨';
+    return sendWhatsAppDirectMessage(phone, rawMsg, btnEl);
+}
+
 function checkUpcomingBirthdays() {
 
 const box = document.getElementById('birthdayAlertList');
@@ -709,23 +769,22 @@ return;
 }
 
 box.innerHTML = matchedBirthdays.map(b => {
+    let cleanPhone = formatWhatsAppPhone(b.phone);
+    let waMsg = encodeURIComponent(`كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`);
 
-let cleanPhone = formatWhatsAppPhone(b.phone);
-
-let waMsg = encodeURIComponent(`كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂`);
-
-return `
-
-<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ffeaa7; padding:4px 0; flex-wrap:wrap; gap:5px;">
-
-<span>🎉 <strong>${escapeHtml(b.name)}</strong> (${escapeHtml(b.type)}) - ${escapeHtml(b.date)}</span>
-
-${cleanPhone ? `<a href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${waMsg}" target="_blank" class="btn-mini btn-success">تهنئة واتساب 📲</a>` : ''}
-
-</div>
-
-`;
-
+    return `
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ffeaa7; padding:6px 0; flex-wrap:wrap; gap:6px;">
+        <span>🎉 <strong>${escapeHtml(b.name)}</strong> (${escapeHtml(b.type)}) - ${escapeHtml(b.date)}</span>
+        <div style="display:flex; gap:4px; align-items:center;">
+            ${cleanPhone ? `
+                <button type="button" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${escapeHtml(cleanPhone)}', this)" class="btn-mini btn-success" style="cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
+                    <i class="fa-brands fa-whatsapp"></i> إرسال عبر واتساب 🚀
+                </button>
+                <a href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${waMsg}" target="_blank" class="btn-mini" style="background:#f1f5f9; color:#334155; text-decoration:none;" title="فتح يدوي">📲</a>
+            ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
+        </div>
+    </div>
+    `;
 }).join('');
 
 }
@@ -733,6 +792,8 @@ ${cleanPhone ? `<a href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${
 // ==========================================
 // Explicit Window Exports
 if (typeof window !== 'undefined') {
+  window.sendWhatsAppDirectMessage = sendWhatsAppDirectMessage;
+  window.sendWhatsAppBirthdayDirect = sendWhatsAppBirthdayDirect;
   window.checkUpcomingBirthdays = checkUpcomingBirthdays;
   window.checkUpcomingMasterPlanEvents = checkUpcomingMasterPlanEvents;
   window.renderMaterialsList = renderMaterialsList;

@@ -92,7 +92,359 @@
         if (dateEl) dateEl.textContent = c.formatted || 'التقويم القبطي';
     }
 
-    function renderRadarDashboard() {
+    
+// ==========================================
+// 🚀 رادار النبض الإحصائي وأعياد الميلاد والغياب الحرج
+// ==========================================
+window.currentRadarAbsenceFilter = 'all';
+window.lastRadarAbsentMems = [];
+window.lastRadarBirthdaysList = [];
+
+function renderRadarPulseChart(validMeetingDates) {
+    const container = document.getElementById('radar_attendancePulseBars');
+    const commentEl = document.getElementById('radar_pulseTrendComment');
+    const stabilityEl = document.getElementById('radar_pulseOverallStability');
+    if (!container || !members || members.length === 0) return;
+
+    const recentDates = (validMeetingDates || []).slice(0, 6).reverse();
+    if (recentDates.length === 0) {
+        container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; padding:20px; width:100%; text-align:center;">لا توجد جلسات حضور مسجلة كافية لعرض النبض البياني حتى الآن.</div>';
+        return;
+    }
+
+    const totalMembers = members.length;
+    let rates = [];
+    let barsHtml = '';
+
+    recentDates.forEach(d => {
+        const list = attendanceRecord[d] || [];
+        const attended = list.filter(r => r.attended && !r.isAbsentDueToDelay).length;
+        const liturgy = list.filter(r => r.communion || r.liturgy).length;
+        const attPct = totalMembers > 0 ? Math.round((attended / totalMembers) * 100) : 0;
+        const litPct = totalMembers > 0 ? Math.round((liturgy / totalMembers) * 100) : 0;
+        rates.push(attPct);
+
+        const dParts = d.split('-');
+        const shortDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}` : d;
+        const barHeight = Math.max(16, Math.round(attPct * 1.05));
+
+        barsHtml += `
+            <div style="flex: 1; min-width: 65px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                <div style="font-size: 0.76rem; font-weight: 800; color: #1e3a8a;">${attPct}%</div>
+                <div style="width: 100%; max-width: 46px; height: 110px; display: flex; align-items: flex-end; justify-content: center; background: #f1f5f9; border-radius: 8px; overflow: hidden; position: relative;" title="تاريخ: ${d} | الحضور: ${attended} (${attPct}%) | القداس: ${liturgy} (${litPct}%)">
+                    <div style="width: 52%; height: ${barHeight}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
+                    <div style="width: 48%; height: ${Math.max(8, Math.round(litPct * 1.05))}px; background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
+                </div>
+                <div style="font-size: 0.74rem; font-weight: bold; color: #475569; margin-top: 2px;">${shortDate}</div>
+                <div style="font-size: 0.68rem; color: #94a3b8;">${attended} مخدوم</div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = barsHtml;
+
+    const avgStability = rates.length > 0 ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
+    if (stabilityEl) stabilityEl.textContent = `📈 متوسط الاستقرار: ${avgStability}%`;
+
+    if (rates.length >= 2 && commentEl) {
+        const lastRate = rates[rates.length - 1];
+        const prevRate = rates[rates.length - 2];
+        const diff = lastRate - prevRate;
+        if (diff > 0) {
+            commentEl.innerHTML = `<span style="color:#166534;">↗️ نمو مبارك في الحضور (+${diff}%) مقارنة بالجلسة السابقة! نشكر ربنا.</span>`;
+        } else if (diff === 0) {
+            commentEl.innerHTML = `<span style="color:#1e40af;">➡️ الحضور مستقر ومحافظ على معدله المتميز (${lastRate}%).</span>`;
+        } else {
+            commentEl.innerHTML = `<span style="color:#b45309;">↘️ تراجع في الحضور (${diff}%) - يرجى تفعيل دور رادار الافتقاد.</span>`;
+        }
+    }
+}
+
+function sendWhatsAppAbsenceDirect(name, phone, weeks, btn) {
+    const rawMsg = `سلام ونعمة يا أخي الحبيب ${name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام، ومكانك غالي علينا. حابين نطمئن عليك ونسمع صوتك، وربنا يدبر ونفرح بوجودك معنا الجمعة القادمة بالقداس والاجتماع 🕊️`;
+    if (typeof sendWhatsAppDirectMessage === 'function') {
+        return sendWhatsAppDirectMessage(phone, rawMsg, btn);
+    }
+    const cleanPhone = String(phone || '').replace(/[^0-9]/g, '');
+    window.open('https://wa.me/' + (cleanPhone.startsWith('01') ? '2' + cleanPhone : cleanPhone) + '?text=' + encodeURIComponent(rawMsg), '_blank');
+}
+
+function filterRadarAbsence(filterType = 'all') {
+    window.currentRadarAbsenceFilter = filterType;
+    const btnAll = document.getElementById('btnRadarAbsFilterAll');
+    const btnCrit = document.getElementById('btnRadarAbsFilterCritical');
+    if (btnAll && btnCrit) {
+        if (filterType === 'all') {
+            btnAll.style.background = '#0c2461'; btnAll.style.color = 'white';
+            btnCrit.style.background = '#fef2f2'; btnCrit.style.color = '#dc2626';
+        } else {
+            btnCrit.style.background = '#dc2626'; btnCrit.style.color = 'white';
+            btnAll.style.background = '#f1f5f9'; btnAll.style.color = '#334155';
+        }
+    }
+    renderRadarAbsenceTableBody();
+}
+
+function renderRadarAbsenceTableBody() {
+    const tbodyAbs = document.getElementById('radar_absenceTableBody');
+    if (!tbodyAbs) return;
+
+    let displayList = window.lastRadarAbsentMems || [];
+    if (window.currentRadarAbsenceFilter === 'critical') {
+        displayList = displayList.filter(m => m.consecutiveWeeks >= 3);
+    }
+
+    if (displayList.length === 0) {
+        tbodyAbs.innerHTML = `<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد حالات مطابقة لشرط الفلتر حالياً. 🟢</td></tr>`;
+        return;
+    }
+
+    tbodyAbs.innerHTML = displayList.map(m => {
+        let cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+        const waMsg = encodeURIComponent(`سلام ونعمة يا أخي الحبيب ${m.name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام الجمعة الماضية، وحابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونشوفك الجمعة القادمة بالقداس والاجتماع 🕊️`);
+
+        const isCritical = m.consecutiveWeeks >= 3;
+        const badgeHtml = isCritical 
+            ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.85rem; font-weight:900;">🔴 انقطاع حرج (${m.consecutiveWeeks} أسابيع)</span>`
+            : `<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde047; font-size:0.85rem; font-weight:bold;">🟡 غياب أسبوعين</span>`;
+
+        return `
+            <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : 'transparent'};">
+                <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${escapeHtml(m.name)}</td>
+                <td style="padding: 8px; font-weight: bold;">${escapeHtml(m.code)}</td>
+                <td style="padding: 8px;">${escapeHtml(m.stage)}</td>
+                <td style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
+                <td style="padding: 8px;">${badgeHtml}</td>
+                <td style="padding: 8px;">${m.phone || '-'}</td>
+                <td style="padding: 8px;">
+                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                        ${m.phone ? `
+                            <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-brands fa-whatsapp"></i> افتقاد واتساب 🚀
+                            </button>
+                            <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 6px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;" title="فتح يدوي">📲</a>
+                            <a href="tel:${m.phone}" class="btn-custom" style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;">
+                                <i class="fa-solid fa-phone"></i>
+                            </a>
+                        ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function printCriticalAbsenceList() {
+    const critical = (window.lastRadarAbsentMems || []).filter(m => m.consecutiveWeeks >= 3);
+    if (critical.length === 0) {
+        alert('نشكر ربنا! لا توجد حالات انقطاع حرج (3+ أسابيع) حالياً.');
+        return;
+    }
+
+    const printWin = window.open('', '_blank', 'width=800,height=600');
+    const todayStr = new Date().toLocaleDateString('ar-EG');
+    let rowsHtml = critical.map((m, idx) => `
+        <tr style="border-bottom: 1px solid #ccc; text-align: center;">
+            <td style="padding: 8px;">${idx + 1}</td>
+            <td style="padding: 8px; text-align: right; font-weight: bold;">${escapeHtml(m.name)}</td>
+            <td style="padding: 8px;">${escapeHtml(m.code)}</td>
+            <td style="padding: 8px;">${escapeHtml(m.stage)}</td>
+            <td style="padding: 8px; font-weight: bold; color: red;">${m.consecutiveWeeks} أسابيع</td>
+            <td style="padding: 8px;">${m.phone || '-'}</td>
+            <td style="padding: 8px; width: 140px; border-right: 1px solid #ddd;">&nbsp;</td>
+        </tr>
+    `).join('');
+
+    printWin.document.write(`
+        <html dir="rtl" lang="ar">
+        <head>
+            <title>كشف الافتقاد المنزلي العاجل - حالات الانقطاع 3+ أسابيع</title>
+            <style>
+                body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; padding: 20px; direction: rtl; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th { background: #f3f4f6; border-bottom: 2px solid #333; padding: 8px; font-size: 0.9rem; }
+            </style>
+        </head>
+        <body>
+            <div style="text-align: center; border-bottom: 2px solid #0c2461; padding-bottom: 10px;">
+                <h2 style="margin: 0; color: #0c2461;">اجتماع القديس بولس لإعداد الخدام</h2>
+                <h3 style="margin: 4px 0; color: #dc2626;">كشف الافتقاد المنزلي العاجل (حالات الانقطاع 3 أسابيع فأكثر)</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.9rem;">تاريخ الطباعة: ${todayStr} | إجمالي الحالات: ${critical.length} مخدوم</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>م</th><th>المخدوم</th><th>الكود</th><th>الفرقة</th><th>أسابيع الانقطاع</th><th>الهاتف</th><th>ملاحظات الزيارة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+            <div style="margin-top: 30px; display: flex; justify-content: space-between;">
+                <div>مسؤول الافتقاد: ...........................</div>
+                <div>أمين الخدمة: ...........................</div>
+            </div>
+            <script>window.onload = function() { window.print(); };</script>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
+}
+
+function renderRadarBirthdays(filterMode = 'week') {
+    const tbody = document.getElementById('radar_birthdaysTableBody');
+    const btnWeek = document.getElementById('btnRadarBdayFilterWeek');
+    const btnMonth = document.getElementById('btnRadarBdayFilterMonth');
+    if (!tbody) return;
+
+    if (btnWeek && btnMonth) {
+        if (filterMode === 'week') {
+            btnWeek.style.background = '#b45309'; btnWeek.style.color = '#ffffff';
+            btnMonth.style.background = '#fef3c7'; btnMonth.style.color = '#92400e';
+        } else {
+            btnMonth.style.background = '#b45309'; btnMonth.style.color = '#ffffff';
+            btnWeek.style.background = '#fef3c7'; btnWeek.style.color = '#92400e';
+        }
+    }
+
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentDay = now.getDate();
+
+    const parseDobParts = (dob) => {
+        if (!dob) return null;
+        let cleanDob = dob.toString().trim();
+        let parts;
+        if (cleanDob.includes('-')) {
+            parts = cleanDob.split('-');
+            return parts[0].length === 4 ? { year: parseInt(parts[0]), month: parseInt(parts[1]), day: parseInt(parts[2]) } : { day: parseInt(parts[0]), month: parseInt(parts[1]), year: parseInt(parts[2]) };
+        } else if (cleanDob.includes('/')) {
+            parts = cleanDob.split('/');
+            return parts[0].length === 4 ? { year: parseInt(parts[0]), month: parseInt(parts[1]), day: parseInt(parts[2]) } : { day: parseInt(parts[0]), month: parseInt(parts[1]), year: parseInt(parts[2]) };
+        }
+        return null;
+    };
+
+    let list = [];
+    (members || []).forEach(m => {
+        if (m.dob) {
+            const p = parseDobParts(m.dob);
+            if (p) {
+                const diffDays = p.day - currentDay;
+                const isMatch = filterMode === 'week' 
+                    ? (p.month === currentMonth && Math.abs(diffDays) <= 4)
+                    : (p.month === currentMonth);
+                if (isMatch) {
+                    list.push({ name: m.name, role: 'دارس (' + (m.stage || 'سنة أولى') + ')', phone: m.phone || '', date: `${p.day}/${p.month}`, diffDays });
+                }
+            }
+        }
+    });
+
+    (servants || []).forEach(s => {
+        if (s.dob) {
+            const p = parseDobParts(s.dob);
+            if (p) {
+                const diffDays = p.day - currentDay;
+                const isMatch = filterMode === 'week' 
+                    ? (p.month === currentMonth && Math.abs(diffDays) <= 4)
+                    : (p.month === currentMonth);
+                if (isMatch) {
+                    list.push({ name: s.name, role: 'خادم (' + (s.role || 'خادم') + ')', phone: s.phone || '', date: `${p.day}/${p.month}`, diffDays });
+                }
+            }
+        }
+    });
+
+    list.sort((a, b) => a.diffDays - b.diffDays);
+    window.lastRadarBirthdaysList = list;
+
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="padding: 20px; color: #92400e; font-weight: bold; background: #fffbeb;">لا توجد أعياد ميلاد مسجلة في هذا النطاق حالياً. 🎂</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = list.map(b => {
+        let cleanPhone = (b.phone || '').replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+        const waMsg = encodeURIComponent(`كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`);
+
+        let statusBadge = '';
+        if (b.diffDays === 0) {
+            statusBadge = '<span class="badge" style="background:#fde047; color:#78350f; font-weight:900; font-size:0.82rem; padding:4px 8px;">🎂 اليوم! مبارك</span>';
+        } else if (b.diffDays > 0) {
+            statusBadge = `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:bold; font-size:0.8rem; padding:4px 8px;">بعد ${b.diffDays} يوم</span>`;
+        } else {
+            statusBadge = `<span class="badge" style="background:#f1f5f9; color:#475569; font-weight:bold; font-size:0.8rem; padding:4px 8px;">منذ ${Math.abs(b.diffDays)} يوم</span>`;
+        }
+
+        return `
+            <tr style="border-bottom: 1px solid #fef08a;">
+                <td style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(b.name)}</td>
+                <td style="padding: 8px; font-weight: bold; color: #475569;">${escapeHtml(b.role)}</td>
+                <td style="padding: 8px; font-weight: bold;">${escapeHtml(b.date)}</td>
+                <td style="padding: 8px;">${statusBadge}</td>
+                <td style="padding: 8px;">${b.phone || '-'}</td>
+                <td style="padding: 8px;">
+                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                        ${cleanPhone ? `
+                            <button type="button" class="btn-custom" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${cleanPhone}', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-brands fa-whatsapp"></i> تهنئة واتساب 🚀
+                            </button>
+                            <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 6px; font-size: 0.75rem; background: #fefce8; color: #854d0e; border: 1px solid #fef08a; text-decoration: none; border-radius: 6px;" title="فتح يدوي">📲</a>
+                        ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function sendBatchWeeklyBirthdays(btn) {
+    const list = (window.lastRadarBirthdaysList || []).filter(b => b.phone && b.diffDays >= -1 && b.diffDays <= 4);
+    if (list.length === 0) {
+        alert('لا توجد أرقام هواتف مسجلة لمواليد هذا الأسبوع للإرسال.');
+        return;
+    }
+
+    if (!confirm(`هل تريد إرسال رسائل تهنئة مباركة لعدد (${list.length}) مخدوم وخادم عبر واتساب الخدمة؟`)) {
+        return;
+    }
+
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+
+    let successCount = 0;
+    for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الإرسال (${i + 1}/${list.length}): ${escapeHtml(item.name)}...`;
+        
+        let cleanPhone = item.phone.replace(/[^0-9]/g, '');
+        if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
+
+        const rawMsg = `كل سنة وأنت طيب يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`;
+        
+        try {
+            const res = await fetch('http://127.0.0.1:3000/api/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: cleanPhone, message: rawMsg })
+            });
+            if (res.ok) successCount++;
+        } catch(e) {
+            console.warn('Batch send error for:', item.name, e);
+        }
+        await new Promise(r => setTimeout(r, 2000));
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = `✅ تم إرسال (${successCount} من ${list.length}) تهنئة بنجاح!`;
+    setTimeout(() => { btn.innerHTML = origHtml; }, 5000);
+}
+
+function renderRadarDashboard() {
         if (!members || members.length === 0) return;
         renderRadarCopticFasting();
 
@@ -123,11 +475,9 @@
         const serviceStartStr = sSettings.serviceStart || '2026-09-01';
         const todayIso = new Date().toISOString().split('T')[0];
 
-        // حصر تواريخ الحضور فقط بالاجتماعات التي تمت في نطاق السنة الخدمية الحالية وحتى اليوم
         const validMeetingDates = allDates.filter(d => d >= serviceStartStr && d <= todayIso);
 
         const absentMems = [];
-        // إذا لم تبدأ الخدمة بعد أو لم تُعقد جلسات حضور بعد تاريخ البداية، يكون الغياب تلقائياً صفراً
         if (validMeetingDates.length > 0) {
             members.forEach(m => {
                 const mCode = String(m.code || m.id || '');
@@ -140,7 +490,7 @@
                     const found = recs.find(r => String(r.id) === String(m.id) || String(r.code) === mCode);
                     if (found && found.attended && !found.isAbsentDueToDelay) {
                         if (!lastSeen) lastSeen = d;
-                        break; // انقطعت سلسلة الغياب
+                        break;
                     } else {
                         consecAbs++;
                     }
@@ -161,54 +511,25 @@
             });
         }
 
-        // ترتيب الغائبين تنازلياً حسب مدة الانقطاع
         absentMems.sort((a, b) => b.consecutiveWeeks - a.consecutiveWeeks);
+        window.lastRadarAbsentMems = absentMems;
 
         const elAbsCount = document.getElementById('radar_kpiAbsenceCount');
         if (elAbsCount) elAbsCount.textContent = absentMems.length;
         const elAbsBadge = document.getElementById('radar_absenceAlertBadge');
         if (elAbsBadge) elAbsBadge.innerHTML = `<i class="fa-solid fa-bell"></i> تم رصد: ${absentMems.length} مخدومين`;
 
-        const tbodyAbs = document.getElementById('radar_absenceTableBody');
-        if (tbodyAbs) {
-            if (absentMems.length === 0) {
-                tbodyAbs.innerHTML = `<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا يوجد مخدومون متغيبون لأسبوعين متتاليين حالياً. 🟢</td></tr>`;
-            } else {
-                tbodyAbs.innerHTML = absentMems.map(m => {
-                    let cleanPhone = m.phone.replace(/[^0-9]/g, '');
-                    if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
-                    const waMsg = encodeURIComponent(`سلام ونعمة يا أخي الحبيب ${m.name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام الجمعة الماضية، وحابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونشوفك الجمعة القادمة بالقداس والاجتماع 🕊️`);
+        // رسم جدول الغياب الذكي
+        renderRadarAbsenceTableBody();
 
-                    return `
-                        <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${m.name}</td>
-                            <td style="padding: 8px; font-weight: bold;">${m.code}</td>
-                            <td style="padding: 8px;">${m.stage}</td>
-                            <td style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${m.gender}</span></td>
-                            <td style="padding: 8px; font-weight: 900; color: #dc2626; font-size: 0.95rem;">
-                                ⚠️ ${m.consecutiveWeeks} أسابيع
-                            </td>
-                            <td style="padding: 8px;">${m.phone || '-'}</td>
-                            <td style="padding: 8px;">
-                                <div style="display: flex; gap: 6px; justify-content: center;">
-                                    ${m.phone ? `
-                                        <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                                            <i class="fa-brands fa-whatsapp me-1"></i> افتقاد واتساب
-                                        </a>
-                                        <a href="tel:${m.phone}" class="btn-custom" style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;">
-                                            <i class="fa-solid fa-phone"></i>
-                                        </a>
-                                    ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-            }
-        }
+        // 3. رسم نبض الاجتماع البياني
+        renderRadarPulseChart(validMeetingDates);
 
-        // 3. رادار مهلة الاعتراف (Confession Radar)
+        // 4. رادار مهلة الاعتراف
         renderRadarConfessionSection();
+
+        // 5. رادار أعياد الميلاد
+        renderRadarBirthdays('week');
     }
 
         function renderRadarConfessionSection() {
@@ -531,3 +852,13 @@ switchTab(target);
 }
 
 // ==========================================
+
+if (typeof window !== 'undefined') {
+    window.renderRadarDashboard = renderRadarDashboard;
+    window.renderRadarPulseChart = renderRadarPulseChart;
+    window.renderRadarBirthdays = renderRadarBirthdays;
+    window.filterRadarAbsence = filterRadarAbsence;
+    window.printCriticalAbsenceList = printCriticalAbsenceList;
+    window.sendWhatsAppAbsenceDirect = sendWhatsAppAbsenceDirect;
+    window.sendBatchWeeklyBirthdays = sendBatchWeeklyBirthdays;
+}

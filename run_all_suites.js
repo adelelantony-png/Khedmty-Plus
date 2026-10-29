@@ -18,7 +18,8 @@ const tests = [
   'test_spiritual_oral_pending_isolation.js',
   'test_notes_tab_and_category.js',
   'test_ux_declutter_and_enhancements.js',
-  'test_interactive_guide_page.js'
+  'test_interactive_guide_page.js',
+  'tests/test_birthday_and_radar.js'
 ];
 
 console.log('================================================================');

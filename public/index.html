@@ -330,6 +330,8 @@ async function startSession(r, remember, customToken) {
       code: String(m.code ?? m.id ?? '').trim(),
       name: m.name || '',
       level: m.level || m.stage || 'الفرقة الأولى',
+      dob: m.dob || '',
+      phone: m.phone || '',
       role: 'student',
       loginTimestamp: Date.now()
     };
@@ -337,6 +339,7 @@ async function startSession(r, remember, customToken) {
     localStorage.setItem('student_code', studentUser.code);
     localStorage.setItem('student_name', studentUser.name);
     localStorage.setItem('student_level', studentUser.level);
+    if (studentUser.dob) localStorage.setItem('student_dob', studentUser.dob);
     localStorage.setItem('user_role', 'student');
     location.href = 'student.html';
   }
