@@ -631,7 +631,8 @@ async function sendWhatsAppDirectMessage(phone, message, btnEl) {
 
         const res = await fetch('http://127.0.0.1:3000/api/send-message', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json',
+            'x-api-key': 'khedmety-servant-key-2026' },
             body: JSON.stringify({ phone: cleanPhone, message: message }),
             signal: controller.signal
         });

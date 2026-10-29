@@ -429,7 +429,8 @@ async function sendBatchWeeklyBirthdays(btn) {
         try {
             const res = await fetch('http://127.0.0.1:3000/api/send-message', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json',
+                'x-api-key': 'khedmety-servant-key-2026' },
                 body: JSON.stringify({ phone: cleanPhone, message: rawMsg })
             });
             if (res.ok) successCount++;
@@ -530,6 +531,9 @@ function renderRadarDashboard() {
 
         // 5. رادار أعياد الميلاد
         renderRadarBirthdays('week');
+
+        // 6. تحميل درع الأمان والتراخيص
+        loadSecurityShieldData();
     }
 
         function renderRadarConfessionSection() {
@@ -861,4 +865,187 @@ if (typeof window !== 'undefined') {
     window.printCriticalAbsenceList = printCriticalAbsenceList;
     window.sendWhatsAppAbsenceDirect = sendWhatsAppAbsenceDirect;
     window.sendBatchWeeklyBirthdays = sendBatchWeeklyBirthdays;
+}
+
+
+// ==========================================
+// 🛡️ دوال درع الأمان والرقابة الرقمية (Security Shield Logic)
+// ==========================================
+async function loadSecurityShieldData() {
+    const tbody = document.getElementById('sec_tokensTableBody');
+    if (!tbody) return;
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/security/tokens', {
+            headers: { 'x-api-key': 'khedmety-servant-key-2026' }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.tokens) {
+                renderSecurityTokensTable(data.tokens);
+                return;
+            }
+        }
+    } catch(e) {
+        console.warn('[SecurityShield] تعذر الاتصال بمحرك الأمان، جاري استخدام العرض الآمن:', e);
+    }
+
+    // عرض بديل في حالة عدم تشغيل المحرك
+    renderSecurityTokensTable([
+        { id: 1, name: 'مفتاح أمين الخدمة العام (Master Admin)', token: 'khedmety-master-key-2026', role: 'admin', allowed_stages: '*', hourly_limit: 9999, is_active: 1 },
+        { id: 2, name: 'مفتاح الخدام المعتمد الافتراضي', token: 'khedmety-servant-key-2026', role: 'servant', allowed_stages: '*', hourly_limit: 120, is_active: 1 }
+    ]);
+}
+
+function renderSecurityTokensTable(tokens) {
+    const tbody = document.getElementById('sec_tokensTableBody');
+    if (!tbody) return;
+
+    if (!tokens || tokens.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="padding:15px; color:#64748b;">لا توجد مفاتيح مسجلة.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = tokens.map(t => {
+        const isMaster = t.role === 'admin';
+        const maskedToken = t.token.length > 12 ? t.token.substring(0, 10) + '••••••••' : t.token;
+        const stageBadge = t.allowed_stages === '*' 
+            ? '<span class="badge" style="background:#dcfce7; color:#15803d;">كافة المراحل (شامل) 🌐</span>'
+            : `<span class="badge" style="background:#fef3c7; color:#b45309;">${escapeHtml(t.allowed_stages)}</span>`;
+
+        return `
+            <tr style="border-bottom: 1px solid #e0f2fe; background: ${t.is_active ? 'transparent' : '#f8fafc'};">
+                <td style="padding: 10px 8px; text-align: right; font-weight: bold; color: #0c2461;">
+                    ${escapeHtml(t.name)}
+                </td>
+                <td style="padding: 10px 8px; font-family: monospace; font-size: 0.85rem;">
+                    <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;" title="${escapeHtml(t.token)}">
+                        ${escapeHtml(maskedToken)}
+                    </span>
+                    <button type="button" onclick="copySecurityToken('${escapeHtml(t.token)}')" class="btn-mini" style="background: transparent; border: none; cursor: pointer; color: #0284c7;" title="نسخ المفتاح">📋</button>
+                </td>
+                <td style="padding: 10px 8px;">
+                    <span class="badge ${isMaster ? 'bg-danger' : 'bg-primary'}" style="font-size: 0.75rem;">
+                        ${isMaster ? 'أمين الخدمة 👑' : 'خادم أسرة 👤'}
+                    </span>
+                </td>
+                <td style="padding: 10px 8px;">${stageBadge}</td>
+                <td style="padding: 10px 8px; font-weight: bold; color: #475569;">
+                    ${t.hourly_limit} رسالة/ساعة
+                </td>
+                <td style="padding: 10px 8px;">
+                    ${t.is_active ? `
+                        <span class="badge bg-success" style="font-size: 0.75rem;">نشط 🟢</span>
+                        ${!isMaster ? `<button type="button" onclick="revokeSecurityToken(${t.id})" class="btn-mini btn-danger ms-1" style="cursor:pointer; font-size:0.7rem; padding:2px 6px;">إيقاف</button>` : ''}
+                    ` : '<span class="badge bg-secondary" style="font-size: 0.75rem;">معطل 🔴</span>'}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function copySecurityToken(token) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(token);
+        alert('تم نسخ مفتاح الترخيص الأمني إلى الحافظة بنجاح! 📋');
+    } else {
+        prompt('انسخ المفتاح يدوياً:', token);
+    }
+}
+
+async function createNewSecurityToken() {
+    const servantName = prompt('أدخل اسم الخادم أو الغرض من الترخيص (مثال: خادم أولى بنين - أ. مينا):');
+    if (!servantName || !servantName.trim()) return;
+
+    const stageChoice = prompt('حدد نطاق المرحلة المسموحة للمفتاح:\nاكتب (*) للوصول الشامل، أو اسم المرحلة تحديداً (مثال: سنة أولى أو سنة ثانية):', '*');
+    if (stageChoice === null) return;
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/security/tokens', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'khedmety-master-key-2026'
+            },
+            body: JSON.stringify({
+                name: servantName.trim(),
+                role: stageChoice.trim() === '*' ? 'admin' : 'servant',
+                allowed_stages: stageChoice.trim(),
+                hourly_limit: stageChoice.trim() === '*' ? 300 : 60
+            })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            alert(`تم بنجاح إصدار المفتاح الأمني للخادم [ ${servantName} ]:\nالمفتاح: ${data.token.token}\nالنطاق: ${data.token.allowed_stages}`);
+            loadSecurityShieldData();
+        } else {
+            alert('تعذر إصدار المفتاح من المحرك. تأكد من تشغيل السيرفر.');
+        }
+    } catch(err) {
+        alert('تعذر الاتصال بمحرك الأمان: ' + err.message);
+    }
+}
+
+async function revokeSecurityToken(id) {
+    if (!confirm('هل أنت متأكد من رغبتك في إيقاف وإلغاء هذا المفتاح الأمني؟')) return;
+    try {
+        const res = await fetch(`http://127.0.0.1:3000/api/security/tokens/${id}`, {
+            method: 'DELETE',
+            headers: { 'x-api-key': 'khedmety-master-key-2026' }
+        });
+        if (res.ok) {
+            alert('تم إيقاف المفتاح بنجاح! ✅');
+            loadSecurityShieldData();
+        }
+    } catch(e) {
+        alert('حدث خطأ أثناء إيقاف المفتاح: ' + e.message);
+    }
+}
+
+async function toggleSecurityAuditLogs() {
+    const container = document.getElementById('sec_auditLogsContainer');
+    const listEl = document.getElementById('sec_auditLogsList');
+    if (!container || !listEl) return;
+
+    if (container.style.display === 'block') {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'block';
+    listEl.innerHTML = '<div style="color:#94a3b8;">جاري جلب سجل التدقيق الأمني...</div>';
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/security/audit-logs', {
+            headers: { 'x-api-key': 'khedmety-servant-key-2026' }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.logs && data.logs.length > 0) {
+                listEl.innerHTML = data.logs.map(l => {
+                    const time = new Date(l.created_at).toLocaleTimeString('ar-EG');
+                    const isOk = l.status === 'allowed';
+                    const color = isOk ? '#4ade80' : '#f87171';
+                    return `
+                        <div style="border-bottom: 1px dashed #334155; padding: 4px 0; display: flex; justify-content: space-between; gap: 8px;">
+                            <span>[${time}] <strong style="color:#38bdf8;">${escapeHtml(l.token_name)}</strong> ➔ ${escapeHtml(l.endpoint)} (${escapeHtml(l.phone_target || 'عام')})</span>
+                            <span style="color: ${color}; font-weight: bold;">${l.status === 'allowed' ? 'مصرح 🟢' : 'محظور 🔴 (' + escapeHtml(l.reason) + ')'}</span>
+                        </div>
+                    `;
+                }).join('');
+                return;
+            }
+        }
+    } catch(e) {}
+
+    listEl.innerHTML = '<div style="color:#94a3b8;">لا توجد أحداث أمنية مسجلة حديثاً (نشكر ربنا). 🟢</div>';
+}
+
+if (typeof window !== 'undefined') {
+    window.loadSecurityShieldData = loadSecurityShieldData;
+    window.createNewSecurityToken = createNewSecurityToken;
+    window.revokeSecurityToken = revokeSecurityToken;
+    window.toggleSecurityAuditLogs = toggleSecurityAuditLogs;
+    window.copySecurityToken = copySecurityToken;
 }
