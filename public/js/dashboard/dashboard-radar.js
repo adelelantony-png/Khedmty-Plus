@@ -532,7 +532,10 @@ function renderRadarDashboard() {
         // 5. رادار أعياد الميلاد
         renderRadarBirthdays('week');
 
-        // 6. تحميل درع الأمان والتراخيص
+        // 6. تحميل رادار الاعتذارات اللحظية
+        loadRadarExcuses();
+
+        // 7. تحميل درع الأمان والتراخيص
         loadSecurityShieldData();
     }
 
@@ -1048,4 +1051,239 @@ if (typeof window !== 'undefined') {
     window.revokeSecurityToken = revokeSecurityToken;
     window.toggleSecurityAuditLogs = toggleSecurityAuditLogs;
     window.copySecurityToken = copySecurityToken;
+}
+
+
+// ==========================================
+// 🔔 دوال رادار الاعتذارات اللحظية (Inbound Excuses Logic)
+// ==========================================
+window.lastRadarExcusesList = [];
+window.currentRadarExcuseFilter = 'pending';
+
+async function loadRadarExcuses() {
+    const tbody = document.getElementById('radar_excusesTableBody');
+    const badge = document.getElementById('radar_excusePendingBadge');
+    const kpiCount = document.getElementById('radar_kpiExcusesPendingCount');
+    if (!tbody) return;
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/excuses', {
+            headers: { 'x-api-key': 'khedmety-servant-key-2026' }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.success) {
+                window.lastRadarExcusesList = data.excuses || [];
+                const pending = data.stats?.pendingCount || 0;
+                if (badge) badge.textContent = `⏳ ${pending} اعتذار قيد المراجعة`;
+                if (kpiCount) kpiCount.textContent = pending;
+                renderRadarExcusesTable();
+                return;
+            }
+        }
+    } catch(err) {
+        console.warn('[ExcusesRadar] تعذر الاتصال بمحرك الاعتذارات، جاري استخدام العرض الآمن:', err);
+    }
+
+    if (badge) badge.textContent = '⏳ 0 اعتذار معلق';
+    if (kpiCount) kpiCount.textContent = '0';
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#166534; font-weight:bold; background:#f0fdf4;">نشكر ربنا! لا توجد اعتذارات واردة معلقة حالياً. 🟢</td></tr>';
+}
+
+function filterRadarExcuses(filterMode = 'pending') {
+    window.currentRadarExcuseFilter = filterMode;
+    const btnPending = document.getElementById('btnRadarExcusePending');
+    const btnAll = document.getElementById('btnRadarExcuseAll');
+    if (btnPending && btnAll) {
+        if (filterMode === 'pending') {
+            btnPending.style.background = '#b45309'; btnPending.style.color = 'white';
+            btnAll.style.background = '#f1f5f9'; btnAll.style.color = '#334155';
+        } else {
+            btnAll.style.background = '#0c2461'; btnAll.style.color = 'white';
+            btnPending.style.background = '#fef3c7'; btnPending.style.color = '#92400e';
+        }
+    }
+    renderRadarExcusesTable();
+}
+
+function renderRadarExcusesTable() {
+    const tbody = document.getElementById('radar_excusesTableBody');
+    if (!tbody) return;
+
+    let list = window.lastRadarExcusesList || [];
+    if (window.currentRadarExcuseFilter === 'pending') {
+        list = list.filter(e => e.status === 'pending');
+    }
+
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = list.map(e => {
+        let statusBadge = '';
+        if (e.status === 'pending') {
+            statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde047; font-size:0.78rem;">⏳ قيد المراجعة</span>';
+        } else if (e.status === 'accepted') {
+            statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem;">✅ عذر مقبول</span>';
+        } else {
+            statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem;">❌ غير مقبول</span>';
+        }
+
+        const isPending = e.status === 'pending';
+
+        return `
+            <tr style="border-bottom: 1px solid #fef08a; background: ${isPending ? '#fffdf0' : 'transparent'};">
+                <td style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(e.student_name)}</td>
+                <td style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
+                <td style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
+                <td style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
+                <td style="padding: 8px; text-align: right; max-width: 260px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
+                    "${escapeHtml(e.message_text)}"
+                </td>
+                <td style="padding: 8px;">${statusBadge}</td>
+                <td style="padding: 8px;">
+                    <div style="display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: wrap;">
+                        ${isPending ? `
+                            <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-check"></i> قبول العذر ✅
+                            </button>
+                            <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="padding: 4px 8px; font-size: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-xmark"></i> رفض ❌
+                            </button>
+                        ` : `
+                            <span style="font-size:0.75rem; color:#64748b;">${escapeHtml(e.servant_notes || 'تم حسمه')}</span>
+                        `}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function resolveExcuseAction(id, action, btn) {
+    const isAccept = action === 'accept';
+    const defaultNote = isAccept ? 'عذر مقبول (مراجعة وظروف مثبتة)' : 'اعتذار غير مقبول (تنبيه بالالتزام)';
+    const servantNote = prompt(isAccept ? 'اكتب ملاحظة الاعتماد (اختياري):' : 'اكتب سبب رفض العذر للمخدوم:', defaultNote);
+    if (servantNote === null) return;
+
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحسم...';
+
+    try {
+        const res = await fetch(`http://127.0.0.1:3000/api/excuses/${id}/action`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'khedmety-servant-key-2026'
+            },
+            body: JSON.stringify({
+                action,
+                servant_notes: servantNote,
+                resolved_by: (typeof currentUser !== 'undefined' && currentUser?.name) || 'خادم الفصل'
+            })
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            alert(data.message);
+
+            // تحديث سجل الحضور في شيت الغياب تلقائياً إذا كان العذر مقبولاً
+            if (isAccept && data.excuse) {
+                markStudentExcusedInAttendance(data.excuse);
+            }
+
+            loadRadarExcuses();
+        } else {
+            alert('تعذر تحديث حالة الاعتذار. تأكد من تشغيل السيرفر.');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch(err) {
+        alert('خطأ في الاتصال: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+function markStudentExcusedInAttendance(excuse) {
+    try {
+        const friday = excuse.friday_date;
+        let record = (typeof attendanceRecord !== 'undefined' && attendanceRecord) ? attendanceRecord : {};
+        if (!record[friday]) record[friday] = [];
+
+        const studentCode = String(excuse.student_code || '');
+        const studentPhone = String(excuse.student_phone || '');
+
+        let item = record[friday].find(r => (studentCode && String(r.code) === studentCode) || (studentPhone && String(r.phone).includes(studentPhone.slice(-9))));
+        if (!item) {
+            item = {
+                id: excuse.student_id || Date.now(),
+                code: studentCode,
+                name: excuse.student_name,
+                phone: studentPhone,
+                stage: excuse.stage,
+                attended: false,
+                isAbsentDueToDelay: false,
+                isExcused: true,
+                excuseReason: excuse.reason_category
+            };
+            record[friday].push(item);
+        } else {
+            item.attended = false;
+            item.isAbsentDueToDelay = false;
+            item.isExcused = true;
+            item.excuseReason = excuse.reason_category;
+        }
+
+        if (typeof saveAttendanceRecord === 'function') {
+            saveAttendanceRecord();
+        } else {
+            localStorage.setItem('my_church_attendance', JSON.stringify(record));
+        }
+        console.log(`✅ [Attendance Sync] تم تسجيل غياب بعذر مقبول للمخدوم [${excuse.student_name}] في جلسة [${friday}]`);
+    } catch(err) {
+        console.warn('[Attendance Sync] تعذر تحديث كشف الحضور تلقائياً:', err);
+    }
+}
+
+async function manualRecordStudentExcuse() {
+    const sName = prompt('أدخل اسم المخدوم المعتذر:');
+    if (!sName || !sName.trim()) return;
+
+    const sPhone = prompt('أدخل رقم هاتف المخدوم:');
+    if (!sPhone || !sPhone.trim()) return;
+
+    const reason = prompt('أدخل سبب الاعتذار:', 'ظروف خاصة / امتحان');
+    if (reason === null) return;
+
+    try {
+        const res = await fetch('http://127.0.0.1:3000/api/excuses/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': 'khedmety-servant-key-2026'
+            },
+            body: JSON.stringify({
+                name: sName.trim(),
+                phone: sPhone.trim(),
+                reason: reason.trim()
+            })
+        });
+
+        if (res.ok) {
+            alert('تم تسجيل الاعتذار واعتماده بنجاح! ✅');
+            loadRadarExcuses();
+        }
+    } catch(err) {
+        alert('تعذر تسجيل الاعتذار: ' + err.message);
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.loadRadarExcuses = loadRadarExcuses;
+    window.filterRadarExcuses = filterRadarExcuses;
+    window.resolveExcuseAction = resolveExcuseAction;
+    window.manualRecordStudentExcuse = manualRecordStudentExcuse;
 }

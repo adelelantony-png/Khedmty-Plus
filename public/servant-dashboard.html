@@ -1063,13 +1063,35 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
 
             <!-- بطاقات النبض الرباعية (Radar Pulse KPIs) -->
-            <div class="radar-pulse-grid" style="display: grid; gap: 14px; margin-bottom: 22px;">
+            <div class="radar-pulse-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px;">
                 <!-- 1. غياب متتالي -->
                 <div class="radar-kpi-card" style="border-right: 5px solid #ef4444 !important;">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⚠️ غياب 2+ أسبوع متتالي</div>
                     <div style="font-size: 1.8rem; font-weight: 900; color: #dc2626; margin: 4px 0;" id="radar_kpiAbsenceCount">0</div>
                     <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">يحتاجون افتقاداً ورعاية عاجلة</div>
                 </div>
+
+                <!-- 2. اعتذارات معلقة -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #f59e0b !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🔔 اعتذارات قيد المراجعة</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #d97706; margin: 4px 0;" id="radar_kpiExcusesPendingCount">0</div>
+                    <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">اعتذارات واتساب لحظية</div>
+                </div>
+
+                <!-- 3. نسبة حضور القداس -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #10b981 !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🍞 نسبة حضور القداس والتناول</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #059669; margin: 4px 0;" id="radar_kpiLiturgyPct">0%</div>
+                    <div style="font-size: 0.76rem; color: #065f46; font-weight: bold;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
+                </div>
+
+                <!-- 4. إجمالي المسجلين وقوة الحضور -->
+                <div class="radar-kpi-card" style="border-right: 5px solid #3b82f6 !important;">
+                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">👥 حضور الاجتماع هذا الأسبوع</div>
+                    <div style="font-size: 1.8rem; font-weight: 900; color: #1d4ed8; margin: 4px 0;" id="radar_kpiMeetingAttended">0</div>
+                    <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;" id="radar_kpiTotalMembers">من إجمالي 0 مخدوم</div>
+                </div>
+            </div>
 
             <!-- نبض الاجتماع ومعدل الاستقرار الإحصائي (Meeting Pulse & Trends) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-color: #cbd5e1; margin-bottom: 22px;">
@@ -1090,9 +1112,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     </div>
                 </div>
 
-                <!-- حاوية الأعمدة البيانية التفاعلية لنبض الاجتماع -->
                 <div id="radar_attendancePulseBars" style="display: flex; gap: 14px; align-items: flex-end; min-height: 140px; padding: 15px 10px 8px; border-bottom: 2px solid #e2e8f0; overflow-x: auto;">
-                    <!-- يتم بناؤها آلياً بواسطة JS -->
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
@@ -1103,28 +1123,6 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     <span id="radar_pulseTrendComment" style="font-weight: bold; color: #0f172a;">📊 جاري تحليل اتجاه الحضور...</span>
                 </div>
             </div>
-
-
-                <!-- 2. مهلة الاعتراف -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #f59e0b !important;">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⏳ في مهلة الاعتراف</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #d97706; margin: 4px 0;" id="radar_kpiConfessionCount">0</div>
-                    <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">فترة سماح مشروطة</div>
-                </div>
-
-                <!-- 3. نسبة حضور القداس -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #10b981 !important;">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🍞 نسبة حضور القداس والتناول</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #059669; margin: 4px 0;" id="radar_kpiLiturgyPct">0%</div>
-                    <div style="font-size: 0.76rem; color: #065f46; font-weight: bold;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
-                </div>
-
-                <!-- 4. إجمالي المسجلين وقوة الحضور -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #3b82f6 !important;">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">👥 حضور الاجتماع هذا الأسبوع</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #1d4ed8; margin: 4px 0;" id="radar_kpiMeetingAttended">0</div>
-                    <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;" id="radar_kpiTotalMembers">من إجمالي 0 مخدوم</div>
-                </div>
             </div>
 
             <!-- القسم الأول: رادار الغياب والافتقاد الفوري -->
@@ -1179,7 +1177,60 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
-            <!-- القسم الثاني: رادار مهلة الاعتراف التنازلي -->
+            
+            <!-- القسم الثاني: رادار الاعتذارات اللحظية ومتابعة الغياب بعذر (Inbound Excuses Radar) -->
+            <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border: 1.5px solid #f59e0b; margin-bottom: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">🔔</span>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #92400e;">
+                                رادار الاعتذارات اللحظية ومتابعة الغياب بعذر (Inbound Excuses Radar)
+                            </h4>
+                            <div style="font-size: 0.78rem; color: #78350f;">
+                                رصد فوري لاعتذارات المخدومين الواردة عبر واتساب مع إمكانية الاعتماد كعذر مقبول أو الرفض بنقرة واحدة
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <span class="badge" id="radar_excusePendingBadge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde047; font-size: 0.8rem; padding: 6px 12px; font-weight: bold;">
+                            ⏳ 0 اعتذار قيد المراجعة
+                        </span>
+                        <button type="button" class="btn-custom" onclick="filterRadarExcuses('pending')" id="btnRadarExcusePending" style="background: #b45309; color: white; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            المعلقة فقط
+                        </button>
+                        <button type="button" class="btn-custom" onclick="filterRadarExcuses('all')" id="btnRadarExcuseAll" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            عرض السجل بالكامل
+                        </button>
+                        <button type="button" class="btn-custom" onclick="manualRecordStudentExcuse()" style="background: #166534; color: white; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-plus"></i> تسجيل اعتذار يدوي
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive-wrapper">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                        <thead>
+                            <tr style="background: #fefce8; border-bottom: 2px solid #fde047; color: #78350f;">
+                                <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
+                                <th style="padding: 10px 8px;">الفرقة / الكود</th>
+                                <th style="padding: 10px 8px;">جمعة الغياب</th>
+                                <th style="padding: 10px 8px;">السبب المصنف</th>
+                                <th style="padding: 10px 8px; text-align: right; max-width: 250px;">نص رسالة الواتساب</th>
+                                <th style="padding: 10px 8px;">الحالة</th>
+                                <th style="padding: 10px 8px;">الإجراء الرعوي</th>
+                            </tr>
+                        </thead>
+                        <tbody id="radar_excusesTableBody">
+                            <tr>
+                                <td colspan="7" style="padding: 16px; color: #78350f; font-weight: bold;">جاري فحص رادار الاعتذارات الواردة... 🔔</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+<!-- القسم الثاني: رادار مهلة الاعتراف التنازلي -->
             <div class="radar-section-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                     <div>
