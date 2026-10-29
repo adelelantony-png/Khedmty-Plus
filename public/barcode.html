@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/app-theme.css">
     <!-- مكتبة QR Code المعتمدة في لوحة الخدام -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="js/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --badge-navy: #0c2461;
@@ -660,6 +661,12 @@
             </div>
         </div>
 
+        <!-- شريط الأمان المذهب ورمز التحقق المشفر -->
+        <div class="card-security-badge" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #fefce8 0%, #fef08a 100%); border: 1.5px dashed #ca8a04; border-radius: 12px; padding: 6px 14px; margin-bottom: 12px; font-size: 0.78rem; color: #854d0e; font-weight: bold; position: relative; z-index: 2;">
+            <span><i class="fa-solid fa-shield-halved text-warning me-1"></i> كارنيه هوية رقمي معتمد ☦️ كود موثق</span>
+            <span style="font-family: monospace; letter-spacing: 1px; font-size: 0.72rem; color: #a16207;">OFFICIAL KHEDMETY PASS</span>
+        </div>
+
         <!-- تذييل الكارنيه بالسنوات الكنسية والميلادية -->
         <div class="badge-footer">
             <div class="year-miladi" id="ui-year-miladi">2025–2026</div>
@@ -669,6 +676,9 @@
 
     <!-- أزرار الإجراءات والتحكم -->
     <div class="action-bar">
+        <button type="button" class="btn-action" id="btnDownloadImg" onclick="downloadBadgeAsImage()" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+            <i class="fa-solid fa-file-arrow-down me-1"></i> تحميل الكارنيه (PDF / HD Image) 📥
+        </button>
         <button type="button" class="btn-action btn-print" onclick="window.print()">
             <i class="fa-solid fa-print"></i> طباعة / حفظ الكارنيه
         </button>
