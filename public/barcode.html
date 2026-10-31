@@ -944,6 +944,36 @@
         }
     }
 
+    function downloadBadgeAsImage() {
+        const cardEl = document.querySelector('.card-frame') || document.getElementById('singleView');
+        if (!cardEl) {
+            window.print();
+            return;
+        }
+
+        const studentName = (document.getElementById('ui-student-name')?.textContent || 'مخدوم').trim();
+        const studentCode = (document.getElementById('ui-student-code')?.textContent || 'كود').trim();
+        const fileName = `كارنيه_${studentName}_${studentCode}.pdf`;
+
+        if (typeof html2pdf !== 'undefined') {
+            const opt = {
+                margin:       8,
+                filename:     fileName,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(cardEl).save().catch(err => {
+                console.warn('تعذر حفظ ملف PDF، سيتم فتح نافذة الطباعة المباشرة:', err);
+                window.print();
+            });
+        } else {
+            window.print();
+        }
+    }
+
+    window.downloadBadgeAsImage = downloadBadgeAsImage;
+
     // بدء التشغيل حسب الرابط
     if (isBulkMode) {
         initBulkMode();

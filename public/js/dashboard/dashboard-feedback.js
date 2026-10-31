@@ -484,6 +484,8 @@
         else alert("✅ تمت إضافة الفترة بنجاح!");
     }
 
+    function addBonusPeriodAction() { return addNewBonusPeriodAction(); }
+
     function deleteBonusPeriodAction(id) {
         if (!confirm("هل أنت متأكد من حذف هذه الفترة المخصصة؟")) return;
         const settings = getBonusSettings();
@@ -1185,4 +1187,15 @@ function copyConferenceServantSummary() {
         } else {
             alert("✅ تم حفظ كافة إعدادات البونص وتخفيضات المؤتمر السنوي بنجاح!");
         }
+    }
+
+    if (typeof window !== 'undefined') {
+        window.addBonusPeriodAction = addBonusPeriodAction;
+        window.addNewBonusPeriodAction = addNewBonusPeriodAction;
+        window.deleteBonusPeriodAction = deleteBonusPeriodAction;
+        window.toggleBonusPeriodActiveAction = toggleBonusPeriodActiveAction;
+        window.toggleBonusStudentVisibility = toggleBonusStudentVisibility;
+        window.saveBaseBonusRules = saveBaseBonusRules;
+        window.saveAllUnifiedIncentiveSettings = saveAllUnifiedIncentiveSettings;
+        window.renderBonusSettingsUI = renderBonusSettingsUI;
     }

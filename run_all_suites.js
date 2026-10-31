@@ -21,7 +21,8 @@ const tests = [
   'test_interactive_guide_page.js',
   'tests/test_birthday_and_radar.js',
   'tests/test_phase2_security_hardening.js',
-  'tests/test_full_platform_syntax_and_ui.js'
+  'tests/test_full_platform_syntax_and_ui.js',
+  'tests/simulate_real_user_journeys.js'
 ];
 
 console.log('================================================================');
