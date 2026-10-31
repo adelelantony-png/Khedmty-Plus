@@ -19,7 +19,9 @@ const tests = [
   'test_notes_tab_and_category.js',
   'test_ux_declutter_and_enhancements.js',
   'test_interactive_guide_page.js',
-  'tests/test_birthday_and_radar.js'
+  'tests/test_birthday_and_radar.js',
+  'tests/test_phase2_security_hardening.js',
+  'tests/test_full_platform_syntax_and_ui.js'
 ];
 
 console.log('================================================================');

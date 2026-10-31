@@ -741,7 +741,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
     if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
 
-    const fsdb = firebase.firestore();
+    const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : firebase.firestore());
 
 
 

@@ -74,9 +74,14 @@ service cloud.firestore {
       }
     }
 
-    // ---- 3. كشوفات الحضور اليومية ----
+    // ---- 3. كشوفات الحضور اليومية (مخدومين وخدام) ----
     match /attendance/{date} {
       allow read: if signedIn();
+      allow create, update: if isStaff();
+      allow delete: if isFull();
+    }
+    match /servants_attendance/{date} {
+      allow read: if isStaff();
       allow create, update: if isStaff();
       allow delete: if isFull();
     }
@@ -113,20 +118,47 @@ service cloud.firestore {
       allow write: if isStaff();
     }
 
-    // ---- 8. إعدادات وسنة الخدمة ----
+    // ---- 8. إعدادات وسنة الخدمة والأرشيف والنسخ الاحتياطية ----
     match /settings/{id} {
       allow read: if signedIn();
       allow write: if isAdmin();
     }
+    match /archive/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /auto_backups/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /version_history/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
 
-    // ---- 9. سجل التدقيق والعمليات (Audit Log) ----
+    // ---- 9. سجل التدقيق والعمليات وسجلات الأخطاء (Audit & Error Logs) ----
     match /audit/{id} {
       allow create: if isStaff();
       allow read: if isAdmin();
       allow update, delete: if false;
     }
+    match /audit_logs/{id} {
+      allow create: if isStaff();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+    match /error_logs/{id} {
+      allow create: if signedIn();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
 
-    // ---- 10. آراء وتقييمات المخدومين للقاء الجمعة ----
+    // ---- 10. جلسات الاتصال النشطة (Active Sessions / Kiosk) ----
+    match /active_sessions/{id} {
+      allow read: if isStaff();
+      allow create, update: if signedIn();
+      allow delete: if isStaff() || (signedIn() && request.auth.uid == resource.data.uid);
+    }
+
+    // ---- 11. آراء وتقييمات المخدومين للقاء الجمعة ----
     match /feedback/{feedbackId} {
       allow create: if signedIn();
       allow read: if isStaff();

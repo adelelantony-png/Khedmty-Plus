@@ -269,7 +269,7 @@
         },
 
         /**
-         * تسجيل الخروج الموحد ومسح جميع مفاتيح الجلسة
+         * تسجيل الخروج الموحد ومسح جميع مفاتيح الجلسة وإلغاء جميع المستمعين
          */
         logout: function (redirectUrl = 'index.html') {
             const sessionKeys = [
@@ -291,6 +291,10 @@
                     if (s) s.removeItem(k);
                 } catch (e) {}
             });
+
+            // إلغاء جميع اشتراكات Firestore لمنع تسرب الذاكرة
+            this.unsubscribeAllListeners();
+
             if (typeof firebase !== 'undefined' && firebase.auth) {
                 try {
                     const p = firebase.auth().signOut();
@@ -301,6 +305,33 @@
                 } catch (e) {}
             }
             doRedirect(redirectUrl);
+        },
+
+        /**
+         * تسجيل مستمع Firestore نشط لتتبعه وإلغائه بأمان عند انتهاء الجلسة
+         */
+        registerListener: function (unsub) {
+            if (typeof unsub === 'function') {
+                if (typeof window !== 'undefined') {
+                    window._khedmtyActiveListeners = window._khedmtyActiveListeners || [];
+                    window._khedmtyActiveListeners.push(unsub);
+                }
+            }
+            return unsub;
+        },
+
+        /**
+         * إلغاء جميع اشتراكات Firestore النشطة دفعة واحدة
+         */
+        unsubscribeAllListeners: function () {
+            if (typeof window !== 'undefined' && Array.isArray(window._khedmtyActiveListeners)) {
+                window._khedmtyActiveListeners.forEach(unsub => {
+                    try {
+                        if (typeof unsub === 'function') unsub();
+                    } catch (e) {}
+                });
+                window._khedmtyActiveListeners = [];
+            }
         },
 
         /**

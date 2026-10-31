@@ -10,3 +10,29 @@ window.FIREBASE_CONFIG = {
   messagingSenderId: "25101228841",
   appId: "1:25101228841:web:3164821d165014a1e2b538"
 };
+
+/**
+ * دالة مساعدة معتمدة لتهيئة قاعدة بيانات Firestore وتفعيل الحفظ غير المتصل (Offline Persistence)
+ * مع دعم مزامنة النوافذ المتعددة (synchronizeTabs: true) بأمان
+ */
+window.initKhedmtyFirestore = function (customApp) {
+  if (typeof firebase === 'undefined' || !firebase.firestore) return null;
+  var app = customApp || (firebase.apps && firebase.apps.length > 0 ? firebase.app() : firebase.initializeApp(window.FIREBASE_CONFIG));
+  var db = app.firestore();
+
+  if (!window._khedmtyPersistenceInitialized) {
+    window._khedmtyPersistenceInitialized = true;
+    if (typeof db.enablePersistence === 'function') {
+      db.enablePersistence({ synchronizeTabs: true }).catch(function (err) {
+        if (err.code === 'failed-precondition') {
+          console.warn('تنبيه: كاش فايربيز يعمل في وضع التبويب الفردي');
+        } else if (err.code === 'unimplemented') {
+          console.warn('تنبيه: المتصفح الحالي لا يدعم التخزين المحلي المستمر دون اتصال');
+        } else {
+          console.warn('تعذر تفعيل وضع عدم الاتصال:', err.message);
+        }
+      });
+    }
+  }
+  return db;
+};

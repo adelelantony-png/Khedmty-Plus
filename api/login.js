@@ -29,14 +29,60 @@ function hashPasswordSha256(password) {
 }
 
 /**
- * مقارنة آمنة ضد هجمات التوقيت Timing Attacks
+ * مقارنة آمنة ضد هجمات التوقيت Timing Attacks بتثبيت الطول عبر SHA-256
  */
 function timingSafeCompare(a, b) {
     if (typeof a !== 'string' || typeof b !== 'string') return false;
-    const bufA = Buffer.from(a);
-    const bufB = Buffer.from(b);
-    if (bufA.length !== bufB.length) return false;
-    return crypto.timingSafeEqual(bufA, bufB);
+    const hashA = crypto.createHash('sha256').update(a).digest();
+    const hashB = crypto.createHash('sha256').update(b).digest();
+    return crypto.timingSafeEqual(hashA, hashB);
+}
+
+/**
+ * نظام حماية ضد هجمات التخمين Brute-Force Rate Limiting (ذاكرة الجلسة)
+ */
+const loginAttempts = new Map();
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 دقائق
+const MAX_ATTEMPTS = 5;
+
+function getClientKey(req, cleanId) {
+    const headers = (req && req.headers) || {};
+    const rawIp = headers['x-forwarded-for'] || headers['x-real-ip'] || (req && req.socket && req.socket.remoteAddress);
+    const ip = (typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : 'client');
+    return `${ip}:${cleanId}`;
+}
+
+function checkRateLimit(key) {
+    const now = Date.now();
+    const entry = loginAttempts.get(key);
+    if (!entry) return { allowed: true };
+    if (now > entry.resetAt) {
+        loginAttempts.delete(key);
+        return { allowed: true };
+    }
+    if (entry.count >= MAX_ATTEMPTS) {
+        const remainingSeconds = Math.max(1, Math.ceil((entry.resetAt - now) / 1000));
+        return { allowed: false, remainingSeconds };
+    }
+    return { allowed: true };
+}
+
+function recordFailedAttempt(key) {
+    const now = Date.now();
+    const entry = loginAttempts.get(key);
+    if (!entry || now > entry.resetAt) {
+        loginAttempts.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    } else {
+        entry.count += 1;
+    }
+}
+
+function clearRateLimit(key) {
+    loginAttempts.delete(key);
+}
+
+function resetRateLimiter() {
+    loginAttempts.clear();
 }
 
 /**
@@ -144,6 +190,16 @@ module.exports = async (req, res) => {
 
     const cleanId = validation.identifier;
     const cleanPwd = validation.password;
+    const rateKey = getClientKey(req, cleanId);
+
+    // التحقق من هجمات التخمين Brute-Force
+    const rateStatus = checkRateLimit(rateKey);
+    if (!rateStatus.allowed) {
+        return res.status(429).json({
+            success: false,
+            message: `تم تجاوز الحد الأقصى للمحاولات الخاطئة. يرجى الانتظار لمدة ${rateStatus.remainingSeconds} ثانية قبل المحاولة مجدداً.`
+        });
+    }
 
     try {
         const db = getDb();
@@ -153,7 +209,8 @@ module.exports = async (req, res) => {
         const ADMIN_KEYS = ['admin', 'الأدمن', 'عادل جورج'];
         if (ADMIN_KEYS.includes(cleanId) || ADMIN_KEYS.includes(cleanId.toLowerCase())) {
             const adminPass = process.env.ADMIN_PASSWORD || '1234567';
-            if (cleanPwd === adminPass) {
+            if (timingSafeCompare(cleanPwd, adminPass)) {
+                clearRateLimit(rateKey);
                 const uid = 'servant_admin';
                 const claims = {
                     role: 'admin',
@@ -190,9 +247,11 @@ module.exports = async (req, res) => {
             const servantData = servantDoc.data();
             const isMatch = verifyPassword(servantData, cleanPwd);
             if (!isMatch) {
+                recordFailedAttempt(rateKey);
                 return res.status(401).json({ success: false, message: 'اسم الخادم أو كلمة المرور غير صحيحة' });
             }
 
+            clearRateLimit(rateKey);
             const { uid, claims } = createLoginClaims('servant', servantData, servantDoc.id);
             const customToken = await auth.createCustomToken(uid, claims);
 
@@ -248,9 +307,11 @@ module.exports = async (req, res) => {
             // فحص كلمة المرور أو رقم الهاتف
             const isMatch = verifyPassword(studentData, cleanPwd);
             if (!isMatch) {
+                recordFailedAttempt(rateKey);
                 return res.status(401).json({ success: false, message: 'كود الامتحان أو كلمة المرور/الهاتف غير صحيحة' });
             }
 
+            clearRateLimit(rateKey);
             const { uid, claims } = createLoginClaims('student', studentData, studentDoc.id);
             const customToken = await auth.createCustomToken(uid, claims);
 
@@ -265,6 +326,7 @@ module.exports = async (req, res) => {
         }
 
         // 3. المستخدم غير موجود
+        recordFailedAttempt(rateKey);
         return res.status(401).json({ success: false, message: 'بيانات الدخول غير صحيحة: تأكد من كتابة اسم الخادم أو كود الامتحان وكلمة المرور' });
 
     } catch (error) {
@@ -282,4 +344,9 @@ module.exports.createLoginClaims = createLoginClaims;
 module.exports.convertArabicDigits = convertArabicDigits;
 module.exports.normalizePhone = normalizePhone;
 module.exports.phonesMatch = phonesMatch;
+module.exports.checkRateLimit = checkRateLimit;
+module.exports.recordFailedAttempt = recordFailedAttempt;
+module.exports.clearRateLimit = clearRateLimit;
+module.exports.resetRateLimiter = resetRateLimiter;
+module.exports.getClientKey = getClientKey;
 

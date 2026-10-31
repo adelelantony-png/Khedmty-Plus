@@ -1330,19 +1330,19 @@ function renderLiveTableDemo() {
             badgeHtml = '<span class="badge-status badge-rej">🔴 غير مجتاز</span>';
         }
 
-        html += '<tr>' +
-            '<td>' + (idx + 1) + '</td>' +
-            '<td style="text-align:right; font-weight:800; color:#0c2461;">' + st.name + '</td>' +
-            '<td><input type="number" class="table-input-score" value="' + st.spWr + '" min="0" max="30" onchange="updateDemoScore(' + idx + ', 'spWr', this.value)"></td>' +
-            '<td><input type="number" class="table-input-score" value="' + st.psWr + '" min="0" max="20" onchange="updateDemoScore(' + idx + ', 'psWr', this.value)"></td>' +
-            '<td><input type="number" class="table-input-score" value="' + st.spOr + '" min="0" max="30" onchange="updateDemoScore(' + idx + ', 'spOr', this.value)"></td>' +
-            '<td><input type="number" class="table-input-score" value="' + st.psOr + '" min="0" max="20" onchange="updateDemoScore(' + idx + ', 'psOr', this.value)"></td>' +
-            '<td style="font-weight:900; font-size:0.95rem; color:#0c2461;">' + total + '</td>' +
-            '<td style="font-weight:800;">' + pct.toFixed(1) + '%</td>' +
-            '<td>' + badgeHtml + '</td>' +
-            '<td style="font-size:0.75rem; color:#64748b;">' + st.note + '</td>' +
-            '<td><button type="button" class="mock-btn" onclick="inspectButton('بطاقة 360° للمخدوم ' + st.name + '', 'تعرض تفاصيل درجاته وملاحظاته، ورابط واتساب فوري لإرسال النتيجة بلمسة واحدة.')" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-size:0.72rem; padding:3px 8px;">🪪 عرض</button></td>' +
-        '</tr>';
+        html += `<tr>
+            <td>${idx + 1}</td>
+            <td style="text-align:right; font-weight:800; color:#0c2461;">${st.name}</td>
+            <td><input type="number" class="table-input-score" value="${st.spWr}" min="0" max="30" onchange="updateDemoScore(${idx}, 'spWr', this.value)"></td>
+            <td><input type="number" class="table-input-score" value="${st.psWr}" min="0" max="20" onchange="updateDemoScore(${idx}, 'psWr', this.value)"></td>
+            <td><input type="number" class="table-input-score" value="${st.spOr}" min="0" max="30" onchange="updateDemoScore(${idx}, 'spOr', this.value)"></td>
+            <td><input type="number" class="table-input-score" value="${st.psOr}" min="0" max="20" onchange="updateDemoScore(${idx}, 'psOr', this.value)"></td>
+            <td style="font-weight:900; font-size:0.95rem; color:#0c2461;">${total}</td>
+            <td style="font-weight:800;">${pct.toFixed(1)}%</td>
+            <td>${badgeHtml}</td>
+            <td style="font-size:0.75rem; color:#64748b;">${st.note}</td>
+            <td><button type="button" class="mock-btn" onclick="inspectButton('بطاقة 360° للمخدوم ${st.name}', 'تعرض تفاصيل درجاته وملاحظاته، ورابط واتساب فوري لإرسال النتيجة بلمسة واحدة.')" style="background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; font-size:0.72rem; padding:3px 8px;">🪪 عرض</button></td>
+        </tr>`;
     });
 
     tbody.innerHTML = html;

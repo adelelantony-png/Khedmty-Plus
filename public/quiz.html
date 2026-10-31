@@ -505,6 +505,11 @@
             .lifelines { justify-content: center; }
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="auth-client.js"></script>
 </head>
 <body>
 
@@ -525,8 +530,8 @@
             <button class="btn-ghost" onclick="toggleProjectorMode()" title="وضع العرض على الشاشة / البروجكتور">
                 <i class="fa-solid fa-expand"></i> <span class="d-none d-sm-inline">بروجكتور</span>
             </button>
-            <a href="servant-dashboard.html" class="btn-liturgical">
-                <i class="fa-solid fa-house"></i> <span>لوحة الخادم</span>
+            <a href="servant-dashboard.html" class="btn-liturgical" id="homeNavBtn">
+                <i class="fa-solid fa-house"></i> <span id="homeNavText">الرئيسية</span>
             </a>
         </div>
     </header>
@@ -874,6 +879,16 @@
 
         /* Initialization */
         window.addEventListener('DOMContentLoaded', () => {
+            if (window.KhedmtyAuth) {
+                const homeBtn = document.getElementById('homeNavBtn');
+                const homeText = document.getElementById('homeNavText');
+                if (homeBtn && typeof window.KhedmtyAuth.getHomeUrl === 'function') {
+                    homeBtn.href = window.KhedmtyAuth.getHomeUrl();
+                }
+                if (homeText && typeof window.KhedmtyAuth.isStudent === 'function' && window.KhedmtyAuth.isStudent()) {
+                    homeText.innerText = 'بوابة المخدوم';
+                }
+            }
             onFilterChange();
             renderBankList();
         });
@@ -1146,6 +1161,24 @@
         /* Completion Screen */
         function showCompletion() {
             playSound('fanfare');
+            const homeUrl = (window.KhedmtyAuth && typeof window.KhedmtyAuth.getHomeUrl === 'function') ? window.KhedmtyAuth.getHomeUrl() : 'index.html';
+            const homeLabel = (window.KhedmtyAuth && typeof window.KhedmtyAuth.isStudent === 'function' && window.KhedmtyAuth.isStudent()) ? 'العودة لبوابة المخدوم' : 'العودة للوحة الخادم';
+
+            // مزامنة النتيجة للمخدوم إن كان مسجلاً
+            try {
+                if (window.KhedmtyAuth && typeof window.KhedmtyAuth.isAuthenticated === 'function' && window.KhedmtyAuth.isAuthenticated()) {
+                    const code = window.KhedmtyAuth.getStudentCode();
+                    if (code && typeof firebase !== 'undefined' && firebase.firestore) {
+                        const db = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : firebase.firestore());
+                        db.collection('students').doc(String(code)).collection('quiz_achievements').add({
+                            score: soloScore,
+                            date: new Date().toISOString().split('T')[0],
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        }).catch(() => {});
+                    }
+                }
+            } catch(e) {}
+
             const card = document.getElementById('quizPlayCard');
             card.innerHTML = `
                 <div style="text-align:center; padding:40px 20px;">
@@ -1158,8 +1191,8 @@
                         <button class="btn-liturgical" onclick="location.reload()">
                             <i class="fa-solid fa-rotate-right"></i> جولة أسئلة جديدة
                         </button>
-                        <a href="servant-dashboard.html" class="btn-ghost" style="background:var(--primary);">
-                            <i class="fa-solid fa-house"></i> العودة للوحة الخادم
+                        <a href="${homeUrl}" class="btn-ghost" style="background:var(--primary);">
+                            <i class="fa-solid fa-house"></i> ${homeLabel}
                         </a>
                     </div>
                 </div>

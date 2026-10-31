@@ -22,6 +22,7 @@ const PRECACHE_ASSETS = [
     './bible.html',
     './barcode.html',
     './results.html',
+    './quiz.html',
     './offline.html',
     './manifest.json',
     './auth-client.js',
