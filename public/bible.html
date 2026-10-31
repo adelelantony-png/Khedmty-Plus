@@ -86,25 +86,25 @@
 
 
 
-        <div id="planBanner" class="plan-alert d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-            <div>
-
-                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> قراءة اليوم المقررة</span>
-
-                <div class="fw-bold text-dark fs-6" id="planBannerTitle">جاري فحص الخطة...</div>
-
+        <div id="planBanner" class="plan-alert mb-3" style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706 !important; border-radius: 16px; padding: 14px 18px; box-shadow: 0 4px 15px rgba(217, 119, 6, 0.08);">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <div>
+                    <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-calendar-day me-1"></i> قراءة اليوم المقررة</span>
+                    <div class="fw-bold text-dark fs-6" id="planBannerTitle">جاري فحص الخطة...</div>
+                </div>
+                <div id="planBannerSummaryBadge" class="badge bg-light text-dark border border-warning px-3 py-2 fw-bold" style="font-size:0.85rem;">
+                    جاري فحص الإصحاحات...
+                </div>
             </div>
-
-            <button id="btnMarkRead" class="btn btn-success fw-bold px-3 py-2" onclick="markCurrentChapterRead()">
-
-                <i class="fa-solid fa-check me-1"></i> أتممت قراءة اليوم (+5 نقاط ⭐)
-
-            </button>
-
+            <!-- كبسولات الإصحاحات الفردية التفاعلية -->
+            <div class="d-flex flex-wrap gap-2 align-items-center mt-2 pt-2 border-top border-warning border-opacity-25" id="planBannerChaptersGrid">
+                <!-- Dynamically populated chapter buttons -->
+            </div>
+            <!-- رسالة إتمام اليوم بالكامل -->
+            <div id="planBannerCompletionAlert" class="alert alert-success d-none mt-2 mb-0 py-2 px-3 fw-bold small text-center" style="border-radius: 10px;">
+                🎉 مبارك! أتممت قراءة جميع إصحاحات اليوم بالكامل وحصلت على بونص الأمانة الذهبي (+3 نقاط)! ✝️
+            </div>
         </div>
-
-
 
         <div class="filter-box">
 
@@ -477,6 +477,7 @@ async function detectTodayPlan() {
             bannerTxt += ` — ⏳ (تنطلق الخدمة في ${todayItem.serviceStartDate} — متبقي ${todayItem.daysUntilStart} أيام)`;
         }
         bannerTitle.textContent = bannerTxt;
+        renderPlanBannerChapters(todayItem, curMonth, curDay);
 
 
 

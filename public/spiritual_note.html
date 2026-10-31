@@ -511,6 +511,58 @@
 
                     chapsGrid.appendChild(pill);
                 }
+
+                // حساب وعرض الإصحاحات المتبقية التي لم يقرأها المخدوم بشكل لطيف
+                let remainingBox = document.getElementById('catchup-remaining-card');
+                if (!remainingBox) {
+                    remainingBox = document.createElement('div');
+                    remainingBox.id = 'catchup-remaining-card';
+                    chapsBox.parentNode.insertBefore(remainingBox, chapsBox.nextSibling);
+                }
+
+                const remainingChaps = [];
+                for (let c = startChap; c <= endChap; c++) {
+                    if (!completed.includes(c)) remainingChaps.push(c);
+                }
+
+                if (remainingChaps.length > 0) {
+                    remainingBox.className = 'mt-2 p-3 rounded-3';
+                    remainingBox.style.cssText = 'background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 1.5px dashed #d97706; border-radius: 14px;';
+                    remainingBox.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-hourglass-half text-warning me-1"></i> متبقي لك في قراءة هذا اليوم:
+                            </span>
+                            <span class="badge bg-warning text-dark fw-bold">${remainingChaps.length} إصحاح متبقي</span>
+                        </div>
+                        <p class="small text-muted mb-2">
+                            أتممت <strong>${completed.length}</strong> من أصل <strong>${totalCount}</strong> إصحاحات. أكمل الإصحاحات التالية للحصول على بونص الأمانة (+3 نقاط):
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            ${remainingChaps.map(c => `
+                                <a href="bible.html?book=${encodeURIComponent(planItem.book)}&chapter=${c}&from=spiritual_note" class="badge bg-white text-dark border border-warning text-decoration-none px-3 py-2 shadow-sm d-inline-flex align-items-center gap-1" style="font-size:0.84rem; border-radius:8px;">
+                                    <i class="fa-solid fa-book-bible text-warning"></i>
+                                    <span>قراءة إصحاح ${c} 📖</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (totalCount > 0) {
+                    remainingBox.className = 'mt-2 p-2 rounded-3 alert alert-success d-flex align-items-center gap-2 mb-0';
+                    remainingBox.style.borderRadius = '12px';
+                    remainingBox.innerHTML = `
+                        <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+                        <div>
+                            <strong class="d-block small">رائع! أتممت قراءة جميع إصحاحات هذا اليوم بنجاح ✝️</strong>
+                            <small class="text-muted">حصلت على كامل نقاط القراءة وبونص الأمانة الذهبي (+3 نقاط)!</small>
+                        </div>
+                    `;
+                } else {
+                    remainingBox.innerHTML = '';
+                    remainingBox.className = 'd-none';
+                }
+
+
             }
         } else {
             readingName.textContent = "قراءة وتأمل حر";
