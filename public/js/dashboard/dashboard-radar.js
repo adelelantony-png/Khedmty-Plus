@@ -402,6 +402,10 @@ function renderRadarBirthdays(filterMode = 'week') {
     }).join('');
 }
 
+function filterRadarBirthdays(filterMode = 'week') {
+    return renderRadarBirthdays(filterMode);
+}
+
 async function sendBatchWeeklyBirthdays(btn) {
     const list = (window.lastRadarBirthdaysList || []).filter(b => b.phone && b.diffDays >= -1 && b.diffDays <= 4);
     if (list.length === 0) {
@@ -864,6 +868,7 @@ if (typeof window !== 'undefined') {
     window.renderRadarDashboard = renderRadarDashboard;
     window.renderRadarPulseChart = renderRadarPulseChart;
     window.renderRadarBirthdays = renderRadarBirthdays;
+    window.filterRadarBirthdays = filterRadarBirthdays;
     window.filterRadarAbsence = filterRadarAbsence;
     window.printCriticalAbsenceList = printCriticalAbsenceList;
     window.sendWhatsAppAbsenceDirect = sendWhatsAppAbsenceDirect;

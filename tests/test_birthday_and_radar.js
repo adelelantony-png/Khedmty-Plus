@@ -34,6 +34,8 @@ assert(radarJs.includes('renderRadarPulseChart'), 'dashboard-radar.js must conta
 assert(radarJs.includes('filterRadarAbsence'), 'dashboard-radar.js must contain filterRadarAbsence');
 assert(radarJs.includes('printCriticalAbsenceList'), 'dashboard-radar.js must contain printCriticalAbsenceList');
 assert(radarJs.includes('renderRadarBirthdays'), 'dashboard-radar.js must contain renderRadarBirthdays');
+assert(radarJs.includes('function filterRadarBirthdays'), 'dashboard-radar.js must contain filterRadarBirthdays');
+assert(radarJs.includes('window.filterRadarBirthdays = filterRadarBirthdays;'), 'dashboard-radar.js must export window.filterRadarBirthdays');
 assert(radarJs.includes('sendBatchWeeklyBirthdays'), 'dashboard-radar.js must contain sendBatchWeeklyBirthdays');
 console.log('✅ Ministry Leadership Radar & Pulse Charts in dashboard-radar.js Verified!');
 
