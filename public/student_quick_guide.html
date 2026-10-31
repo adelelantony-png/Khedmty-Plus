@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دليل المخدوم والدارس | خدمتي برو</title>
+    <link rel="icon" type="image/png" href="favicon-48.png">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --navy-dark: #091a44;
+            --navy-primary: #0c2461;
+            --navy-accent: #1e3799;
+            --gold-primary: #d4af37;
+            --gold-light: #fef08a;
+            --gold-border: #c59b27;
+            --bg-parchment: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-parchment);
+            color: var(--text-main);
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .guide-container {
+            max-width: 860px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 2px solid #e2e8f0;
+            padding: 32px 40px;
+        }
+
+        /* ترويسة الدليل الرسمية */
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2.5px solid var(--navy-primary);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+
+        .church-info h2 {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--navy-primary);
+        }
+
+        .church-info h3 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--navy-accent);
+        }
+
+        .church-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+
+        .cross-seal {
+            font-size: 2.5rem;
+            color: var(--gold-border);
+            text-align: center;
+            line-height: 1;
+        }
+
+        .doc-badge {
+            background: #fefce8;
+            color: #854d0e;
+            border: 1px solid #fde047;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        /* عنوان المستند */
+        .title-banner {
+            text-align: center;
+            background: linear-gradient(135deg, #0f2744 0%, #1e3799 100%);
+            color: #ffffff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 15px rgba(12, 36, 97, 0.2);
+        }
+
+        .title-banner h1 {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .title-banner p {
+            font-size: 0.9rem;
+            color: #fef08a;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        /* الأقسام الإرشادية */
+        .section-box {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .section-box.accent-gold {
+            border-right: 6px solid var(--gold-border);
+        }
+
+        .section-box.accent-navy {
+            border-right: 6px solid var(--navy-accent);
+        }
+
+        .section-box.accent-green {
+            border-right: 6px solid #10b981;
+        }
+
+        .section-box.accent-purple {
+            border-right: 6px solid #8b5cf6;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .section-header i {
+            font-size: 1.3rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--navy-primary);
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .steps-list li {
+            position: relative;
+            padding-right: 28px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .steps-list li::before {
+            content: "🌟";
+            position: absolute;
+            right: 0;
+            top: 0;
+            font-size: 0.95rem;
+        }
+
+        .steps-list li strong {
+            color: var(--navy-dark);
+        }
+
+        /* شريط التنبيهات */
+        .alert-verse {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #065f46;
+            font-weight: 800;
+            margin-top: 10px;
+            justify-content: center;
+            font-style: italic;
+        }
+
+        /* أزرار الإجراءات العلوية */
+        .action-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.92rem;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-print {
+            background: linear-gradient(135deg, var(--navy-primary), var(--navy-accent));
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(12, 36, 97, 0.25);
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .action-toolbar {
+                display: none !important;
+            }
+            .guide-container {
+                box-shadow: none !important;
+                border: none !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="guide-container">
+        <!-- شريط الأزرار (يختفي عند الطباعة) -->
+        <div class="action-toolbar">
+            <a href="student.html" class="btn-action btn-back">
+                <i class="fa-solid fa-arrow-right"></i> العودة لبوابة المخدوم
+            </a>
+            <button class="btn-action btn-print" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> طباعة دليل المخدوم (A4 PDF) 🖨️
+            </button>
+        </div>
+
+        <!-- ترويسة الوثيقة الرسمية -->
+        <div class="guide-header">
+            <div class="church-info">
+                <h2>كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية</h2>
+                <h3>اجتماع القديس بولس الرسول لإعداد الخدام ✝️</h3>
+                <p>فصل إعداد خدام — العام الخدمي 2026 / 2027</p>
+            </div>
+            <div class="cross-seal">☩</div>
+            <div>
+                <span class="doc-badge">دليل الدارس والمخدوم</span>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 6px; text-align: left;">تطبيق الموبايل الذكي</div>
+            </div>
+        </div>
+
+        <!-- البانر الرئيسي -->
+        <div class="title-banner">
+            <h1>📖 دليل المخدوم والدارس السريع (Student Quick Guide)</h1>
+            <p>"كُنْ أَمِينًا إِلَى الْمَوْتِ فَسَأُعْطِيكَ إِكْلِيلَ الْحَيَاةِ" (رؤ 2: 10)</p>
+        </div>
+
+        <!-- الخطوة 1: الدخول وتثبيت التطبيق -->
+        <div class="section-box accent-gold">
+            <div class="section-header">
+                <i class="fa-solid fa-mobile-screen-button text-warning"></i>
+                <h3>1. تثبيت التطبيق والدخول لبوابتك الشخصية</h3>
+            </div>
+            <ul class="steps-list">
+                <li><strong>تثبيت التطبيق على الموبايل (PWA):</strong> افتح الرابط <strong dir="ltr">khedmty-plus.vercel.app</strong> من متصفح هاتفك (Chrome أو Safari)، ثم اضغط على خيارات المتصفح واختر <strong>«إضافة إلى الشاشة الرئيسية (Add to Home Screen)»</strong> ليصبح تطبيقاً مستقلاً بأيقونة فاخرة.</li>
+                <li><strong>تسجيل الدخول:</strong> اكتب <strong>كود الامتحان الخاص بك</strong> (المطبوع على الكارنيه)، وفي خانة كلمة المرور اكتب <strong>رقم هاتفك المسجل في الاستمارة</strong>.</li>
+                <li><strong>العمل بدون إنترنت:</strong> التطبيق يحفظ بياناتك تلقائياً؛ يمكنك فتحه في أي وقت بدون إنترنت وسيفتح معك فوراً.</li>
+            </ul>
+        </div>
+
+        <!-- الخطوة 2: قراءة الكتاب المقدس اليومية -->
+        <div class="section-box accent-navy">
+            <div class="section-header">
+                <i class="fa-solid fa-book-bible text-primary"></i>
+                <h3>2. قراءة الكتاب المقدس اليومية (الخطة السنوية 366 يوماً)</h3>
+            </div>
+            <ul class="steps-list">
+                <li><strong>قراءة اليوم المقررة:</strong> ستجد كارت قراءة اليوم في الصفحة الرئيسية موضحاً به السفر والإصحاحات المقررة.</li>
+                <li><strong>إصحاحاً فإصحاحاً:</strong> عند فتح القارئ، يظهر لك زر لكل إصحاح؛ بمجرد إنهاء قراءة الإصحاح اضغط عليه ليتحول للأخضر وتكسب نقاط الحصاد الروحي فوراً.</li>
+                <li><strong>الكتاب المقدس يعمل 100% أوف لاين:</strong> كافة أسفار الإنجيل الـ 73 مخزنة على جهازك؛ يمكنك القراءة في المترو أو أثناء السفر بدون استهلاك أي باقة إنترنت.</li>
+            </ul>
+        </div>
+
+        <!-- الخطوة 3: النوتة الروحية ووسائط النعمة -->
+        <div class="section-box accent-green">
+            <div class="section-header">
+                <i class="fa-solid fa-dove text-success"></i>
+                <h3>3. نوتتي الروحية وسجل وسائط النعمة (🕊️ نوتتي)</h3>
+            </div>
+            <ul class="steps-list">
+                <li><strong>تسجيل اليوميات الروحية:</strong> من الشريط السفلي، اضغط على <strong>«🕊️ نوتتي»</strong> وعلّم بعلامة صح أمام: (صلاة باكر ☀️ - صلاة الغروب 🌙 - حضور القداس والتناول 🍞🍷 - ممارسة سر الاعتراف 🕊️).</li>
+                <li><strong>التذكير الهادئ:</strong> يظهر لك كارت تشجيعي لطيف إذا تبقى لك إصحاحات لإكمال قراءة اليوم وحصد الأوسمة.</li>
+            </ul>
+        </div>
+
+        <!-- الخطوة 4: الحضور والشارات والدرجات -->
+        <div class="section-box accent-purple">
+            <div class="section-header">
+                <i class="fa-solid fa-award text-purple" style="color:#8b5cf6;"></i>
+                <h3>4. شريط التنقل السريع: درجاتي وحصادي وشاراتي</h3>
+            </div>
+            <ul class="steps-list">
+                <li><strong>📊 درجاتي:</strong> لمتابعة نتائج اختبارات القبول وامتحانات المواد الأكاديمية والشفوية ونسبة النجاح.</li>
+                <li><strong>🏆 أوسمتي وحصادي:</strong> لمتابعة شعلة المواظبة اليومية (Streak 🔥) ودرجات النمو الروحي وشارات التميز.</li>
+                <li><strong>📷 كارنيه الحضور:</strong> يمكنك استعراض بطاقتك الرقمية والـ QR Code وإبرازه للخادم عند باب الاجتماع لتسجيل حضورك في ثانية واحدة.</li>
+            </ul>
+        </div>
+
+        <div class="alert-verse">
+            "أَمَّا أَنْتَ فَاثْبُتْ عَلَى مَا تَعَلَّمْتَ وَأَيْقَنْتَ، عَارِفًا مِمَّنْ تَعَلَّمْتَ" (2 تي 3: 14) ✝️
+        </div>
+    </div>
+
+</body>
+</html>

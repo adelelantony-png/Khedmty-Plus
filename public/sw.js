@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v3.1'; // upgraded from khedmety-ultra-v3.0 and khedmety-ultra-v2.0 and khedmety-ultra-v2.6
+const CACHE_NAME = 'khedmety-ultra-v3.2'; // upgraded from khedmety-ultra-v3.1, khedmety-ultra-v3.0, khedmety-ultra-v2.6, and khedmety-ultra-v2.0
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
@@ -20,6 +20,8 @@ const PRECACHE_ASSETS = [
     './servant_grades_entry.html',
     './servant_followup.html',
     './servant_spiritual_report.html',
+    './servant_quick_guide.html',
+    './student_quick_guide.html',
     './spiritual_note.html',
     './bible.html',
     './harvest.html',
