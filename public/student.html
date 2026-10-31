@@ -123,6 +123,160 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
             transform: scale(1.1);
         }
 
+    
+        /* ============================================================== */
+        /* مسطرة التنقل السفلية للموبايل والتبويبات الكنسية الفاخرة */
+        /* ============================================================== */
+        :root {
+            --liturgical-navy: #0f2744;
+            --liturgical-navy-light: #1b3a5b;
+            --liturgical-gold: #c59b27;
+            --liturgical-gold-light: #dfb743;
+            --liturgical-bg: #f8fafc;
+        }
+
+        @media (max-width: 768px) {
+            body { padding-bottom: 95px !important; }
+        }
+
+        .welcome-header {
+            background: linear-gradient(135deg, #0f2744 0%, #1b3a5b 55%, #1e3a8a 100%) !important;
+            border-bottom: 3.5px solid #c59b27 !important;
+            box-shadow: 0 12px 30px rgba(15, 39, 68, 0.28) !important;
+        }
+
+        /* مسطرة التبويب العلوية للأجهزة الكبيرة والتابلت */
+        .student-top-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 6px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(15, 39, 68, 0.05);
+            overflow-x: auto;
+        }
+        .student-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-size: 0.92rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+        }
+        .student-nav-btn:hover {
+            color: #0f2744;
+            background: #f1f5f9;
+        }
+        .student-nav-btn.active {
+            background: linear-gradient(135deg, #0f2744, #1b3a5b);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(15, 39, 68, 0.25);
+            border-bottom: 2px solid #c59b27;
+        }
+        .student-nav-btn.active .nav-icon {
+            color: #c59b27 !important;
+        }
+
+        /* شريط الملاحة السفلي الثابت لشاشات الموبايل */
+        .student-bottom-nav {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .student-bottom-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 68px;
+                background: rgba(15, 39, 68, 0.96);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
+                border-top: 1.5px solid rgba(197, 155, 39, 0.5);
+                box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.35);
+                z-index: 9998;
+                align-items: center;
+                justify-content: space-around;
+                padding: 0 6px;
+                direction: rtl;
+            }
+            .bottom-nav-item {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                background: none;
+                border: none;
+                color: #94a3b8;
+                font-size: 0.72rem;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                padding: 6px 0;
+                border-radius: 12px;
+                text-decoration: none;
+            }
+            .bottom-nav-item .nav-icon {
+                font-size: 1.25rem;
+                transition: transform 0.2s ease, color 0.2s ease;
+            }
+            .bottom-nav-item.active {
+                color: #ffffff;
+            }
+            .bottom-nav-item.active .nav-icon {
+                color: #c59b27;
+                transform: translateY(-2px) scale(1.1);
+                filter: drop-shadow(0 2px 6px rgba(197, 155, 39, 0.6));
+            }
+            .bottom-nav-item.active .nav-title {
+                color: #c59b27;
+                font-weight: 800;
+            }
+        }
+
+        .student-tab-pane {
+            animation: fadeInTab 0.28s ease-in-out;
+        }
+        @keyframes fadeInTab {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .liturgical-shelf-card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1.5px solid #e2e8f0;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(15, 39, 68, 0.04);
+        }
+        .liturgical-shelf-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(15, 39, 68, 0.09);
+            border-color: #c59b27;
+            color: inherit;
+        }
+
     </style>
 
 </head>
@@ -191,7 +345,31 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
     
     <!-- 🎂 بطاقة الاحتفال الملكي بعيد ميلاد المخدوم -->
-    <div id="student-birthday-banner" class="alert border-0 shadow-lg d-none mb-3 rounded-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #92400e 0%, #b45309 35%, #d97706 70%, #f59e0b 100%); border: 1.5px solid #fde047 !important; box-shadow: 0 8px 24px rgba(217,119,6,0.3) !important;">
+    <!-- مسطرة التبويب العلوية (Top Segmented Navigation) -->
+    <div class="student-top-tabs">
+        <button type="button" class="student-nav-btn active" data-tab="home" onclick="switchStudentTab('home')">
+            <span class="nav-icon"><i class="fa-solid fa-house"></i></span>
+            <span>الرئيسية</span>
+        </button>
+        <button type="button" class="student-nav-btn" data-tab="spiritual" onclick="switchStudentTab('spiritual')">
+            <span class="nav-icon text-danger"><i class="fa-solid fa-dove"></i></span>
+            <span>نوتتي الروحية</span>
+        </button>
+        <button type="button" class="student-nav-btn" data-tab="grades" onclick="switchStudentTab('grades')">
+            <span class="nav-icon text-primary"><i class="fa-solid fa-chart-simple"></i></span>
+            <span>درجاتي وحضوري</span>
+        </button>
+        <button type="button" class="student-nav-btn" data-tab="badges" onclick="switchStudentTab('badges')">
+            <span class="nav-icon text-warning"><i class="fa-solid fa-trophy"></i></span>
+            <span>أوسمتي وحصادي</span>
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 🏠 التبويب 1: الرئيسية (Home Tab) -->
+    <!-- ========================================== -->
+    <div id="pane-home" class="student-tab-pane active">
+            <div id="student-birthday-banner" class="alert border-0 shadow-lg d-none mb-3 rounded-4 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #92400e 0%, #b45309 35%, #d97706 70%, #f59e0b 100%); border: 1.5px solid #fde047 !important; box-shadow: 0 8px 24px rgba(217,119,6,0.3) !important;">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center">
                 <span class="fs-1 me-2" style="display:inline-block; animation: bdayBounce 1.2s infinite alternate;">🎂</span>
@@ -230,7 +408,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
     <!-- ========================================== -->
     <!-- 🌟 وحدة رحلتك الروحية الملكية (Spiritual Journey) -->
     <!-- ========================================== -->
-    <div class="card p-3 mb-3 border-0 spiritual-journey-card">
+            <div class="card p-3 mb-3 border-0 spiritual-journey-card">
         
         <!-- عنوان القسم -->
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -272,7 +450,51 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         </div>
 
         <!-- 3. متابعة وسائط النعمة والتأهيل الروحي لخادم المسيح (متابعة رعوية للتأهيل) -->
-        <div class="private-diary-box p-3 text-white mb-3">
+        </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+            <div>
+                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-bookmark me-1"></i> قراءة اليوم حسب الخطة السنوية</span>
+                <h5 class="fw-bold text-dark mb-0" id="ui-today-reading-title">جاري التحديد...</h5>
+                <small class="text-muted" id="ui-today-date-text"></small>
+            </div>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <a id="btn-go-reading" href="bible.html" class="btn btn-warning text-dark fw-bold px-3 py-2 shadow-sm rounded-pill" style="font-size:0.88rem;">
+                    <i class="fa-solid fa-book-open-reader me-1"></i> ابدأ القراءة الآن
+                </a>
+            </div>
+        </div>
+
+        <!-- شريط إنجاز إصحاحات اليوم -->
+        <div class="mt-2 pt-2 border-top border-warning border-opacity-25" id="ui-chapters-progress-box">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="fw-bold text-dark" id="ui-chapters-progress-text">إنجاز إصحاحات اليوم: 0 من 0</small>
+                <span class="badge bg-light text-dark border border-warning" id="ui-chapters-progress-badge">0%</span>
+            </div>
+            <div class="progress" style="height: 8px; border-radius: 6px; background: rgba(217, 119, 6, 0.15);">
+                <div id="ui-chapters-progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
+            </div>
+        </div>
+
+        <!-- كبسولات الإصحاحات التفاعلية -->
+        <div class="d-flex flex-wrap gap-2 mt-3" id="ui-today-chapters-grid">
+            <!-- Dynamically populated chips -->
+        </div>
+
+        <!-- رسالة البونص عند الاكتمال -->
+        <div id="ui-chapters-completion-banner" class="alert alert-success d-none mt-3 mb-0 py-2 px-3 fw-bold small text-center" style="border-radius: 12px;">
+            🎉 مبارك! أتممت قراءة جميع إصحاحات اليوم بنجاح وحصلت على بونص الأمانة (+3 نقاط إضافية)! ✝️
+        </div>
+    </div>
+
+    <!-- بطاقة تخفيضات ومكافآت المؤتمر السنوي (Conference Incentive Voucher Card) -->
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 🕊️ التبويب 2: نوتتي الروحية (Spiritual Tab) -->
+    <!-- ========================================== -->
+    <div id="pane-spiritual" class="student-tab-pane" style="display: none;">
+        <div class="card p-3 mb-3 border-0 spiritual-journey-card">
+                    <div class="private-diary-box p-3 text-white mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="d-flex align-items-center gap-2">
                     <span>🕊️</span>
@@ -310,89 +532,109 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         </div>
 
         <!-- 4. نظام الأوسمة التحفيزي (Badges & Gamification) -->
-        <div class="badges-gamification-section">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div class="fw-bold small text-dark"><span class="me-1">🎖️</span> الأوسمة والإنجازات:</div>
-                <span class="small text-muted" id="ui-unlocked-badges-count" style="font-size: 0.75rem;">0 / 4 مكتمل</span>
+        </div>
+            <!-- القسم الثاني: وسائط النعمة والقراءات الروحية -->
+
+    <div class="category-title"><i class="fa-solid fa-dove text-danger"></i> وسائط النعمة والقراءات الروحية:</div>
+
+    <div class="menu-grid">
+
+        <a href="spiritual_note.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-heart-pulse"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">النوتة الروحية اليومية</strong>
+
+                    <small class="text-muted">تسجيل صلوات الأجبية، القداس، والصوم</small>
+
+                </div>
+
             </div>
 
-            <div class="row g-2 text-center" id="badgesGrid">
-                <!-- وسام أسبوع كامل -->
-                <div class="col-6 col-md-3">
-                    <div class="badge-achievement-card" id="badge-week">
-                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🔥</div>
-                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أسبوع كامل</div>
-                        <div class="small text-muted mt-1" id="badge-week-progress" style="font-size: 0.7rem;">0 / 7 أيام</div>
-                    </div>
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="bible.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-book-bible"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">قارئ الكتاب المقدس</strong>
+
+                    <small class="text-muted">قراءة أسفار وإصحاحات العهدين وتسجيل الخلوة</small>
+
                 </div>
-                <!-- وسام شهر متواصل -->
-                <div class="col-6 col-md-3">
-                    <div class="badge-achievement-card" id="badge-month">
-                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🌟</div>
-                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">شهر متواصل</div>
-                        <div class="small text-muted mt-1" id="badge-month-progress" style="font-size: 0.7rem;">0 / 30 يوم</div>
-                    </div>
-                </div>
-                <!-- وسام 100 يوم -->
-                <div class="col-6 col-md-3">
-                    <div class="badge-achievement-card" id="badge-century">
-                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🏆</div>
-                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">100 يوم بركة</div>
-                        <div class="small text-muted mt-1" id="badge-century-progress" style="font-size: 0.7rem;">0 / 100 يوم</div>
-                    </div>
-                </div>
-                <!-- وسام أمانة الاعتراف -->
-                <div class="col-6 col-md-3">
-                    <div class="badge-achievement-card" id="badge-confession">
-                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🕊️</div>
-                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أمانة الاعتراف</div>
-                        <div class="small text-muted mt-1" id="badge-confession-progress" style="font-size: 0.7rem;">سر التوبة والاعتراف</div>
-                    </div>
-                </div>
+
             </div>
-        </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="katamaros.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-scroll"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">القطمارس اليومي</strong>
+
+                    <small class="text-muted">قراءات العشية، باكر، والقداس الإلهي</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
+
+
+
+        <a href="synaxarium.html" class="card-menu">
+
+            <div class="d-flex align-items-center">
+
+                <div class="menu-icon bg-secondary bg-opacity-10 text-secondary"><i class="fa-solid fa-church"></i></div>
+
+                <div>
+
+                    <strong class="d-block text-dark">السنكسار الكنسي</strong>
+
+                    <small class="text-muted">سير وتذكارات آباء وشهداء الكنيسة</small>
+
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-left text-muted"></i>
+
+        </a>
 
     </div>
 
-        <!-- بطاقة قراءة اليوم الإصحاحية التفاعلية -->
-    <div class="card p-3 mb-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706 !important; border-radius: 18px;">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-            <div>
-                <span class="badge bg-warning text-dark mb-1 fw-bold"><i class="fa-solid fa-bookmark me-1"></i> قراءة اليوم حسب الخطة السنوية</span>
-                <h5 class="fw-bold text-dark mb-0" id="ui-today-reading-title">جاري التحديد...</h5>
-                <small class="text-muted" id="ui-today-date-text"></small>
-            </div>
-            <div class="d-flex gap-2 align-items-center flex-wrap">
-                <a id="btn-go-reading" href="bible.html" class="btn btn-warning text-dark fw-bold px-3 py-2 shadow-sm rounded-pill" style="font-size:0.88rem;">
-                    <i class="fa-solid fa-book-open-reader me-1"></i> ابدأ القراءة الآن
-                </a>
-            </div>
-        </div>
 
-        <!-- شريط إنجاز إصحاحات اليوم -->
-        <div class="mt-2 pt-2 border-top border-warning border-opacity-25" id="ui-chapters-progress-box">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-                <small class="fw-bold text-dark" id="ui-chapters-progress-text">إنجاز إصحاحات اليوم: 0 من 0</small>
-                <span class="badge bg-light text-dark border border-warning" id="ui-chapters-progress-badge">0%</span>
-            </div>
-            <div class="progress" style="height: 8px; border-radius: 6px; background: rgba(217, 119, 6, 0.15);">
-                <div id="ui-chapters-progress-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%; transition: width 0.3s ease;"></div>
-            </div>
-        </div>
-
-        <!-- كبسولات الإصحاحات التفاعلية -->
-        <div class="d-flex flex-wrap gap-2 mt-3" id="ui-today-chapters-grid">
-            <!-- Dynamically populated chips -->
-        </div>
-
-        <!-- رسالة البونص عند الاكتمال -->
-        <div id="ui-chapters-completion-banner" class="alert alert-success d-none mt-3 mb-0 py-2 px-3 fw-bold small text-center" style="border-radius: 12px;">
-            🎉 مبارك! أتممت قراءة جميع إصحاحات اليوم بنجاح وحصلت على بونص الأمانة (+3 نقاط إضافية)! ✝️
-        </div>
     </div>
 
-    <!-- بطاقة تخفيضات ومكافآت المؤتمر السنوي (Conference Incentive Voucher Card) -->
-    <div id="conferenceDiscountStudentCard" class="card p-3 mb-3 border-0 shadow-sm d-none" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border-right: 5px solid #2563eb !important; border-radius: 18px; box-shadow: 0 4px 15px rgba(37,99,235,0.08);">
+    <!-- ========================================== -->
+    <!-- 📊 التبويب 3: درجاتي وحضوري (Grades Tab) -->
+    <!-- ========================================== -->
+    <div id="pane-grades" class="student-tab-pane" style="display: none;">
+            <div id="conferenceDiscountStudentCard" class="card p-3 mb-3 border-0 shadow-sm d-none" style="background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%); border-right: 5px solid #2563eb !important; border-radius: 18px; box-shadow: 0 4px 15px rgba(37,99,235,0.08);">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
             <div>
                 <span class="badge" style="background: #fef3c7; color: #92400e; font-weight: 800; font-size: 0.76rem;">
@@ -459,7 +701,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
     </div>
 
 
-    <!-- القسم الأول: الالتزام الدراسي والشيتات والحضور -->
+            <!-- القسم الأول: الالتزام الدراسي والشيتات والحضور -->
 
     <div class="category-title"><i class="fa-solid fa-graduation-cap text-primary"></i> الالتزام الدراسي والشيتات والحضور:</div>
 
@@ -577,102 +819,61 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
 
 
-    <!-- القسم الثاني: وسائط النعمة والقراءات الروحية -->
+    </div>
 
-    <div class="category-title"><i class="fa-solid fa-dove text-danger"></i> وسائط النعمة والقراءات الروحية:</div>
-
-    <div class="menu-grid">
-
-        <a href="spiritual_note.html" class="card-menu">
-
-            <div class="d-flex align-items-center">
-
-                <div class="menu-icon bg-danger bg-opacity-10 text-danger"><i class="fa-solid fa-heart-pulse"></i></div>
-
-                <div>
-
-                    <strong class="d-block text-dark">النوتة الروحية اليومية</strong>
-
-                    <small class="text-muted">تسجيل صلوات الأجبية، القداس، والصوم</small>
-
-                </div>
-
+    <!-- ========================================== -->
+    <!-- 🏆 التبويب 4: أوسمتي وحصادي (Badges & Harvest Tab) -->
+    <!-- ========================================== -->
+    <div id="pane-badges" class="student-tab-pane" style="display: none;">
+        <div class="card p-3 mb-3 border-0 spiritual-journey-card">
+                    <div class="badges-gamification-section">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold small text-dark"><span class="me-1">🎖️</span> الأوسمة والإنجازات:</div>
+                <span class="small text-muted" id="ui-unlocked-badges-count" style="font-size: 0.75rem;">0 / 4 مكتمل</span>
             </div>
 
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-
-        </a>
-
-
-
-        <a href="bible.html" class="card-menu">
-
-            <div class="d-flex align-items-center">
-
-                <div class="menu-icon bg-warning bg-opacity-10 text-warning"><i class="fa-solid fa-book-bible"></i></div>
-
-                <div>
-
-                    <strong class="d-block text-dark">قارئ الكتاب المقدس</strong>
-
-                    <small class="text-muted">قراءة أسفار وإصحاحات العهدين وتسجيل الخلوة</small>
-
+            <div class="row g-2 text-center" id="badgesGrid">
+                <!-- وسام أسبوع كامل -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-week">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🔥</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أسبوع كامل</div>
+                        <div class="small text-muted mt-1" id="badge-week-progress" style="font-size: 0.7rem;">0 / 7 أيام</div>
+                    </div>
                 </div>
-
-            </div>
-
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-
-        </a>
-
-
-
-        <a href="katamaros.html" class="card-menu">
-
-            <div class="d-flex align-items-center">
-
-                <div class="menu-icon bg-info bg-opacity-10 text-info"><i class="fa-solid fa-scroll"></i></div>
-
-                <div>
-
-                    <strong class="d-block text-dark">القطمارس اليومي</strong>
-
-                    <small class="text-muted">قراءات العشية، باكر، والقداس الإلهي</small>
-
+                <!-- وسام شهر متواصل -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-month">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🌟</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">شهر متواصل</div>
+                        <div class="small text-muted mt-1" id="badge-month-progress" style="font-size: 0.7rem;">0 / 30 يوم</div>
+                    </div>
                 </div>
-
-            </div>
-
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-
-        </a>
-
-
-
-        <a href="synaxarium.html" class="card-menu">
-
-            <div class="d-flex align-items-center">
-
-                <div class="menu-icon bg-secondary bg-opacity-10 text-secondary"><i class="fa-solid fa-church"></i></div>
-
-                <div>
-
-                    <strong class="d-block text-dark">السنكسار الكنسي</strong>
-
-                    <small class="text-muted">سير وتذكارات آباء وشهداء الكنيسة</small>
-
+                <!-- وسام 100 يوم -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-century">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🏆</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">100 يوم بركة</div>
+                        <div class="small text-muted mt-1" id="badge-century-progress" style="font-size: 0.7rem;">0 / 100 يوم</div>
+                    </div>
                 </div>
-
+                <!-- وسام أمانة الاعتراف -->
+                <div class="col-6 col-md-3">
+                    <div class="badge-achievement-card" id="badge-confession">
+                        <div class="badge-icon mb-1" style="font-size: 1.5rem; opacity:0.35;">🕊️</div>
+                        <div class="fw-bold" style="font-size: 0.8rem; color:#475569;">أمانة الاعتراف</div>
+                        <div class="small text-muted mt-1" id="badge-confession-progress" style="font-size: 0.7rem;">سر التوبة والاعتراف</div>
+                    </div>
+                </div>
             </div>
-
-            <i class="fa-solid fa-chevron-left text-muted"></i>
-
-        </a>
+        </div>
 
     </div>
 
-
-    <!-- قسم تقييم لقاء الجمعة والمقترحات (Feedback Widget) -->
+        <!-- بطاقة قراءة اليوم الإصحاحية التفاعلية -->
+    <div class="card p-3 mb-3 border-0 shadow-sm" style="background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%); border-right: 5px solid #d97706 !important; border-radius: 18px;">
+        </div>
+            <!-- قسم تقييم لقاء الجمعة والمقترحات (Feedback Widget) -->
     <div class="card p-3 mt-4 mb-3 border-0 shadow-sm rounded-4" style="background: #ffffff; border: 1px solid #e2e8f0 !important;">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div class="d-flex align-items-center gap-2">
@@ -710,9 +911,9 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
             </button>
         </div>
     </div>
+    </div>
+
 </div>
-
-
 
 <script src="auth-client.js"></script>
   <script src="js/khedmty-db.js"></script>
@@ -2398,7 +2599,59 @@ function triggerBirthdayCelebration(isManual = false) {
 document.addEventListener('DOMContentLoaded', function() {
     checkAndCelebrateBirthday();
 });
+
+
+    // دالة التبديل الفوري بين التبويبات بدون تحميل
+    function switchStudentTab(tabId) {
+        if (!tabId) tabId = 'home';
+        document.querySelectorAll('.student-tab-pane').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.student-nav-btn, .bottom-nav-item').forEach(b => b.classList.remove('active'));
+        
+        const target = document.getElementById('pane-' + tabId);
+        if (target) {
+            target.style.display = 'block';
+        }
+        document.querySelectorAll('[data-tab="' + tabId + '"]').forEach(b => b.classList.add('active'));
+        
+        try {
+            if (history.replaceState) history.replaceState(null, '', '#' + tabId);
+        } catch(e) {}
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.switchStudentTab = switchStudentTab;
+
+    // استعادة التبويب المفتوح من الرابط (Hash)
+    window.addEventListener('DOMContentLoaded', () => {
+        const hash = (window.location.hash || '').replace('#', '').trim();
+        if (['home', 'spiritual', 'grades', 'badges'].includes(hash)) {
+            switchStudentTab(hash);
+        }
+    });
+
 </script>
+
+    <!-- ============================================================== -->
+    <!-- مسطرة الملاحة السفلية الثابتة للموبايل (Mobile Bottom Bar) -->
+    <!-- ============================================================== -->
+    <nav class="student-bottom-nav">
+        <button type="button" class="bottom-nav-item active" data-tab="home" onclick="switchStudentTab('home')">
+            <span class="nav-icon"><i class="fa-solid fa-house"></i></span>
+            <span class="nav-title">الرئيسية</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-tab="spiritual" onclick="switchStudentTab('spiritual')">
+            <span class="nav-icon"><i class="fa-solid fa-dove"></i></span>
+            <span class="nav-title">نوتتي</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-tab="grades" onclick="switchStudentTab('grades')">
+            <span class="nav-icon"><i class="fa-solid fa-chart-simple"></i></span>
+            <span class="nav-title">درجاتي</span>
+        </button>
+        <button type="button" class="bottom-nav-item" data-tab="badges" onclick="switchStudentTab('badges')">
+            <span class="nav-icon"><i class="fa-solid fa-trophy"></i></span>
+            <span class="nav-title">أوسمتي</span>
+        </button>
+    </nav>
+
 </body>
 
 </html>

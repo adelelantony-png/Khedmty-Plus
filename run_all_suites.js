@@ -24,7 +24,8 @@ const tests = [
   'tests/test_full_platform_syntax_and_ui.js',
   'tests/simulate_real_user_journeys.js',
   'tests/test_granular_chapter_tracking.js',
-  'tests/test_offline_and_sync_engine.js'
+  'tests/test_offline_and_sync_engine.js',
+  'tests/test_student_mobile_tabs.js'
 ];
 
 console.log('================================================================');
