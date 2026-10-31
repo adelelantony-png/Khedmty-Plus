@@ -26,7 +26,8 @@ const tests = [
   'tests/test_granular_chapter_tracking.js',
   'tests/test_offline_and_sync_engine.js',
   'tests/test_student_mobile_tabs.js',
-  'tests/test_pastoral_early_warning.js'
+  'tests/test_pastoral_early_warning.js',
+  'tests/test_official_certificates_and_signatures.js'
 ];
 
 console.log('================================================================');

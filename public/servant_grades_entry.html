@@ -771,13 +771,58 @@ body {
         }
 
         @media print {
-            body * {
+            /* 1. طباعة شهادات الدفعة مجمعة */
+            body.printing-batch-cert * {
                 visibility: hidden !important;
             }
-            #printablePdfReport, #printablePdfReport * {
+            body.printing-batch-cert #printableBatchContainer,
+            body.printing-batch-cert #printableBatchContainer * {
                 visibility: visible !important;
             }
-            #printablePdfReport {
+            body.printing-batch-cert #printableBatchContainer {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: transparent !important;
+            }
+            body.printing-batch-cert .cert-page-break {
+                page-break-after: always !important;
+                break-after: page !important;
+                min-height: 94vh !important;
+                margin: 0 0 25px 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* 2. طباعة شهادة مخدوم فردية */
+            body.printing-single-cert * {
+                visibility: hidden !important;
+            }
+            body.printing-single-cert #printableCertificate,
+            body.printing-single-cert #printableCertificate * {
+                visibility: visible !important;
+            }
+            body.printing-single-cert #printableCertificate {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+            }
+
+            /* 3. كشف الدرجات الافتراضي للكنترول */
+            body:not(.printing-batch-cert):not(.printing-single-cert) * {
+                visibility: hidden !important;
+            }
+            body:not(.printing-batch-cert):not(.printing-single-cert) #printablePdfReport,
+            body:not(.printing-batch-cert):not(.printing-single-cert) #printablePdfReport * {
+                visibility: visible !important;
+            }
+            body:not(.printing-batch-cert):not(.printing-single-cert) #printablePdfReport {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -792,6 +837,21 @@ body {
                 size: A4 landscape;
                 margin: 6mm;
             }
+        }
+
+        /* تنسيق الشهادة بالنمط الموفر للحبر والأوراق الكنسية الرسمية */
+        .certificate-sheet.cert-theme-parchment {
+            background: #ffffff !important;
+            color: #0c2461 !important;
+            border: 4px double #b45309 !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+        }
+        .certificate-sheet.cert-theme-parchment .cert-border-inner {
+            border-color: #d4af37 !important;
+        }
+        .certificate-sheet.cert-theme-parchment .cert-student-name {
+            color: #0c2461 !important;
+            text-shadow: none !important;
         }
 
 
@@ -2317,6 +2377,9 @@ body {
                     <a href="javascript:void(0)" onclick="closeExportMenu(); exportDetailedCriteriaExcel()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#15803d; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='transparent'">
                         <i class="fa-solid fa-file-excel fs-5 text-success"></i> شيت إكسيل معتمد (Excel XLSX) 📊
                     </a>
+                    <a href="javascript:void(0)" onclick="closeExportMenu(); openBatchCertificatesModal()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#b45309; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#fefce8'" onmouseout="this.style.background='transparent'">
+                        <i class="fa-solid fa-award fs-5 text-warning"></i> ستوديو طباعة شهادات الاجتياز والتقدير 📜
+                    </a>
                     <a href="javascript:void(0)" onclick="closeExportMenu(); openPdfExportModal()" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#dc2626; font-weight:800; text-decoration:none; border-radius:6px; font-size:0.83rem;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='transparent'">
                         <i class="fa-solid fa-file-pdf fs-5 text-danger"></i> تقرير PDF رسمي للطباعة 📄
                     </a>
@@ -2764,6 +2827,9 @@ body {
                     <i class="fa-solid fa-sparkles text-warning me-1"></i> صورة جاهزة للمشاركة على السوشيال ميديا أو الواتساب
                 </div>
                 <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-custom" onclick="printSingleCertificate()" style="background: linear-gradient(135deg, #0c2461, #1e3799); color: #ffffff; border: none; font-weight: bold; box-shadow: 0 3px 10px rgba(12,36,97,0.25);">
+                        <i class="fa-solid fa-print me-1"></i> طباعة الشهادة (A4 Print) 🖨️
+                    </button>
                     <button type="button" class="btn-custom" onclick="downloadCertificateImage()" style="background: #10b981; color: #ffffff; border: none; font-weight: bold;">
                         <i class="fa-solid fa-image me-1"></i> تنزيل البطاقة كصورة عالية الدقة (HD PNG) 📥
                     </button>
@@ -2872,6 +2938,68 @@ body {
                     </button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة ستوديو طباعة شهادات التقدير والاجتياز الرسمية (Batch Certificates Print Studio) -->
+    <div id="batchCertificatesModal" class="pdf-modal-overlay">
+        <div class="pdf-modal-content" style="max-width: 1050px;">
+            <!-- رأس النافذة -->
+            <div style="background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%); color: #ffffff; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-award fs-4 text-warning"></i>
+                    <div>
+                        <strong style="font-size: 1.15rem;">ستوديو طباعة شهادات التقدير والاجتياز الرسمية</strong>
+                        <div style="font-size: 0.8rem; color: #cbd5e1;">طباعة شهادات التقدير الكنسية المعتمدة للدفعة (A4 Print-Ready Studio)</div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeBatchCertificatesModal()" class="import-close-btn">&times;</button>
+            </div>
+
+            <!-- شريط خيارات الفلترة والتنسيق -->
+            <div style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <label style="font-size: 0.88rem; font-weight: 800; color: #0c2461;">الفئة المستهدفة:</label>
+                    <select id="certFilterSelect" class="form-select form-select-sm" style="width: auto; font-weight: 700; border-color: #cbd5e1;" onchange="renderBatchCertificatesPreview()">
+                        <option value="passed_all" selected>جميع المقبولين (نهائياً + رعاية الاعتراف)</option>
+                        <option value="accepted_only">المقبولون نهائياً فقط 🟢</option>
+                        <option value="conditional_only">المقبولون مع رعاية الاعتراف فقط 🕊️</option>
+                        <option value="males">المقبولون (بنين فقط) 👦</option>
+                        <option value="females">المقبولات (بنات فقط) 👧</option>
+                        <option value="all_candidates">كافة المسجلين (لأغراض المراجعة)</option>
+                    </select>
+
+                    <label style="font-size: 0.88rem; font-weight: 800; color: #0c2461; margin-right: 8px;">نمط الورق:</label>
+                    <select id="certThemeSelect" class="form-select form-select-sm" style="width: auto; font-weight: 700; border-color: #cbd5e1;" onchange="renderBatchCertificatesPreview()">
+                        <option value="royal" selected>الملكي الفاخر (Navy & Gold 👑)</option>
+                        <option value="parchment">الموفر للحبر والطباعة (Parchment White 📄)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="certCountBadge" class="badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.88rem; padding: 6px 12px; font-weight: 800;">
+                        جاهز لطباعة: 0 شهادة
+                    </span>
+                    <button type="button" class="btn-custom" onclick="printBatchCertificates()" style="background: linear-gradient(135deg, #0c2461, #1e3799); color: #ffffff; border: none; font-weight: 800; box-shadow: 0 4px 12px rgba(12, 36, 97, 0.25);">
+                        <i class="fa-solid fa-print me-1"></i> طباعة الشهادات الآن (Print A4) 🖨️
+                    </button>
+                </div>
+            </div>
+
+            <!-- منطقة المعاينة الفورية للشهادات -->
+            <div class="pdf-preview-container" style="background: #334155; padding: 20px;">
+                <div id="printableBatchContainer" style="width: 100%; max-width: 820px; display: flex; flex-direction: column; gap: 24px;">
+                    <!-- يتم تعبئة الشهادات ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- ذيل النافذة -->
+            <div style="background: #ffffff; border-top: 1.5px solid #cbd5e1; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.82rem; color: #64748b; font-weight: 700;">
+                    <i class="fa-solid fa-circle-info text-primary me-1"></i> يتم طباعة كل شهادة في صفحة مستقلة A4 تلقائياً مع الترويسة والتوقيعات والأختام الكنسية المعتمدة.
+                </div>
+                <button type="button" class="btn-custom" onclick="closeBatchCertificatesModal()">إغلاق</button>
             </div>
         </div>
     </div>
@@ -3803,6 +3931,7 @@ body {
     }
 
     function printPdfReport() {
+        document.body.classList.remove('printing-batch-cert', 'printing-single-cert');
         renderPdfPreview();
         window.print();
     }
@@ -7629,6 +7758,176 @@ body {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    function printSingleCertificate() {
+        document.body.classList.add('printing-single-cert');
+        document.body.classList.remove('printing-batch-cert');
+        window.print();
+        setTimeout(function() {
+            document.body.classList.remove('printing-single-cert');
+        }, 1200);
+    }
+
+    function openBatchCertificatesModal() {
+        var modal = document.getElementById('batchCertificatesModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            renderBatchCertificatesPreview();
+        }
+    }
+
+    function closeBatchCertificatesModal() {
+        var modal = document.getElementById('batchCertificatesModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function getHonorRankText(pct) {
+        var p = Number(pct) || 0;
+        if (p >= 85) return 'امتياز مع مرتبة الشرف 🌟';
+        if (p >= 75) return 'جيد جداً مرتفع 🏅';
+        if (p >= 65) return 'جيد مبارك 🎖️';
+        return 'مقبول بنعمة ربنا 🕊️';
+    }
+
+    function renderBatchCertificatesPreview() {
+        var container = document.getElementById('printableBatchContainer');
+        var badge = document.getElementById('certCountBadge');
+        if (!container) return;
+
+        var filter = (document.getElementById('certFilterSelect') && document.getElementById('certFilterSelect').value) || 'passed_all';
+        var theme = (document.getElementById('certThemeSelect') && document.getElementById('certThemeSelect').value) || 'royal';
+        var isParchment = (theme === 'parchment');
+
+        var now = new Date();
+        var dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        var targetCandidates = candidatesList.filter(function(c) {
+            var dec = computeDecision(c);
+            var isPass = (dec.key === 'accepted' || dec.key === 'conditional');
+            var isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+
+            if (filter === 'passed_all') return isPass;
+            if (filter === 'accepted_only') return dec.key === 'accepted';
+            if (filter === 'conditional_only') return dec.key === 'conditional';
+            if (filter === 'males') return isPass && !isF;
+            if (filter === 'females') return isPass && isF;
+            if (filter === 'all_candidates') return true;
+            return isPass;
+        });
+
+        if (badge) {
+            badge.textContent = 'جاهز لطباعة: ' + targetCandidates.length + ' شهادة';
+        }
+
+        if (targetCandidates.length === 0) {
+            container.innerHTML = '<div style="background:#ffffff; padding:40px; text-align:center; border-radius:12px; color:#64748b; font-weight:800;">لا توجد مخدومين يطابقون الفئة المحددة حالياً.</div>';
+            return;
+        }
+
+        var html = '';
+        targetCandidates.forEach(function(c) {
+            var total = (Number(c.g1) || 0) + (Number(c.g2) || 0) + (Number(c.g3) || 0) + (Number(c.g4) || 0);
+            var pct = maxTotalScore > 0 ? ((total / maxTotalScore) * 100).toFixed(1) : "0.0";
+            var rank = getHonorRankText(pct);
+            var isF = (c.gender === 'بنات' || c.gender === 'female' || c.gender === 'أنثى');
+
+            var greeting = isF 
+                ? 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابنة المباركة والخادمة الأمينة:' 
+                : 'يسر أسرة إعداد خدام القديس بولس الرسول أن تهنئ الابن المبارك والخادم الأمين:';
+            var role = isF ? 'فصل إعداد خادمات — الفرقة الأولى' : 'فصل إعداد خدام — الفرقة الأولى';
+
+            var themeClass = isParchment ? 'cert-theme-parchment' : '';
+            var textColor = isParchment ? '#0c2461' : '#fef08a';
+            var subColor = isParchment ? '#1e3799' : '#e2e8f0';
+            var dateColor = isParchment ? '#64748b' : '#cbd5e1';
+            var codeColor = isParchment ? '#047857' : '#6ee7b7';
+            var crossColor = isParchment ? '#b45309' : '#fef08a';
+            var bodyText = isParchment ? '#334155' : '#f1f5f9';
+            var scoreColor = isParchment ? '#b45309' : '#fde047';
+            var pctColor = isParchment ? '#047857' : '#6ee7b7';
+            var signTitleColor = isParchment ? '#0c2461' : '#f8fafc';
+
+            html += '<div class="certificate-sheet ' + themeClass + ' cert-page-break" style="margin-bottom: 24px;">' +
+                '<div class="cert-border-inner">' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(212,175,55,0.4); padding-bottom:8px; margin-bottom:10px;">' +
+                        '<div style="text-align:right; line-height:1.4;">' +
+                            '<div style="font-size:11pt; font-weight:900; color:' + textColor + ';">كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالمطرية</div>' +
+                            '<div style="font-size:9.5pt; font-weight:800; color:' + subColor + ';">اجتماع القديس بولس الرسول لإعداد الخدام ✝️</div>' +
+                            '<div style="font-size:8pt; color:' + dateColor + '; font-weight:700;">فصل إعداد خدام — الفرقة الأولى (دفعة 2026 / 2027)</div>' +
+                        '</div>' +
+                        '<div style="text-align:center;">' +
+                            '<div style="font-size:26pt; color:' + crossColor + '; line-height:1;">☩</div>' +
+                        '</div>' +
+                        '<div style="text-align:left; line-height:1.4;">' +
+                            '<div style="font-size:8.5pt; color:' + dateColor + ';">التاريخ: ' + dateStr + '</div>' +
+                            '<div style="font-size:9.5pt; font-weight:bold; color:' + codeColor + ';">كود: ' + (c.code || '') + '</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                    '<div style="font-size:9.5pt; font-style:italic; color:' + crossColor + '; margin-bottom:10px; font-weight:700;">' +
+                        '"كُنْ أَمِينًا إِلَى الْمَوْتِ فَسَأُعْطِيكَ إِكْلِيلَ الْحَيَاةِ" (رؤ 2: 10)' +
+                    '</div>' +
+
+                    '<div style="font-size:15pt; font-weight:900; color:' + (isParchment ? '#0c2461' : '#ffffff') + '; letter-spacing:0.5px; margin-bottom:6px;">' +
+                        '🏆 شهادة اجتياز وقبول رسمية 🏆' +
+                    '</div>' +
+
+                    '<div style="font-size:10pt; color:' + (isParchment ? '#334155' : '#e2e8f0') + '; margin-bottom:4px;">' +
+                        greeting +
+                    '</div>' +
+
+                    '<div class="cert-student-name" style="font-size:1.85rem; font-weight:900; margin:8px 0; color:' + textColor + ';">' +
+                        (c.name || 'مخدوم مبارك') +
+                    '</div>' +
+
+                    '<div style="font-size:10pt; line-height:1.6; color:' + bodyText + '; max-width:620px; margin:0 auto 12px;">' +
+                        'بقبوله رسمياً في <strong>' + role + '</strong> بعد اجتياز اختبارات القبول والمقابلة الشخصية بنجاح، وحصوله على مجموع: ' +
+                        '<span style="color:' + scoreColor + '; font-weight:900;">' + total.toFixed(1) + ' / ' + maxTotalScore + '</span> ' +
+                        'بنسبة: <span style="color:' + pctColor + '; font-weight:900;">' + pct + '%</span> ' +
+                        'بتقدير عام: <strong style="color:' + textColor + '; text-decoration:underline;">' + rank + '</strong> 🎯' +
+                    '</div>' +
+
+                    '<div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid rgba(212,175,55,0.4); padding-top:10px; margin-top:10px;">' +
+                        '<div style="text-align:center; font-size:8.5pt; flex:1;">' +
+                            '<div style="font-weight:800; color:' + signTitleColor + ';">مسؤول الكنترول والرصد</div>' +
+                            '<div style="height:24px;"></div>' +
+                            '<div style="color:' + dateColor + '; font-size:7.5pt;">التوقيع: .....................</div>' +
+                        '</div>' +
+
+                        '<div class="gold-seal-badge" style="margin:0 12px;">' +
+                            '<span>✝️</span>' +
+                            '<span>معتمد</span>' +
+                            '<span>2026</span>' +
+                        '</div>' +
+
+                        '<div style="text-align:center; font-size:8.5pt; flex:1;">' +
+                            '<div style="font-weight:800; color:' + signTitleColor + ';">أمين فصل إعداد الخدام</div>' +
+                            '<div style="color:' + dateColor + '; font-size:8pt; margin-top:2px;">أ/ عادل جورج</div>' +
+                            '<div style="color:' + dateColor + '; font-size:7.5pt; margin-top:6px;">التوقيع: .....................</div>' +
+                        '</div>' +
+
+                        '<div style="text-align:center; font-size:8.5pt; flex:1;">' +
+                            '<div style="font-weight:800; color:' + signTitleColor + ';">كاهن إعداد الخدام ورعاية الشباب</div>' +
+                            '<div style="color:' + dateColor + '; font-size:8pt; margin-top:2px;">برعاية الآباء الكهنة</div>' +
+                            '<div style="color:' + dateColor + '; font-size:7.5pt; margin-top:6px;">التوقيع: .....................</div>' +
+                        '</div>' +
+                    '</div>' +
+
+                '</div>' +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function printBatchCertificates() {
+        document.body.classList.add('printing-batch-cert');
+        document.body.classList.remove('printing-single-cert');
+        window.print();
+        setTimeout(function() {
+            document.body.classList.remove('printing-batch-cert');
+        }, 1200);
     }
 
     function shareCertificateWhatsapp() {
