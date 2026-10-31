@@ -27,9 +27,25 @@ module.exports = async (req, res) => {
         const db = getDb();
         const studentCode = String(code).trim();
 
-        // 1. حساب عدد أيام قراءة الكتاب المقدس المنجزة
+        // 1. حساب عدد أيام وإصحاحات قراءة الكتاب المقدس المنجزة بدقة
         const readingsSnapshot = await db.collection('students').doc(studentCode).collection('reading_logs').get();
         const bibleCount = readingsSnapshot.size;
+        let bibleChaptersCount = 0;
+        let fullyCompletedDays = 0;
+
+        readingsSnapshot.forEach(doc => {
+            const d = doc.data() || {};
+            if (Array.isArray(d.completed_chapters)) {
+                bibleChaptersCount += d.completed_chapters.length;
+            } else if (d.chapters_read_count) {
+                bibleChaptersCount += d.chapters_read_count;
+            } else if (d.is_completed || d.completed) {
+                bibleChaptersCount += (d.total_chapters || 1);
+            }
+            if (d.is_completed || d.completed) {
+                fullyCompletedDays++;
+            }
+        });
 
         // 2. حساب عدد الشيتات المسلمة
         const sheetsSnapshot = await db.collection('students').doc(studentCode).collection('sheet_submissions').get();
@@ -58,14 +74,18 @@ module.exports = async (req, res) => {
 
         const baseBonus = (studentDoc.exists ? (studentDoc.data().bonus || 0) : (memberDoc ? (memberDoc.data().bonus || 0) : 0));
         const storedPoints = (studentDoc.exists ? (studentDoc.data().points || 0) : (memberDoc ? (memberDoc.data().points || 0) : 0));
-        // حساب النقاط التراكمية الموحدة: (أيام النوتة * 5) + (قراءات الإنجيل * 5) + البونص والدرجات المسجلة
-        const points = Math.max(storedPoints, baseBonus + (spiritualCount * 5) + (bibleCount * 5));
+        
+        // حساب النقاط التراكمية الموحدة: (أيام النوتة * 5) + (قراءات الإصحاحات * 2 + بونص الأيام الكاملة) + البونص والدرجات المسجلة
+        const bibleReadingPoints = Math.max(bibleCount * 5, (bibleChaptersCount * 2) + (fullyCompletedDays * 3));
+        const points = Math.max(storedPoints, baseBonus + (spiritualCount * 5) + bibleReadingPoints);
 
         return res.status(200).json({
             success: true,
             data: {
                 points: points,
                 bibleCount: bibleCount,
+                bibleChaptersCount: bibleChaptersCount,
+                totalBibleChapters: 1189,
                 totalPlanDays: 366,
                 submittedSheets: submittedSheets,
                 totalSubjects: totalSubjects,
@@ -73,7 +93,7 @@ module.exports = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("Firebase Error:", error);
+        console.error("Firebase Error in harvest:", error);
         return res.status(500).json({ success: false, message: 'حدث خطأ في جلب بيانات الحصاد' });
     }
 };

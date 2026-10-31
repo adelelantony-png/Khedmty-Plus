@@ -4663,27 +4663,25 @@ return id;
 // عدد قراءات الإنجيل الخاصة بدارس معين (يدعم أكثر من شكل لتخزين البيانات)
 
 function countBibleReadingsFor(readings, sCode) {
-
 if (!readings || !sCode) return 0;
-
-let direct = readings[sCode];
-
-if (direct && typeof direct === 'object') return Array.isArray(direct) ? direct.length : Object.keys(direct).length;
-
 let n = 0;
-
 Object.keys(readings).forEach(k => {
-
-let v = readings[k];
-
-if (k.endsWith('_' + sCode) || k.startsWith(sCode + '_')) n++;
-
-else if (v && typeof v === 'object' && !Array.isArray(v) && (String(v.code || v.studentCode || '') === sCode)) n++;
-
+    let v = readings[k];
+    let matches = (k.endsWith('_' + sCode) || k.startsWith(sCode + '_')) ||
+                  (v && typeof v === 'object' && !Array.isArray(v) && (String(v.code || v.studentCode || '') === String(sCode)));
+    if (matches) {
+        if (v && Array.isArray(v.completed_chapters)) {
+            n += v.completed_chapters.length;
+        } else if (v && v.chapters_read_count) {
+            n += v.chapters_read_count;
+        } else if (v && (v.is_completed || v.completed)) {
+            n += (v.total_chapters || 1);
+        } else {
+            n++;
+        }
+    }
 });
-
 return n;
-
 }
 
 // عدد الجمعات المتتالية الأخيرة التي غابها الدارس (من آخر جمعة مسجّل فيها حضور لأي أحد)

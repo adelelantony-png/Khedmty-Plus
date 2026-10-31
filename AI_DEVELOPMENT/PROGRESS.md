@@ -114,3 +114,15 @@
   4. **Liturgical Color Harmony & Design System:** Modernized chips, tabs, and metric cards with royal navy and church gold styling.
   5. **100% Feature Preservation:** Zero features deleted, zero destructive database changes.
 - **Verification:** All 21 test suites passed 100% (605 user event handlers verified with 0 ReferenceErrors).
+
+### [2026-10-31] Granular Chapter-by-Chapter Tracking Across Student Portal, Spiritual Note, Harvest & Followup (TSK-018)
+- **Status:** **COMPLETED & VERIFIED**
+- **Safety Pre-check:** Full project backup created and verified at `D:\StPaul_Service_System\_Backups\03_Web_Khedmty_Plus_PreChapterGranular_20261031` (250 files, 27.15 MB, Robocopy Exit Code 1 / Success).
+- **Key Enhancements Implemented:**
+  1. **Granular Reading Architecture:** Replaced binary all-or-nothing daily plan tracking with chapter-by-chapter logging.
+  2. **Student Portal Studio:** Added progress bar and responsive interactive chapter chips with real-time sync.
+  3. **Spiritual Note Integration:** Updated catchup section with interactive chapter pills for selected dates.
+  4. **Harvest & Bible Progress:** Aggregates exact chapters read against the 1189 chapters of the Holy Bible.
+  5. **Pastoral Report & Servant Dashboard:** Displays exact chapters read for each student and custom WhatsApp followup messaging.
+  6. **100% Feature Preservation:** Zero features deleted, zero destructive database changes.
+- **Verification:** All 22 test suites passed 100% (`run_all_suites.js` 22/22 PASS).

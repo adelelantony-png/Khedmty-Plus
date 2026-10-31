@@ -148,7 +148,21 @@
         let spiritualCount = Object.keys(localSpiritual).filter(key => key.endsWith(`_${studentCode}`)).length;
 
         const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-        let bibleCount = Object.keys(bibleReadings).filter(k => k.endsWith(`_${studentCode}`) || String((bibleReadings[k] || {}).code || '') === studentCode).length;
+        let bibleCount = 0;
+        let bibleChaptersCount = 0;
+        Object.keys(bibleReadings).forEach(k => {
+            if (k.endsWith(`_${studentCode}`) || String((bibleReadings[k] || {}).code || '') === studentCode) {
+                bibleCount++;
+                const item = bibleReadings[k] || {};
+                if (Array.isArray(item.completed_chapters)) {
+                    bibleChaptersCount += item.completed_chapters.length;
+                } else if (item.chapters_read_count) {
+                    bibleChaptersCount += item.chapters_read_count;
+                } else {
+                    bibleChaptersCount += (item.total_chapters || 1);
+                }
+            }
+        });
 
         const submittedSheetsMap = JSON.parse(localStorage.getItem('khedmety_submitted_sheets')) || {};
         const submittedSheets = (submittedSheetsMap[studentCode] || []).length;
@@ -157,6 +171,8 @@
             attendancePoints,
             spiritualCount,
             bibleCount,
+            bibleChaptersCount,
+            totalBibleChapters: 1189,
             submittedSheets,
             totalPlanDays: 366,
             totalSubjects: 7
@@ -180,7 +196,6 @@
         }
 
         try {
-            // سحب مباشر ومتزامن من Firestore مع ترشيد قراءات الحضور
             const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
             const attQuery = (firebase.firestore && firebase.firestore.FieldPath)
                 ? fsdb.collection('attendance').where(firebase.firestore.FieldPath.documentId(), '>=', cutoffDate)
@@ -193,7 +208,6 @@
                 fsdb.collection('students').doc(studentCode).collection('sheet_submissions').get()
             ]);
 
-            // تحديث الحضور المحلي من السحابة مع دمج الأيام السابقة
             const cloudAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
             attSnap.forEach(doc => { cloudAtt[doc.id] = Object.values(doc.data() || {}).filter(Boolean); });
             if (Object.keys(cloudAtt).length > 0) {
@@ -202,14 +216,25 @@
 
             const localData = calculateLocalHarvest();
 
+            let bibleSnapChapters = 0;
+            bibleSnap.forEach(doc => {
+                const d = doc.data() || {};
+                if (Array.isArray(d.completed_chapters)) bibleSnapChapters += d.completed_chapters.length;
+                else if (d.chapters_read_count) bibleSnapChapters += d.chapters_read_count;
+                else if (d.is_completed || d.completed) bibleSnapChapters += (d.total_chapters || 1);
+            });
+
             const mergedBibleCount = Math.max(bibleSnap.size, localData.bibleCount);
+            const mergedBibleChapters = Math.max(bibleSnapChapters, localData.bibleChaptersCount || localData.bibleCount);
             const mergedSpiritualCount = Math.max(spirSnap.size, localData.spiritualCount);
             const mergedSheets = Math.max(sheetsSnap.size, localData.submittedSheets);
-            const mergedPoints = localData.attendancePoints + (mergedSpiritualCount * 5) + (mergedBibleCount * 5);
+            const mergedPoints = localData.attendancePoints + (mergedSpiritualCount * 5) + (mergedBibleChapters * 2);
 
             renderHarvestUI({
                 points: mergedPoints,
                 bibleCount: mergedBibleCount,
+                bibleChaptersCount: mergedBibleChapters,
+                totalBibleChapters: 1189,
                 totalPlanDays: 366,
                 submittedSheets: mergedSheets,
                 totalSubjects: 7,
@@ -218,31 +243,29 @@
         } catch (error) {
             console.warn("تم الاعتماد على الحساب المحلي:", error);
             const localData = calculateLocalHarvest();
-            localData.points = localData.attendancePoints + (localData.spiritualCount * 5) + (localData.bibleCount * 5);
+            localData.points = localData.attendancePoints + (localData.spiritualCount * 5) + ((localData.bibleChaptersCount || localData.bibleCount) * 2);
             renderHarvestUI(localData);
         }
     }
 
     function renderHarvestUI(data) {
-        if (isBonusPointsPublished()) {
-            document.getElementById('stat-points').textContent = data.points;
-        } else {
-            const ptEl = document.getElementById('stat-points');
-            if (ptEl) {
-                ptEl.innerHTML = '<span style="font-size:0.95rem; color:#64748b; font-weight:800;">🔒 محفوظة لدى أمين الخدمة</span>';
-                if (ptEl.nextElementSibling) ptEl.nextElementSibling.textContent = 'تُعلن بقرار الإدارة';
-            }
+        const ptEl = document.getElementById('stat-points');
+        if (ptEl) {
+            ptEl.textContent = data.points;
         }
 
-        const biblePercent = data.totalPlanDays > 0 ? Math.min(100, Math.round((data.bibleCount / data.totalPlanDays) * 100)) : 0;
-        document.getElementById('stat-bible-text').textContent = `أتممت ${data.bibleCount} من أصل ${data.totalPlanDays} يوماً`;
-        document.getElementById('stat-bible-badge').textContent = `${biblePercent}%`;
-        document.getElementById('stat-bible-bar').style.width = `${biblePercent}%`;
+        const totalChapters = data.totalBibleChapters || 1189;
+        const chapCount = data.bibleChaptersCount || data.bibleCount || 0;
+        const biblePercent = totalChapters > 0 ? Math.min(100, Math.round((chapCount / totalChapters) * 100)) : 0;
 
-        const sheetsPercent = data.totalSubjects > 0 ? Math.min(100, Math.round((data.submittedSheets / data.totalSubjects) * 100)) : 0;
+        document.getElementById('stat-bible-text').textContent = `أتممت ${chapCount} إصحاحاً مقروءاً (${data.bibleCount} يوماً مسجلاً)`;
+        document.getElementById('stat-bible-badge').textContent = `${biblePercent}%`;
+        document.getElementById('stat-bible-bar').style.width = `${Math.max(biblePercent, chapCount > 0 ? 1 : 0)}%`;
+
+        const sheetPercent = data.totalSubjects > 0 ? Math.min(100, Math.round((data.submittedSheets / data.totalSubjects) * 100)) : 0;
         document.getElementById('stat-sheets-text').textContent = `سلمت ${data.submittedSheets} من أصل ${data.totalSubjects} شيتات مطلوبة`;
-        document.getElementById('stat-sheets-badge').textContent = `${sheetsPercent}%`;
-        document.getElementById('stat-sheets-bar').style.width = `${sheetsPercent}%`;
+        document.getElementById('stat-sheets-badge').textContent = `${sheetPercent}%`;
+        document.getElementById('stat-sheets-bar').style.width = `${sheetPercent}%`;
 
         const noteBadge = document.getElementById('stat-spiritual-badge');
         noteBadge.textContent = `${data.spiritualCount} يوم مسجل`;

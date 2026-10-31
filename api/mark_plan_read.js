@@ -12,7 +12,7 @@ module.exports = async (req, res) => {
         return res.status(authResult.status).json({ success: false, message: authResult.error });
     }
 
-    const { code, month, day, reading } = req.body || {};
+    const { code, month, day, reading, book, chapter, completed_chapters, total_chapters, action } = req.body || {};
 
     if (!code || !month || !day) {
         return res.status(400).json({ success: false, message: 'بيانات غير مكتملة: مطلوب الكود والشهر واليوم' });
@@ -27,27 +27,100 @@ module.exports = async (req, res) => {
         const db = getDb();
         const admin = getAdmin();
         const studentCode = String(code).trim();
+        const docId = `${month}-${day}`;
+        const stdRef = db.collection('students').doc(studentCode);
+        const docRef = stdRef.collection('reading_logs').doc(docId);
 
-        // حفظ القراءة اليومية في مجموعة reading_logs ومجموعة daily_reading_logs لتوافق جميع الواجهات
+        let existingData = {};
+        try {
+            const docSnap = await docRef.get();
+            if (docSnap && docSnap.exists) {
+                existingData = docSnap.data() || {};
+            }
+        } catch (e) {
+            existingData = {};
+        }
+
+        let chapters = Array.isArray(existingData.completed_chapters) ? [...existingData.completed_chapters] : [];
+        if (chapters.length === 0 && (existingData.is_completed === 1 || existingData.completed === 1)) {
+            if (Array.isArray(existingData.chapters_plan) && existingData.chapters_plan.length > 0) {
+                chapters = [...existingData.chapters_plan];
+            }
+        }
+
+        const reqChapter = (chapter !== undefined && chapter !== null) ? parseInt(chapter, 10) : null;
+        const reqCompletedChapters = Array.isArray(completed_chapters) ? completed_chapters.map(n => parseInt(n, 10)) : null;
+
+        if (reqCompletedChapters !== null) {
+            chapters = reqCompletedChapters;
+        } else if (reqChapter !== null) {
+            if (action === 'unmark_chapter') {
+                chapters = chapters.filter(c => c !== reqChapter);
+            } else if (action === 'toggle_chapter') {
+                if (chapters.includes(reqChapter)) {
+                    chapters = chapters.filter(c => c !== reqChapter);
+                } else {
+                    chapters.push(reqChapter);
+                }
+            } else {
+                if (!chapters.includes(reqChapter)) {
+                    chapters.push(reqChapter);
+                }
+            }
+        } else {
+            // Legacy: mark all or default
+            if (Array.isArray(req.body.chapters_plan) && req.body.chapters_plan.length > 0) {
+                chapters = req.body.chapters_plan.map(n => parseInt(n, 10));
+            } else if (total_chapters) {
+                chapters = [];
+                for (let i = 1; i <= parseInt(total_chapters, 10); i++) chapters.push(i);
+            } else {
+                chapters = [1];
+            }
+        }
+
+        // إزالة التكرار والترتيب
+        chapters = Array.from(new Set(chapters)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+
+        const totalChaps = total_chapters ? parseInt(total_chapters, 10) : (existingData.total_chapters || (chapters.length > 0 ? Math.max(...chapters, 1) : 1));
+        const isFullyCompleted = totalChaps > 0 ? (chapters.length >= totalChaps) : (chapters.length > 0);
+
+        // نقطتان لكل إصحاح مقروء + 3 نقاط بونص عند إتمام خطة اليوم كاملة
+        const calculatedPoints = (chapters.length * 2) + (isFullyCompleted ? 3 : 0);
+
         const readingLogData = {
             plan_month: parseInt(month, 10),
             plan_day: parseInt(day, 10),
-            reading_text: reading || '',
-            is_completed: 1,
-            completed: 1,
-            points: 5,
-            read_at: admin.firestore.FieldValue.serverTimestamp()
+            reading_text: reading || existingData.reading_text || '',
+            book: book || existingData.book || '',
+            completed_chapters: chapters,
+            chapters_read_count: chapters.length,
+            total_chapters: totalChaps,
+            is_completed: isFullyCompleted ? 1 : 0,
+            completed: isFullyCompleted ? 1 : 0,
+            points: calculatedPoints,
+            updated_at: admin.firestore.FieldValue.serverTimestamp(),
+            read_at: existingData.read_at || admin.firestore.FieldValue.serverTimestamp()
         };
 
-        const stdRef = db.collection('students').doc(studentCode);
         await Promise.all([
-            stdRef.collection('reading_logs').doc(`${month}-${day}`).set(readingLogData, { merge: true }),
-            stdRef.collection('daily_reading_logs').doc(`${month}-${day}`).set(readingLogData, { merge: true })
+            stdRef.collection('reading_logs').doc(docId).set(readingLogData, { merge: true }),
+            stdRef.collection('daily_reading_logs').doc(docId).set(readingLogData, { merge: true })
         ]);
 
-        return res.status(200).json({ success: true, message: 'تم تسجيل قراءة الخطة بنجاح' });
+        return res.status(200).json({
+            success: true,
+            message: isFullyCompleted ? 'تم إتمام قراءة اليوم كاملة بنجاح! ✝️' : `تم تسجيل قراءة الإصحاح بنجاح (${chapters.length}/${totalChaps}) 📖`,
+            data: {
+                completed_chapters: chapters,
+                chapters_read_count: chapters.length,
+                total_chapters: totalChaps,
+                is_fully_completed: isFullyCompleted,
+                points: calculatedPoints
+            }
+        });
     } catch (error) {
-        console.error("Firebase Error:", error);
+        console.error("Firebase Error in mark_plan_read:", error);
         return res.status(500).json({ success: false, message: 'فشل التسجيل في السيرفر' });
     }
 };
