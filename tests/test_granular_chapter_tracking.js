@@ -37,6 +37,12 @@ const dashHtml = fs.readFileSync(path.join(__dirname, '../public/servant-dashboa
 assert.ok(dashHtml.includes('completed_chapters.length'), 'servant-dashboard.html must count completed_chapters in countBibleReadingsFor');
 console.log('  ✅ servant_spiritual_report & servant-dashboard chapter counting verified');
 
+// 5. Verify bible.html chapter tracking
+const bibleHtml = fs.readFileSync(path.join(__dirname, '../public/bible.html'), 'utf8');
+assert.ok(bibleHtml.includes('updateReadingStatusForCurrentChapter'), 'bible.html must declare updateReadingStatusForCurrentChapter');
+assert.ok(bibleHtml.includes('completed_chapters'), 'bible.html markCurrentChapterRead must track completed_chapters');
+console.log('  ✅ bible.html dynamic chapter completion button verified');
+
 // 5. Test Logic Simulation: Points & Completion calculation
 function calculateChapterScore(completedArr, totalCount) {
     const isFull = completedArr.length >= totalCount && totalCount > 0;

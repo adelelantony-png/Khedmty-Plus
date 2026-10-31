@@ -871,150 +871,105 @@ function changeFontSize(delta) {
 
 
 async function markCurrentChapterRead() {
-
-    if (!studentCode) return;
+    if (!studentCode) {
+        alert('يرجى تسجيل الدخول أولاً لحفظ قراءتك ونقاطك الروحية.');
+        return;
+    }
 
     const btnMark = document.getElementById('btnMarkRead');
-
-    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التسجيل السحابي...';
-
+    btnMark.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري التسجيل...';
     btnMark.disabled = true;
 
-
-
     const now = new Date();
-
     const curMonth = now.getMonth() + 1;
-
     const curDay = now.getDate();
-
-    const planKey = `${curMonth}-${curDay}`;
-
-
+    const planKey = `${curMonth}-${curDay}_${studentCode}`;
 
     const bookIndex = document.getElementById('bookSelect').value;
-
-    const chapNum = parseInt(document.getElementById('chapterSelect').value) + 1;
-
+    const chapNum = parseInt(document.getElementById('chapterSelect').value, 10) + 1;
     const book = bibleData[bookIndex];
-
     const bookTitle = book ? (arabicBookNames[book.name] || book.name) : (targetBookName || 'قراءة يومية');
 
-
-
-    const recordData = {
-
-        code: String(studentCode),
-
-        name: studentName,
-
+    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+    let savedLog = localReadings[planKey] || {
+        code: studentCode,
+        month: curMonth,
+        day: curDay,
         book: bookTitle,
-
-        chapter: chapNum,
-
-        planKey: planKey,
-
-        date: now.toISOString(),
-
-        completed: 1,
-
-        points: 5,
-
+        reading: bookTitle + ' ' + chapNum,
+        completed_chapters: [],
         _synced: false
-
     };
 
+    let completed = Array.isArray(savedLog.completed_chapters) ? [...savedLog.completed_chapters] : [];
+    if (!completed.includes(chapNum)) {
+        completed.push(chapNum);
+    }
+    completed = Array.from(new Set(completed)).sort((a, b) => a - b);
 
+    const totalCount = (targetChapterEnd && targetChapter) ? (targetChapterEnd - targetChapter + 1) : Math.max(...completed, 1);
+    const isAll = (completed.length >= totalCount && totalCount > 0);
 
-    // 1. حفظ محلي فوري (أوفلاين)
+    savedLog.code = String(studentCode);
+    savedLog.name = studentName;
+    savedLog.book = bookTitle;
+    savedLog.chapter = chapNum;
+    savedLog.completed_chapters = completed;
+    savedLog.chapters_read_count = completed.length;
+    savedLog.total_chapters = totalCount;
+    savedLog.is_completed = isAll ? 1 : 0;
+    savedLog.completed = isAll ? 1 : 0;
+    savedLog.points = (completed.length * 2) + (isAll ? 3 : 0);
+    savedLog._synced = false;
 
-    let localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
-
-    localReadings[`${planKey}_${studentCode}`] = recordData;
-
+    localReadings[planKey] = savedLog;
     localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
 
-
-
-    // 2. تسجيل سحابي موثق عبر API
-
     if (window.AuthClient) {
-
         try {
-
             const resp = await AuthClient.fetch('/api/mark_plan_read', {
-
                 method: 'POST',
-
                 headers: { 'Content-Type': 'application/json' },
-
                 body: JSON.stringify({
-
                     code: studentCode,
-
                     month: curMonth,
-
                     day: curDay,
-
-                    reading: bookTitle + ' ' + chapNum
-
+                    book: bookTitle,
+                    reading: bookTitle + ' ' + chapNum,
+                    chapter: chapNum,
+                    action: 'mark_chapter',
+                    completed_chapters: completed,
+                    total_chapters: totalCount
                 })
-
             });
-
             if (resp.ok) {
-
-                recordData._synced = true;
-
-                localReadings[`${planKey}_${studentCode}`] = recordData;
-
+                savedLog._synced = true;
+                localReadings[planKey] = savedLog;
                 localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
-
             }
-
-        } catch (apiErr) {
-
-            console.warn("API mark_plan_read warning, saving directly if online:", apiErr);
-
+        } catch (e) {
+            console.warn('API sync warning:', e);
         }
-
     }
 
-
-
-    // 3. حفظ إضافي مباشر في Firestore كنسخة احتياطية
-
-    try {
-
-        await fsdb.collection('students').doc(studentCode).collection('reading_logs').doc(planKey).set(recordData, { merge: true });
-
-    } catch (e) {
-
-        console.warn("Cloud reading log warning:", e);
-
+    if (fsdb) {
+        try {
+            await fsdb.collection('students').doc(studentCode).collection('reading_logs').doc(`${curMonth}-${curDay}`).set(savedLog, { merge: true });
+        } catch(e) {}
     }
-
-
-
-    btnMark.className = 'btn btn-outline-success fw-bold px-3 py-2';
-
-    btnMark.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> أتممت قراءة اليوم بنجاح (+5 نقاط ⭐)';
 
     btnMark.disabled = false;
+    updateReadingStatusForCurrentChapter();
 
+    if (isAll) {
+        alert('🎉 مبارك! أتممت قراءة جميع إصحاحات اليوم بنجاح وحصلت على بونص الأمانة (+3 نقاط)! ✝️');
+    }
 }
 
-
-
 window.onload = async function() {
-
     await detectTodayPlan();
-
     await loadBibleData();
-
 };
-
-
 
 function handleBibleBack(e) {
 
