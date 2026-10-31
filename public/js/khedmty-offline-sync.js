@@ -197,6 +197,22 @@
             return true;
         }
 
+        // 5. مزامنة حضور المخدومين المسجل أوفلاين (ATTENDANCE)
+        if (action === 'ATTENDANCE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { date, record } = payload;
+            if (!date || !record) return true;
+            const pKey = (record.code || record.id || '').toString().replace(/\D/g, '') || String(record.id || record.code || Date.now());
+            if (!pKey) return true;
+
+            await fsdb.collection('attendance').doc(String(date)).set({
+                [pKey]: record
+            }, { merge: true });
+            return true;
+        }
+
         return true;
     }
 

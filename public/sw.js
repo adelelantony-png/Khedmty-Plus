@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v3.0'; // upgraded from khedmety-ultra-v2.0 and khedmety-ultra-v2.6
+const CACHE_NAME = 'khedmety-ultra-v3.1'; // upgraded from khedmety-ultra-v3.0 and khedmety-ultra-v2.0 and khedmety-ultra-v2.6
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
@@ -44,6 +44,7 @@ const PRECACHE_ASSETS = [
     './js/app-updater.js',
     './js/khedmty-db.js',
     './js/khedmty-offline-sync.js',
+    './js/html5-qrcode.min.js',
     './js/xlsx.full.min.js',
     './js/html2pdf.bundle.min.js',
     './js/dashboard/dashboard-radar.js',

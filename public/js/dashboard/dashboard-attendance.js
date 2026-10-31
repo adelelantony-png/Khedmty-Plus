@@ -100,21 +100,29 @@ renderAttendanceCalendar();
 
 showKioskWelcome(member, isAbsent, 'member');
 
-if (!isFirebaseActive || !fsdb) {
+// إذا كان الجهاز غير متصل بالإنترنت أو تعذر فايربيز: الحفظ المحلي السريع وطابور المزامنة
+if (!navigator.onLine || !isFirebaseActive || !fsdb) {
 
 syncToCloud('attendance', attendanceRecord);
+
+if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+    KhedmtyOfflineSync.enqueue('ATTENDANCE', {
+        date: activeSelectedDate,
+        record: newRecord
+    });
+}
 
 if (isAbsent) {
 
 playBeepSound('error');
 
-showToast(`⚠️ ${member.name} (تأخير شديد)`, true);
+showToast(`⚠️ ${member.name} (تأخير شديد - محفوظ محلياً 📱)`, true);
 
 } else {
 
 playBeepSound('success');
 
-showToast(`✅ تم تسجيل حضور: ${member.name} (${activeSelectedDate})`);
+showToast(`✅ تم تسجيل حضور: ${member.name} (${activeSelectedDate} - محفوظ محلياً بدون نت 📱)`);
 
 }
 
@@ -162,9 +170,17 @@ updateLastSyncTimestamp();
 
 renderAttendanceCalendar();
 
-}).catch(() => {
+}).catch(err => {
 
-showToast("❌ خطأ أثناء المزامنة السحابية", true);
+console.warn("تنبيه المزامنة السحابية اللحظية، تم الحفظ في طابور الأوفلاين:", err);
+syncToCloud('attendance', attendanceRecord);
+if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+    KhedmtyOfflineSync.enqueue('ATTENDANCE', {
+        date: activeSelectedDate,
+        record: newRecord
+    });
+}
+showToast(`💾 تم حفظ حضور: ${member.name} محلياً بدون نت وسيتم توثيقه سحابياً 📱`);
 
 });
 
@@ -1553,6 +1569,30 @@ let mName = m.name ? m.name.trim().toLowerCase() : "";
 return (mCode === input || mName.includes(input.toLowerCase()));
 
 });
+
+// إذا لم يُعثر على الدارس في members، نبحث في candidatesList من الكنترول
+if (!member) {
+    try {
+        const cList = JSON.parse(localStorage.getItem('candidatesList') || '[]');
+        member = cList.find(c => {
+            let cCode = c.code ? c.code.toString().trim() : "";
+            let cName = c.name ? c.name.trim().toLowerCase() : "";
+            return (cCode === input || cName.includes(input.toLowerCase()));
+        });
+    } catch(e) {}
+}
+
+// إذا كان المخدوم غير مسجل محلياً لكن الخادم أدخل كوداً في الكنيسة أوفلاين:
+if (!member && input) {
+    member = {
+        id: input,
+        code: input,
+        name: 'دارس (كود ' + input + ')',
+        stage: 'الفرقة الأولى',
+        gender: 'بنين',
+        phone: ''
+    };
+}
 
 if (member) {
 
