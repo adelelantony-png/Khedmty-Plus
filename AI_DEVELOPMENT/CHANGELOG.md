@@ -30,3 +30,17 @@ All notable changes to this project will be documented in this file.
 - Created `tests/test_phase2_security_hardening.js` (6/6 passing).
 - Created `tests/test_full_platform_syntax_and_ui.js` validating all 26 HTML pages (78/78 passing).
 - Integrated both into `run_all_suites.js` bringing total regression suites to 20/20 (100% pass rate).
+
+## [1.1.0-DECLUTTER] - 2026-10-31
+### UI Declutter & Architecture Reorganization (servant-dashboard.html)
+- **Pre-modification Backup**: Created verified backup at `public/servant-dashboard.html.backup_declutter_20261031` and `D:\StPaul_Service_System\_Backups\servant-dashboard.html.pre_declutter`.
+- **Zen Mode (الوضع الهادئ 🌿)**: Added `#btnZenToggle` in the dashboard header with `toggleZenMode()` to cleanly hide emergency code bars and noisy technical telemetry (`.zen-hide`), remembered in `localStorage`.
+- **Settings Sub-Pills**: Deconstructed the 600+ lines in `settingsTab` into 4 segmented tab pills:
+  1. `[ ⚙️ إعدادات الخدمة والمواعيد ]` (`#setSection_general`)
+  2. `[ 🎁 محرك التحفيز والبونص ]` (`#setSection_incentives`)
+  3. `[ 🧹 تهيئة السنة والوضع التجريبي ]` (`#setSection_reset`)
+  4. `[ ☁️ سحابة Firebase والأجهزة ]` (`#setSection_cloud`)
+- **Radar Collapsible Sections**: Added interactive chevron toggles (`toggleRadarCard`) to radar cards for pulse, absence alerts, excuses, and birthdays.
+- **Fast-Discovery Tables**: Collapsed the add forms in `membersTab` and `servantsTab` into clean expandable drawers so the search filters and student/servant rosters appear instantly without scrolling.
+- **Navigation Groups Mapping**: Updated `public/js/dashboard/dashboard-navigation.js` to correctly route `radarTab`, `feedbackTab`, `cloudUsageTab`, and `smartPrepTab` into the top group navigation bar.
+- **Regression Quality**: All 21 test suites passed with 100% success rate (588/588 user event handlers verified).

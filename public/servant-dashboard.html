@@ -635,6 +635,101 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             border: 1px solid #bbf7d0;
         }
 
+
+        /* ========================================================================= */
+        /* KHIDMETY PRO — DECLUTTER & ZEN MODE STYLES                                */
+        /* ========================================================================= */
+        .btn-zen-mode {
+            border: 1.5px solid #10b981;
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0 6px;
+        }
+        .btn-zen-mode:hover {
+            background: #d1fae5;
+            transform: translateY(-1px);
+        }
+        body.zen-mode-active .btn-zen-mode {
+            background: #059669;
+            color: #ffffff;
+            border-color: #047857;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+        }
+        body.zen-mode-active .zen-hide {
+            display: none !important;
+        }
+
+        /* Settings Sub-Tab Pills */
+        .settings-pill-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #f1f5f9;
+            padding: 8px;
+            border-radius: 12px;
+            margin: 14px 0 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .settings-pill-btn {
+            border: none;
+            background: transparent;
+            color: #475569;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .settings-pill-btn:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .settings-pill-btn.active {
+            background: #ffffff;
+            color: #1e3a8a;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            font-weight: 800;
+        }
+        .settings-section-panel {
+            animation: fadeInSettingsSection 0.2s ease-in-out;
+        }
+        @keyframes fadeInSettingsSection {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Collapsible radar headers */
+        .collapsible-radar-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s ease;
+            border-radius: 12px;
+            padding: 4px 6px;
+        }
+        .collapsible-radar-header:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .toggle-chevron {
+            transition: transform 0.25s ease;
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            color: #64748b;
+        }
+
     </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
@@ -833,13 +928,17 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 (<span id="currentRoleBadge" class="role-badge">خادم</span>)
 
+<button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
+<span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
+</button>
+
 <a href="#" onclick="logout()" style="color:#ff7675; margin-right:8px; text-decoration:none; font-weight:bold;">[خروج آمن 🚪]</a>
 
 </div>
 
 </div>
 
-<div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+<div class="zen-hide" style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
 
 <button class="btn-mini btn-success" onclick="exportTodaySessionToWhatsApp()" style="flex:1; padding:8px;">📲 إرسال كود طوارئ اليوم لأمين الخدمة (WhatsApp)</button>
 
@@ -1127,10 +1226,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
             <!-- القسم الأول: رادار الغياب والافتقاد الفوري -->
             <div class="radar-section-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                <div class="collapsible-radar-header" onclick="toggleRadarCard('radar_absenceBody', 'radar_absenceChevron')" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0c2461;">
-                            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> رادار الغياب والافتقاد الفوري (غياب أسبوعين متتاليين فأكثر)
+                            <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> رادار الغياب والافتقاد الفوري (غياب أسبوعين متتاليين فأكثر) <span id="radar_absenceChevron" class="toggle-chevron">▼</span>
                         </h4>
                         <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
                             مخدومون توقفوا عن الحضور ويحتاجون إلى رسالة محبة وافتقاد مباشر عبر الواتساب بنقرة واحدة
@@ -1142,6 +1241,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
                 
+                <div id="radar_absenceBody">
                 <!-- شريط تصفية حالات الغياب وإجراءات الزيارة -->
                 <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
                     <button type="button" class="btn-custom" onclick="filterRadarAbsence('all')" id="btnRadarAbsFilterAll" style="background: #0c2461; color: white; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">
@@ -1873,10 +1973,14 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div id="membersTab" class="tab-content">
 
-<div class="can-edit">
-
-<h2>إضافة دارس جديد</h2>
-
+<div class="can-edit" style="margin-bottom:16px;">
+<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 14px; cursor:pointer;" onclick="toggleAddMemberForm()">
+    <h3 style="margin:0; border:none; font-size:1rem; color:var(--primary); display:flex; align-items:center; gap:8px;">
+        <span>➕</span> إضافة دارس جديد
+    </h3>
+    <button type="button" id="btnAddMemberToggle" class="btn-mini" style="background:#2563eb; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-weight:bold;">إظهار النموذج ⬇️</button>
+</div>
+<div id="addMemberFormContainer" style="display:none; margin-top:10px; border:1.5px solid #e2e8f0; border-radius:12px; padding:15px; background:#ffffff;">
 <form id="addForm">
 
 <div class="form-grid">
@@ -1930,7 +2034,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <button type="submit" class="btn-primary">حفظ في المنظومة</button>
 
 </form>
-
+</div>
 </div>
 
 <div style="background:#eaf2f8; border:1px solid #d4e6f1; padding:12px; border-radius:8px; margin-bottom:15px;">
@@ -2194,8 +2298,15 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
+<div class="admin-only" style="margin-bottom:16px;">
+<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:10px 14px; cursor:pointer;" onclick="toggleAddServantForm()">
+    <h3 style="margin:0; border:none; font-size:1rem; color:var(--primary); display:flex; align-items:center; gap:8px;">
+        <span>➕</span> إضافة خادم جديد
+    </h3>
+    <button type="button" id="btnAddServantToggle" class="btn-mini" style="background:#059669; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-weight:bold;">إظهار النموذج ⬇️</button>
+</div>
+<div id="addServantFormContainer" style="display:none; margin-top:10px; border:1.5px solid #e2e8f0; border-radius:12px; padding:15px; background:#ffffff;">
 <div class="form-grid">
-
 <div class="form-group"><input type="text" id="newServantCode" placeholder="كود الخادم (مثال: 102)"></div>
 
 <div class="form-group"><input type="text" id="newServantName" placeholder="اسم الخادم الرباعي"></div>
@@ -2227,6 +2338,8 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 </div>
 
 <button class="btn-success" onclick="addServantManual()">حفظ الخادم</button>
+</div>
+</div>
 
 <h3 style="margin-top:25px;">قائمة الخدام والصلاحيات</h3>
 
@@ -2443,6 +2556,22 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <div id="settingsTab" class="tab-content">
 
 <h2>إعدادات المنظومة وتخصيص الخدمة</h2>
+<div class="settings-pill-bar">
+    <button type="button" class="settings-pill-btn active" id="pill_general" onclick="switchSettingsSection('general', this)">
+        <span>⚙️</span> إعدادات الخدمة والمواعيد
+    </button>
+    <button type="button" class="settings-pill-btn" id="pill_incentives" onclick="switchSettingsSection('incentives', this)">
+        <span>🎁</span> محرك التحفيز والبونص
+    </button>
+    <button type="button" class="settings-pill-btn" id="pill_reset" onclick="switchSettingsSection('reset', this)">
+        <span>🧹</span> تهيئة السنة والوضع التجريبي
+    </button>
+    <button type="button" class="settings-pill-btn" id="pill_cloud" onclick="switchSettingsSection('cloud', this)">
+        <span>☁️</span> سحابة Firebase والأجهزة
+    </button>
+</div>
+<div id="setSection_general" class="settings-section-panel">
+
 
 <h3>اسم الكنيسة والخدمة والنطاق السنوي</h3>
 
@@ -2474,7 +2603,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
-            <!-- قسم إدارة البيانات وأمان التهيئة السنوية والوضع التجريبي -->
+            </div><!-- /setSection_general (part 1) -->
+
+<div id="setSection_reset" class="settings-section-panel" style="display:none;">
+<!-- قسم إدارة البيانات وأمان التهيئة السنوية والوضع التجريبي -->
             <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%); border: 2px solid #fca5a5; padding: 20px; border-radius: 14px; margin: 20px 0; box-shadow: 0 4px 12px rgba(220,38,38,0.06);">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
                     <div>
@@ -2866,6 +2998,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
+</div><!-- /setSection_incentives -->
+
+<div id="setSection_cloud" class="settings-section-panel" style="display:none;">
 <div class="admin-only" style="background:#e8f4fd; border:2px solid #74b9ff; padding:15px; border-radius:10px; margin:15px 0;">
 
 <h4 style="margin:0 0 6px 0; color:var(--primary); font-size:15px;">🔗 إرسال رابط تفعيل السحابة للخادم</h4>
@@ -2956,6 +3091,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
+</div><!-- /setSection_cloud -->
+
+<div id="setSection_general_times" class="settings-section-panel">
 <h3>مواعيد الاجتماع الأساسي (يوم الجمعة) ونظام الصيف</h3>
 
 <div class="form-grid">
@@ -3041,6 +3179,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <button class="btn-primary" onclick="saveFirebaseConfig()" style="margin-top:8px;">حفظ وتأمين الاتصال بالسحابة ☁️</button>
 
 <button class="btn-success" onclick="saveGeneralSettings()" style="margin-top:6px;">حفظ جميع الإعدادات 💾</button>
+</div><!-- /setSection_general_times -->
 
 </div>
 
@@ -8924,6 +9063,117 @@ function presUpdateTimerDisplay() {
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePresentationMode();
 });
+
+// =========================================================================
+// KHIDMETY PRO — UI DECLUTTER & ZEN MODE HELPER FUNCTIONS
+// =========================================================================
+function toggleZenMode() {
+    const isZen = document.body.classList.toggle('zen-mode-active');
+    const zenText = document.getElementById('zenText');
+    const zenIcon = document.getElementById('zenIcon');
+    if (zenText && zenIcon) {
+        if (isZen) {
+            zenIcon.textContent = '🌿';
+            zenText.textContent = 'الوضع الهادئ: مفعّل';
+        } else {
+            zenIcon.textContent = '🌿';
+            zenText.textContent = 'الوضع الهادئ';
+        }
+    }
+    try {
+        localStorage.setItem('khedmty_zen_mode', isZen ? 'on' : 'off');
+    } catch(e) {}
+}
+window.toggleZenMode = toggleZenMode;
+
+function switchSettingsSection(secKey, btnElement) {
+    document.querySelectorAll('.settings-pill-btn').forEach(b => b.classList.remove('active'));
+    if (btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        const pBtn = document.getElementById('pill_' + secKey);
+        if (pBtn) pBtn.classList.add('active');
+    }
+    
+    // Hide all settings panels
+    const p1 = document.getElementById('setSection_general');
+    const pTimes = document.getElementById('setSection_general_times');
+    const pInc = document.getElementById('setSection_incentives');
+    const pReset = document.getElementById('setSection_reset');
+    const pCloud = document.getElementById('setSection_cloud');
+
+    if (p1) p1.style.display = 'none';
+    if (pTimes) pTimes.style.display = 'none';
+    if (pInc) pInc.style.display = 'none';
+    if (pReset) pReset.style.display = 'none';
+    if (pCloud) pCloud.style.display = 'none';
+
+    if (secKey === 'general') {
+        if (p1) p1.style.display = 'block';
+        if (pTimes) pTimes.style.display = 'block';
+    } else if (secKey === 'incentives') {
+        if (pInc) pInc.style.display = 'block';
+    } else if (secKey === 'reset') {
+        if (pReset) pReset.style.display = 'block';
+    } else if (secKey === 'cloud') {
+        if (pCloud) pCloud.style.display = 'block';
+    }
+}
+window.switchSettingsSection = switchSettingsSection;
+
+function toggleRadarCard(bodyId, chevronId) {
+    const b = document.getElementById(bodyId);
+    const c = document.getElementById(chevronId);
+    if (!b) return;
+    if (b.style.display === 'none') {
+        b.style.display = 'block';
+        if (c) c.style.transform = 'rotate(0deg)';
+    } else {
+        b.style.display = 'none';
+        if (c) c.style.transform = 'rotate(180deg)';
+    }
+}
+window.toggleRadarCard = toggleRadarCard;
+
+function toggleAddMemberForm() {
+    const box = document.getElementById('addMemberFormContainer');
+    const btn = document.getElementById('btnAddMemberToggle');
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        if (btn) btn.textContent = 'إخفاء النموذج ⬆️';
+    } else {
+        box.style.display = 'none';
+        if (btn) btn.textContent = 'إظهار النموذج ⬇️';
+    }
+}
+window.toggleAddMemberForm = toggleAddMemberForm;
+
+function toggleAddServantForm() {
+    const box = document.getElementById('addServantFormContainer');
+    const btn = document.getElementById('btnAddServantToggle');
+    if (!box) return;
+    if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        if (btn) btn.textContent = 'إخفاء النموذج ⬆️';
+    } else {
+        box.style.display = 'none';
+        if (btn) btn.textContent = 'إظهار النموذج ⬇️';
+    }
+}
+window.toggleAddServantForm = toggleAddServantForm;
+
+// Restore Zen mode on startup if enabled
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        if (localStorage.getItem('khedmty_zen_mode') === 'on') {
+            document.body.classList.add('zen-mode-active');
+            const zenText = document.getElementById('zenText');
+            if (zenText) zenText.textContent = 'الوضع الهادئ: مفعّل';
+        }
+    } catch(e) {}
+});
+
 </script>
 
 </body>

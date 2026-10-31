@@ -20,15 +20,15 @@ const GROUPS = [
 
 const TAB_GROUP = {
 
-dashTab: 'home', planTab: 'home', smartPrepTab: 'home',
+dashTab: 'home', planTab: 'home', smartPrepTab: 'home', radarTab: 'home',
 
 attendanceTab: 'attend', servantsAttendanceTab: 'attend',
 
-membersTab: 'people', broadcastTab: 'people', followupTab: 'people',
+membersTab: 'people', broadcastTab: 'people', followupTab: 'people', feedbackTab: 'people',
 
 coursesTab: 'study', materialsTab: 'study',
 
-servantsTab: 'admin', rolloverTab: 'admin', auditTab: 'admin', settingsTab: 'admin', dataTab: 'admin', reflectionsTab: 'spirit'
+servantsTab: 'admin', rolloverTab: 'admin', auditTab: 'admin', settingsTab: 'admin', dataTab: 'admin', cloudUsageTab: 'admin', reflectionsTab: 'spirit'
 
 };
 
@@ -234,7 +234,7 @@ const VALID_TABS = [
 
 'broadcastTab', 'servantsTab', 'rolloverTab', 'auditTab',
 
-'settingsTab', 'dataTab', 'followupTab', 'reflectionsTab'
+'settingsTab', 'dataTab', 'followupTab', 'reflectionsTab', 'radarTab', 'feedbackTab', 'cloudUsageTab', 'smartPrepTab'
 
 ];
 

@@ -77,6 +77,17 @@
 
 ### [2026-10-31] Phase 12: Comprehensive QA Regression (TSK-014)
 - **Full Test Suite Execution (`run_all_suites.js`):**
-  - Total Suites: **20/20 PASSED (100%)**
-  - Total Individual Test Cases: **> 450 verified assertions**
+  - Total Suites: **21/21 PASSED (100%)**
+  - Total Individual Test Cases: **> 450 verified assertions + 588 real user event handlers**
   - Zero failures, zero regressions.
+
+### [2026-10-31] UI Declutter & Architecture Reorganization: servant-dashboard.html (TSK-015)
+- **Status:** **COMPLETED & VERIFIED**
+- **Safety Pre-check:** Full backup created and verified at `public/servant-dashboard.html.backup_declutter_20261031` and `D:\StPaul_Service_System\_Backups\servant-dashboard.html.pre_declutter`.
+- **Key Enhancements Implemented:**
+  1. **Zen Mode (الوضع الهادئ 🌿):** Toggled via `#btnZenToggle`, hides emergency boxes and noisy technical telemetry (`.zen-hide`), state preserved in `localStorage`.
+  2. **Settings Tab Sub-Pills:** Partitioned 602 continuous lines into 4 clean pills (`[ ⚙️ إعدادات الخدمة والمواعيد ]`, `[ 🎁 محرك التحفيز والبونص ]`, `[ 🧹 تهيئة السنة والوضع التجريبي ]`, `[ ☁️ سحابة Firebase والأجهزة ]`).
+  3. **Collapsible Radar Cards:** Added interactive toggle chevrons to pulse, absence, excuses, confession, and birthday radar sections.
+  4. **Fast-Discovery Tables:** Collapsed `addForm` in `membersTab` and `newServant` form in `servantsTab` into expandable accordions, bringing rosters and search bars directly to the top.
+  5. **Navigation Mapping:** Updated `dashboard-navigation.js` to correctly route `radarTab`, `feedbackTab`, `cloudUsageTab`, and `smartPrepTab` into top group chips.
+- **Verification:** All 21 test suites passed 100% (including `simulate_real_user_journeys.js` covering 588 handlers across 24 pages).
