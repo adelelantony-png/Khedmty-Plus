@@ -730,6 +730,83 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             color: #64748b;
         }
 
+
+        /* ========================================================================= */
+        /* KHIDMETY PRO — COMPACT NAVIGATION & RADAR PILL STYLES                     */
+        /* ========================================================================= */
+        .radar-pill-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+            background: #f8fafc;
+            padding: 6px 8px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+        }
+        .radar-pill-btn {
+            border: none;
+            background: transparent;
+            color: #475569;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .radar-pill-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+        .radar-pill-btn.active {
+            background: #0c2461;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(12, 36, 97, 0.25);
+            font-weight: 800;
+        }
+        .radar-section-panel {
+            animation: fadeInRadarSection 0.2s ease-in-out;
+        }
+        @keyframes fadeInRadarSection {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Compact top group bar */
+        .grp-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .grp-chip {
+            background: #eef1fb;
+            color: #33415c;
+            border-radius: 10px;
+            padding: 5px 4px;
+            font-weight: 800;
+            font-size: 11.5px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-align: center;
+            user-select: none;
+            transition: 0.2s;
+        }
+        .grp-chip .ic { font-size: 17px; line-height: 1.1; }
+        .tabs {
+            background: #f6f8fe;
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 12px;
+        }
+
     </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
@@ -1192,6 +1269,33 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
+            
+            <!-- أزرار التصفح السريع للرادار (Radar Segmented Pills) -->
+            <div class="radar-pill-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; background:#f1f5f9; padding:6px; border-radius:12px; border:1px solid #cbd5e1;">
+                <button type="button" class="radar-pill-btn active" id="radarPill_absence" onclick="switchRadarSection('absence', this)">
+                    <span>⚠️</span> الغياب والافتقاد الفوري
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_excuses" onclick="switchRadarSection('excuses', this)">
+                    <span>🔔</span> الاعتذارات الواردة
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_pulse" onclick="switchRadarSection('pulse', this)">
+                    <span>📈</span> نبض الحضور والنمو
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_confession" onclick="switchRadarSection('confession', this)">
+                    <span>🕊️</span> مهلة سر الاعتراف
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_birthdays" onclick="switchRadarSection('birthdays', this)">
+                    <span>🎂</span> أعياد الميلاد
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_security" onclick="switchRadarSection('security', this)">
+                    <span>🛡️</span> الأمان وتصفير الباسورد
+                </button>
+                <button type="button" class="radar-pill-btn" id="radarPill_all" onclick="switchRadarSection('all', this)" style="margin-right:auto;">
+                    <span>🌐</span> عرض الكل
+                </button>
+            </div>
+
+            <div id="radarSec_pulse" class="radar-section-panel" style="display:none;">
             <!-- نبض الاجتماع ومعدل الاستقرار الإحصائي (Meeting Pulse & Trends) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-color: #cbd5e1; margin-bottom: 22px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -1224,6 +1328,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
             </div>
 
+            </div><!-- /radarSec_pulse -->
+
+            <div id="radarSec_absence" class="radar-section-panel">
             <!-- القسم الأول: رادار الغياب والافتقاد الفوري -->
             <div class="radar-section-box">
                 <div class="collapsible-radar-header" onclick="toggleRadarCard('radar_absenceBody', 'radar_absenceChevron')" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
@@ -1278,6 +1385,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
 
             
+            </div><!-- /radarSec_absence -->
+
+            <div id="radarSec_excuses" class="radar-section-panel" style="display:none;">
             <!-- القسم الثاني: رادار الاعتذارات اللحظية ومتابعة الغياب بعذر (Inbound Excuses Radar) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border: 1.5px solid #f59e0b; margin-bottom: 22px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -1330,7 +1440,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
-<!-- القسم الثاني: رادار مهلة الاعتراف التنازلي -->
+</div><!-- /radarSec_excuses -->
+
+            <div id="radarSec_confession" class="radar-section-panel" style="display:none;">
+            <!-- القسم الثاني: رادار مهلة الاعتراف التنازلي -->
             <div class="radar-section-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                     <div>
@@ -1368,6 +1481,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
 
             
+            </div><!-- /radarSec_confession -->
+
+            <div id="radarSec_birthdays" class="radar-section-panel" style="display:none;">
             <!-- القسم الثالث: رادار أعياد الميلاد والمناسبات والتهاني مع واتساب الخدمة -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border-color: #fde047; margin-bottom: 22px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -1416,7 +1532,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
-<!-- القسم الثالث: أداة معالجة نسيان كلمة المرور للمخدوم (Offline Password Reset) -->
+</div><!-- /radarSec_birthdays -->
+
+            <div id="radarSec_security" class="radar-section-panel" style="display:none;">
+            <!-- القسم الثالث: أداة معالجة نسيان كلمة المرور للمخدوم (Offline Password Reset) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border-color: #86efac;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
                     <i class="fa-solid fa-key text-success fs-5"></i>
@@ -1500,108 +1619,96 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
 
 
+        </div><!-- /radarSec_security -->
         </div>
 
 <!-- 1. الرئيسية -->
 
 <div id="dashTab" class="tab-content active">
 
-<!-- Quick Smart Prep Banner in Home Tab -->
-<div style="background: linear-gradient(135deg, #123d58 0%, #197d80 100%); color: #fff; padding: 16px 20px; border-radius: 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(18,61,88,0.15); border: 1.5px solid rgba(213,169,71,0.4);">
-    <div style="display:flex; align-items:center; gap:12px;">
-        <div style="font-size:2rem; width:48px; height:48px; background:rgba(255,255,255,0.15); border-radius:12px; display:flex; align-items:center; justify-content:center;">✍️🕊️</div>
+<!-- 1. Live Core Ministry Statistics (Above the fold - First thing seen) -->
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+    <h3 style="margin:0; font-size:1.25rem; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:8px;">
+        <span>📊</span> لوحة المتابعة ونبض الخدمة اليوم
+    </h3>
+    <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">محدث لحظياً مع قاعدة البيانات السحابية ☁️</span>
+</div>
+
+<!-- 👥 إحصائيات المخدومين والدارسين -->
+<div class="stat-grid" style="margin-bottom:10px;">
+    <div class="stat-card"><div>إجمالي المخدومين</div><div class="num" id="statTotalMembers">0</div></div>
+    <div class="stat-card"><div>حضور المخدومين اليوم</div><div class="num" id="statTodayMembersCount">0</div></div>
+    <div class="stat-card"><div>نسبة حضور المخدومين</div><div class="num" id="statMembersPercent">0%</div></div>
+    <div class="stat-card"><div>المتناولون اليوم 🕊️</div><div class="num" id="statTodayCommunion" style="color:var(--success);">0</div></div>
+    <div class="stat-card"><div>المؤهلون للتخرج (≥75%)</div><div class="num" id="statQualifiedGraduates" style="color:var(--purple);">0</div></div>
+</div>
+
+<!-- 👔 إحصائيات الخدام والمحاضرين -->
+<div class="stat-grid" style="margin-bottom:14px;">
+    <div class="stat-card"><div>إجمالي الخدام</div><div class="num" id="statTotalServantsDash">0</div></div>
+    <div class="stat-card"><div>حضور الخدام اليوم</div><div class="num" id="statTodayServantsCount" style="color:var(--success);">0</div></div>
+    <div class="stat-card"><div>نسبة حضور الخدام</div><div class="num" id="statServantsPercent" style="color:var(--success);">0%</div></div>
+</div>
+
+<!-- 2. Compact Smart Prep Ribbon (Single sleek row) -->
+<div style="background: linear-gradient(135deg, #123d58 0%, #197d80 100%); color: #fff; padding: 10px 16px; border-radius: 12px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 2px 8px rgba(18,61,88,0.12); border: 1px solid rgba(213,169,71,0.4);">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.3rem;">✍️🕊️</span>
         <div>
-            <div style="font-weight:800; font-size:1.1rem; color:#fff;">مساعد تحضير الخدمة الذكي (Smart Prep) &amp; وضع الإلقاء 🎙️</div>
-            <div style="font-size:0.85rem; color:#e0f2fe; margin-top:2px;">تحضير دروس الخدمة بتفاسير الآباء الأرثوذكس، ألعاب تفاعلية، وقوالب إلقاء للمحاضرين</div>
+            <strong style="font-size:0.95rem; color:#fff;">مساعد تحضير الخدمة الذكي (Smart Prep)</strong>
+            <span style="font-size:0.8rem; color:#e0f2fe; margin-right:8px;">تفاسير الآباء الأرثوذكس، ألعاب تفاعلية، وقوالب إلقاء</span>
         </div>
     </div>
-    <div style="display:flex; gap:8px;">
-        <button type="button" class="btn" onclick="switchTab('smartPrepTab')" style="background:linear-gradient(135deg, #d5a947 0%, #e5b958 100%); color:#0b2230; font-weight:800; border:none; padding:9px 18px; border-radius:10px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> فتح محضر الخدمة الآن
-        </button>
+    <button type="button" class="btn" onclick="switchTab('smartPrepTab')" style="background:#d5a947; color:#0b2230; font-weight:800; border:none; padding:7px 16px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
+        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> فتح محضر الخدمة 🎙️
+    </button>
+</div>
+
+<!-- 3. Reminders & Upcoming Events Grid (Compact 2-columns) -->
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 14px;">
+    <div id="myNextEventBanner" style="display:none; background:#e8f4fd; border:1px solid #74b9ff; color:#0984e3; padding:10px 14px; border-radius:8px;">
+        <h4 style="margin:0 0 4px 0; font-size:0.85rem;">🔔 تذكير بتكليفك القادم هذا الأسبوع:</h4>
+        <div id="myNextEventDetails" style="font-size:13px; font-weight:bold;"></div>
+    </div>
+
+    <div style="background:#f1f2f6; border:1px solid #dfe6e9; padding:10px 14px; border-radius:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:5px;">
+            <h4 style="margin:0; color:var(--primary); font-size:0.85rem;">📅 محطات قادمة في خطة السنة:</h4>
+            <button class="btn-mini btn-primary" onclick="switchTab('planTab', document.querySelectorAll('.tab-btn')[1])" style="padding:2px 8px; font-size:0.75rem;">عرض الأجندة</button>
+        </div>
+        <div id="upcomingPlanEventsList" style="font-size:12.5px;">جاري فحص الخطة السنوية...</div>
+    </div>
+
+    <div style="background:#fff9e6; border:1px solid #ffeaa7; padding:10px 14px; border-radius:8px;">
+        <h4 style="margin:0 0 4px 0; color:#d35400; font-size:0.85rem;">🎂 مناسبات وأعياد ميلاد هذا الأسبوع:</h4>
+        <div id="birthdayAlertList" style="font-size:12.5px;">جاري فحص التواريخ...</div>
     </div>
 </div>
 
-
-<div id="myNextEventBanner" style="display:none; background:#e8f4fd; border:1px solid #74b9ff; color:#0984e3; padding:12px; border-radius:8px; margin-bottom:12px;">
-
-<h4 style="margin:0 0 4px 0;">🔔 تذكير بتكليفك القادم هذا الأسبوع:</h4>
-
-<div id="myNextEventDetails" style="font-size:13px; font-weight:bold;"></div>
-
+<!-- 4. Heatmap & Compact Absence Alert Card -->
+<div style="background:#fff; border:1px solid #dfe6e9; border-radius:12px; padding:14px; margin-bottom:14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
+        <h4 style="margin:0; color:var(--primary); font-size:14px;">🔥 الخريطة الحرارية ومؤشر خطر الانقطاع (آخر 4 لقاءات جمعة)</h4>
+        <span id="attritionCountBadge" class="role-badge" style="background:var(--danger); font-size:11px;">0 معرض للتسرب</span>
+    </div>
+    <p style="font-size:11px; color:#636e72; margin:0 0 8px 0;">رصد استباقي لمن بدأ التزامه يتراجع في لقاءات الجمعة للتدخل بالافتقاد قبل الانقطاع.</p>
+    <div id="heatmapContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px; margin-top:8px;"></div>
 </div>
 
-<div style="background:#f1f2f6; border:1px solid #dfe6e9; padding:12px; border-radius:8px; margin-bottom:15px;">
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:5px;">
-
-<h4 style="margin:0; color:var(--primary); font-size:14px;">📅 محطات قادمة في خطة السنة:</h4>
-
-<button class="btn-mini btn-primary" onclick="switchTab('planTab', document.querySelectorAll('.tab-btn')[1])">عرض الأجندة كاملة</button>
-
+<!-- 5. Compact Absence Radar Box (Max height + Scrollable) -->
+<div style="background:#fff; border:1px solid #fed7aa; border-radius:12px; padding:14px; margin-bottom:14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h4 style="margin:0; color:#9a3412; font-size:0.95rem; display:flex; align-items:center; gap:6px;">
+            <span>⚠️</span> رادار المنقطعين (غياب لقائي جمعة متتاليين)
+        </h4>
+        <button type="button" class="btn-mini btn-primary" onclick="switchTab('radarTab')" style="background:#ea580c; border:none; padding:3px 10px; font-size:0.78rem;">
+            فتح الرادار الشامل 📡
+        </button>
+    </div>
+    <div id="absentAlertList" style="background:#fffbeb; padding:10px 14px; border-radius:8px; color:#856404; font-size:13px; max-height:160px; overflow-y:auto; border:1px solid #fde68a; line-height:1.7;">
+        جاري الفحص...
+    </div>
 </div>
-
-<div id="upcomingPlanEventsList" style="font-size:13px;">جاري فحص الخطة السنوية...</div>
-
-</div>
-
-<div style="background:#fff9e6; border:1px solid #ffeaa7; padding:12px; border-radius:8px; margin-bottom:15px;">
-
-<h4 style="margin:0 0 8px 0; color:#d35400; font-size:14px;">🎂 مناسبات وأعياد ميلاد هذا الأسبوع:</h4>
-
-<div id="birthdayAlertList" style="font-size:13px;">جاري فحص التواريخ...</div>
-
-</div>
-
-<h2>لوحة التحكم والمتابعة</h2>
-
-<h4 style="margin:10px 0 5px 0; color:var(--primary);">👥 إحصائيات المخدومين والدارسين:</h4>
-
-<div class="stat-grid">
-
-<div class="stat-card"><div>إجمالي المخدومين</div><div class="num" id="statTotalMembers">0</div></div>
-
-<div class="stat-card"><div>حضور المخدومين اليوم</div><div class="num" id="statTodayMembersCount">0</div></div>
-
-<div class="stat-card"><div>نسبة حضور المخدومين</div><div class="num" id="statMembersPercent">0%</div></div>
-
-<div class="stat-card"><div>المتناولون اليوم 🕊️</div><div class="num" id="statTodayCommunion" style="color:var(--success);">0</div></div>
-
-<div class="stat-card"><div>المؤهلون للتخرج (≥75%)</div><div class="num" id="statQualifiedGraduates" style="color:var(--purple);">0</div></div>
-
-</div>
-
-<h4 style="margin:15px 0 5px 0; color:#2c3e50;">👔 إحصائيات الخدام والمحاضرين:</h4>
-
-<div class="stat-grid">
-
-<div class="stat-card"><div>إجمالي الخدام</div><div class="num" id="statTotalServantsDash">0</div></div>
-
-<div class="stat-card"><div>حضور الخدام اليوم</div><div class="num" id="statTodayServantsCount" style="color:var(--success);">0</div></div>
-
-<div class="stat-card"><div>نسبة حضور الخدام</div><div class="num" id="statServantsPercent" style="color:var(--success);">0%</div></div>
-
-</div>
-
-<div style="background:#fff; border:1px solid #dfe6e9; border-radius:10px; padding:15px; margin-bottom:15px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
-
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
-
-<h4 style="margin:0; color:var(--primary); font-size:14px;">🔥 الخريطة الحرارية ومؤشر خطر الانقطاع (آخر 4 لقاءات جمعة)</h4>
-
-<span id="attritionCountBadge" class="role-badge" style="background:var(--danger); font-size:11px;">0 معرض للتسرب</span>
-
-</div>
-
-<p style="font-size:11px; color:#636e72; margin-top:0;">رصد استباقي لمن بدأ التزامه يتراجع في لقاءات الجمعة للتدخل بالافتقاد قبل الانقطاع.</p>
-
-<div id="heatmapContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px; margin-top:10px;"></div>
-
-</div>
-
-<h3>⚠️ رادار المنقطعين (غياب لقائي جمعة متتاليين)</h3>
-
-<div id="absentAlertList" style="background:#fff3cd; padding:10px; border-radius:6px; color:#856404; font-size:13px;">جاري الفحص...</div>
 
 </div>
 
@@ -7837,11 +7944,9 @@ const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 // ==========================================
 
 function hideBackupReminder() {
-
-let b = document.getElementById('backupReminderBar');
-
-if (b) b.remove();
-
+    let b = document.getElementById('backupReminderBar');
+    if (b) b.remove();
+    try { sessionStorage.setItem('khedmety_backup_dismissed', '1'); } catch(e) {}
 }
 
 function showBackupReminderIfNeeded() {
@@ -9162,6 +9267,28 @@ function toggleAddServantForm() {
     }
 }
 window.toggleAddServantForm = toggleAddServantForm;
+
+
+function switchRadarSection(secKey, btnElement) {
+    document.querySelectorAll('.radar-pill-btn').forEach(b => b.classList.remove('active'));
+    if (btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        const p = document.getElementById('radarPill_' + secKey);
+        if (p) p.classList.add('active');
+    }
+
+    const panels = document.querySelectorAll('.radar-section-panel');
+    if (secKey === 'all') {
+        panels.forEach(p => p.style.display = 'block');
+    } else {
+        panels.forEach(p => p.style.display = 'none');
+        const target = document.getElementById('radarSec_' + secKey);
+        if (target) target.style.display = 'block';
+    }
+}
+window.switchRadarSection = switchRadarSection;
+
 
 // Restore Zen mode on startup if enabled
 document.addEventListener('DOMContentLoaded', () => {

@@ -91,3 +91,15 @@
   4. **Fast-Discovery Tables:** Collapsed `addForm` in `membersTab` and `newServant` form in `servantsTab` into expandable accordions, bringing rosters and search bars directly to the top.
   5. **Navigation Mapping:** Updated `dashboard-navigation.js` to correctly route `radarTab`, `feedbackTab`, `cloudUsageTab`, and `smartPrepTab` into top group chips.
 - **Verification:** All 21 test suites passed 100% (including `simulate_real_user_journeys.js` covering 588 handlers across 24 pages).
+
+### [2026-10-31] Information Hierarchy & Compact UX: servant-dashboard.html (TSK-016)
+- **Status:** **COMPLETED & VERIFIED**
+- **Safety Pre-check:** Full backup created and verified at `public/servant-dashboard.html.backup_compact_ux_20261031` and `D:\StPaul_Service_System\_Backups\servant-dashboard.html.pre_compact_ux`.
+- **Key Enhancements Implemented:**
+  1. **Above-the-Fold Vital Statistics**: Reordered `dashTab` so that Live KPI cards (Students total, Today's attendance, Communion count, Percentage, Servants count & attendance) are the first visible items at the top of the dashboard.
+  2. **Compact Smart Prep Ribbon**: Replaced vertical promotional box with a sleek horizontal action ribbon.
+  3. **Bounded Absence List**: Styled `#absentAlertList` with a fixed `max-height: 160px; overflow-y: auto;` to eliminate vertical page blowout from 40+ absent students.
+  4. **Radar Segmented Pill Switcher**: Divided `radarTab` into 6 segmented views (`absence`, `excuses`, `pulse`, `confession`, `birthdays`, `security`, `all`), eliminating 3000px of scrolling.
+  5. **Top Navigation Height Optimization**: Compacted `.grp-bar` and `.tabs` vertical padding, reclaiming ~60px of screen real estate.
+  6. **Dismissable Backup Banner**: Enabled session persistence for `hideBackupReminder()`.
+- **Verification:** All 21 test suites passed 100% (554 servant event handlers verified).

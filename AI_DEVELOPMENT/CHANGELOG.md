@@ -44,3 +44,14 @@ All notable changes to this project will be documented in this file.
 - **Fast-Discovery Tables**: Collapsed the add forms in `membersTab` and `servantsTab` into clean expandable drawers so the search filters and student/servant rosters appear instantly without scrolling.
 - **Navigation Groups Mapping**: Updated `public/js/dashboard/dashboard-navigation.js` to correctly route `radarTab`, `feedbackTab`, `cloudUsageTab`, and `smartPrepTab` into the top group navigation bar.
 - **Regression Quality**: All 21 test suites passed with 100% success rate (588/588 user event handlers verified).
+
+## [1.2.0-COMPACT-UX] - 2026-10-31
+### Information Hierarchy & Compact Prioritization (servant-dashboard.html)
+- **Pre-modification Backup**: Created verified backup at `public/servant-dashboard.html.backup_compact_ux_20261031` and `D:\StPaul_Service_System\_Backups\servant-dashboard.html.pre_compact_ux`.
+- **Above-The-Fold Core Statistics**: Reordered `dashTab` to place live vital KPI cards (Students total, Today's attendance, Communion count, Percentage, Servants count & attendance) at the very top of the screen, eliminating the need to scroll down to view basic data.
+- **Compact Promotional & Alert Banners**: Streamlined the oversized Smart Prep card into a horizontal compact ribbon and grouped upcoming plan and birthday notifications into a responsive side-by-side grid.
+- **Bounded Absence List Scroll**: Styled `#absentAlertList` with a fixed `max-height: 160px; overflow-y: auto;` so lists of 40+ absent students remain contained in a neat scrollable card without stretching the page vertically.
+- **Radar Segmented Switcher (Pill Navigation)**: Partitioned `radarTab` into 6 segmented sections (`[ ⚠️ الغياب والافتقاد ]`, `[ 🔔 الاعتذارات الواردة ]`, `[ 📈 نبض الحضور ]`, `[ 🕊️ مهلة الاعتراف ]`, `[ 🎂 أعياد الميلاد ]`, `[ 🛡️ الأمان والباسوردات ]`, `[ 🌐 عرض الكل ]`), reducing a 3000px scroll into a compact, single-screen view.
+- **Compact Navigation Bar**: Tightened margins and chip padding on `.grp-bar` and `.tabs`, reclaiming ~60px of vertical viewport height.
+- **Session-Persistent Dismissal**: Enhanced `hideBackupReminder()` to persist dismissal in `sessionStorage`, keeping the top of the viewport free of persistent yellow banners during active sessions.
+- **Quality Gates**: All 21 test suites passed (100%), and 554 servant event handlers verified without errors.
