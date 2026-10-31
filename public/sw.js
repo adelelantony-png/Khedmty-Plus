@@ -1,38 +1,51 @@
 /**
- * public/sw.js - Service Worker لمشروع Khedmety-Plus
+ * public/sw.js - Service Worker الفائق لمنظومة Khedmty-Plus (Ultra Offline Engine v3.0)
  * 
- * ضوابط الأمان والأوفلاين:
- * 1. دعم كامل لتشغيل الموقع في وضع عدم الاتصال (Offline-First) لجميع شاشات الخدام والمخدومين على الهاتف.
- * 2. ممنوع تخزين استجابات API أو بيانات الأعضاء أو التوكنات السحابية في الكاش نهائياً.
- * 3. ممنوع تخزين طلبات غير GET (كتابة، تعديل، حذف).
- * 4. الكاش مخصص فقط للأصول الثابتة وواجهات التطبيق (App Shell) لتمكين الفتح في أي وقت بدون إنترنت.
+ * الميزات المتقدمة:
+ * 1. العمل الكامل دون إنترنت (Offline-First) لجميع شاشات الخدام والمخدومين.
+ * 2. استراتيجية (Fast-Network with Instant Cache Fallback): استجابة فورية دون تعليق.
+ * 3. تخزين مسبق كامل (Precaching) لجميع الشاشات ونصوص الكتاب المقدس (bible-data.js).
+ * 4. دعم وحفظ الأصول الخارجية والمكتبات السحابية (Google Fonts, FontAwesome, Bootstrap, Firebase).
+ * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v2.6'; // upgraded from khedmety-ultra-v2.0 and v2.5
+const CACHE_NAME = 'khedmety-ultra-v3.0'; // upgraded from khedmety-ultra-v2.0 and khedmety-ultra-v2.6
 
-// الأصول الثابتة المسموح بتخزينها محلياً فقط لتمكين الفتح أوفلاين على الموبايل
+// قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
     './',
     './index.html',
     './servant-dashboard.html',
     './student.html',
+    './servant_grades_entry.html',
     './servant_followup.html',
     './servant_spiritual_report.html',
     './spiritual_note.html',
     './bible.html',
+    './harvest.html',
     './barcode.html',
     './results.html',
     './quiz.html',
+    './admin_subjects.html',
+    './sheet.html',
+    './sheets_list.html',
+    './synaxarium.html',
+    './katamaros.html',
+    './student_attendance.html',
     './offline.html',
     './manifest.json',
     './auth-client.js',
     './css/app-theme.css',
     './bible_plan.js',
     './bible_plan.json',
+    './bible-data.js',
     './js/firebase-config.js',
     './js/pwa-helper.js',
     './js/app-updater.js',
     './js/khedmty-db.js',
+    './js/khedmty-offline-sync.js',
+    './js/xlsx.full.min.js',
+    './js/html2pdf.bundle.min.js',
     './js/dashboard/dashboard-radar.js',
     './js/dashboard/dashboard-plan.js',
     './js/dashboard/dashboard-curriculum.js',
@@ -45,18 +58,29 @@ const PRECACHE_ASSETS = [
     './js/dashboard/dashboard-members.js',
     './icons/icon-192.png',
     './icons/icon-512.png',
-    './icons/favicon-48.png'
+    './icons/favicon-48.png',
+    './icons/apple-touch-icon.png'
 ];
 
-// تثبيت الـ Service Worker وتخزين الـ App Shell بمرونة واحتواء الأخطاء الفردية
+// شبكات CDN المسموح بتخزينها أوفلاين
+const ALLOWED_CDN_HOSTS = [
+    'fonts.googleapis.com',
+    'fonts.gstatic.com',
+    'cdn.jsdelivr.net',
+    'cdnjs.cloudflare.com',
+    'www.gstatic.com',
+    'unpkg.com'
+];
+
+// تثبيت Service Worker وتحميل الأصول مسبقاً
 self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME).then(async cache => {
-            // تخزين الأصول الأساسية بشكل مستقل لضمان عدم فشل التثبيت عند تعذر تحميل ملف فردي
+            console.log('[SW v3.0] جاري تثبيت الأصول الأساسية وتفعيل وضع عدم الاتصال...');
             await Promise.allSettled(
                 PRECACHE_ASSETS.map(asset =>
                     cache.add(asset).catch(err => {
-                        console.warn('[SW] تعذر تخزين الأصل مسبقاً:', asset, err.message);
+                        console.warn('[SW v3.0] تنبيه أثناء تحميل الأصل المسبق:', asset, err.message);
                     })
                 )
             );
@@ -64,13 +88,14 @@ self.addEventListener('install', event => {
     );
 });
 
-// تفعيل وتطهير النسخ القديمة الخاصة بالتطبيق فقط دون لمس كاشات النطاقات أو التطبيقات الأخرى
+// تنشيط وحذف الكاشات القديمة
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cache => {
                     if (typeof cache === 'string' && cache.startsWith('khedmety-') && cache !== CACHE_NAME) {
+                        console.log('[SW v3.0] تنظيف كاش قديم:', cache);
                         return caches.delete(cache);
                     }
                 })
@@ -79,68 +104,121 @@ self.addEventListener('activate', event => {
     );
 });
 
-// معالجة الطلبات باشتراطات أمان صارمة ودعم كامل للأوفلاين
+/**
+ * دالة جلب من الشبكة مع حد أقصى للانتظار (Fast-Network Timeout)
+ */
+function fetchWithTimeout(request, timeoutMs = 1800) {
+    return new Promise((resolve, reject) => {
+        let isDone = false;
+        const timer = setTimeout(() => {
+            if (!isDone) {
+                isDone = true;
+                reject(new Error('NETWORK_TIMEOUT_REACHED'));
+            }
+        }, timeoutMs);
+
+        fetch(request).then(res => {
+            if (!isDone) {
+                isDone = true;
+                clearTimeout(timer);
+                resolve(res);
+            }
+        }).catch(err => {
+            if (!isDone) {
+                isDone = true;
+                clearTimeout(timer);
+                reject(err);
+            }
+        });
+    });
+}
+
+// معالجة كافة طلبات الجلب (Fetch Interceptor)
 self.addEventListener('fetch', event => {
     const request = event.request;
     const url = new URL(request.url);
 
-    // 1. استبعاد أي طلب غير GET (تعديلات، إرسال نماذج)
+    // 1. تجاوز أي طلب غير GET
     if (request.method !== 'GET') {
         return;
     }
 
-    // 2. أمني: استبعاد كامل ومطلق لجميع واجهات API ومسارات المصادقة
+    // 2. تجاوز طلبات الـ API الحية (يتم التعامل معها عبر كود التطبيق وطابور المزامنة)
     if (url.pathname.startsWith('/api/') || url.pathname.includes('/api/')) {
-        return; // ترك الطلب يذهب مباشرة للشبكة دون لمس الكاش
+        return;
     }
 
-    // 3. استبعاد طلبات قواعد البيانات الحية والسحابة المباشرة من الكاش
+    // 3. تجاوز محركات المزامنة السحابية المباشرة
     if (url.origin.includes('firestore.googleapis.com') || url.origin.includes('firebaseio.com') || url.origin.includes('identitytoolkit.googleapis.com')) {
         return;
     }
 
-    // 4. معالجة طلبات التنقل بين صفحات HTML (Navigation Requests) لتمكين الفتح أوفلاين في أي وقت
+    // 4. استراتيجية التنقل (Navigation Requests - HTML Pages):
+    // تجربة الشبكة بحد أقصى 1.8 ثانية، وفي حال البطء أو انقطاع النت يتم التقديم فورياً من الكاش!
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request).then(response => {
-                // إذا كان الاتصال متاحاً، نحفظ نسخة حديثة في الكاش ونعيد الصفحة
+            fetchWithTimeout(request, 1800).then(response => {
                 if (response && response.status === 200) {
                     const copy = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
                 }
                 return response;
             }).catch(async () => {
-                // وضع عدم الاتصال (Offline): استرجاع الصفحة المخزنة فوراً
                 const cache = await caches.open(CACHE_NAME);
 
-                // أ) محاولة المطابقة المباشرة لنفس الطلب
+                // أ) محاولة المطابقة المباشرة
                 let cached = await cache.match(request);
                 if (cached) return cached;
 
-                // ب) محاولة المطابقة بدون معلمات الرابط (مثل ?tab=membersTab أو ?group=people)
+                // ب) محاولة المطابقة بدون معلمات الاستعلام
                 const pathOnly = url.origin + url.pathname;
                 cached = await cache.match(pathOnly);
                 if (cached) return cached;
 
-                // ج) المطابقة بالمسار النسبي
+                // ج) محاولة المطابقة بالمسار النسبي
                 const localPath = '.' + url.pathname;
                 cached = await cache.match(localPath);
                 if (cached) return cached;
 
-                // د) مطابقة الصفحة الرئيسية
+                // د) الصفحة الرئيسية
                 if (url.pathname === '/' || url.pathname.endsWith('/index.html')) {
                     cached = await cache.match('./index.html');
                     if (cached) return cached;
                 }
 
-                // هـ) في حالة عدم وجود الصفحة إطلاقاً، عرض صفحة عدم الاتصال
-                return cache.match('./offline.html');
+                // هـ) صفحة الأوفلاين العامة
+                const fallback = await cache.match('./offline.html');
+                return fallback || new Response('<h1>أنت غير متصل بالإنترنت حالياً</h1><p>يرجى فتح الشاشة المحفوظة مسبقاً.</p>', {
+                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                });
             })
         );
         return;
     }
 
-    // 5. استراتيجية Stale-While-Revalidate للأصول الثابتة (CSS, JS, Fonts, Images)
+    // 5. استراتيجية شبكات الـ CDN الخارجية (Google Fonts, FontAwesome, Bootstrap, Firebase)
+    const isCdn = ALLOWED_CDN_HOSTS.some(host => url.hostname.includes(host));
+    if (isCdn) {
+        event.respondWith(
+            caches.match(request).then(cachedResponse => {
+                if (cachedResponse) {
+                    return cachedResponse; // Cache-First للأصول الخارجية المعتمدة
+                }
+                return fetch(request).then(networkResponse => {
+                    if (networkResponse && (networkResponse.status === 200 || networkResponse.type === 'opaque')) {
+                        const copy = networkResponse.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+                    }
+                    return networkResponse;
+                }).catch(() => {
+                    // فشل الصامت للخطوط إذا لم تكن متوفرة
+                });
+            })
+        );
+        return;
+    }
+
+    // 6. استراتيجية الأصول الثابتة الداخلية (Stale-While-Revalidate للأكواد والصور والأنماط)
     event.respondWith(
         caches.match(request).then(cachedResponse => {
             const fetchPromise = fetch(request).then(networkResponse => {
@@ -152,7 +230,7 @@ self.addEventListener('fetch', event => {
                 }
                 return networkResponse;
             }).catch(() => {
-                // وضع عدم الاتصال: الاكتفاء بما هو في الكاش
+                // هدوء أوفلاين
             });
 
             return cachedResponse || fetchPromise;
@@ -160,7 +238,7 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// استقبال رسائل التحديث القسري وتطهير الكاش مع الرد عبر منفذ الرسائل
+// استقبال رسائل تحديث الكاش الفوري
 self.addEventListener('message', event => {
     if (event.data && event.data.action === 'SKIP_WAITING_AND_CLEAR') {
         self.skipWaiting();

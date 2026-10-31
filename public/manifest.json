@@ -1,7 +1,7 @@
 {
-  "name": "Khedmety-Plus | خدمتي برو",
-  "short_name": "Khedmety+",
-  "description": "المنظومة الذكية لإعداد الخدام والمخدومين - متابعة الحضور والأنشطة والنوتة الروحية وقراءة الكتاب المقدس",
+  "name": "خدمتي برو | KHIDMETY PRO",
+  "short_name": "خدمتي+",
+  "description": "المنظومة الرعوية والروحية المتكاملة - تدعم العمل الكامل أون لاين وأوف لاين دون اتصال",
   "lang": "ar",
   "dir": "rtl",
   "id": "khedmety-plus-pwa",
@@ -9,8 +9,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0c2461",
-  "theme_color": "#1e3799",
+  "background_color": "#0f2744",
+  "theme_color": "#0f2744",
   "icons": [
     {
       "src": "icons/icon-192.png",

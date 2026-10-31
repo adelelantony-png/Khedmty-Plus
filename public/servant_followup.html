@@ -18,6 +18,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
     <script src="js/firebase-config.js"></script>
     <script src="auth-client.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/khedmty-db.js"></script>
+<script src="js/khedmty-offline-sync.js"></script>
+<script src="js/pwa-helper.js"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -872,7 +876,7 @@ body {
     let isCloudOnline = false;
     try {
         if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-        fsdb = firebase.firestore();
+        fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : firebase.firestore());
     } catch (e) {
         console.warn("Firebase init warning in followup:", e);
     }

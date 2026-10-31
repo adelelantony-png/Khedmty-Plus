@@ -169,6 +169,10 @@
 <script src="bible-data.js"></script>
 
 <script src="bible_plan.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/khedmty-db.js"></script>
+<script src="js/khedmty-offline-sync.js"></script>
+<script src="js/pwa-helper.js"></script>
 
 
 
@@ -202,7 +206,7 @@ const FB_CONFIG = {
 
 if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
 
-const fsdb = firebase.firestore();
+const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : firebase.firestore());
 
 
 
@@ -1139,8 +1143,24 @@ async function toggleChapterFromBanner(planItem, curMonth, curDay, chapterNum) {
             savedLog._synced = true;
             localReadings[planKey] = savedLog;
             localStorage.setItem('khedmety_bible_readings', JSON.stringify(localReadings));
+        } else {
+            throw new Error('Offline API');
         }
-    } catch (e) {}
+    } catch (e) {
+        if (window.KhedmtyOfflineSync) {
+            KhedmtyOfflineSync.enqueue('MARK_PLAN_READ', {
+                code: studentCode,
+                month: curMonth,
+                day: curDay,
+                book: planItem.book,
+                reading: planItem.reading,
+                chapter: chapterNum,
+                action: 'toggle_chapter',
+                completed_chapters: completed,
+                total_chapters: totalCount
+            }, { dedupKey: `${curMonth}-${curDay}_${studentCode}` });
+        }
+    }
 
     if (isAll) {
         alert('🎉 مبارك! أتممت قراءة جميع إصحاحات اليوم بالكامل وحصلت على بونص الأمانة (+3 نقاط)! ✝️');

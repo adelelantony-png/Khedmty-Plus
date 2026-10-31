@@ -106,6 +106,10 @@
 </div>
 
 <script src="auth-client.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/khedmty-db.js"></script>
+<script src="js/khedmty-offline-sync.js"></script>
+<script src="js/pwa-helper.js"></script>
 <script>
     if (window.AuthClient) {
         AuthClient.enforceAuth(['student', 'servant', 'admin']);
@@ -120,7 +124,7 @@
         appId: "1:25101228841:web:3164821d165014a1e2b538"
     };
     if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
-    const fsdb = firebase.firestore();
+    const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : firebase.firestore());
 
     const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
     const studentUser = (window.AuthClient && typeof AuthClient.getUser === 'function') ? AuthClient.getUser() : null;
