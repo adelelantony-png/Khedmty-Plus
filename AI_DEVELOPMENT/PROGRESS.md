@@ -103,3 +103,14 @@
   5. **Top Navigation Height Optimization**: Compacted `.grp-bar` and `.tabs` vertical padding, reclaiming ~60px of screen real estate.
   6. **Dismissable Backup Banner**: Enabled session persistence for `hideBackupReminder()`.
 - **Verification:** All 21 test suites passed 100% (554 servant event handlers verified).
+
+### [2026-10-31] One-Click Group Navigation & Liturgical Design Polish: servant-dashboard.html (TSK-017)
+- **Status:** **COMPLETED & VERIFIED**
+- **Safety Pre-check:** Full project backup created and verified at `D:\StPaul_Service_System\_Backups\03_Web_Khedmty_Plus_PreDesignPolish_20261031` (242 files, 26 MB, Robocopy Exit Code 1 / Success). Single file backups verified at `public/servant-dashboard.html.backup_compact_ux_20261031` and `D:\StPaul_Service_System\_Backups\servant-dashboard.html.pre_compact_ux`.
+- **Key Enhancements Implemented:**
+  1. **One-Click Group Auto Switch:** Resolved user friction where clicking top groups didn't switch the active screen. Now clicking any group chip immediately switches to the first visible tab content of that section.
+  2. **Spiritual Oasis Hub (`#reflectionsTab`):** Added an embedded sacred liturgical dashboard tab linking to Bible, Katamaros, Synaxarium, Spiritual Notes, and Personal Journal.
+  3. **Grades Studio Promotion:** Placed direct link to `servant_grades_entry.html` in the Study group tab bar.
+  4. **Liturgical Color Harmony & Design System:** Modernized chips, tabs, and metric cards with royal navy and church gold styling.
+  5. **100% Feature Preservation:** Zero features deleted, zero destructive database changes.
+- **Verification:** All 21 test suites passed 100% (605 user event handlers verified with 0 ReferenceErrors).

@@ -82,28 +82,30 @@ fab.className = 'help-fab'; fab.title = 'مركز المساعدة'; fab.setAttr
 
 document.body.appendChild(fab);
 
-function showGroup(g) {
-
+function showGroup(g, autoSwitch = true) {
 current = g;
-
 refresh();
-
 fab.href = 'servant_help.html?g=' + g;
-
 try {
-
-if (typeof sessionStorage !== 'undefined') {
-
-const uk = (window.AuthClient && typeof AuthClient.getUser === 'function' && AuthClient.getUser()?.id) || 
-
-(typeof currentUser !== 'undefined' && currentUser && currentUser.id) || 'guest';
-
-sessionStorage.setItem('khedmety_group_' + uk, g);
-
-}
-
+  if (typeof sessionStorage !== 'undefined') {
+    const uk = (window.AuthClient && typeof AuthClient.getUser === 'function' && AuthClient.getUser()?.id) || 
+    (typeof currentUser !== 'undefined' && currentUser && currentUser.id) || 'guest';
+    sessionStorage.setItem('khedmety_group_' + uk, g);
+  }
 } catch (e) {}
 
+// One-Click Auto Switch: عند الضغط على المجموعة تفتح أول خاصية مفعلة تلقائياً!
+if (autoSwitch && typeof window.switchTab === 'function') {
+  const visibleBtns = [...tabs.querySelectorAll('.tab-btn:not(.grp-hidden)')].filter(b => b.style.display !== 'none');
+  const hasActive = visibleBtns.some(b => b.classList.contains('active'));
+  if (!hasActive && visibleBtns.length > 0) {
+    const firstBtn = visibleBtns[0];
+    const m = (firstBtn.getAttribute('onclick') || '').match(/switchTab\('(\w+)'/);
+    if (m && m[1]) {
+      window.switchTab(m[1], firstBtn);
+    }
+  }
+}
 }
 
 bar.addEventListener('click', e => { const c = e.target.closest('.grp-chip'); if (c) showGroup(c.dataset.g); });

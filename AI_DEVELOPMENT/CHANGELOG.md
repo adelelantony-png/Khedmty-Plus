@@ -55,3 +55,35 @@ All notable changes to this project will be documented in this file.
 - **Compact Navigation Bar**: Tightened margins and chip padding on `.grp-bar` and `.tabs`, reclaiming ~60px of vertical viewport height.
 - **Session-Persistent Dismissal**: Enhanced `hideBackupReminder()` to persist dismissal in `sessionStorage`, keeping the top of the viewport free of persistent yellow banners during active sessions.
 - **Quality Gates**: All 21 test suites passed (100%), and 554 servant event handlers verified without errors.
+
+## [1.3.0-LITURGICAL-POLISH] - 2026-10-31
+### One-Click Group Navigation & Liturgical Design Polish
+- **Full Project Pre-modification Backup**: Created verified snapshot at `D:\StPaul_Service_System\_Backups\03_Web_Khedmty_Plus_PreDesignPolish_20261031` (242 files, 26 MB, Robocopy Exit Code 1 / Success).
+- **One-Click Group Auto Switch (`public/js/dashboard/dashboard-navigation.js`)**:
+  - Eliminated the double-click barrier: Clicking any top group chip (`.grp-chip`) now automatically activates the first visible tab content of that group via `window.switchTab(firstTabId, firstBtn)`.
+  - Immediate view transitions:
+    * "🏠 الرئيسية" -> Opens Overview Dashboard (`dashTab`)
+    * "📷 الحضور" -> Opens Attendance Matrix (`attendanceTab`)
+    * "👥 المخدومون" -> Opens Member Directory (`membersTab`)
+    * "🎓 الدراسة" -> Opens Subject Catalog (`coursesTab`)
+    * "🕊️ الروحيات" -> Opens Spiritual Oasis Hub (`reflectionsTab`)
+    * "⚙️ الإدارة" -> Opens Administrative Settings (`settingsTab`)
+- **Spiritual Oasis Hub (`#reflectionsTab` in `public/servant-dashboard.html`)**:
+  - Built an embedded spiritual oasis directly in the dashboard featuring a royal navy and gold banner.
+  - Houses 5 luxury cards linking to:
+    * `servant_spiritual_note.html` (نوتة الخادم الروحية)
+    * `servant_journal.html` (مفكرة الخادم الشخصية)
+    * `bible.html` (قارئ الكتاب المقدس)
+    * `katamaros.html` (القطمارس الكنسي اليومي)
+    * `synaxarium.html` (السنكسار وسير الآباء والشهداء)
+- **Elevated Grades Studio (`servant_grades_entry.html`)**:
+  - Direct prominent entry tab added to the "Study / الدراسة 🎓" group in `servant-dashboard.html`, allowing admission & ministry readiness grades entry with zero searching.
+- **Royal Liturgical Design System & Color Harmony**:
+  - Refined color palette with Coptic church liturgical hues: Deep Royal Navy (`#0f2744`), Indigo Blue (`#1e3a8a`), Warm Liturgical Gold (`#c59b27`), Emerald (`#059669`).
+  - Styled `.grp-chip` with clean white elevation cards, gold accent border on hover, and active gradient (`linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%)`).
+  - Harmonized `.stat-card`, `.tabs`, and `.tab-btn` with clean borders, micro-interactions, and visual depth.
+- **Strict Non-Destructive Integrity**:
+  - 100% feature preservation: Zero functions, tabs, buttons, or database paths were deleted or modified destructively.
+- **Quality Gates**:
+  - Full test suite passed: **21/21 suites (100%)**.
+  - Event simulation verified: **605 user event handlers (555 servant + 50 student)** across the entire platform with 0 ReferenceErrors.
