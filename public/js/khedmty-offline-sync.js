@@ -213,6 +213,67 @@
             return true;
         }
 
+        // 6. مزامنة إعادة كتابة أو إلغاء الحضور الميداني (ATTENDANCE_OVERWRITE)
+        if (action === 'ATTENDANCE_OVERWRITE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { date, records } = payload;
+            if (!date) return true;
+            let partitionObj = {};
+            (records || []).forEach(item => {
+                let p = (item.code || item.id || '').toString().replace(/\D/g, '') || String(item.id || item.code || Date.now());
+                if (p) partitionObj[p] = item;
+            });
+            await fsdb.collection('attendance').doc(String(date)).set(partitionObj);
+            return true;
+        }
+
+        // 7. مزامنة تحديث المخدومين مع حل التعارضات (MEMBER_UPDATE with Conflict Resolution)
+        if (action === 'MEMBER_UPDATE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { memberId, data, updatedAt } = payload;
+            if (!memberId) return true;
+
+            const memberRef = fsdb.collection('members').doc(String(memberId));
+            const docSnap = await memberRef.get();
+            if (docSnap.exists) {
+                const remoteData = docSnap.data();
+                const remoteUpdatedAt = remoteData.updatedAt || remoteData.lastModified || 0;
+                // حل التعارض: دمج الحقول غير المتعارضة، وأحدث طابع زمني يفوز للحقول المشتركة
+                if (remoteUpdatedAt > (updatedAt || 0)) {
+                    const mergedData = Object.assign({}, data, remoteData);
+                    await memberRef.set(mergedData, { merge: true });
+                } else {
+                    await memberRef.set(Object.assign({}, data, { updatedAt: updatedAt || Date.now() }), { merge: true });
+                }
+            } else {
+                await memberRef.set(Object.assign({}, data, { updatedAt: updatedAt || Date.now() }), { merge: true });
+            }
+            return true;
+        }
+
+        // 8. مزامنة تسجيل الافتقاد الرعوي (VISITATION_LOG)
+        if (action === 'VISITATION_LOG') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { memberId, logEntry } = payload;
+            if (!memberId || !logEntry) return true;
+
+            const memberRef = fsdb.collection('members').doc(String(memberId));
+            const docSnap = await memberRef.get();
+            let currentLogs = [];
+            if (docSnap.exists && Array.isArray(docSnap.data().visitationLogs)) {
+                currentLogs = docSnap.data().visitationLogs;
+            }
+            currentLogs.unshift(logEntry);
+            await memberRef.set({ visitationLogs: currentLogs, lastVisitation: logEntry.date }, { merge: true });
+            return true;
+        }
+
         return true;
     }
 
@@ -232,7 +293,7 @@
             badge.id = 'khedmty-offline-bar';
             badge.style.cssText = `
                 position: fixed;
-                bottom: 14px;
+                bottom: 76px;
                 left: 50%;
                 transform: translateX(-50%);
                 z-index: 99999;
@@ -249,6 +310,8 @@
                 direction: rtl;
                 cursor: default;
                 backdrop-filter: blur(8px);
+                max-width: 90vw;
+                white-space: nowrap;
             `;
             document.body.appendChild(badge);
         }

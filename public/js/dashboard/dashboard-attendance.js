@@ -1886,7 +1886,7 @@ if (!member) return;
 
 if (isChecked) atomicRegisterAttendance(member);
 
-else cancelMemberAttendance(memberId);
+else cancelMemberAttendance(memberId, true);
 
 renderAttendanceTable();
 
@@ -1900,6 +1900,56 @@ renderManualAttendanceModalList();
 
 checkLocalStorageUsage();
 
+}
+
+function selectAllManualAttendance(isSelectAll) {
+    const searchBox = document.getElementById('manualModalSearchBox');
+    const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
+    const filtered = members.filter(m => (m.name || '').toLowerCase().includes(search) || (m.code || '').toString().includes(search));
+    
+    filtered.forEach(m => {
+        let isAtt = !!(attendanceRecord[activeSelectedDate] || []).some(a => a.id.toString() === m.id.toString());
+        if (isSelectAll && !isAtt) {
+            atomicRegisterAttendance(m);
+        } else if (!isSelectAll && isAtt) {
+            cancelMemberAttendance(m.id, true);
+        }
+    });
+
+    renderAttendanceTable();
+    renderLiveCardsFeed();
+    renderMembersList();
+    renderDashboard();
+    renderManualAttendanceModalList();
+    checkLocalStorageUsage();
+    if (typeof showToast === 'function') {
+        showToast(isSelectAll ? `✅ تم تحديد ${filtered.length} مخدوم كحاضرين` : `❌ تم إلغاء تحديد ${filtered.length} مخدوم (تسجيل غياب)`);
+    }
+}
+
+function invertSelectionManualAttendance() {
+    const searchBox = document.getElementById('manualModalSearchBox');
+    const search = searchBox ? searchBox.value.toLowerCase().trim() : '';
+    const filtered = members.filter(m => (m.name || '').toLowerCase().includes(search) || (m.code || '').toString().includes(search));
+    
+    filtered.forEach(m => {
+        let isAtt = !!(attendanceRecord[activeSelectedDate] || []).some(a => a.id.toString() === m.id.toString());
+        if (isAtt) {
+            cancelMemberAttendance(m.id, true);
+        } else {
+            atomicRegisterAttendance(m);
+        }
+    });
+
+    renderAttendanceTable();
+    renderLiveCardsFeed();
+    renderMembersList();
+    renderDashboard();
+    renderManualAttendanceModalList();
+    checkLocalStorageUsage();
+    if (typeof showToast === 'function') {
+        showToast(`🔄 تم عكس حالة الحضور لـ ${filtered.length} مخدوم بنجاح`);
+    }
 }
 
 // ==========================================
@@ -1920,6 +1970,8 @@ if (typeof window !== 'undefined') {
   window.closeAttendanceExportModal = closeAttendanceExportModal;
   window.openManualAttendanceModal = openManualAttendanceModal;
   window.closeManualAttendanceModal = closeManualAttendanceModal;
+  window.selectAllManualAttendance = selectAllManualAttendance;
+  window.invertSelectionManualAttendance = invertSelectionManualAttendance;
   window.changeCalendarMonth = changeCalendarMonth;
   window.selectAttendanceDate = selectAttendanceDate;
 

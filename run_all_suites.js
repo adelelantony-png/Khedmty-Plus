@@ -28,7 +28,8 @@ const tests = [
   'tests/test_student_mobile_tabs.js',
   'tests/test_pastoral_early_warning.js',
   'tests/test_official_certificates_and_signatures.js',
-  'tests/test_offline_login_and_attendance.js'
+  'tests/test_offline_login_and_attendance.js',
+  'tests/test_suite28_qa_audit_and_hardening.js'
 ];
 
 console.log('================================================================');

@@ -4316,6 +4316,18 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <input type="text" id="manualModalSearchBox" placeholder="🔍 بحث سريع في القائمة..." onkeyup="renderManualAttendanceModalList()" style="margin-bottom:12px;">
 
+<div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+  <button type="button" class="btn-mini btn-primary" onclick="selectAllManualAttendance(true)" style="padding:8px 14px; font-size:12px; font-weight:800; cursor:pointer; border-radius:8px; border:none; background:#10b981; color:#fff;">
+    ✅ تحديد الكل كحاضر
+  </button>
+  <button type="button" class="btn-mini btn-warning" onclick="invertSelectionManualAttendance()" style="padding:8px 14px; font-size:12px; font-weight:800; cursor:pointer; border-radius:8px; border:none; background:#f59e0b; color:#fff;">
+    🔄 عكس التحديد
+  </button>
+  <button type="button" class="btn-mini btn-danger" onclick="selectAllManualAttendance(false)" style="padding:8px 14px; font-size:12px; font-weight:800; cursor:pointer; border-radius:8px; border:none; background:#ef4444; color:#fff;">
+    ❌ إلغاء تحديد الكل (غياب)
+  </button>
+</div>
+
 <div class="table-responsive" style="max-height:380px; overflow-y:auto; border:1px solid #ddd; border-radius:8px;">
 
 <table id="manualAttendanceModalTable" style="margin:0; width:100%;" class="adaptive-card-table">

@@ -705,7 +705,7 @@ async function clearAllMembers() {
             alert("✅ تم تفريغ كشف الدارسين بنجاح.");
         }
 
-function cancelMemberAttendance(memberId) {
+function cancelMemberAttendance(memberId, silent = false) {
 
 let m = members.find(x => x.id.toString() === memberId.toString());
 
@@ -713,13 +713,24 @@ let rec = (attendanceRecord[activeSelectedDate] || []).find(x => x.id.toString()
 
 let mName = m ? m.name : (rec ? rec.name : "هذا الشخص");
 
-if (confirm(`إلغاء تسجيل حضور (${mName}) ليوم (${activeSelectedDate})؟`)) {
+if (silent || confirm(`إلغاء تسجيل حضور (${mName}) ليوم (${activeSelectedDate})؟`)) {
 
 attendanceRecord[activeSelectedDate] = (attendanceRecord[activeSelectedDate] || []).filter(item => item.id.toString() !== memberId.toString());
 
 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
-if (isFirebaseActive && fsdb) {
+if (window.KhedmtyDB && typeof KhedmtyDB.setItem === 'function') {
+    KhedmtyDB.setItem(STORAGE_KEYS.ATTENDANCE, attendanceRecord).catch(() => {});
+}
+
+if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+    KhedmtyOfflineSync.enqueue('ATTENDANCE_OVERWRITE', {
+        date: activeSelectedDate,
+        records: attendanceRecord[activeSelectedDate] || []
+    }, { dedupKey: 'att_ovw_' + activeSelectedDate });
+}
+
+if (isFirebaseActive && fsdb && navigator.onLine) {
 
 // استبدال مستند اليوم بالكامل بالقائمة المحدَّثة يحذف ضمنياً أي مفتاح لم يعد موجوداً
 

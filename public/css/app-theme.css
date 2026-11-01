@@ -118,6 +118,8 @@ html {
     -webkit-tap-highlight-color: transparent;
     font-size: 16px;
     scroll-behavior: smooth;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -127,10 +129,25 @@ body {
     margin: 0;
     padding: 0;
     line-height: 1.65;
+    max-width: 100%;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+/* منع التكبير التلقائي في أجهزة الآيفون والموبايل وحماية أبعاد اللمس */
+input[type="text"], input[type="password"], input[type="number"], input[type="search"], input[type="tel"], input[type="email"], select, textarea {
+    font-size: 16px !important;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+    body {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+    }
 }
 
 /* إمكانية الوصول والتنقل عبر لوحة المفاتيح Focus Accessibility */
