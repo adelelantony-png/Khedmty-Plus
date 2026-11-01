@@ -411,11 +411,13 @@
             }
         });
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && navigator.onLine) {
-                processQueue().catch(() => {});
-            }
-        });
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && navigator.onLine) {
+                    processQueue().catch(() => {});
+                }
+            });
+        }
 
         // دورة فحص دورية خفيفة كل 45 ثانية
         const syncTimer = setInterval(() => {

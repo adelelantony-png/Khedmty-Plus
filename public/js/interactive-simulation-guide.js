@@ -286,7 +286,7 @@
 
     // حقن زر علامة الاستفهام العائم (فقط في الشاشات الرئيسية كالدخول، ومستثنى من صفحات الداشبورد ومركز المساعدة لمنع التكرار)
     const isHelpCenter = window.location.pathname.includes('servant_help.html') || window.location.pathname.includes('student_help.html');
-    const isDashboard = window.location.pathname.includes('servant-dashboard.html') || window.location.pathname.includes('student-portal.html');
+    const isDashboard = window.location.pathname.includes('servant-dashboard.html') || window.location.pathname.includes('student.html') || window.location.pathname.includes('student-portal.html');
     let floatBtn = document.getElementById('simFloatingHelpBtn');
     if (!isHelpCenter && !isDashboard && !document.querySelector('.help-fab') && !floatBtn) {
         floatBtn = document.createElement('div');

@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v3.5'; // upgraded mobile compact roll-call cards, fast modal touch labels & unified help FAB
+const CACHE_NAME = 'khedmety-ultra-v3.6'; // verified student portal mobile ux & offline sync engine
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
