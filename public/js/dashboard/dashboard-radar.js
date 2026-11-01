@@ -211,13 +211,13 @@ function renderRadarAbsenceTableBody() {
 
         return `
             <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : 'transparent'};">
-                <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${escapeHtml(m.name)}</td>
-                <td style="padding: 8px; font-weight: bold;">${escapeHtml(m.code)}</td>
-                <td style="padding: 8px;">${escapeHtml(m.stage)}</td>
-                <td style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
-                <td style="padding: 8px;">${badgeHtml}</td>
-                <td style="padding: 8px;">${m.phone || '-'}</td>
-                <td style="padding: 8px;">
+                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${escapeHtml(m.name)}</td>
+                <td data-label="الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(m.code)}</td>
+                <td data-label="الفرقة / المرحلة" style="padding: 8px;">${escapeHtml(m.stage)}</td>
+                <td data-label="النوع" style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
+                <td data-label="أسابيع الغياب" style="padding: 8px;">${badgeHtml}</td>
+                <td data-label="الهاتف" style="padding: 8px;">${m.phone || '-'}</td>
+                <td data-label="الإجراء الرعوي" style="padding: 8px;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${m.phone ? `
                             <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -382,12 +382,12 @@ function renderRadarBirthdays(filterMode = 'week') {
 
         return `
             <tr style="border-bottom: 1px solid #fef08a;">
-                <td style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(b.name)}</td>
-                <td style="padding: 8px; font-weight: bold; color: #475569;">${escapeHtml(b.role)}</td>
-                <td style="padding: 8px; font-weight: bold;">${escapeHtml(b.date)}</td>
-                <td style="padding: 8px;">${statusBadge}</td>
-                <td style="padding: 8px;">${b.phone || '-'}</td>
-                <td style="padding: 8px;">
+                <td data-label="الاسم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(b.name)}</td>
+                <td data-label="الصفة / الفرقة" style="padding: 8px; font-weight: bold; color: #475569;">${escapeHtml(b.role)}</td>
+                <td data-label="تاريخ الميلاد" style="padding: 8px; font-weight: bold;">${escapeHtml(b.date)}</td>
+                <td data-label="الموعد" style="padding: 8px;">${statusBadge}</td>
+                <td data-label="الهاتف" style="padding: 8px;">${b.phone || '-'}</td>
+                <td data-label="تهنئة واتساب" style="padding: 8px;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${cleanPhone ? `
                             <button type="button" class="btn-custom" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${cleanPhone}', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -625,16 +625,16 @@ function renderRadarDashboard() {
                 tbodyConf.innerHTML = pendingConf.map(c => {
                     return `
                         <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${c.name}</td>
-                            <td style="padding: 8px; font-weight: bold;">${c.code}</td>
-                            <td style="padding: 8px; color: #b45309; font-weight: bold;">${c.confessor}</td>
-                            <td style="padding: 8px;">
+                            <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${c.name}</td>
+                            <td data-label="الكود" style="padding: 8px; font-weight: bold;">${c.code}</td>
+                            <td data-label="أب الاعتراف" style="padding: 8px; color: #b45309; font-weight: bold;">${c.confessor}</td>
+                            <td data-label="مهلة الاعتراف" style="padding: 8px;">
                                 <span class="radar-alert-badge ${c.countdownClass}">
                                     ${c.countdownText}
                                 </span>
                             </td>
-                            <td style="padding: 8px;">${c.phone || '-'}</td>
-                            <td style="padding: 8px;">
+                            <td data-label="الهاتف" style="padding: 8px;">${c.phone || '-'}</td>
+                            <td data-label="الإجراء" style="padding: 8px;">
                                 <button type="button" class="btn-custom" onclick="quickResolveRadarConfession('${c.code}')" style="padding: 4px 10px; font-size: 0.75rem; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 6px; font-weight: bold; cursor: pointer;">
                                     <i class="fa-solid fa-check-double me-1 text-success"></i> حل المشكلة والاعتماد
                                 </button>
@@ -923,25 +923,25 @@ function renderSecurityTokensTable(tokens) {
 
         return `
             <tr style="border-bottom: 1px solid #e0f2fe; background: ${t.is_active ? 'transparent' : '#f8fafc'};">
-                <td style="padding: 10px 8px; text-align: right; font-weight: bold; color: #0c2461;">
+                <td data-label="اسم الترخيص" style="padding: 10px 8px; text-align: right; font-weight: bold; color: #0c2461;">
                     ${escapeHtml(t.name)}
                 </td>
-                <td style="padding: 10px 8px; font-family: monospace; font-size: 0.85rem;">
+                <td data-label="مفتاح الترخيص" style="padding: 10px 8px; font-family: monospace; font-size: 0.85rem;">
                     <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; border: 1px solid #cbd5e1;" title="${escapeHtml(t.token)}">
                         ${escapeHtml(maskedToken)}
                     </span>
                     <button type="button" onclick="copySecurityToken('${escapeHtml(t.token)}')" class="btn-mini" style="background: transparent; border: none; cursor: pointer; color: #0284c7;" title="نسخ المفتاح">📋</button>
                 </td>
-                <td style="padding: 10px 8px;">
+                <td data-label="الدور" style="padding: 10px 8px;">
                     <span class="badge ${isMaster ? 'bg-danger' : 'bg-primary'}" style="font-size: 0.75rem;">
                         ${isMaster ? 'أمين الخدمة 👑' : 'خادم أسرة 👤'}
                     </span>
                 </td>
-                <td style="padding: 10px 8px;">${stageBadge}</td>
-                <td style="padding: 10px 8px; font-weight: bold; color: #475569;">
+                <td data-label="المرحلة المسموحة" style="padding: 10px 8px;">${stageBadge}</td>
+                <td data-label="سقف الإرسال" style="padding: 10px 8px; font-weight: bold; color: #475569;">
                     ${t.hourly_limit} رسالة/ساعة
                 </td>
-                <td style="padding: 10px 8px;">
+                <td data-label="الحالة والإجراء" style="padding: 10px 8px;">
                     ${t.is_active ? `
                         <span class="badge bg-success" style="font-size: 0.75rem;">نشط 🟢</span>
                         ${!isMaster ? `<button type="button" onclick="revokeSecurityToken(${t.id})" class="btn-mini btn-danger ms-1" style="cursor:pointer; font-size:0.7rem; padding:2px 6px;">إيقاف</button>` : ''}
@@ -1139,15 +1139,15 @@ function renderRadarExcusesTable() {
 
         return `
             <tr style="border-bottom: 1px solid #fef08a; background: ${isPending ? '#fffdf0' : 'transparent'};">
-                <td style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(e.student_name)}</td>
-                <td style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
-                <td style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
-                <td style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
-                <td style="padding: 8px; text-align: right; max-width: 260px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
+                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(e.student_name)}</td>
+                <td data-label="الفرقة / الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
+                <td data-label="جمعة الغياب" style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
+                <td data-label="السبب" style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
+                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 260px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
                     "${escapeHtml(e.message_text)}"
                 </td>
-                <td style="padding: 8px;">${statusBadge}</td>
-                <td style="padding: 8px;">
+                <td data-label="الحالة" style="padding: 8px;">${statusBadge}</td>
+                <td data-label="الإجراء الرعوي" style="padding: 8px;">
                     <div style="display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: wrap;">
                         ${isPending ? `
                             <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">

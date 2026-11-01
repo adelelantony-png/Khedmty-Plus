@@ -455,20 +455,17 @@ th { background: var(--primary); color: white; }
 
 .empty-state { color: #888; padding: 15px; text-align: center; font-size: 12px; }
 
-@media screen and (max-width: 768px) and (orientation: portrait) {
-
-.adaptive-card-table thead { display: none; }
-
-.adaptive-card-table, .adaptive-card-table tbody, .adaptive-card-table tr, .adaptive-card-table td { display: block; width: 100%; white-space: normal !important; }
-
-.adaptive-card-table tr { background: #fff; margin-bottom: 12px; border: 1px solid #dcdde1; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); padding: 8px; }
-
-.adaptive-card-table td { display: flex; justify-content: space-between; align-items: center; text-align: left; padding: 6px 10px; border: none; border-bottom: 1px solid #f1f2f6; font-size: 13px; }
-
-.adaptive-card-table td:last-child { border-bottom: none; }
-
-.adaptive-card-table td::before { content: attr(data-label); font-weight: bold; color: var(--primary); text-align: right; margin-left: 10px; }
-
+@media screen and (max-width: 768px) {
+.table-responsive-wrapper { overflow-x: hidden !important; background: transparent !important; border: none !important; box-shadow: none !important; }
+.adaptive-card-table thead, .radar-adaptive-table thead { display: none !important; }
+.adaptive-card-table, .adaptive-card-table tbody, .adaptive-card-table tr, .adaptive-card-table td,
+.radar-adaptive-table, .radar-adaptive-table tbody, .radar-adaptive-table tr, .radar-adaptive-table td { display: block !important; width: 100% !important; white-space: normal !important; box-sizing: border-box !important; }
+.adaptive-card-table tr, .radar-adaptive-table tr { background: #fff !important; margin-bottom: 12px !important; border: 1px solid #dcdde1 !important; border-radius: 12px !important; box-shadow: 0 2px 6px rgba(0,0,0,0.04) !important; padding: 10px 12px !important; }
+.adaptive-card-table td, .radar-adaptive-table td { display: flex !important; justify-content: space-between !important; align-items: center !important; text-align: left !important; padding: 7px 4px !important; border: none !important; border-bottom: 1px dashed #f1f2f6 !important; font-size: 13px !important; }
+.adaptive-card-table td:last-child, .radar-adaptive-table td:last-child { border-bottom: none !important; justify-content: center !important; padding-top: 10px !important; }
+.adaptive-card-table td::before, .radar-adaptive-table td::before { content: attr(data-label); font-weight: bold; color: var(--primary); text-align: right; margin-left: 10px; font-size: 12px; }
+.adaptive-card-table td[colspan], .radar-adaptive-table td[colspan] { display: block !important; text-align: center !important; padding: 16px !important; border: none !important; }
+.adaptive-card-table td[colspan]::before, .radar-adaptive-table td[colspan]::before { content: none !important; display: none !important; }
 }
 
 .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
@@ -1471,28 +1468,28 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             <!-- بطاقات النبض الرباعية (Radar Pulse KPIs) -->
             <div class="radar-pulse-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 22px;">
                 <!-- 1. غياب متتالي -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #ef4444 !important;">
+                <div class="radar-kpi-card" onclick="switchRadarSection('absence')" style="border-right: 5px solid #ef4444 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم الغياب والافتقاد">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⚠️ غياب 2+ أسبوع متتالي</div>
                     <div style="font-size: 1.8rem; font-weight: 900; color: #dc2626; margin: 4px 0;" id="radar_kpiAbsenceCount">0</div>
                     <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">يحتاجون افتقاداً ورعاية عاجلة</div>
                 </div>
 
                 <!-- 2. اعتذارات معلقة -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #f59e0b !important;">
+                <div class="radar-kpi-card" onclick="switchRadarSection('excuses')" style="border-right: 5px solid #f59e0b !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم الاعتذارات">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🔔 اعتذارات قيد المراجعة</div>
                     <div style="font-size: 1.8rem; font-weight: 900; color: #d97706; margin: 4px 0;" id="radar_kpiExcusesPendingCount">0</div>
                     <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">اعتذارات واتساب لحظية</div>
                 </div>
 
                 <!-- 3. نسبة حضور القداس -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #10b981 !important;">
+                <div class="radar-kpi-card" onclick="switchRadarSection('pulse')" style="border-right: 5px solid #10b981 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض القداس">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🍞 نسبة حضور القداس والتناول</div>
                     <div style="font-size: 1.8rem; font-weight: 900; color: #059669; margin: 4px 0;" id="radar_kpiLiturgyPct">0%</div>
                     <div style="font-size: 0.76rem; color: #065f46; font-weight: bold;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
                 </div>
 
                 <!-- 4. إجمالي المسجلين وقوة الحضور -->
-                <div class="radar-kpi-card" style="border-right: 5px solid #3b82f6 !important;">
+                <div class="radar-kpi-card" onclick="switchRadarSection('pulse')" style="border-right: 5px solid #3b82f6 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض الحضور">
                     <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">👥 حضور الاجتماع هذا الأسبوع</div>
                     <div style="font-size: 1.8rem; font-weight: 900; color: #1d4ed8; margin: 4px 0;" id="radar_kpiMeetingAttended">0</div>
                     <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;" id="radar_kpiTotalMembers">من إجمالي 0 مخدوم</div>
@@ -1556,8 +1553,6 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     <span id="radar_pulseTrendComment" style="font-weight: bold; color: #0f172a;">📊 جاري تحليل اتجاه الحضور...</span>
                 </div>
             </div>
-            </div>
-
             </div><!-- /radarSec_pulse -->
 
             <div id="radarSec_absence" class="radar-section-panel">
@@ -1593,7 +1588,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
 <div class="table-responsive-wrapper">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
                                 <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
@@ -1615,6 +1610,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             </div>
 
             
+            </div>
             </div><!-- /radarSec_absence -->
 
             <div id="radarSec_excuses" class="radar-section-panel" style="display:none;">
@@ -1649,7 +1645,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
                 <div class="table-responsive-wrapper">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #fefce8; border-bottom: 2px solid #fde047; color: #78350f;">
                                 <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
@@ -1690,7 +1686,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
                 <div class="table-responsive-wrapper">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
                                 <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
@@ -1742,7 +1738,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
                 <div class="table-responsive-wrapper">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #fefce8; border-bottom: 2px solid #fde047; color: #78350f;">
                                 <th style="padding: 10px 8px; text-align: right;">الاسم</th>
@@ -1817,7 +1813,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
                 <!-- جدول مفاتيح التراخيص المعتمدة -->
                 <div class="table-responsive-wrapper" style="margin-bottom: 12px;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
                             <tr style="background: #f0f9ff; border-bottom: 2px solid #bae6fd; color: #0369a1;">
                                 <th style="padding: 10px 8px; text-align: right;">اسم الترخيص / الخادم</th>
@@ -9519,12 +9515,44 @@ function switchRadarSection(secKey, btnElement) {
     }
 
     const panels = document.querySelectorAll('.radar-section-panel');
+    let target = null;
     if (secKey === 'all') {
         panels.forEach(p => p.style.display = 'block');
+        target = document.getElementById('radarSec_pulse') || panels[0];
+        if (typeof renderRadarDashboard === 'function') {
+            try { renderRadarDashboard(); } catch(e){}
+        }
     } else {
         panels.forEach(p => p.style.display = 'none');
-        const target = document.getElementById('radarSec_' + secKey);
-        if (target) target.style.display = 'block';
+        target = document.getElementById('radarSec_' + secKey);
+        if (target) {
+            target.style.display = 'block';
+            try {
+                if (secKey === 'absence') {
+                    const absBody = document.getElementById('radar_absenceBody');
+                    if (absBody) absBody.style.display = 'block';
+                    if (typeof filterRadarAbsence === 'function') filterRadarAbsence(window.currentRadarAbsenceFilter || 'all');
+                } else if (secKey === 'excuses') {
+                    if (typeof loadRadarExcuses === 'function') loadRadarExcuses();
+                } else if (secKey === 'pulse') {
+                    if (typeof renderRadarPulseChart === 'function') renderRadarDashboard();
+                } else if (secKey === 'confession') {
+                    if (typeof renderRadarConfessionSection === 'function') renderRadarConfessionSection();
+                } else if (secKey === 'birthdays') {
+                    if (typeof renderRadarBirthdays === 'function') renderRadarBirthdays('week');
+                } else if (secKey === 'security') {
+                    if (typeof loadSecurityShieldData === 'function') loadSecurityShieldData();
+                }
+            } catch(e) {
+                console.warn('[Radar] Error triggering section loader:', e);
+            }
+        }
+    }
+
+    if (target && typeof target.scrollIntoView === 'function') {
+        try {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch(e) {}
     }
 }
 window.switchRadarSection = switchRadarSection;
@@ -9537,6 +9565,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('zen-mode-active');
             const zenText = document.getElementById('zenText');
             if (zenText) zenText.textContent = 'الوضع الهادئ: مفعّل';
+        }
+    } catch(e) {}
+
+    // Auto-activate radar section from URL query if present
+    try {
+        const radarSec = new URLSearchParams(window.location.search).get('radar_sec');
+        if (radarSec && typeof switchRadarSection === 'function') {
+            setTimeout(() => switchRadarSection(radarSec), 300);
         }
     } catch(e) {}
 });

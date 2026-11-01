@@ -32,6 +32,18 @@
                 localStorage.setItem(STORAGE_KEYS.ROLE, 'admin');
                 localStorage.setItem('my_church_admin_pwd', 'sha256_mock_hash_for_qa');
                 localStorage.setItem('khedmety_last_manual_backup', String(Date.now()));
+                if (!localStorage.getItem('my_church_class')) {
+                    const today = new Date();
+                    const curMonth = String(today.getMonth() + 1).padStart(2, '0');
+                    const curDay = String(today.getDate()).padStart(2, '0');
+                    const bDate = '2004-' + curMonth + '-' + curDay;
+                    const mockMembers = [
+                        { id: 'std_1042', code: 1042, name: 'ميشيل عاطف حبيب', stage: 'الفرقة الأولى', gender: 'بنين', phone: '01222222222', dob: bDate, confessor: 'أبونا بولس', area: 'البساتين' },
+                        { id: 'std_1043', code: 1043, name: 'مارينا ماجد كمال', stage: 'الفرقة الأولى', gender: 'بنات', phone: '01233333333', dob: '2004-11-15', confessor: 'أبونا بطرس', area: 'دار السلام' },
+                        { id: 'std_1044', code: 1044, name: 'بيشوي هاني رمزي', stage: 'الفرقة الثانية', gender: 'بنين', phone: '01244444444', dob: '2003-08-20', confessor: 'أبونا بولس', area: 'المعادي' }
+                    ];
+                    localStorage.setItem('my_church_class', JSON.stringify(mockMembers));
+                }
             } else if (sim === 'student') {
                 const stdU = { id: 'std_1042', code: '1042', name: 'ميشيل عاطف حبيب', stage: 'الفرقة الأولى', level: 'الفرقة الأولى', role: 'student', phone: '01222222222', confessor: 'أبونا بولس' };
                 localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(stdU));

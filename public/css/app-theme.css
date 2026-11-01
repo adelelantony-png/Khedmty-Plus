@@ -1153,3 +1153,94 @@ html, body {
 @media print {
     .help-fab { display: none !important; }
 }
+
+
+/* -------------------------------------------------------------
+   جداول متكيفة بدون تمرير عرضي على شاشات الموبايل (Adaptive Cards)
+   ------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .table-responsive-wrapper {
+        overflow-x: hidden !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        margin-bottom: 1rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .adaptive-card-table thead,
+    .radar-adaptive-table thead {
+        display: none !important;
+    }
+
+    .adaptive-card-table,
+    .adaptive-card-table tbody,
+    .adaptive-card-table tr,
+    .adaptive-card-table td,
+    .radar-adaptive-table,
+    .radar-adaptive-table tbody,
+    .radar-adaptive-table tr,
+    .radar-adaptive-table td {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+    }
+
+    .adaptive-card-table tr,
+    .radar-adaptive-table tr {
+        background: #ffffff !important;
+        margin-bottom: 12px !important;
+        border: 1px solid var(--k-border-subtle, #e2e8f0) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(12, 36, 97, 0.05) !important;
+        padding: 10px 14px !important;
+    }
+
+    .adaptive-card-table td,
+    .radar-adaptive-table td {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        text-align: left !important;
+        padding: 7px 4px !important;
+        border: none !important;
+        border-bottom: 1px dashed #f1f5f9 !important;
+        font-size: 0.85rem !important;
+    }
+
+    .adaptive-card-table td:last-child,
+    .radar-adaptive-table td:last-child {
+        border-bottom: none !important;
+        padding-top: 10px !important;
+        justify-content: center !important;
+    }
+
+    .adaptive-card-table td::before,
+    .radar-adaptive-table td::before {
+        content: attr(data-label);
+        font-weight: 800;
+        color: var(--k-navy-dark, #0c2461);
+        text-align: right;
+        margin-left: 10px;
+        font-size: 0.82rem;
+    }
+
+    .adaptive-card-table td[colspan],
+    .radar-adaptive-table td[colspan] {
+        display: block !important;
+        text-align: center !important;
+        padding: 18px 12px !important;
+        border: none !important;
+        font-weight: bold !important;
+        border-radius: 10px !important;
+    }
+
+    .adaptive-card-table td[colspan]::before,
+    .radar-adaptive-table td[colspan]::before {
+        content: none !important;
+        display: none !important;
+    }
+}
