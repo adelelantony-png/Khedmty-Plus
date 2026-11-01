@@ -284,16 +284,20 @@
     `;
     document.head.appendChild(simStyle);
 
-    // حقن زر علامة الاستفهام العائم
-    const floatBtn = document.createElement('div');
-    floatBtn.className = 'sim-floating-btn';
-    floatBtn.id = 'simFloatingHelpBtn';
-    floatBtn.title = 'الدليل المحاكي التفاعلي لمنظومة خدمتي برو';
-    floatBtn.innerHTML = `
-        <span>❓</span>
-        <span class="sim-floating-badge">شرح</span>
-    `;
-    document.body.appendChild(floatBtn);
+    // حقن زر علامة الاستفهام العائم (فقط في الشاشات الرئيسية كالدخول، ومستثنى من صفحات مركز المساعدة والصفحات التي بها .help-fab لمنع التكرار)
+    const isHelpCenter = window.location.pathname.includes('servant_help.html') || window.location.pathname.includes('student_help.html');
+    let floatBtn = document.getElementById('simFloatingHelpBtn');
+    if (!isHelpCenter && !document.querySelector('.help-fab') && !floatBtn) {
+        floatBtn = document.createElement('div');
+        floatBtn.className = 'sim-floating-btn';
+        floatBtn.id = 'simFloatingHelpBtn';
+        floatBtn.title = 'الدليل المحاكي التفاعلي لمنظومة خدمتي برو';
+        floatBtn.innerHTML = `
+            <span>❓</span>
+            <span class="sim-floating-badge">شرح</span>
+        `;
+        document.body.appendChild(floatBtn);
+    }
 
     // حقن نافذة المودال التفاعلية
     const modalOverlay = document.createElement('div');
@@ -518,8 +522,8 @@
         setTimeout(openModal, 100);
     }
 
-    openBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
+    if (openBtn) openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal();
     });

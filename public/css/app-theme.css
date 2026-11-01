@@ -1113,3 +1113,43 @@ html, body {
         margin-bottom: 36px !important;
     }
 }
+
+
+/* زر المساعدة العائم الموحد للمنظومة (Unified Help FAB) */
+.help-fab {
+    position: fixed;
+    bottom: 22px;
+    left: 22px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0c2461 0%, #1e3799 50%, #0984e3 100%);
+    color: #ffffff !important;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    font-weight: 900;
+    text-decoration: none !important;
+    box-shadow: 0 8px 24px rgba(12, 36, 97, 0.4);
+    border: 2px solid #c59b27;
+    z-index: 9990;
+    transition: all 0.25s ease;
+    user-select: none;
+}
+.help-fab:hover {
+    transform: scale(1.1) rotate(6deg);
+    box-shadow: 0 12px 28px rgba(12, 36, 97, 0.55);
+    color: #ffd700 !important;
+}
+@media (max-width: 768px) {
+    .help-fab {
+        bottom: 74px;
+        left: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+}
+@media print {
+    .help-fab { display: none !important; }
+}

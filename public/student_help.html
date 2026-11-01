@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز مساعدة الدارس والمخدوم | دليل خدمتي برو</title>
+    <meta name="theme-color" content="#0c2461">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/app-theme.css">
+    <style>
+        :root {
+            --primary: #0c2461;
+            --primary-dark: #091a44;
+            --accent: #1e3799;
+            --gold: #c59b27;
+            --gold-light: #e0b438;
+            --ok: #10b981;
+            --warn: #f59e0b;
+            --bad: #e11d48;
+            --bg: #f8fafc;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            color: #1e293b;
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+        .wrap { max-width: 880px; margin: 0 auto; padding: 16px 16px 80px; }
+        a { color: var(--accent); }
+
+        .topbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .btn {
+            border: 2px solid #cbd5e1;
+            background: #fff;
+            color: #334155;
+            border-radius: 12px;
+            padding: 9px 16px;
+            font: inherit;
+            font-weight: 700;
+            font-size: .88rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .btn:hover { border-color: var(--accent); color: var(--accent); }
+        .btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: 0;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(12, 36, 97, 0.25);
+        }
+        .btn.primary:hover { color: #fff; filter: brightness(1.1); transform: translateY(-1px); }
+
+        .hero {
+            background: linear-gradient(135deg, #091a44 0%, #0c2461 45%, #1e3799 100%);
+            color: #fff;
+            border-radius: 24px;
+            padding: 28px 22px;
+            text-align: center;
+            box-shadow: 0 16px 36px rgba(12, 36, 97, 0.3);
+            border-bottom: 3.5px solid var(--gold);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(197, 155, 39, 0.2);
+            filter: blur(50px);
+            bottom: -100px;
+            right: -60px;
+            pointer-events: none;
+        }
+        .hero h1 { margin: 0 0 6px; font-size: 1.65rem; font-weight: 900; position: relative; }
+        .hero h1 span.cross { color: #d4af37; margin-left: 6px; }
+        .hero p { margin: 0 0 18px; opacity: .9; position: relative; font-size: .96rem; line-height: 1.6; }
+        .search { position: relative; max-width: 540px; margin: auto; }
+        .search input {
+            width: 100%;
+            border: 0;
+            border-radius: 16px;
+            padding: 14px 48px 14px 18px;
+            font: inherit;
+            font-size: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+            outline: 0;
+            background: #ffffff;
+        }
+        .search span {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: #64748b;
+        }
+
+        .sim-promo {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            color: #fff;
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin: 16px 0;
+            border: 2px solid var(--gold);
+            box-shadow: 0 8px 24px rgba(12, 36, 97, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .sim-promo .title { font-weight: 800; font-size: 1.05rem; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .sim-promo .desc { font-size: 0.86rem; color: #cbd5e1; margin-top: 3px; }
+        .sim-promo-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #0c2461;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-weight: 900;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 14px rgba(197, 155, 39, 0.4);
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        .sim-promo-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+        .student-badge-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 14px 18px;
+            margin: 14px 0;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            border-right: 5px solid var(--gold);
+        }
+        .student-badge-card .ic { font-size: 2rem; }
+        .student-badge-card small { color: #64748b; display: block; margin-top: 2px; }
+
+        .grp { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 16px 0; }
+        .chip {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 10px 6px;
+            text-align: center;
+            font-weight: 800;
+            font-size: .82rem;
+            cursor: pointer;
+            user-select: none;
+            transition: .2s;
+            color: #33415c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .chip .ic { font-size: 1.4rem; display: block; line-height: 1.3; margin-bottom: 2px; }
+        .chip:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .chip.active {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: var(--primary);
+            color: #fff;
+            box-shadow: 0 8px 18px rgba(12, 36, 97, .3);
+            transform: translateY(-2px);
+        }
+
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 10px 0 20px; }
+        .step { background: #fff; border-radius: 18px; padding: 18px; box-shadow: 0 4px 14px rgba(0, 0, 0, .05); position: relative; border: 1px solid #e8edf6; }
+        .step b.n {
+            position: absolute;
+            top: -12px;
+            right: 14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: #0c2461;
+            display: grid;
+            place-items: center;
+            font-size: .92rem;
+            font-weight: 900;
+            box-shadow: 0 4px 10px rgba(197, 155, 39, 0.35);
+        }
+        .step h3 { margin: 8px 0 6px; font-size: 1.02rem; color: var(--primary); }
+        .step p { margin: 0; font-size: .88rem; color: #475569; line-height: 1.6; }
+
+        h2.sec { font-size: 1.18rem; color: var(--primary); margin: 24px 0 12px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        details {
+            background: #fff;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .04);
+            border: 1.5px solid #e8edf6;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        details[open] { border-color: #b7c9f5; box-shadow: 0 8px 24px rgba(12, 36, 97, .12); }
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary .fi {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #eef4ff;
+            display: grid;
+            place-items: center;
+            font-size: 1.35rem;
+            flex: none;
+        }
+        summary .t { flex: 1; }
+        summary .t small { display: block; font-weight: 500; color: #64748b; font-size: .82rem; margin-top: 2px; }
+        summary::after { content: '▾'; color: #94a3b8; font-size: 1.2rem; transition: .2s; }
+        details[open] summary::after { transform: rotate(180deg); color: var(--accent); }
+        .body { padding: 0 18px 18px; border-top: 1px solid #f1f5f9; margin-top: 4px; }
+        .body p { margin: 12px 0 10px; color: #334155; font-size: 0.93rem; }
+        .body h4 { margin: 14px 0 6px; font-size: .92rem; color: var(--primary); font-weight: 800; }
+        .body ol, .body ul { margin: 0; padding-right: 22px; color: #334155; font-size: .92rem; }
+        .body li { margin-bottom: 4px; }
+        .tip {
+            background: #fffbeb;
+            border-right: 4px solid var(--gold);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: .88rem;
+            margin-top: 12px;
+            color: #92400e;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 2px 10px;
+            font-size: .74rem;
+            font-weight: 800;
+            margin-right: 6px;
+        }
+        .b-std { background: #dcfce7; color: #166534; }
+        .b-att { background: #dbeafe; color: #1e40af; }
+        .b-new { background: #ede9fe; color: #5b21b6; }
+        .gl { font-size: .75rem; color: #94a3b8; font-weight: 700; }
+
+        .empty { text-align: center; color: #64748b; padding: 40px 0; font-weight: bold; }
+        .foot { text-align: center; color: #94a3b8; font-size: .84rem; margin-top: 36px; }
+
+        @media print {
+            body { background: #fff; }
+            .topbar, .search, .grp, .btn, .sim-promo, .student-badge-card { display: none !important; }
+            details { box-shadow: none; break-inside: avoid; border: 1px solid #ccc; }
+            .hero { color: #000; background: #fff; box-shadow: none; border: 2px solid #0c2461; }
+            .hero::after { display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+    <div class="topbar">
+        <a href="student.html" class="btn primary">← العودة للبوابة الشخصية</a>
+        <button type="button" class="btn" onclick="window.print()">🖨️ طباعة الدليل</button>
+    </div>
+
+    <div class="hero">
+        <h1><span class="cross">☩</span> مركز مساعدة الدارس والمخدوم</h1>
+        <p>دليلك الإرشادي المتكامل لمتابعة حضورك، كارنيهك الذكي، درجاتك، وتحدي قراءاتك الروحية</p>
+        <div class="search">
+            <input id="q" type="search" placeholder="ابحث في الدليل: الكارنيه، الحضور، الامتحانات، الكتاب المقدس، التخرج..." autocomplete="off">
+            <span>🔍</span>
+        </div>
+    </div>
+
+    <!-- المحاكي التفاعلي المباشر -->
+    <div class="sim-promo">
+        <div>
+            <div class="title">
+                <span style="color:#d4af37; font-size:1.3rem;">🎬</span> المحاكي التفاعلي المباشر (Simulated Walkthrough)
+            </div>
+            <div class="desc">
+                شاهد وجرّب خطوات استخدام البوابة، الكارنيه الذكي، وإنجاز الإصحاحات بدون إنترنت بمحاكاة بصرية واقعية
+            </div>
+        </div>
+        <button type="button" class="sim-promo-btn" onclick="if(window.openSimGuideModal){window.openSimGuideModal();}else{alert('جارٍ فتح المحاكي...');}">
+            <span>تشغيل المحاكي التفاعلي ⚡</span>
+        </button>
+    </div>
+
+    <div class="student-badge-card" id="studentCard">
+        <div class="ic">🎓</div>
+        <div>
+            <b id="studentName">أهلاً بك يا دارس المسيح</b>
+            <small id="studentSub">البوابة مخصصة لمتابعة دراستك ونموك الروحي في أسرة إعداد الخدام والخدمات.</small>
+        </div>
+    </div>
+
+    <div class="grp" id="grp"></div>
+    <div id="content"></div>
+    <div class="foot">☩ كنيسة القديس بولس الرسول - البساتين | أسرة إعداد الخدام — دليل المخدوم والدارس</div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // استرجاع هوية المخدوم المسجل حالياً
+    function getActiveUser() {
+        try {
+            return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user'));
+        } catch (e) {
+            return null;
+        }
+    }
+    const user = getActiveUser();
+    if (user && user.name) {
+        document.getElementById('studentName').textContent = user.name + (user.code ? ` (كود ${user.code})` : '');
+        document.getElementById('studentSub').textContent = `الفرقة: ${user.stage || 'إعداد خدام'} • هاتف: ${user.phone || 'مسجل'} • أب الاعتراف: ${user.confessor || 'متابع'}`;
+    }
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // أقسام الدليل
+    const GROUPS = [
+        { id: 'start',      ic: '🚀', n: 'ابدأ هنا' },
+        { id: 'barcode',    ic: '🪪', n: 'الكارنيه الذكي' },
+        { id: 'attendance', ic: '📊', n: 'الحضور والتخرج' },
+        { id: 'grades',     ic: '🎓', n: 'المواد والدرجات' },
+        { id: 'spiritual',  ic: '📖', n: 'الكتاب والروحيات' },
+        { id: 'offline',    ic: '⚡', n: 'العمل أوفلاين' },
+        { id: 'faq',        ic: '❓', n: 'أسئلة شائعة' }
+    ];
+
+    // مقالات الدليل والشروحات التفصيلية
+    const F = [
+        // 🚀 ابدأ هنا
+        {
+            g: 'start', ic: '🔑', t: 'كيفية تسجيل الدخول لأول مرة',
+            s: 'خطوات فتح بوابتك الشخصية بالكود ورقم الهاتف',
+            link: 'student.html',
+            d: 'تتيح لك المنظومة الدخول السريع والآمن دون الحاجة لكلمات سر معقدة، فقط باستخدام كود الامتحان ورقم هاتفك المسجل بالكشف.',
+            st: [
+                'افتح رابط المنظومة الرئيسي من المتصفح.',
+                'في خانة «اسم المستخدم أو كود الامتحان»، اكتب كودك المعتمد (مثال: 1042).',
+                'في خانة «كلمة المرور»، أدخل رقم هاتفك المسجل لدى أمانة الخدمة.',
+                'اضغط «عرض النتيجة والملف»، وسيفتح حسابك وتظهر بطاقتك الشخصية فوراً.'
+            ],
+            tp: [
+                'احفظ كودك جيداً فهو رقمك الرسمي في كافة كشوف الامتحانات والشهادات.',
+                'إن واجهتك أي صعوبة في الدخول، تواصل مع خادم فصلك لمراجعة رقم هاتفك في الكشف.'
+            ]
+        },
+        {
+            g: 'start', ic: '📲', t: 'تثبيت التطبيق على الشاشة الرئيسية (PWA)',
+            s: 'تشغيل خدمتي برو كتطبيق مستقل على هاتفك بلا متجر',
+            link: 'student.html',
+            d: 'الموقع مبني بتقنية الـ PWA، مما يعني أنه يتحول إلى تطبيق كامل على هاتف الأندرويد والآيفون مع أيقونة رسمية ويعمل دون الحاجة لتحميل من Google Play أو App Store.',
+            st: [
+                'على هاتف آيفون: افتح الرابط في سفاري (Safari)، اضغط زر المشاركة (Share) ثم اختر «إضافة إلى الشاشة الرئيسية (Add to Home Screen)».',
+                'على هاتف أندرويد: افتح الرابط في كروم (Chrome)، اضغط على الثلاث نقاط بالأعلى ثم اختر «تثبيت التطبيق (Install app)» أو «إضافة للشاشة الرئيسية».',
+                'ستظهر أيقونة التطبيق الرسمية فوراً على شاشتك لتفتحه بلمسة واحدة.'
+            ],
+            tp: ['بمجرد تثبيت التطبيق، يعمل معك في القاعات حتى في وضع الطيران وبدون باقة إنترنت.']
+        },
+
+        // 🪪 الكارنيه الذكي
+        {
+            g: 'barcode', ic: '🪪', t: 'عرض الكارنيه واستخدامه في الكنيسة',
+            s: 'مسح الباركود بكاميرا الخادم في 300 ملي ثانية',
+            link: 'barcode.html',
+            d: 'لكل دارس كارنيه رقمي ذكي يحمل كود QR فريد وصورة وشعار الكنيسة وبيانات الفرقة لتسجيل الحضور السريع يوم الجمعة.',
+            st: [
+                'من بوابتك الرئيسية اضغط زر «الكارنيه الذكي (QR Code)».',
+                'أظهر شاشة هاتفك لخادم الاستقبال عند باب القاعة ليقوم بمسحه بكاميرا الهاتف.',
+                'خلال أقل من ثانية ستسمع نغمة التأكيد وظهور إشعار «حاضر ✔️» مع احتساب حضورك فوراً.'
+            ],
+            tp: [
+                'يمكنك الضغط على زر «حفظ الكارنيه كصورة» لتحميله في استوديو هاتفك وإظهاره حتى لو كان هاتفك غير متصل بالإنترنت تماماً.'
+            ]
+        },
+        {
+            g: 'barcode', ic: '💾', t: 'حفظ الكارنيه كصورة أوفلاين للطوارئ',
+            s: 'أفضل طريقة لضمان حضورك بدون أي استهلاك للبطارية أو النت',
+            link: 'barcode.html',
+            d: 'تتيح لك صفحة الكارنيه تحميل بطاقتك بصيغة صورة عالية الدقة تحتوي على الـ QR وكودك واسمك.',
+            st: [
+                'افتح صفحة الكارنيه.',
+                'اضغط زر «حفظ الكارنيه كصورة» أسفل الكارت.',
+                'ستُحفظ الصورة في مجلد التنزيلات أو الصور بهاتفك.',
+                'يمكنك تعيينها كخلفية شاشة قفل أو إظهارها من الاستوديو يوم الجمعة لمسحها فوراً.'
+            ],
+            tp: ['حتى لو نفدت باقة الإنترنت بالكامل، الكارنيه المحفوظ يعمل مع ماسح الخدام بنسبة 100%.']
+        },
+
+        // 📊 الحضور والتخرج
+        {
+            g: 'attendance', ic: '📈', t: 'نسبة الحضور الرسمية وشرط التخرج',
+            s: 'تحقيق 75% من اجتماعات الجمعة للحصول على الشهادة',
+            link: 'student.html?tab=attendance',
+            d: 'تعتمد لائحة أسرة إعداد الخدام على الالتزام بحضور لقاء الجمعة الأسبوعي كمعيار أساسي للتخرج والانتقال للفرقة التالية.',
+            st: [
+                'تُحسب نسبة الحضور من إجمالي لقاءات الجمعة الرسمية فقط.',
+                'الحد الأدنى المطلوب للتخرج هو تحقيق 75% حضور فأكثر.',
+                'يمكنك مراقبة نسبتك الحالية من مؤشر التخرج الدائري في صفحتك الشخصية.',
+                'اللون الأخضر يعني أنك مؤهل للتخرج، واللون البرتقالي أو الأحمر ينبهك لضرورة الالتزام.'
+            ],
+            tp: [
+                'أي غياب بعذر مقبول يجب إبلاغ خادم فصلك به مسبقاً ليتم توثيقه في الملاحظات.'
+            ]
+        },
+        {
+            g: 'attendance', ic: '⭐', t: 'فعاليات البونص والأنشطة الإضافية',
+            s: 'نقاط تميز للأنشطة الروحية والقداسات والمعسكرات',
+            link: 'student.html?tab=attendance',
+            d: 'بخلاف اجتماع الجمعة الرسمي، تنظم الخدمة فعاليات إضافية (معسكرات، قداسات، دراسات كتاب، عشيات) تمنحك نقاط بونص ⭐.',
+            st: [
+                'عند حضورك أي فعالية إضافية، يتم تسجيل حضورك كالمعتاد بالكارنيه.',
+                'تُضاف نقاط الفعالية إلى رصيد «البونص الإضافي» في ملفك الشخصي.',
+                'تساعدك نقاط البونص في تعويض أي تأخير وترفع من ترتيبك في لوحة أوائل الدفعة.'
+            ],
+            tp: ['نقاط البونص ترفع التقييم الشامل للأداء الروحي وتؤهلك لأوسمة التميز الكنسي.']
+        },
+
+        // 🎓 المواد والدرجات
+        {
+            g: 'grades', ic: '📝', t: 'متابعة الامتحانات ونتائج المواد',
+            s: 'رصد فوري للامتحانات الأربعة ودرجات أعمال السنة',
+            link: 'student.html?tab=grades',
+            d: 'تشتمل الدراسة على أربعة امتحانات دورية تقيس استيعابك للمناهج اللاهوتية والكتابية والطقسية.',
+            st: [
+                'من بوابتك، اضغط تبويب «درجاتي».',
+                'ستجد جدولاً بالمواد والدرجات المحصلة والدرجة العظمى لكل امتحان.',
+                'تظهر النتيجة فور اعتمادها ورصدها من أمانة الكنترول.',
+                'التقديرات المعتمدة: ممتاز (≥85%)، جيد جداً (≥75%)، جيد (≥65%)، مقبول (≥50%).'
+            ],
+            tp: ['اضغط على كارت المادة للاطلاع على تفاصيل الأسئلة والتوجيهات التشجيعية من المحاضر.']
+        },
+        {
+            g: 'grades', ic: '📜', t: 'استلام شهادة التخرج الرسمية المعتمدة',
+            s: 'شهادة إعداد خدام موثقة بالأختام والتوقيعات الكنسية الثلاثية',
+            link: 'student.html?tab=grades',
+            d: 'يحصل كل دارس يحقق نسبة الحضور المطلوبة (≥75%) والنجاح في الامتحانات على شهادة تخرج ورقية ورقمية رسمية.',
+            st: [
+                'عند نهاية السنة الدراسية، يتم فتح استوديو الشهادات.',
+                'تحمل شهادتك الكود الرقمي وختم أمانة الخدمة وتوقيع الآباء الكهنة المشرفين.',
+                'يمكنك تنزيل النسخة الرقمية عالية الجودة كملف PDF للطباعة.'
+            ],
+            tp: ['تُسلَّم الشهادات الورقية في حفل التخرج السنوي بحضور الآباء الكهنة.']
+        },
+
+        // 📖 الكتاب والروحيات
+        {
+            g: 'spiritual', ic: '📖', t: 'تحدي قراءة الكتاب المقدس اليومي',
+            s: 'قراءة الإصحاحات المقررة وحصد نقاط البونص',
+            link: 'bible.html',
+            d: 'يحتوي النظام على خطة سنوية منظمة لقراءة أسفار الكتاب المقدس أصحاحاً بأصحاح مع إمكانية متابعة إنجازك اليومي.',
+            st: [
+                'افتح «نوتتي الروحية» أو «قارئ الكتاب المقدس» من بوابتك.',
+                'ستظهر لك أصحاحات اليوم المحددة في خطة القراءة.',
+                'اقرأ الأصحاح مباشرة من القارئ الإلكتروني المريح.',
+                'اضغط زر رقم الإصحاح بعد قراءته ليتحول إلى اللون الأخضر ويُسجل في حسابك.'
+            ],
+            tp: [
+                'نظام الحصاد: تحصل على نقطتين (2 pts) عن كل إصحاح تقرؤه، وتحصل على بونص إضافي (+3 pts) عند إتمام كامل أصحاحات اليوم بنسبة 100%!'
+            ]
+        },
+        {
+            g: 'spiritual', ic: '⛪', t: 'القطمارس والسنكسار اليومي',
+            s: 'قراءات القداس الإلهي وسير وتذكارات القديسين',
+            link: 'katamaros.html',
+            d: 'تطبيق خدمتي برو يضع بين يديك قراءات الكنيسة القبطية الأرثوذكسية اليومية بحسب التقويم القبطي.',
+            st: [
+                'افتح «القطمارس اليومي» للاطلاع على قراءات العشية، باكر، والقداس (البولس، الكاثوليكون، الإبركسيس، المزمور، والإنجيل).',
+                'افتح «السنكسار» للتعرف على أعياد وتذكارات القديسين والشهداء المحتفى بهم في هذا اليوم.'
+            ],
+            tp: ['قراءات اليوم تمنحك زاداً روحياً يومياً يغذي حياتك قبل بدء يومك أو نزولك للعمل والدراسة.']
+        },
+
+        // ⚡ العمل أوفلاين
+        {
+            g: 'offline', ic: '📡', t: 'كيف يعمل التطبيق بدون باقة إنترنت؟',
+            s: 'تقنية التخزين المحلي والمزامنة التلقائية الصامتة',
+            link: 'student.html',
+            d: 'تم تصميم التطبيق ليعمل في أشد القاعات عزلاً بدون تغطية شبكية من خلال محرك التخزين المحلي الذكي (Service Worker + Cache Storage).',
+            st: [
+                'بمجرد فتح الموقع لمرة واحدة أثناء اتصالك بالإنترنت، يقوم المتصفح بحفظ كافة الملفات والكارنيه والقراءات تلقائياً.',
+                'يمكنك فتح التطبيق في أي وقت حتى بدون باقة أو شبكة واي فاي.',
+                'الكارنيه الذكي يظل يعمل ويظهر كود الـ QR بكل وضوح.',
+                'أي تسجيلات أو قراءات تقوم بها أوفلاين تُحفظ محلياً وتُرفع سحابياً تلقائياً عند عودة الإنترنت.'
+            ],
+            tp: ['لا تقم بمسح بيانات المتصفح (Clear Cache) لضمان استمرار عمل التطبيق أوفلاين بكفاءة.']
+        }
+    ];
+
+    // أسئلة شائعة للمخدومين
+    const FAQ = [
+        ['نسيت كود الامتحان الخاص بي، كيف أحصل عليه؟', 'يمكنك التواصل مع خادم فصلك أو أمين أسرة إعداد الخدام وسيخبرك بكودك المسجل فوراً، كما ستجده مسجلاً في رسائل الواتساب الدورية التي تصلك من الخدمة.'],
+        ['هل يحتاج التطبيق إلى مساحة تخزين كبيرة على الهاتف؟', 'لا على الإطلاق! حجم تطبيق خدمتي برو خفيف جداً (أقل من 2 ميجابايت) ولا يستهلك ذاكرة الهاتف أو البطارية.'],
+        ['ماذا أفعل إذا تغيبت عن اجتماع الجمعة لظرف طارئ؟', 'أبلغ خادم مجموعتك بالاعتذار المسبق لتوثيق العذر في الملاحظات، واحرص على تعويض نسبة الحضور بالالتزام في اللقاءات التالية والمشاركة في فعاليات البونص الإضافية.'],
+        ['كيف أعرف موقفي الحالي من التخرج؟', 'تجد في أعلى بوابتك الشخصية مؤشر «جاهزية التخرج» الدائري، إذا كان المؤشر أخضر ونسبتك 75% فأكثر فأنت مؤهل للتخرج واستلام الشهادة الرسمية بنجاح.'],
+        ['هل درجاتي وبياناتي الشخصية محمية ومحفوظة بسرية؟', 'نعم تماماً، بيانات كل دارس مشفرة ومحمية ولا تظهر إلا لصاحب الحساب بواسطة كوده ورقم هاتفه المسجل ولأمانة الخدمة المعتمدة فقط.'],
+        ['كيف أتواصل مع خادم فصلي أو أطلب جلسة اعتراف؟', 'يمكنك التحدث مع خادمك مباشرة في نهاية اجتماع الجمعة، أو مراسلته عبر رقم الواتساب الموضح في كارت الفصل، كما يمكنك طلب ترتيب ميعاد مع أب اعترافك بكل خصوصية.']
+    ];
+
+    function featureHtml(f, showGroup) {
+        const url = f.link || 'student.html';
+        const gname = GROUPS.find(g => g.id === f.g)?.n || '';
+        return `<details data-search="${esc((f.t + ' ' + f.s + ' ' + f.d + ' ' + f.st.join(' ') + ' ' + f.tp.join(' ')).toLowerCase())}">
+            <summary>
+                <span class="fi">${f.ic}</span>
+                <span class="t">
+                    ${esc(f.t)}
+                    <span class="badge b-std">متاح للدارس</span>
+                    <small>${esc(f.s)}${showGroup ? ' <span class="gl">• ' + gname + '</span>' : ''}</small>
+                </span>
+            </summary>
+            <div class="body">
+                <p>${esc(f.d)}</p>
+                ${f.st && f.st.length ? `<h4>الخطوات العملية:</h4><ol>${f.st.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+                ${f.tp && f.tp.length ? f.tp.map(x => `<div class="tip">💡 ${esc(x)}</div>`).join('') : ''}
+                <div style="margin-top:14px">
+                    <a class="btn primary" href="${url}">فتح الخاصية الآن ←</a>
+                </div>
+            </div>
+        </details>`;
+    }
+
+    const faqHtml = x => `<details data-search="${esc((x[0] + ' ' + x[1]).toLowerCase())}"><summary><span class="fi">❓</span><span class="t">${esc(x[0])}</span></summary><div class="body"><p>${esc(x[1])}</p></div></details>`;
+
+    function startHtml() {
+        const steps = [
+            ['سجّل دخولك', 'بكود الامتحان ورقم هاتفك المسجل بالكشف لفتح البوابة الشخصية.'],
+            ['ثبّت التطبيق', 'من خيارات المتصفح اختر «إضافة للشاشة الرئيسية» ليعمل معك أوفلاين.'],
+            ['احفظ كارنيهك', 'افتح الكارنيه واحفظه كصورة في ألبوم هاتفك لاستخدامه في الحضور.'],
+            ['تابع نسبة حضورك', 'احرص على تحقيق 75% حضور في اجتماعات الجمعة لتتخرج بامتياز.'],
+            ['أنجز قراءتك اليومية', 'اقرأ إصحاحات اليوم وسجل إنجازك لتحصد نقاط البونص ⭐.']
+        ];
+        return `<h2 class="sec">🚀 خمس خطوات لبداية رحلتك في خدمتي برو</h2>
+            <div class="steps">${steps.map((s, i) => `<div class="step"><b class="n">${i + 1}</b><h3>${s[0]}</h3><p>${s[1]}</p></div>`).join('')}</div>
+            <h2 class="sec">🌟 أبرز ميزات بوابتك الشخصية</h2>
+            <div class="steps">
+                <div class="step"><h3>🪪 الكارنيه الرقمي</h3><p>مسح فوري بالكاميرا وتسجيل حضورك في جزء من الثانية.</p></div>
+                <div class="step"><h3>📊 كشف الدرجات</h3><p>متابعة تقييمك في الامتحانات الأربعة وملاحظات الخدام.</p></div>
+                <div class="step"><h3>📖 الكتاب المقدس</h3><p>قراءة الأسفار وحصاد نقاط البونص التنافسية.</p></div>
+                <div class="step"><h3>⚡ العمل أوفلاين</h3><p>التطبيق يعمل بدون باقة نت في أي مكان وقاعة.</p></div>
+            </div>`;
+    }
+
+    let current = 'start';
+    const $ = id => document.getElementById(id);
+
+    function render() {
+        const q = $('q').value.trim().toLowerCase();
+        document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', !q && c.dataset.g === current));
+        let html = '';
+        if (q) {
+            const hits = F.filter(f => (f.t + ' ' + f.s + ' ' + f.d + ' ' + (f.st||[]).join(' ') + ' ' + (f.tp||[]).join(' ')).toLowerCase().includes(q));
+            const fq = FAQ.filter(x => (x[0] + ' ' + x[1]).toLowerCase().includes(q));
+            html = hits.length || fq.length
+                ? `<h2 class="sec">نتائج البحث (${hits.length + fq.length})</h2>` + hits.map(f => featureHtml(f, true)).join('') + fq.map(faqHtml).join('')
+                : '<div class="empty">لا توجد نتائج مطابقة لبحثك. جرّب كتابة «كارنيه» أو «حضور» أو «درجات».</div>';
+        } else if (current === 'start') {
+            html = startHtml();
+        } else if (current === 'faq') {
+            html = `<h2 class="sec">❓ أسئلة شائعة وإجاباتها للمخدومين</h2>` + FAQ.map(faqHtml).join('');
+        } else {
+            const grpObj = GROUPS.find(g => g.id === current);
+            html = `<h2 class="sec">${grpObj ? grpObj.ic + ' ' + grpObj.n : ''}</h2>` + F.filter(f => f.g === current).map(f => featureHtml(f, false)).join('');
+        }
+        $('content').innerHTML = html;
+        if (q) document.querySelectorAll('#content details').forEach(d => d.open = true);
+    }
+
+    $('grp').innerHTML = GROUPS.map(g => `<div class="chip" data-g="${g.id}" role="button" tabindex="0"><span class="ic">${g.ic}</span>${g.n}</div>`).join('');
+    $('grp').addEventListener('click', e => {
+        const c = e.target.closest('.chip');
+        if (c) {
+            current = c.dataset.g;
+            $('q').value = '';
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+
+    $('q').addEventListener('input', render);
+    window.addEventListener('beforeprint', () => document.querySelectorAll('#content details').forEach(d => d.open = true));
+
+    // دعم التنقل المباشر عبر رابط: ?g=barcode
+    const urlGroup = new URLSearchParams(location.search).get('g');
+    if (urlGroup && GROUPS.some(x => x.id === urlGroup)) current = urlGroup;
+    render();
+})();
+</script>
+<script src="js/pwa-helper.js"></script>
+<script src="js/interactive-simulation-guide.js"></script>
+</body>
+</html>
