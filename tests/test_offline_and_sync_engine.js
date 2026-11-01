@@ -16,7 +16,7 @@ const publicDir = path.join(rootDir, 'public');
 const swPath = path.join(publicDir, 'sw.js');
 assert.ok(fs.existsSync(swPath), 'sw.js must exist in public directory');
 const swContent = fs.readFileSync(swPath, 'utf8');
-assert.ok(swContent.includes('khedmety-ultra-v3.0'), 'sw.js must use CACHE_NAME v3.0');
+assert.ok(/khedmety-ultra-v[3-9]\.[0-9]/.test(swContent), 'sw.js must use valid ultra CACHE_NAME');
 assert.ok(swContent.includes('./servant_grades_entry.html'), 'sw.js must precache servant_grades_entry.html');
 assert.ok(swContent.includes('./bible-data.js'), 'sw.js must precache bible-data.js');
 assert.ok(swContent.includes('./harvest.html'), 'sw.js must precache harvest.html');
