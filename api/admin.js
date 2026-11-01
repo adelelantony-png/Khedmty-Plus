@@ -41,7 +41,43 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, message: 'تمت إضافة المادة بنجاح!' });
         }
 
-        // 2. استيراد المخدومين من إكسيل (Batch Write)
+        // 2. حذف مخدوم نهائياً من السحابة والمنظومة
+        if (action === 'delete_member' || action === 'delete_student') {
+            const { code, id, phone } = payload || {};
+            const cleanCode = String(code || '').trim();
+            const cleanId = String(id || '').trim();
+            const cleanPhone = String(phone || '').trim();
+
+            const batch = db.batch();
+            let touched = false;
+
+            if (cleanId) {
+                batch.delete(db.collection('members').doc(cleanId));
+                touched = true;
+            }
+            if (cleanCode) {
+                batch.delete(db.collection('students').doc(cleanCode));
+                batch.delete(db.collection('members').doc(cleanCode));
+                touched = true;
+            }
+            if (touched) {
+                await batch.commit();
+            }
+
+            // فحص إضافي بالهاتف إن لم يتوفر كود أو ID
+            if (cleanPhone && !cleanCode) {
+                const snap = await db.collection('members').where('phone', '==', cleanPhone).get();
+                if (!snap.empty) {
+                    const phoneBatch = db.batch();
+                    snap.forEach(d => phoneBatch.delete(d.ref));
+                    await phoneBatch.commit();
+                }
+            }
+
+            return res.status(200).json({ success: true, message: 'تم حذف المخدوم من السحابة بنجاح!' });
+        }
+
+        // 3. استيراد المخدومين من إكسيل (Batch Write)
         if (action === 'import_students') {
             if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
                 return res.status(400).json({ success: false, message: 'قائمة الطلاب فارغة أو غير صحيحة' });
