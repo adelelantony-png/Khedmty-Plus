@@ -363,19 +363,31 @@ filtered.forEach(m => {
         : `<button class="btn-mini btn-success can-attend" onclick="registerMemberAttendanceFromTable('${m.id}')">تسجيل حضور ✔️</button>`;
 
     let tr = document.createElement('tr');
+    tr.id = 'memRow_' + m.id;
+    tr.className = 'member-card-item';
     tr.innerHTML = `
-<td data-label="كود الامتحان"><strong style="color:var(--primary); font-size:14px;">${escapeHtml(m.code) || '-'}</strong></td>
-<td data-label="الاسم"><strong>${escapeHtml(m.name)}</strong></td>
-<td data-label="المرحلة">${escapeHtml(normalizeStageText(m.stage))}</td>
-<td data-label="التليفون">${escapeHtml(m.phone)}</td>
-<td data-label="حضور الجمعة الرسمي">
+<td data-label="كود الامتحان" class="col-code"><strong style="color:var(--primary); font-size:14px;">${escapeHtml(m.code) || '-'}</strong></td>
+<td data-label="الاسم" class="col-name">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:4px;">
+        <strong style="color:#0c2461; font-size:14.5px;">${escapeHtml(m.name)}</strong>
+        <span class="mobile-only-badge badge" style="background:#f1f5f9; color:#475569; font-size:11px;">${escapeHtml(normalizeStageText(m.stage))}</span>
+    </div>
+</td>
+<td data-label="المرحلة" class="col-stage col-hide-compact">${escapeHtml(normalizeStageText(m.stage))}</td>
+<td data-label="التليفون" class="col-secondary">${escapeHtml(m.phone)}</td>
+<td data-label="حضور الجمعة الرسمي" class="col-secondary">
 <div style="font-weight:bold; font-size:11px;">${grad.percent}% (${grad.attended}/${grad.total})</div>
 <div class="progress-bar-container"><div class="progress-bar" style="width:${grad.percent}%; background:${grad.qualified ? 'var(--success)' : 'var(--warning)'}"></div></div>
 </td>
-<td data-label="نقاط بونص ⭐"><strong style="color:var(--purple);">+${grad.bonus} نقطة</strong></td>
-<td data-label="أهلية التخرج">${gradBadge}</td>
-<td data-label="تسجيل يدوي">${manualBtn}</td>
-<td data-label="الملف"><button class="btn-primary" style="padding:4px 8px; margin:0; font-size:11px;" onclick="openProfile('${m.id}')">الملف 🪪</button></td>
+<td data-label="نقاط بونص ⭐" class="col-secondary"><strong style="color:var(--purple);">+${grad.bonus} نقطة</strong></td>
+<td data-label="أهلية التخرج" class="col-secondary">${gradBadge}</td>
+<td data-label="تسجيل يدوي" class="col-action">
+    <div style="display:flex; gap:6px; align-items:center; justify-content:space-between; width:100%;">
+        ${manualBtn}
+        <button type="button" class="btn-toggle-row-details" onclick="toggleMemberRowDetails('${m.id}', this)" style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:bold; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;" title="عرض/إخفاء الإحصائيات">إحصائيات ▾</button>
+    </div>
+</td>
+<td data-label="الملف" class="col-profile"><button class="btn-primary" style="padding:4px 8px; margin:0; font-size:11px;" onclick="openProfile('${m.id}')">الملف 🪪</button></td>
 `;
     fragment.appendChild(tr);
 });
@@ -1875,3 +1887,62 @@ if (typeof window !== 'undefined') {
   window.closeQrSearchModal = closeQrSearchModal;
 
 }
+
+
+function setMembersViewMode(mode) {
+    const table = document.getElementById('membersTable');
+    const btnCompact = document.getElementById('btnMembersViewCompact');
+    const btnFull = document.getElementById('btnMembersViewFull');
+    const container = table ? table.closest('.table-responsive') || table.parentElement : null;
+
+    if (mode === 'compact') {
+        if (container) container.classList.add('members-compact-active');
+        if (table) table.classList.add('members-compact-active');
+        if (btnCompact) {
+            btnCompact.style.background = '#0c2461';
+            btnCompact.style.color = '#ffffff';
+            btnCompact.style.borderColor = '#0c2461';
+        }
+        if (btnFull) {
+            btnFull.style.background = '#ffffff';
+            btnFull.style.color = '#475569';
+            btnFull.style.borderColor = '#cbd5e1';
+        }
+        try { localStorage.setItem('khedmty_members_view_mode', 'compact'); } catch(e){}
+    } else {
+        if (container) container.classList.remove('members-compact-active');
+        if (table) table.classList.remove('members-compact-active');
+        if (btnCompact) {
+            btnCompact.style.background = '#ffffff';
+            btnCompact.style.color = '#475569';
+            btnCompact.style.borderColor = '#cbd5e1';
+        }
+        if (btnFull) {
+            btnFull.style.background = '#0c2461';
+            btnFull.style.color = '#ffffff';
+            btnFull.style.borderColor = '#0c2461';
+        }
+        try { localStorage.setItem('khedmty_members_view_mode', 'full'); } catch(e){}
+    }
+}
+window.setMembersViewMode = setMembersViewMode;
+
+function toggleMemberRowDetails(id, btn) {
+    const row = document.getElementById('memRow_' + id);
+    if (!row) return;
+    const isOpen = row.classList.toggle('details-open');
+    if (btn) {
+        btn.textContent = isOpen ? 'طي ▴' : 'إحصائيات ▾';
+        btn.style.background = isOpen ? '#e0f2fe' : '#f1f5f9';
+        btn.style.color = isOpen ? '#0369a1' : '#475569';
+    }
+}
+window.toggleMemberRowDetails = toggleMemberRowDetails;
+
+// تفعيل الوضع المدمج تلقائياً على الموبايل
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const savedMode = localStorage.getItem('khedmty_members_view_mode') || 'compact';
+        setMembersViewMode(savedMode);
+    } catch(e){}
+});

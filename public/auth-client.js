@@ -44,6 +44,13 @@
                     ];
                     localStorage.setItem('my_church_class', JSON.stringify(mockMembers));
                 }
+                if (locParams.get('open_modal') === 'manual_attendance') {
+                    window.addEventListener('DOMContentLoaded', () => {
+                        setTimeout(() => {
+                            if (typeof window.openManualAttendanceModal === 'function') window.openManualAttendanceModal();
+                        }, 1200);
+                    });
+                }
             } else if (sim === 'student') {
                 const stdU = { id: 'std_1042', code: '1042', name: 'ميشيل عاطف حبيب', stage: 'الفرقة الأولى', level: 'الفرقة الأولى', role: 'student', phone: '01222222222', confessor: 'أبونا بولس' };
                 localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(stdU));

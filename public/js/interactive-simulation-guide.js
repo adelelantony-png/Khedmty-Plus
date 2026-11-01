@@ -284,10 +284,11 @@
     `;
     document.head.appendChild(simStyle);
 
-    // حقن زر علامة الاستفهام العائم (فقط في الشاشات الرئيسية كالدخول، ومستثنى من صفحات مركز المساعدة والصفحات التي بها .help-fab لمنع التكرار)
+    // حقن زر علامة الاستفهام العائم (فقط في الشاشات الرئيسية كالدخول، ومستثنى من صفحات الداشبورد ومركز المساعدة لمنع التكرار)
     const isHelpCenter = window.location.pathname.includes('servant_help.html') || window.location.pathname.includes('student_help.html');
+    const isDashboard = window.location.pathname.includes('servant-dashboard.html') || window.location.pathname.includes('student-portal.html');
     let floatBtn = document.getElementById('simFloatingHelpBtn');
-    if (!isHelpCenter && !document.querySelector('.help-fab') && !floatBtn) {
+    if (!isHelpCenter && !isDashboard && !document.querySelector('.help-fab') && !floatBtn) {
         floatBtn = document.createElement('div');
         floatBtn.className = 'sim-floating-btn';
         floatBtn.id = 'simFloatingHelpBtn';

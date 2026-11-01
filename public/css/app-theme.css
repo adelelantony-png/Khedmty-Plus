@@ -1244,3 +1244,80 @@ html, body {
         display: none !important;
     }
 }
+
+
+/* -------------------------------------------------------------
+   أنماط التحضير السريع المدمج ونوافذ الحضور (Mobile Compact Cards)
+   ------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* نافذة تسجيل الحضور السريع manualAttendanceModalTable */
+    #manualAttendanceModalTable.adaptive-card-table tr {
+        background: #ffffff !important;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 10px 12px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 2px 6px rgba(12, 36, 97, 0.05) !important;
+    }
+    #manualAttendanceModalTable.adaptive-card-table td {
+        border-bottom: none !important;
+        padding: 4px 0 !important;
+    }
+    #manualAttendanceModalTable.adaptive-card-table td::before {
+        display: none !important;
+    }
+
+    /* كروت المخدومين في الوضع المدمج السريع */
+    .members-compact-active #membersTable.adaptive-card-table tr {
+        padding: 8px 12px !important;
+        margin-bottom: 8px !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+        box-shadow: 0 1px 4px rgba(12, 36, 97, 0.05) !important;
+        border: 1.5px solid #e2e8f0 !important;
+    }
+
+    /* إخفاء الحقول الثانوية الطويلة في الوضع المدمج افتراضياً */
+    .members-compact-active #membersTable.adaptive-card-table td.col-secondary {
+        display: none !important;
+    }
+
+    /* إظهار الحقول الثانوية عند نقر الخادم على زر إحصائيات */
+    .members-compact-active #membersTable.adaptive-card-table tr.details-open td.col-secondary {
+        display: flex !important;
+        animation: fadeIn 0.2s ease-in;
+    }
+
+    /* تنسيق الكود والاسم والمرحلة المدمجة */
+    .members-compact-active #membersTable.adaptive-card-table td.col-code {
+        display: none !important; /* الكود يظهر بجانب الاسم مباشرة في الوضع المدمج */
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-hide-compact {
+        display: none !important;
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-name {
+        padding: 4px 0 !important;
+        border-bottom: 1px dashed #f1f5f9 !important;
+        margin-bottom: 6px !important;
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-name::before {
+        display: none !important;
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-action {
+        padding: 4px 0 !important;
+        border-bottom: none !important;
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-action::before {
+        display: none !important;
+    }
+    .members-compact-active #membersTable.adaptive-card-table td.col-profile {
+        display: none !important; /* زر الملف مدمج في سطر الإجراءات السريعة */
+    }
+}
+
+@media (min-width: 769px) {
+    .btn-toggle-row-details,
+    .mobile-only-badge {
+        display: none !important;
+    }
+}

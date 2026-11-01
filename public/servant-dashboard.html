@@ -2482,9 +2482,25 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
-<div class="table-responsive">
+<!-- شريط نمط عرض قائمة المخدومين: مدمج سريع أو كشف شامل -->
+<div class="members-view-switcher" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:#f8fafc; padding:8px 12px; border-radius:12px; border:1px solid #cbd5e1; flex-wrap:wrap; gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:12px; font-weight:800; color:#0c2461;">⚡ نمط العرض:</span>
+        <button type="button" id="btnMembersViewCompact" onclick="setMembersViewMode('compact')" style="padding:6px 14px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #0c2461; background:#0c2461; color:#fff; cursor:pointer;">
+            ⚡ تحضير سريع (مدمج)
+        </button>
+        <button type="button" id="btnMembersViewFull" onclick="setMembersViewMode('full')" style="padding:6px 14px; font-size:12px; font-weight:800; border-radius:8px; border:1px solid #cbd5e1; background:#ffffff; color:#475569; cursor:pointer;">
+            📋 كشف تفصيلي (كامل)
+        </button>
+    </div>
+    <div style="font-size:11px; font-weight:bold; color:#15803d; background:#dcfce7; padding:4px 10px; border-radius:8px; border:1px solid #86efac;">
+        📱 مخصص لتسريع تحضير الموبايل
+    </div>
+</div>
 
-<table id="membersTable" class="adaptive-card-table">
+<div class="table-responsive members-compact-active">
+
+<table id="membersTable" class="adaptive-card-table members-compact-active">
 
 <thead>
 
@@ -3290,8 +3306,8 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                         </div>
 
                         <!-- جدول الفترات المسجلة -->
-                        <div style="overflow-x:auto;">
-                            <table style="width:100%; border-collapse:collapse; font-size:0.82rem; text-align:center;">
+                        <div class="table-responsive-wrapper">
+                            <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; font-size:0.82rem; text-align:center;">
                                 <thead>
                                     <tr style="background:#1e293b; color:#ffffff;">
                                         <th style="padding:8px 6px;">مسمى الفترة</th>
@@ -8841,7 +8857,7 @@ if (document.readyState === 'loading') {
 
             <!-- جدول البيانات التفاعلي -->
             <div style="flex:1; overflow-y:auto; overflow-x:auto; padding:0 22px;">
-                <table style="width:100%; border-collapse:collapse; text-align:center; font-size:0.84rem; margin:14px 0;">
+                <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; text-align:center; font-size:0.84rem; margin:14px 0;">
                     <thead style="position:sticky; top:0; background:#f1f5f9; z-index:2; border-bottom:2px solid #cbd5e1;">
                         <tr>
                             <th style="padding:10px 6px;">#</th>

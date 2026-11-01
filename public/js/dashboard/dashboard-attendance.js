@@ -377,9 +377,19 @@ tr.innerHTML = `
 
 <td data-label="حضور">${status}</td>
 
-<td data-label="تناول 🕊️"><input type="checkbox" ${a.communion ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'communion', this.checked)" style="width:18px; height:18px; cursor:pointer;"></td>
+<td data-label="تناول 🕊️">
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:#059669; justify-content:center;">
+        <input type="checkbox" ${a.communion ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'communion', this.checked)" style="width:18px; height:18px; cursor:pointer; accent-color:#059669;">
+        <span>تناول</span>
+    </label>
+</td>
 
-<td data-label="مشاركة 💡"><input type="checkbox" ${a.participation ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'participation', this.checked)" style="width:18px; height:18px; cursor:pointer;"></td>
+<td data-label="مشاركة 💡">
+    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:#d97706; justify-content:center;">
+        <input type="checkbox" ${a.participation ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'participation', this.checked)" style="width:18px; height:18px; cursor:pointer; accent-color:#d97706;">
+        <span>مشاركة</span>
+    </label>
+</td>
 
 <td data-label="النقاط ⭐"><strong style="color:var(--accent);">${a.points || 5}</strong></td>
 
@@ -1859,17 +1869,35 @@ let isCom = rec ? !!rec.communion : false;
 let isPart = rec ? !!rec.participation : false;
 
 let tr = document.createElement('tr');
-
+tr.className = 'manual-modal-row-card';
 tr.innerHTML = `
-
-<td style="text-align:right;"><strong>${escapeHtml(m.name)}</strong> (${escapeHtml(m.code) || '-'})</td>
-
-<td><input type="checkbox" ${isAtt ? 'checked' : ''} onchange="toggleManualModalAttendance('${m.id}', this.checked)" style="width:18px; height:18px; cursor:pointer;"></td>
-
-<td><input type="checkbox" ${isCom ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'communion', this.checked)" style="width:18px; height:18px; cursor:pointer;"></td>
-
-<td><input type="checkbox" ${isPart ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'participation', this.checked)" style="width:18px; height:18px; cursor:pointer;"></td>
-
+<td data-label="المخدوم" class="modal-col-name" style="text-align:right; border-bottom:1px solid #f1f5f9; padding-bottom:6px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:4px;">
+        <strong style="color:var(--primary); font-size:14px;">${escapeHtml(m.name)}</strong>
+        <div>
+            <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:bold; font-size:11px;">كود: ${escapeHtml(m.code) || '-'}</span>
+            <span class="badge" style="background:#f1f5f9; color:#475569; font-size:11px; margin-right:4px;">${escapeHtml(normalizeStageText(m.stage) || '')}</span>
+        </div>
+    </div>
+</td>
+<td data-label="حضور اليوم" class="modal-col-check">
+    <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isAtt ? '#dcfce7' : '#f8fafc'}; border:1.5px solid ${isAtt ? '#10b981' : '#cbd5e1'}; font-weight:bold; color:${isAtt ? '#15803d' : '#334155'}; transition:0.2s;">
+        <span style="font-size:12px;">👥 حضور الاجتماع</span>
+        <input type="checkbox" ${isAtt ? 'checked' : ''} onchange="toggleManualModalAttendance('${m.id}', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#10b981;">
+    </label>
+</td>
+<td data-label="التناول بالقداس" class="modal-col-check">
+    <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isCom ? '#e0f2fe' : '#f8fafc'}; border:1.5px solid ${isCom ? '#0284c7' : '#cbd5e1'}; font-weight:bold; color:${isCom ? '#0369a1' : '#64748b'}; opacity:${!isAtt ? '0.45' : '1'}; transition:0.2s;">
+        <span style="font-size:12px;">🍞 تناول بالقداس (+10)</span>
+        <input type="checkbox" ${isCom ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'communion', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#0284c7;">
+    </label>
+</td>
+<td data-label="مشاركة بالدرس" class="modal-col-check">
+    <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isPart ? '#fef3c7' : '#f8fafc'}; border:1.5px solid ${isPart ? '#f59e0b' : '#cbd5e1'}; font-weight:bold; color:${isPart ? '#b45309' : '#64748b'}; opacity:${!isAtt ? '0.45' : '1'}; transition:0.2s;">
+        <span style="font-size:12px;">💡 تفاعل ومشاركة (+5)</span>
+        <input type="checkbox" ${isPart ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'participation', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#f59e0b;">
+    </label>
+</td>
 `;
 
 tbody.appendChild(tr);
