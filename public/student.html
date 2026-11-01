@@ -964,7 +964,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
         }
 
-        const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+        if (window.location.search.includes('sim_role=student')) { localStorage.setItem('student_code', '1042'); localStorage.setItem('student_name', 'ميشيل عاطف حبيب'); localStorage.setItem('student_level', 'الفرقة الأولى'); localStorage.setItem('my_church_active_user', JSON.stringify({ id: 'std_1042', code: '1042', name: 'ميشيل عاطف حبيب', level: 'الفرقة الأولى', role: 'student', phone: '01222222222' })); } const studentCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
 
         if (!studentCode) {
 

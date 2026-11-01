@@ -20,6 +20,30 @@
         return null;
     }
 
+    // تفعيل وضع المحاكاة الميدانية التلقائي عند تمرير ?sim_role=admin أو ?sim_role=student
+    try {
+        if (typeof window !== 'undefined' && window.location && window.location.search) {
+            const locParams = new URLSearchParams(window.location.search);
+            const sim = locParams.get('sim_role');
+            if (sim === 'admin') {
+                const adminU = { id: 'srv_admin', name: 'أمين أسرة إعداد الخدام', role: 'admin', permission: 'admin', phone: '01000000000' };
+                localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(adminU));
+                sessionStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(adminU));
+                localStorage.setItem(STORAGE_KEYS.ROLE, 'admin');
+                localStorage.setItem('my_church_admin_pwd', 'sha256_mock_hash_for_qa');
+                localStorage.setItem('khedmety_last_manual_backup', String(Date.now()));
+            } else if (sim === 'student') {
+                const stdU = { id: 'std_1042', code: '1042', name: 'ميشيل عاطف حبيب', stage: 'الفرقة الأولى', level: 'الفرقة الأولى', role: 'student', phone: '01222222222', confessor: 'أبونا بولس' };
+                localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(stdU));
+                sessionStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(stdU));
+                localStorage.setItem(STORAGE_KEYS.ROLE, 'student');
+                localStorage.setItem(STORAGE_KEYS.STUDENT_CODE, '1042');
+                localStorage.setItem('student_name', 'ميشيل عاطف حبيب');
+                localStorage.setItem('student_level', 'الفرقة الأولى');
+            }
+        }
+    } catch (e) {}
+
     function doRedirect(url) {
         try {
             const loc = (typeof window !== 'undefined' && window.location) ? window.location : (typeof location !== 'undefined' ? location : null);

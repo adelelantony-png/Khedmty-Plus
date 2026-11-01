@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>محاكي الجلسات الميدانية | خدمتي برو</title>
+</head>
+<body style="font-family:sans-serif; text-align:center; padding:50px;">
+    <h2>جارٍ تجهيز جلسة المحاكاة...</h2>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const role = params.get('role') || 'admin';
+        const target = params.get('target') || (role === 'admin' ? 'servant-dashboard.html' : 'student.html');
+
+        if (role === 'admin') {
+            const adminUser = {
+                id: 'srv_admin',
+                name: 'أمين أسرة إعداد الخدام',
+                role: 'admin',
+                permission: 'admin',
+                phone: '01000000000'
+            };
+            localStorage.setItem('my_church_active_user', JSON.stringify(adminUser));
+            sessionStorage.setItem('my_church_active_user', JSON.stringify(adminUser));
+
+            // عينة بيانات مخدومين للمحاكاة
+            const mockMembers = [
+                { id: 'std_1042', code: 1042, name: 'ميشيل عاطف حبيب', stage: 'الفرقة الأولى', phone: '01222222222', confessor: 'أبونا بولس', area: 'البساتين' },
+                { id: 'std_1043', code: 1043, name: 'مارينا ماجد كمال', stage: 'الفرقة الأولى', phone: '01233333333', confessor: 'أبونا بطرس', area: 'دار السلام' },
+                { id: 'std_1044', code: 1044, name: 'بيشوي هاني رمزي', stage: 'الفرقة الثانية', phone: '01244444444', confessor: 'أبونا بولس', area: 'المعادي' }
+            ];
+            localStorage.setItem('my_church_class', JSON.stringify(mockMembers));
+
+            // عينة سجلات حضور
+            const mockAtt = {
+                'std_1042': { attended: true, timestamp: Date.now() },
+                'std_1043': { attended: true, timestamp: Date.now() }
+            };
+            localStorage.setItem('my_church_attendance', JSON.stringify(mockAtt));
+
+        } else {
+            // محاكاة دور المخدوم (Student)
+            const studentUser = {
+                id: 'std_1042',
+                code: '1042',
+                name: 'ميشيل عاطف حبيب',
+                stage: 'الفرقة الأولى',
+                level: 'الفرقة الأولى',
+                role: 'student',
+                phone: '01222222222',
+                confessor: 'أبونا بولس'
+            };
+            localStorage.setItem('my_church_active_user', JSON.stringify(studentUser));
+            sessionStorage.setItem('my_church_active_user', JSON.stringify(studentUser));
+            localStorage.setItem('student_code', '1042');
+            localStorage.setItem('student_name', 'ميشيل عاطف حبيب');
+            localStorage.setItem('student_level', 'الفرقة الأولى');
+            localStorage.setItem('student_phone', '01222222222');
+
+            // إنجاز قراءات تجريبي
+            const bibleReadings = {
+                '1042': {
+                    '10-31': { completed_chapters: [1, 2, 3, 4], total_chapters: 4, points: 11 }
+                }
+            };
+            localStorage.setItem('khedmety_bible_readings', JSON.stringify(bibleReadings));
+        }
+
+        setTimeout(() => {
+            window.location.replace(target);
+        }, 80);
+    </script>
+</body>
+</html>
