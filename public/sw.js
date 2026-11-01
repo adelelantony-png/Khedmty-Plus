@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v3.8'; // activated pastoral whatsapp outreach & disaster recovery diagnostics
+const CACHE_NAME = 'khedmety-ultra-v3.9'; // unified help fab across all servant modules
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
