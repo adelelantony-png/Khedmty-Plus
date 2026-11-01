@@ -22,6 +22,7 @@ const PRECACHE_ASSETS = [
     './servant_spiritual_report.html',
     './servant_quick_guide.html',
     './student_quick_guide.html',
+    './js/interactive-simulation-guide.js',
     './spiritual_note.html',
     './bible.html',
     './harvest.html',
