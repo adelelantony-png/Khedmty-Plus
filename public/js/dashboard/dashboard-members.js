@@ -387,7 +387,12 @@ filtered.forEach(m => {
         <button type="button" class="btn-toggle-row-details" onclick="toggleMemberRowDetails('${m.id}', this)" style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:bold; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;" title="عرض/إخفاء الإحصائيات">إحصائيات ▾</button>
     </div>
 </td>
-<td data-label="الملف" class="col-profile"><button class="btn-primary" style="padding:4px 8px; margin:0; font-size:11px;" onclick="openProfile('${m.id}')">الملف 🪪</button></td>
+<td data-label="الملف والتواصل" class="col-profile">
+    <div style="display:flex; gap:4px; align-items:center; justify-content:center;">
+        <button type="button" class="btn-primary" style="padding:4px 8px; margin:0; font-size:11px;" onclick="openProfile('${m.id}')">الملف 🪪</button>
+        <button type="button" class="btn-custom" onclick="sendDirectMemberWhatsApp('${m.id}')" style="background:#25d366; color:#ffffff; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;" title="إرسال رسالة افتقاد واتساب مباشرة"><i class="fa-brands fa-whatsapp"></i> واتساب</button>
+    </div>
+</td>
 `;
     fragment.appendChild(tr);
 });
