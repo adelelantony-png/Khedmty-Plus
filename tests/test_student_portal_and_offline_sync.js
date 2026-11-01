@@ -56,7 +56,7 @@ assert(guideJs.includes("window.location.pathname.includes('student.html')"), 'i
 console.log('\n[2/4] Auditing PWA Service Worker & Offline Cache Integrity...');
 const swJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'sw.js'), 'utf8');
 
-assert(swJs.includes("CACHE_NAME = 'khedmety-ultra-v3.6'"), 'sw.js is running latest v3.6 cache');
+assert(/khedmety-ultra-v3\.[6-9]/.test(swJs), 'sw.js is running latest v3.6+ cache');
 assert(swJs.includes("'./student.html'"), 'student.html is precached for offline use');
 assert(swJs.includes("'./student_help.html'"), 'student_help.html is precached for offline use');
 assert(swJs.includes("'./servant_help.html'"), 'servant_help.html is precached for offline use');

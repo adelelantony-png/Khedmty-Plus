@@ -756,7 +756,7 @@
         // 1. محاولة جلب المخدومين من localStorage
         let localMembers = [];
         try {
-            const raw = localStorage.getItem('my_church_members');
+            const raw = localStorage.getItem('my_church_class') || localStorage.getItem('my_church_members') || localStorage.getItem('khedmety_members');
             if (raw) localMembers = JSON.parse(raw);
         } catch(e) {}
 
