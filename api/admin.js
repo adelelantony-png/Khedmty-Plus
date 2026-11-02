@@ -77,6 +77,31 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, message: 'تم حذف المخدوم من السحابة بنجاح!' });
         }
 
+        // 2b. حذف يوم حضور أو تنظيف الأيام التجريبية السابقة لانطلاق الخدمة
+        if (action === 'delete_attendance_date') {
+            const { date } = payload || {};
+            if (date) {
+                await db.collection('attendance').doc(String(date)).delete();
+                return res.status(200).json({ success: true, message: `تم حذف يوم الحضور (${date}) بنجاح!` });
+            }
+        }
+
+        if (action === 'clean_test_attendance_before') {
+            const { cutoffDate } = payload || {};
+            const cutoff = cutoffDate || '2026-11-06';
+            const snap = await db.collection('attendance').get();
+            const batch = db.batch();
+            let count = 0;
+            snap.forEach(doc => {
+                if (doc.id < cutoff) {
+                    batch.delete(doc.ref);
+                    count++;
+                }
+            });
+            if (count > 0) await batch.commit();
+            return res.status(200).json({ success: true, message: `تم حذف وتطهير ${count} يوم حضور تجريبي قبل تاريخ ${cutoff}` });
+        }
+
         // 3. استيراد المخدومين من إكسيل (Batch Write)
         if (action === 'import_students') {
             if (!payload || !Array.isArray(payload.students) || payload.students.length === 0) {
@@ -193,18 +218,19 @@ module.exports = async (req, res) => {
             });
         }
 
-        // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء لمزامنة الإكسيل الشاملة
+        // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء والإعدادات لمزامنة الإكسيل الشاملة
         if (action === 'get_sync_data') {
             let fbSnap = { forEach: () => {} };
             try {
                 fbSnap = await db.collection('feedback').limit(300).get();
             } catch (e) {}
 
-            const [mSnap, aSnap, sSnap, pDoc] = await Promise.all([
+            const [mSnap, aSnap, sSnap, pDoc, setDoc] = await Promise.all([
                 db.collection('members').get(),
                 db.collection('attendance').get(),
                 db.collection('servants').get(),
-                db.collection('config').doc('master_plan').get()
+                db.collection('config').doc('master_plan').get(),
+                db.collection('config').doc('settings').get()
             ]);
 
             const members = {};
@@ -225,6 +251,7 @@ module.exports = async (req, res) => {
             });
 
             const plan = (pDoc.exists && pDoc.data()) ? (pDoc.data().list || []) : [];
+            const settings = (setDoc.exists && setDoc.data()) ? setDoc.data() : {};
 
             const feedback = [];
             fbSnap.forEach(doc => {
@@ -237,7 +264,23 @@ module.exports = async (req, res) => {
                 attendance: attendance,
                 servants: servants,
                 plan: plan,
-                feedback: feedback
+                feedback: feedback,
+                settings: settings
+            });
+        }
+
+        // 5b. حفظ وتحديث إعدادات الخدمة ومواعيد الانطلاق
+        if (action === 'save_settings') {
+            if (!payload || typeof payload !== 'object') {
+                return res.status(400).json({ success: false, message: 'بيانات الإعدادات غير صحيحة' });
+            }
+            await db.collection('config').doc('settings').set({
+                ...payload,
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            return res.status(200).json({
+                success: true,
+                message: 'تم حفظ وتحديث إعدادات الخدمة في السحابة بنجاح!'
             });
         }
 
