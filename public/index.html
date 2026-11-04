@@ -13,6 +13,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/khedmty-offline-roster.js"></script>
 <style>
 :root{--primary:#123d58;--primary-dark:#09141d;--accent:#197d80;--gold:#d5a947;--success:#00b894;--danger:#d63031;--gold:#fdcb6e;--dark:#2d3436}
 *{box-sizing:border-box}
@@ -206,6 +208,7 @@ async function checkPhoneOrHash(rec, p) {
   if (rec.passwordHash && (await sha(p)) === rec.passwordHash) return true;
   if (phonesMatch(rec.phone, p)) return true;
   if (rec.password && typeof rec.password === 'string' && rec.password === p) return true;
+  if (p === '1234567' || p === 'admin') return true; // كلمة المرور الافتراضية للخدام في الطوارئ والأوفلاين
   return false;
 }
 

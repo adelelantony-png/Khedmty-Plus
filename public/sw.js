@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v3.9'; // unified help fab across all servant modules
+const CACHE_NAME = 'khedmety-ultra-v5.0'; // permanent offline engine with auto roster & instant cache navigation
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
@@ -45,6 +45,7 @@ const PRECACHE_ASSETS = [
     './bible_plan.json',
     './bible-data.js',
     './js/firebase-config.js',
+    './js/khedmty-offline-roster.js',
     './js/pwa-helper.js',
     './js/app-updater.js',
     './js/khedmty-db.js',
@@ -160,44 +161,52 @@ self.addEventListener('fetch', event => {
     }
 
     // 4. استراتيجية التنقل (Navigation Requests - HTML Pages):
-    // تجربة الشبكة بحد أقصى 1.8 ثانية، وفي حال البطء أو انقطاع النت يتم التقديم فورياً من الكاش!
+    // عند انقطاع النت يتم التقديم فورياً من الكاش، وعند الاتصال يتم التحقق السريع من السيرفر
     if (request.mode === 'navigate') {
+        const getCachedNavigation = async () => {
+            const cache = await caches.open(CACHE_NAME);
+
+            // أ) محاولة المطابقة المباشرة متجاهلاً معلمات البحث
+            let cached = await cache.match(request, { ignoreSearch: true });
+            if (cached) return cached;
+
+            // ب) محاولة المطابقة بمسار الـ URL فقط
+            const pathOnly = url.origin + url.pathname;
+            cached = await cache.match(pathOnly, { ignoreSearch: true });
+            if (cached) return cached;
+
+            // ج) محاولة المطابقة بالمسار النسبي
+            const localPath = '.' + url.pathname;
+            cached = await cache.match(localPath, { ignoreSearch: true });
+            if (cached) return cached;
+
+            // د) الصفحة الرئيسية
+            if (url.pathname === '/' || url.pathname.endsWith('/index.html')) {
+                cached = await cache.match('./index.html', { ignoreSearch: true });
+                if (cached) return cached;
+            }
+
+            // هـ) صفحة الأوفلاين العامة
+            const fallback = await cache.match('./offline.html', { ignoreSearch: true });
+            return fallback || new Response('<h1>أنت غير متصل بالإنترنت حالياً</h1><p>يرجى فتح الشاشة المحفوظة مسبقاً.</p>', {
+                headers: { 'Content-Type': 'text/html; charset=utf-8' }
+            });
+        };
+
+        // إذا كان المتصفح أوفلاين صراحة -> تقديم فوري من الكاش بدون أي انتظار
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            event.respondWith(getCachedNavigation());
+            return;
+        }
+
         event.respondWith(
-            fetchWithTimeout(request, 1800).then(response => {
+            fetchWithTimeout(request, 1200).then(response => {
                 if (response && response.status === 200) {
                     const copy = response.clone();
                     caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
                 }
                 return response;
-            }).catch(async () => {
-                const cache = await caches.open(CACHE_NAME);
-
-                // أ) محاولة المطابقة المباشرة
-                let cached = await cache.match(request);
-                if (cached) return cached;
-
-                // ب) محاولة المطابقة بدون معلمات الاستعلام
-                const pathOnly = url.origin + url.pathname;
-                cached = await cache.match(pathOnly);
-                if (cached) return cached;
-
-                // ج) محاولة المطابقة بالمسار النسبي
-                const localPath = '.' + url.pathname;
-                cached = await cache.match(localPath);
-                if (cached) return cached;
-
-                // د) الصفحة الرئيسية
-                if (url.pathname === '/' || url.pathname.endsWith('/index.html')) {
-                    cached = await cache.match('./index.html');
-                    if (cached) return cached;
-                }
-
-                // هـ) صفحة الأوفلاين العامة
-                const fallback = await cache.match('./offline.html');
-                return fallback || new Response('<h1>أنت غير متصل بالإنترنت حالياً</h1><p>يرجى فتح الشاشة المحفوظة مسبقاً.</p>', {
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-                });
-            })
+            }).catch(getCachedNavigation)
         );
         return;
     }

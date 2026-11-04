@@ -4,6 +4,76 @@
  */
 
 
+// ==========================================
+// وظائف الماسح الضوئي فائق السرعة طِبق الأصل من الصورة المرفقة
+// ==========================================
+function openFastScannerModal() {
+    const modal = document.getElementById('fastScannerModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+    updateScannerDatePill();
+    updateFastScannerSyncBadge();
+    renderLiveCardsFeed();
+    startCamera();
+}
+
+function closeFastScannerModal() {
+    stopCamera();
+    const modal = document.getElementById('fastScannerModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function updateScannerDatePill() {
+    const pill = document.getElementById('fastScannerDatePill');
+    if (!pill) return;
+    let targetDate = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : (typeof today !== 'undefined' ? today : new Date().toISOString().split('T')[0]);
+    let parts = targetDate.split('-');
+    if (parts.length === 3) {
+        let y = parts[0];
+        let m = parseInt(parts[1], 10);
+        let d = parseInt(parts[2], 10);
+        pill.innerText = 'حضور يوم ' + d + '-' + m + '-' + y;
+    } else {
+        pill.innerText = 'حضور يوم ' + targetDate;
+    }
+}
+
+function updateFastScannerSyncBadge() {
+    const badge = document.getElementById('fastScannerSyncStatusBadge');
+    if (!badge) return;
+    if (navigator.onLine) {
+        badge.className = 'fast-scanner-sync-badge sync-online';
+        badge.innerHTML = '☁️ مزامنة سحابية لحظية';
+    } else {
+        badge.className = 'fast-scanner-sync-badge sync-offline';
+        badge.innerHTML = '📱 وضع الأوفلاين (محفوظ محلياً)';
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('online', () => {
+        updateFastScannerSyncBadge();
+        if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.processQueue === 'function') {
+            KhedmtyOfflineSync.processQueue().catch(() => {});
+        }
+    });
+    window.addEventListener('offline', updateFastScannerSyncBadge);
+}
+
+let debounceBackgroundRenderTimer = null;
+function scheduleBackgroundDashboardUpdates() {
+    if (debounceBackgroundRenderTimer) clearTimeout(debounceBackgroundRenderTimer);
+    debounceBackgroundRenderTimer = setTimeout(() => {
+        try { if (typeof renderAttendanceTable === 'function') renderAttendanceTable(); } catch(e){}
+        try { if (typeof renderMembersList === 'function') renderMembersList(); } catch(e){}
+        try { if (typeof renderDashboard === 'function') renderDashboard(); } catch(e){}
+        try { if (typeof renderAttendanceCalendar === 'function') renderAttendanceCalendar(); } catch(e){}
+    }, 450);
+}
+
 // 10. تسجيل الحضور الذري
 
 // ==========================================
@@ -88,17 +158,15 @@ attendanceRecord[activeSelectedDate].unshift(newRecord);
 
 localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
 
-renderAttendanceTable();
-
+// 🚀 تحديث لحظي وفوري لقائمة الحضور تحت الكاميرا + تغذية صوتية ولمسية (بدون أي شاشات معطلة)
 renderLiveCardsFeed();
+playBeepSound('success');
+if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try { navigator.vibrate(60); } catch(e){}
+}
 
-renderMembersList();
-
-renderDashboard();
-
-renderAttendanceCalendar();
-
-showKioskWelcome(member, isAbsent, 'member');
+// جدولة التحديثات الثقيلة في الخلفية دون إسقاط أي إطار من الكاميرا
+scheduleBackgroundDashboardUpdates();
 
 // إذا كان الجهاز غير متصل بالإنترنت أو تعذر فايربيز: الحفظ المحلي السريع وطابور المزامنة
 if (!navigator.onLine || !isFirebaseActive || !fsdb) {
@@ -1511,57 +1579,43 @@ openAttendanceExportModal('all');
 // ==========================================
 
 function renderLiveCardsFeed() {
+    const feed = document.getElementById('liveCardsFeed');
+    const countBadge = document.getElementById('liveScanCount');
+    if (!feed) return;
 
-const feed = document.getElementById('liveCardsFeed');
+    let targetDate = (typeof activeSelectedDate !== "undefined" && activeSelectedDate) ? activeSelectedDate : (typeof today !== "undefined" ? today : new Date().toISOString().split('T')[0]);
+    let todayList = attendanceRecord[targetDate] || [];
 
-const countBadge = document.getElementById('liveScanCount');
+    if (countBadge) countBadge.innerText = todayList.length;
 
-if (!feed) return;
+    if (todayList.length === 0) {
+        feed.innerHTML = `
+            <div style="text-align:center; color:#94a3b8; padding:22px 10px; font-size:13px; font-weight:600;">
+                وجّه الكاميرا نحو باركود الكارنيه لبدء التسجيل السريع...
+            </div>
+        `;
+        return;
+    }
 
-let todayList = attendanceRecord[today] || [];
+    feed.innerHTML = '';
+    const totalCount = todayList.length;
 
-if (countBadge) countBadge.innerText = todayList.length;
-
-if (todayList.length === 0) {
-
-feed.innerHTML = '<div class="empty-state">لم يتم مسح أي كارنيه حتى الآن...</div>';
-
-return;
-
-}
-
-feed.innerHTML = '';
-
-todayList.forEach((item, index) => {
-
-let card = document.createElement('div');
-
-card.className = 'live-scan-card';
-
-card.innerHTML = `
-
-<div style="display:flex; align-items:center; gap:10px;">
-
-<span style="color:var(--success); font-weight:bold; font-size:16px;">✔️</span>
-
-<div>
-
-<strong style="font-size:14px; color:var(--dark);">${escapeHtml(item.name)}</strong>
-
-<div style="font-size:11px; color:#636e72;">كود: ${escapeHtml(item.code)} | ${item.isBonusEvent ? '⭐ بونص فعالية' : 'جمعة أساسي'} | وقت: ${escapeHtml(item.time)}</div>
-
-</div>
-
-</div>
-
-<span class="live-scan-index">#${todayList.length - index}</span>
-
-`;
-
-feed.appendChild(card);
-
-});
-
+    todayList.forEach((item, index) => {
+        let card = document.createElement('div');
+        card.className = 'fast-scan-card';
+        card.innerHTML = `
+            <div class="fast-scan-left">
+                <div class="fast-scan-check-circle">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="fast-scan-name">${escapeHtml(item.name || 'مخدوم')}</div>
+            </div>
+            <div class="fast-scan-index">#${totalCount - index}</div>
+        `;
+        feed.appendChild(card);
+    });
 }
 
 function manualMarkMemberFromInput() {
@@ -1665,151 +1719,129 @@ select.appendChild(opt);
 }
 
 async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        return alert("يرجى استخدام متصفح حديث يدعم الكاميرا.");
+    }
 
-if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const modal = document.getElementById('fastScannerModal');
+    if (modal && modal.style.display !== 'flex') {
+        modal.style.display = 'flex';
+        updateScannerDatePill();
+        updateFastScannerSyncBadge();
+        renderLiveCardsFeed();
+    }
 
-return alert("يرجى استخدام متصفح حديث يدعم الكاميرا.");
+    if (typeof Html5Qrcode === 'undefined') {
+        showToast("⏳ جاري تهيئة كاميرا المسح الضوئي...");
+        await ensureHtml5QrLoaded().catch(() => {});
+    }
 
-}
+    try {
+        const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        testStream.getTracks().forEach(t => t.stop());
+        await populateCameraDevices();
 
-if (typeof Html5Qrcode === 'undefined') {
+        const startBtn = document.getElementById('startCameraBtn');
+        if (startBtn) startBtn.style.display = 'none';
+        const stopBtn = document.getElementById('stopCameraBtn');
+        if (stopBtn) stopBtn.style.display = 'block';
 
-showToast("⏳ جاري تهيئة كاميرا المسح الضوئي...");
+        if (html5QrCode) {
+            try { await html5QrCode.stop(); } catch(e){ console.warn("[خدمتي برو]", e); }
+        }
 
-await ensureHtml5QrLoaded().catch(() => {});
+        html5QrCode = new Html5Qrcode("reader");
+        const chosenDeviceId = document.getElementById('cameraSelectionDropdown')?.value;
+        const cameraConfig = {
+            fps: 20,
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                let minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                return { width: Math.floor(minEdge * 0.78), height: Math.floor(minEdge * 0.78) };
+            },
+            aspectRatio: 1.0
+        };
 
-}
-
-try {
-
-const testStream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-testStream.getTracks().forEach(t => t.stop());
-
-await populateCameraDevices();
-
-document.getElementById('startCameraBtn').style.display = 'none';
-
-document.getElementById('stopCameraBtn').style.display = 'block';
-
-if (html5QrCode) {
-
-try { await html5QrCode.stop(); } catch(e){ console.warn("[خدمتي برو]", e); }
-
-}
-
-html5QrCode = new Html5Qrcode("reader");
-
-const chosenDeviceId = document.getElementById('cameraSelectionDropdown').value;
-
-const cameraConfig = { fps: 10, qrbox: { width: 220, height: 220 } };
-
-if (chosenDeviceId) {
-
-await html5QrCode.start(chosenDeviceId, cameraConfig, markAttendance, () => {});
-
-} else {
-
-try {
-
-await html5QrCode.start({ facingMode: "environment" }, cameraConfig, markAttendance, () => {});
-
-} catch (envErr) {
-
-await html5QrCode.start({ facingMode: "user" }, cameraConfig, markAttendance, () => {});
-
-}
-
-}
-
-} catch (err) {
-
-stopCamera();
-
-alert("❌ تم رفض إذن الكاميرا. يرجى التأكد من إعطاء إذن الكاميرا للمتصفح.");
-
-}
-
+        if (chosenDeviceId) {
+            await html5QrCode.start(chosenDeviceId, cameraConfig, markAttendance, () => {});
+        } else {
+            try {
+                await html5QrCode.start({ facingMode: "environment" }, cameraConfig, markAttendance, () => {});
+            } catch (envErr) {
+                await html5QrCode.start({ facingMode: "user" }, cameraConfig, markAttendance, () => {});
+            }
+        }
+    } catch (err) {
+        stopCamera();
+        alert("❌ تم رفض إذن الكاميرا. يرجى التأكد من إعطاء إذن الكاميرا للمتصفح.");
+    }
 }
 
 function stopCamera() {
-
-if (html5QrCode) {
-
-html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
-
-}
-
-document.getElementById('startCameraBtn').style.display = 'block';
-
-document.getElementById('stopCameraBtn').style.display = 'none';
-
+    if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+            try { html5QrCode.clear(); } catch(e){}
+        }).catch(() => {});
+    }
+    const modal = document.getElementById('fastScannerModal');
+    if (modal) modal.style.display = 'none';
+    const startBtn = document.getElementById('startCameraBtn');
+    if (startBtn) startBtn.style.display = 'inline-block';
+    const stopBtn = document.getElementById('stopCameraBtn');
+    if (stopBtn) stopBtn.style.display = 'none';
 }
 
 let lastScannedCode = "";
-
 let lastScannedTime = 0;
-
-const SCAN_COOLDOWN_MS = 5000;
+const DUPLICATE_COOLDOWN_MS = 1200; // منع التكرار العرضي لنفس الكارنيه فقط
 
 function markAttendance(scannedText) {
+    scannedText = scannedText.trim();
+    let nowTimestamp = Date.now();
 
-scannedText = scannedText.trim();
+    // إذا كان نفس الكود تماماً ومضى أقل من 1.2 ثانية: تجاهل لتفادي تكرار اللقطة أثناء حمل الكارنيه
+    if (scannedText === lastScannedCode && (nowTimestamp - lastScannedTime) < DUPLICATE_COOLDOWN_MS) {
+        return;
+    }
+    // لأي شخص آخر أو كود مختلف: تسجيل فوري بلحظة الصفر (0ms)
+    lastScannedCode = scannedText;
+    lastScannedTime = nowTimestamp;
 
-let nowTimestamp = Date.now();
+    let parsedName = scannedText;
+    if (scannedText.includes('/')) parsedName = scannedText.split('/')[0].trim();
 
-if (scannedText === lastScannedCode && (nowTimestamp - lastScannedTime) < SCAN_COOLDOWN_MS) return;
+    let member = members.find(m => {
+        let mName = m.name ? m.name.trim().toLowerCase() : "";
+        let mCode = m.code ? m.code.toString().trim() : "";
+        let mId = m.id ? m.id.toString().trim() : "";
+        let mQr = m.qrCode ? m.qrCode.toLowerCase() : "";
+        return (mCode === scannedText || (mQr !== "" && mQr === scannedText.toLowerCase()) || mName === parsedName.toLowerCase() || mId === scannedText);
+    });
 
-lastScannedCode = scannedText;
+    if (!member && typeof candidatesList !== 'undefined' && Array.isArray(candidatesList)) {
+        member = candidatesList.find(c => {
+            let cCode = c.code ? c.code.toString().trim() : "";
+            let cId = c.id ? c.id.toString().trim() : "";
+            let cName = c.name ? c.name.trim().toLowerCase() : "";
+            return (cCode === scannedText || cId === scannedText || cName === parsedName.toLowerCase());
+        });
+    }
 
-lastScannedTime = nowTimestamp;
-
-let parsedName = scannedText;
-
-if (scannedText.includes('/')) parsedName = scannedText.split('/')[0].trim();
-
-let member = members.find(m => {
-
-let mName = m.name ? m.name.trim().toLowerCase() : "";
-
-let mCode = m.code ? m.code.toString().trim() : "";
-
-let mId = m.id ? m.id.toString().trim() : "";
-
-let mQr = m.qrCode ? m.qrCode.toLowerCase() : "";
-
-return (mCode === scannedText || (mQr !== "" && mQr === scannedText.toLowerCase()) || mName === parsedName.toLowerCase() || mId === scannedText);
-
-});
-
-if (member) {
-
-atomicRegisterAttendance(member);
-
-} else {
-
-let s = servants.find(x => (x.code && x.code.toString() === scannedText) || x.id.toString() === scannedText || (x.name && scannedText.includes(x.name)));
-
-if (s) {
-
-recordServantAttendance(s);
-
-showKioskWelcome(s, false, 'servant');
-
-playBeepSound('success');
-
-showToast(`✅ تم رصد حضور الخادم: ${s.name}`);
-
-} else {
-
-playBeepSound('error');
-
-showToast(`❌ كود غير مسجل أو غير مقروء`, true);
-
-}
-
-}
-
+    if (member) {
+        atomicRegisterAttendance(member);
+    } else {
+        let s = servants.find(x => (x.code && x.code.toString() === scannedText) || x.id.toString() === scannedText || (x.name && scannedText.includes(x.name)));
+        if (s) {
+            recordServantAttendance(s);
+            playBeepSound('success');
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                try { navigator.vibrate(50); } catch(e){}
+            }
+            showToast(`✅ تم رصد حضور الخادم: ${s.name}`);
+        } else {
+            playBeepSound('error');
+            showToast(`❌ كود غير مسجل أو غير مقروء`, true);
+        }
+    }
 }
 
 // ==========================================

@@ -15,6 +15,8 @@
         }
     }
 
+    loadScriptIfNotPresent('js/firebase-config.js', 'FIREBASE_CONFIG');
+    loadScriptIfNotPresent('js/khedmty-offline-roster.js', 'KHEDMETY_ROSTER_LOADED');
     loadScriptIfNotPresent('js/khedmty-db.js', 'KhedmtyDB');
     loadScriptIfNotPresent('js/khedmty-offline-sync.js', 'KhedmtyOfflineSync');
     loadScriptIfNotPresent('js/app-updater.js', 'KhedmetyAppUpdater');

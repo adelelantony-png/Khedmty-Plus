@@ -482,7 +482,235 @@ th { background: var(--primary); color: white; }
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-#reader { width: 100%; max-width: 320px; min-height: 250px; margin: auto; border: 2px dashed var(--accent); border-radius: 8px; overflow: hidden; background: #000; }
+#reader { width: 100%; height: 100%; border: none; border-radius: 24px; overflow: hidden; background: #000; margin: 0 auto; }
+
+/* ===== تصميم الماسح الضوئي فائق السرعة طِبق الأصل من الصورة المرفقة ===== */
+.fast-scanner-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  animation: fastFadeIn 0.2s ease-out;
+}
+
+@keyframes fastFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fast-scanner-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  max-height: 94vh;
+  border-radius: 28px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  animation: fastModalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  direction: ltr; /* لتطابق توزيع شاشة الكاميرا والفهرس يساراً ويميناً طِبق الصورة */
+}
+
+@keyframes fastModalSlideUp {
+  0% { transform: translateY(22px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.fast-scanner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px 10px 24px;
+  background: #ffffff;
+  direction: ltr;
+}
+
+.fast-scanner-title {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.fast-scanner-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 21px;
+  color: #64748b;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+.fast-scanner-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.fast-scanner-body {
+  padding: 0 20px 14px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* نافذة الكاميرا الدائرية الأطراف 24px مطابقة للصورة */
+.fast-scanner-camera-box {
+  width: 100%;
+  max-width: 320px;
+  height: 290px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #000;
+  margin: 4px auto 0 auto;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fast-scanner-camera-box #reader {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  border-radius: 24px !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+.fast-scanner-camera-box #reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 24px !important;
+}
+
+.fast-scanner-camera-box #reader__scan_region {
+  border-radius: 20px !important;
+}
+
+/* شارة التاريخ البيضاوية الزرقاء في الوسط (حضور يوم 13-6-2026) */
+.fast-scanner-date-pill {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  background: #e1f0ff;
+  color: #0b66c3;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 7px 24px;
+  border-radius: 12px;
+  margin: 14px auto 12px auto;
+  text-align: center;
+  display: inline-block;
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 6px rgba(11, 102, 195, 0.08);
+}
+
+/* قائمة المخدومين المسجلين مباشرة تحت الكاميرا */
+.fast-scanner-feed {
+  width: 100%;
+  max-height: 230px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 4px;
+  direction: ltr;
+}
+
+/* كارت الحضور المطابق للصورة 100%: دائرة خضراء وعلامة صح والاسم وفهرس # */
+.fast-scan-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f9fa;
+  border: 1px solid #edf0f2;
+  border-radius: 16px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  animation: fastScanSlideIn 0.25s ease-out;
+}
+
+@keyframes fastScanSlideIn {
+  0% { opacity: 0; transform: translateY(-8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.fast-scan-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  direction: ltr;
+}
+
+.fast-scan-check-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #c6f6d5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fast-scan-name {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: right;
+  direction: rtl;
+}
+
+.fast-scan-index {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.fast-scanner-footer {
+  padding: 10px 20px 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  background: #fafafa;
+  direction: ltr;
+}
+
+.fast-scanner-sync-badge {
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.fast-scanner-sync-badge.sync-online {
+  background: #dcfce7;
+  color: #15803d;
+}
+.fast-scanner-sync-badge.sync-offline {
+  background: #fef3c7;
+  color: #b45309;
+}
 
 #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 15px; }
 
@@ -925,16 +1153,13 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
     </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
-
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
-
+<script src="js/html5-qrcode.min.js"></script>
+<script src="js/xlsx.full.min.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/khedmty-offline-roster.js"></script>
 
 </head>
 
@@ -2114,13 +2339,16 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div class="live-scanner-container">
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
 
-<h3 style="margin:0; border:none;">📷 الماسح الضوئي الذكي (Live Scanner)</h3>
+<h3 style="margin:0; border:none; display:flex; align-items:center; gap:8px;">
+  <span>📷</span>
+  <span>الماسح الضوئي الذكي (Live Fast Scanner)</span>
+</h3>
 
 <div style="display:flex; gap:6px;">
 
-<button id="startCameraBtn" class="btn-success btn-mini" onclick="startCamera()">فتح الكاميرا 📹</button>
+<button id="startCameraBtn" class="btn-success btn-mini" onclick="openFastScannerModal()">فتح الكاميرا 📹</button>
 
 <button id="stopCameraBtn" class="btn-danger btn-mini" style="display:none;" onclick="stopCamera()">إغلاق ⏹️</button>
 
@@ -2128,9 +2356,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
-<div style="margin-bottom:10px;">
+<div style="margin-bottom:12px;">
 
-<select id="cameraSelectionDropdown" style="padding:6px; font-size:12px;">
+<select id="cameraSelectionDropdown" style="padding:7px 12px; font-size:12px; border-radius:10px; width:100%; max-width:320px;">
 
 <option value="">تحديد الكاميرا الخلفية تلقائياً...</option>
 
@@ -2138,22 +2366,60 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
-<div id="reader"></div>
+<div style="text-align: center; padding: 26px 16px; background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); border-radius: 16px; border: 1.5px dashed #cbd5e1; margin-top: 6px;">
 
-<div class="live-stream-header">
+<div style="font-size: 46px; margin-bottom: 8px;">📷</div>
 
-<span>قائمة مسح اليوم (<span id="liveScanDate"></span>)</span>
+<h4 style="margin: 0 0 6px 0; font-weight: 800; color: #1e293b; font-size: 17px;">الماسح الضوئي المباشر فائق السرعة</h4>
 
-<span>إجمالي الحاضرين: <strong id="liveScanCount" style="color:var(--accent);">0</strong></span>
+<p style="font-size: 13px; color: #64748b; margin-bottom: 16px; max-width: 380px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+تسجيل فوري بدون أي تأخير، تظهر فيه الأسماء مباشرة تحت الكاميرا مع المزامنة السحابية ودعم الأوفلاين.
+</p>
+
+<button type="button" class="btn-primary" style="padding: 12px 28px; font-size: 15px; font-weight: 700; border-radius: 14px; box-shadow: 0 6px 18px rgba(30, 55, 153, 0.22); cursor: pointer;" onclick="openFastScannerModal()">
+تشغيل الماسح بالكاميرا 📹
+</button>
 
 </div>
 
-<div id="liveCardsFeed" class="live-cards-feed">
-
-<div style="text-align:center; color:#888; padding:15px; font-size:12px;">وجّه الكاميرا نحو باركود الكارنيه لبدء الرصد المباشر...</div>
-
 </div>
 
+<!-- نافذة الماسح الضوئي فائق السرعة المطابقة للصورة 100% -->
+<div id="fastScannerModal" class="fast-scanner-backdrop" onclick="if(event.target===this) closeFastScannerModal()">
+  <div class="fast-scanner-sheet">
+    <!-- رأس الماسح الضوئي: الماسح الضوئي يساراً و ✕ يميناً -->
+    <div class="fast-scanner-header">
+      <h2 class="fast-scanner-title">الماسح الضوئي</h2>
+      <button type="button" class="fast-scanner-close-btn" onclick="closeFastScannerModal()" title="إغلاق">✕</button>
+    </div>
+
+    <!-- المحتوى الداخلي للماسح -->
+    <div class="fast-scanner-body">
+      <!-- نافذة الكاميرا الدائرية 24px -->
+      <div class="fast-scanner-camera-box">
+        <div id="reader"></div>
+      </div>
+
+      <!-- شارة التاريخ الزرقاء البيضاوية (طِبق الصورة المرفقة) -->
+      <div class="fast-scanner-date-pill" id="fastScannerDatePill">
+        حضور يوم --
+      </div>
+
+      <!-- قائمة المخدومين المسجلين مباشرة تحت الكاميرا -->
+      <div class="fast-scanner-feed" id="liveCardsFeed">
+        <div style="text-align:center; color:#94a3b8; padding:20px; font-size:13px; font-weight:600;">
+          وجّه الكاميرا نحو باركود الكارنيه لبدء التسجيل السريع...
+        </div>
+      </div>
+    </div>
+
+    <!-- شريط سفلي لحالة السحابة والأوفلاين وإجمالي المسجلين -->
+    <div class="fast-scanner-footer">
+      <span id="fastScannerSyncStatusBadge" class="fast-scanner-sync-badge sync-online">☁️ مزامنة سحابية لحظية</span>
+      <span id="liveScanDate" style="display:none;"></span>
+      <span style="font-size: 12px; color: #64748b; font-weight: 700;">المسجلين: <strong id="liveScanCount" style="color:#0b66c3;">0</strong></span>
+    </div>
+  </div>
 </div>
 
 <div style="background:#fff; border:1px solid #dfe6e9; padding:12px; border-radius:8px; margin-top:15px;">
@@ -4614,7 +4880,7 @@ return new Promise((resolve, reject) => {
 
 let script = document.createElement('script');
 
-script.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+script.src = "js/xlsx.full.min.js";
 
 script.onload = () => resolve(window.XLSX);
 
@@ -4634,7 +4900,7 @@ return new Promise((resolve, reject) => {
 
 let script = document.createElement('script');
 
-script.src = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
+script.src = "js/html5-qrcode.min.js";
 
 script.onload = () => resolve(window.Html5Qrcode);
 
@@ -6693,11 +6959,10 @@ safeTrackListener(fsdb.collection('members').onSnapshot(snap => {
 if (shouldAcceptCloudData('members')) {
 
 if (snap.empty) {
-
+// 🛡️ حماية التخزين المحلي: منع حذف المخدومين عند الفتح أوفلاين
+if (navigator.onLine && snap.metadata && !snap.metadata.fromCache && (!members || members.length === 0)) {
 members = [];
-
-localStorage.removeItem(STORAGE_KEYS.MEMBERS);
-
+}
 } else {
 
 let rawList = snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
@@ -6852,13 +7117,15 @@ safeTrackListener(fsdb.collection('servants').onSnapshot(snap => {
 
 if (shouldAcceptCloudData('servants')) {
 
-servants = snap.empty ? [] : snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
-
+if (!snap.empty) {
+servants = snap.docs.map(d => Object.assign({}, d.data(), { id: d.data().id || d.id }));
 localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+}
 
-// 🛡️ الحارس الأمني: منع أي تلاعب بالصلاحيات عبر الـ Console ومطابقتها بقاعدة البيانات
+// 🛡️ الحارس الأمني: يعمل فقط عند الاتصال الحقيقي بالسحابة وليس في وضع عدم الاتصال (الأوفلاين)
+const isTrulyOnline = navigator.onLine && snap.metadata && !snap.metadata.fromCache && snap.docs.length > 0;
 
-if (currentUser && currentUser.code !== 'admin' && !currentUser.isSuperAdmin && (currentUser.name || '').trim() !== 'عادل جورج') {
+if (isTrulyOnline && currentUser && currentUser.code !== 'admin' && !currentUser.isSuperAdmin && !currentUser.offlineSession && (currentUser.name || '').trim() !== 'عادل جورج') {
 
 let cloudRecord = servants.find(s =>
 

@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/app-theme.css">
     <!-- مكتبة QR Code المعتمدة في لوحة الخدام -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="js/html2pdf.bundle.min.js"></script>
     <style>
         :root {
@@ -676,11 +677,14 @@
 
     <!-- أزرار الإجراءات والتحكم -->
     <div class="action-bar">
+        <button type="button" class="btn-action" id="btnDownloadAsImage" onclick="saveCardAsDirectImage()" style="background: linear-gradient(135deg, #0984e3, #0056b3); color: white; font-weight: 800; font-size: 15px; padding: 12px 22px; border-radius: 14px; box-shadow: 0 4px 15px rgba(9, 132, 227, 0.35);">
+            <i class="fa-solid fa-image me-1"></i> حفظ الكارنيه كصورة للموبايل (HD Image) 🖼️
+        </button>
         <button type="button" class="btn-action" id="btnDownloadImg" onclick="downloadBadgeAsImage()" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
-            <i class="fa-solid fa-file-arrow-down me-1"></i> تحميل الكارنيه (PDF / HD Image) 📥
+            <i class="fa-solid fa-file-pdf me-1"></i> تحميل الكارنيه (PDF) 📄
         </button>
         <button type="button" class="btn-action btn-print" onclick="window.print()">
-            <i class="fa-solid fa-print"></i> طباعة / حفظ الكارنيه
+            <i class="fa-solid fa-print"></i> طباعة الكارنيه 🖨️
         </button>
         <button type="button" class="btn-action btn-back btn-smart-back" data-smart-back data-fallback="student.html">
             <i class="fa-solid fa-arrow-right"></i> العودة لبوابة المخدوم
@@ -943,6 +947,94 @@
             document.getElementById('qrCodeTarget').innerHTML = `<span class="badge bg-warning text-dark">خطأ في الـ QR</span>`;
         }
     }
+
+    async function saveCardAsDirectImage() {
+        const cardEl = document.getElementById('studentIdCard') || document.querySelector('.card-frame') || document.getElementById('singleView');
+        if (!cardEl) return window.print();
+
+        const studentName = (document.getElementById('ui-student-name')?.textContent || 'مخدوم').trim();
+        const studentCode = (document.getElementById('ui-student-code')?.textContent || 'كود').trim();
+        const fileName = `كارنيه_${studentName}_${studentCode}.png`;
+
+        const btn = document.getElementById('btnDownloadAsImage');
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تجهيز الصورة بجودة فائقة...';
+            btn.disabled = true;
+        }
+
+        try {
+            let h2c = window.html2canvas;
+            if (!h2c && typeof html2pdf !== 'undefined' && window.html2pdf.html2canvas) {
+                h2c = window.html2pdf.html2canvas;
+            }
+
+            if (typeof h2c === 'function') {
+                const canvas = await h2c(cardEl, {
+                    scale: 3, // دقة 300 DPI فائقة النقاء للأجهزة الذكية
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0
+                });
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) throw new Error("تعذر إنشاء ملف الصورة");
+
+                    // إتاحة الحفظ المباشر لمعرض صور الموبايل (Web Share)
+                    const file = new File([blob], fileName, { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: `كارنيه ${studentName}`,
+                                text: `كارنيه الحضور الذكي المعتمد - ${studentName}`
+                            });
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.innerHTML = originalHtml;
+                            }
+                            return;
+                        } catch (shareErr) {}
+                    }
+
+                    // التحميل المباشر كصورة في هاتف المخدوم
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> تم حفظ الصورة بنجاح! 🎉';
+                        setTimeout(() => { btn.innerHTML = originalHtml; }, 3000);
+                    }
+                }, 'image/png', 1.0);
+            } else {
+                downloadBadgeAsImage();
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        } catch (err) {
+            console.error("فشل حفظ الكارنيه كصورة:", err);
+            downloadBadgeAsImage();
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+    }
+    window.saveCardAsDirectImage = saveCardAsDirectImage;
 
     function downloadBadgeAsImage() {
         const cardEl = document.querySelector('.card-frame') || document.getElementById('singleView');
