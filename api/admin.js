@@ -77,6 +77,41 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, message: 'تم حذف المخدوم من السحابة بنجاح!' });
         }
 
+        // 2c. حذف خادم نهائياً من السحابة وقواعد البيانات
+        if (action === 'delete_servant') {
+            const { code, id, phone } = payload || {};
+            const cleanCode = String(code || '').trim();
+            const cleanId = String(id || '').trim();
+            const cleanPhone = String(phone || '').trim();
+
+            const batch = db.batch();
+            let touched = false;
+
+            if (cleanCode) {
+                batch.delete(db.collection('servants').doc(cleanCode));
+                touched = true;
+            }
+            if (cleanId && cleanId !== cleanCode) {
+                batch.delete(db.collection('servants').doc(cleanId));
+                touched = true;
+            }
+            if (touched) {
+                await batch.commit();
+            }
+
+            // فحص إضافي بالهاتف إن لم يتوفر كود أو ID
+            if (cleanPhone && !cleanCode) {
+                const snap = await db.collection('servants').where('phone', '==', cleanPhone).get();
+                if (!snap.empty) {
+                    const phoneBatch = db.batch();
+                    snap.forEach(d => phoneBatch.delete(d.ref));
+                    await phoneBatch.commit();
+                }
+            }
+
+            return res.status(200).json({ success: true, message: 'تم حذف الخادم من السحابة بنجاح!' });
+        }
+
         // 2b. حذف يوم حضور أو تنظيف الأيام التجريبية السابقة لانطلاق الخدمة
         if (action === 'delete_attendance_date') {
             const { date } = payload || {};

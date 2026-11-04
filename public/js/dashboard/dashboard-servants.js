@@ -423,7 +423,7 @@ tr.innerHTML = `
 
 <td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', ${s.id}, '${escapeHtml(s.name)}')">🕘</button></td>
 
-<td data-label="حذف" class="admin-only"><button class="btn-mini btn-danger" onclick="deleteServant(${s.id})">حذف</button></td>
+<td data-label="حذف" class="admin-only"><button class="btn-mini btn-danger" onclick="deleteServant('${escapeHtml(s.code || s.id)}')">حذف 🗑️</button></td>
 
 `;
 
@@ -737,64 +737,168 @@ function editServant(id) {
     openEditServantModal(id);
 }
 
-function deleteServant(id) {
+// ==========================================
+// 🗑️ وظائف حذف الخدام (فردي وجماعي) مع حماية الأدمن والمزامنة السحابية
+// ==========================================
+async function deleteServant(id) {
+    if (!id && id !== 0) return alert("⚠️ لم يتم تحديد كود أو معرف الخادم المطلوب حذفه!");
+    const targetKey = String(id).trim();
+    let s = servants.find(x => String(x.id || '').trim() === targetKey || String(x.code || '').trim() === targetKey);
+    if (!s) {
+        return alert("⚠️ تعذر العثور على سجل هذا الخادم في القائمة!");
+    }
 
-let s = servants.find(x => x.id === id);
+    const sName = s.name || targetKey;
+    const sCode = String(s.code || s.id || targetKey).trim();
+    const sId = String(s.id || '').trim();
 
-let sName = s ? s.name : id;
+    // حماية حساب الأدمن الرئيسي
+    const isAdminAccount = (s.role === 'admin' || s.permission === 'admin' || sCode === '101');
+    if (isAdminAccount) {
+        const currentAdmin = (typeof AuthClient !== 'undefined' && AuthClient.getActiveUser) ? AuthClient.getActiveUser() : null;
+        if (currentAdmin && (String(currentAdmin.code || '').trim() === sCode || String(currentAdmin.id || '').trim() === sId)) {
+            return alert("⛔ لا يمكنك حذف حساب الأدمن الخاص بك وأنت مسجل الدخول به حالياً لمنع قفل المنظومة!");
+        }
+        if (!confirm(`⚠️ تنبيه أمني مشدد: الخادم [${sName}] مسجل بصلاحية أمين خدمة (Admin)!\nهل أنت متأكد تماماً من رغبتك في حذفه نهائياً من المنظومة؟`)) {
+            return;
+        }
+    } else {
+        if (!confirm(`هل أنت متأكد من حذف الخادم [${sName}] (كود: ${sCode}) نهائياً من المنظومة والسحابة؟`)) {
+            return;
+        }
+    }
 
-if (confirm("هل أنت متأكد من حذف هذا الخادم؟")) {
+    // حفظ نسخة استرجاع في السجل
+    if (typeof saveVersionSnapshot === 'function') {
+        saveVersionSnapshot('servant', s.id || s.code, sName, Object.assign({}, s));
+    }
 
-if (s) saveVersionSnapshot('servant', s.id, s.name, Object.assign({}, s));
+    // إزالة الخادم من الذاكرة المحلية
+    servants = servants.filter(x => {
+        const xc = String(x.code || '').trim();
+        const xi = String(x.id || '').trim();
+        return xc !== sCode && xi !== sCode && xc !== sId && xi !== sId && xc !== targetKey && xi !== targetKey;
+    });
 
-servants = servants.filter(s => s.id !== id);
+    localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
 
-localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+    // حذف فوري من سحابة Firestore إن كانت مفعلة
+    if (isFirebaseActive && fsdb) {
+        try {
+            if (sCode) await fsdb.collection('servants').doc(sCode).delete();
+            if (sId && sId !== sCode) await fsdb.collection('servants').doc(sId).delete();
+        } catch (errCloud) {
+            console.warn("Direct Firestore servant delete warning:", errCloud);
+        }
+    }
 
-syncToCloud('servants', servants);
+    // إرسال طلب حذف إلى Backend Admin API للتأكيد والمزامنة الشاملة
+    try {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (token) {
+            await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    action: 'delete_servant',
+                    payload: { code: sCode, id: sId, phone: s.phone }
+                })
+            }).catch(() => {});
+        }
+    } catch (e) {}
 
-logActivity("حذف خادم", sName, "تم الحذف من القائمة");
+    logActivity("حذف خادم", sName, `تم حذف الخادم كود (${sCode}) نهائياً من السحابة والمنظومة`);
+    renderServantsTable();
+    renderServantsAttendanceTable();
+    populatePlanServantsDropdown();
+    if (typeof checkUpcomingBirthdays === 'function') checkUpcomingBirthdays();
+    if (typeof updateRoleUI === 'function') updateRoleUI();
 
-renderServantsTable();
-
-renderServantsAttendanceTable();
-
-}
-
+    alert(`✅ تم حذف الخادم [${sName}] بنجاح تام من المنظومة وسحابة Firestore.`);
 }
 
 async function clearAllServants() {
+    let pwd = prompt("⚠️ تحذير أمني شديد: سيتم حذف جميع حسابات الخدام ما عدا الأدمن الرئيسي (101)!\nأدخل كلمة مرور أمين الخدمة للتأكيد:");
+    if (!pwd) return;
 
-let pwd = prompt("⚠️ تحذير: سيتم حذف جميع الخدام ما عدا الأدمن الرئيسي!\nأدخل كلمة مرور الأدمن:");
+    let pwdHash = await hashPassword(pwd);
+    if (!isAdminPasswordValid(pwdHash, pwd)) {
+        return alert("❌ كلمة المرور غير صحيحة! تم إلغاء العملية.");
+    }
 
-if (!pwd) return;
+    const nonAdmins = servants.filter(s => s.role !== 'admin' && s.permission !== 'admin' && String(s.code || s.id).trim() !== '101');
+    if (nonAdmins.length === 0) {
+        return alert("لا يوجد خدام غير رئيسيين لحذفهم. الحسابات المتبقية هي حسابات الأدمن الرئيسي فقط.");
+    }
 
-let pwdHash = await hashPassword(pwd);
+    if (!confirm(`⚠️ هل أنت متأكد نهائياً من حذف (${nonAdmins.length}) خادم من المنظومة وسحابة Firestore؟\nلن يمكن التراجع عن هذا الإجراء إلا باستعادة نسخة احتياطية.`)) {
+        return;
+    }
 
-if (isAdminPasswordValid(pwdHash, pwd)) {
+    // حفظ لقطة أمان لكافة الخدام قبل الحذف
+    if (typeof saveVersionSnapshot === 'function') {
+        saveVersionSnapshot('servants_bulk_backup', 'all', 'تفريغ جماعي للخدام', servants.slice());
+    }
 
-if (confirm("هل أنت متأكد؟")) {
+    // إبقاء الأدمن الرئيسي
+    servants = servants.filter(s => s.role === 'admin' || s.permission === 'admin' || String(s.code || s.id).trim() === '101');
+    localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
 
-servants = servants.filter(s => s.role === 'admin' || s.permission === 'admin');
+    // حذف الخدام غير الأدمن من سحابة Firestore مباشرة
+    if (isFirebaseActive && fsdb) {
+        for (const s of nonAdmins) {
+            const sc = String(s.code || s.id || '').trim();
+            if (sc) {
+                fsdb.collection('servants').doc(sc).delete().catch(() => {});
+            }
+        }
+    }
 
-localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+    // إرسال التحديث للسحابة عبر API
+    try {
+        const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+        if (token) {
+            await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({
+                    action: 'update_servants_batch',
+                    payload: { servants: servants }
+                })
+            }).catch(() => {});
+        }
+    } catch (e) {}
 
-syncToCloud('servants', servants);
+    logActivity("حذف الخدام", "تصفية جماعية", `حذف ${nonAdmins.length} خادم مع الإبقاء على الأدمن`);
+    renderServantsTable();
+    renderServantsAttendanceTable();
+    populatePlanServantsDropdown();
+    if (typeof checkUpcomingBirthdays === 'function') checkUpcomingBirthdays();
+    if (typeof updateRoleUI === 'function') updateRoleUI();
 
-logActivity("حذف الخدام", "تصفية جماعية", "حذف كافة حسابات الخدام ما عدا الأدمن");
-
-renderServantsTable();
-
-alert("✅ تم حذف باقي الخدام بنجاح.");
-
+    alert(`✅ تم حذف (${nonAdmins.length}) خادم بنجاح من السحابة والمنظومة، وتم الإبقاء على حساب الأدمن الرئيسي.`);
 }
 
-} else {
+async function clearTodayServantsAttendance() {
+    let dateToClear = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : today;
+    let pwd = prompt(`⚠️ تنبيه: أنت على وشك مسح سجل حضور الخدام ليوم (${dateToClear}) بالكامل!\nأدخل كلمة مرور أمين الخدمة للتأكيد:`);
+    if (!pwd) return;
 
-alert("❌ كلمة المرور غير صحيحة.");
+    let pwdHash = await hashPassword(pwd);
+    if (!isAdminPasswordValid(pwdHash, pwd)) {
+        return alert("❌ كلمة المرور غير صحيحة! تم إلغاء العملية.");
+    }
 
-}
-
+    if (confirm(`هل أنت متأكد نهائياً من مسح كافة تسجيلات حضور الخدام ليوم (${dateToClear})؟`)) {
+        if (typeof servantsAttendance !== 'undefined') {
+            servantsAttendance[dateToClear] = [];
+            localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
+            syncToCloud('servants_attendance', servantsAttendance);
+        }
+        logActivity("مسح حضور الخدام", "تصفية يوم", `مسح سجل حضور الخدام ليوم (${dateToClear})`);
+        renderServantsAttendanceTable();
+        alert(`✅ تم مسح سجل حضور الخدام ليوم (${dateToClear}) بنجاح.`);
+    }
 }
 
 function populatePlanServantsDropdown() {
@@ -901,11 +1005,14 @@ checkLocalStorageUsage();
 
 // Explicit Window Exports
 if (typeof window !== 'undefined') {
-  window.openEditServantModal = openEditServantModal;
-window.closeEditServantModal = closeEditServantModal;
-window.saveEditedServant = saveEditedServant;
-window.editServant = editServant;
-window.renderServantsTable = renderServantsTable;
+    window.openEditServantModal = openEditServantModal;
+  window.closeEditServantModal = closeEditServantModal;
+  window.saveEditedServant = saveEditedServant;
+  window.editServant = editServant;
+  window.deleteServant = deleteServant;
+  window.clearAllServants = clearAllServants;
+  window.clearTodayServantsAttendance = clearTodayServantsAttendance;
+  window.renderServantsTable = renderServantsTable;
   window.renderServantsAttendanceTable = renderServantsAttendanceTable;
   window.registerActiveSession = registerActiveSession;
   window.listenToActiveSessions = listenToActiveSessions;

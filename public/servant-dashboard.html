@@ -70,6 +70,9 @@ window.closeAttendanceExportModal = window.closeAttendanceExportModal || functio
 window.openEditServantModal = window.openEditServantModal || function() {};
 window.closeEditServantModal = window.closeEditServantModal || function() {};
 window.saveEditedServant = window.saveEditedServant || function() {};
+window.deleteServant = window.deleteServant || function() {};
+window.clearAllServants = window.clearAllServants || function() {};
+window.clearTodayServantsAttendance = window.clearTodayServantsAttendance || function() {};
 
 
 window.appErrorLogs = [];
@@ -2517,7 +2520,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <h3>جدول التزام الخدام السنوي واليومي</h3>
 
-<button class="btn-danger admin-only" onclick="clearAllServants()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">🗑️ حذف جميع الخدام</button>
+<button class="btn-danger admin-only" onclick="clearTodayServantsAttendance()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">مسح حضور اليوم للخدام 🗑️</button>
 
 </div>
 
