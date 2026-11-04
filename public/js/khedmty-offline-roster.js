@@ -1083,7 +1083,7 @@
   {
     "id": 101,
     "name": "عادل جورج",
-    "phone": "01200000000",
+    "phone": "01220683691",
     "role": "admin",
     "permission": "admin",
     "code": "admin",
@@ -1116,7 +1116,7 @@
   {
     "id": 104,
     "name": "رباب سمير",
-    "phone": "01220683691",
+    "phone": "",
     "role": "servant",
     "permission": "attend_only",
     "code": "srv_104",
