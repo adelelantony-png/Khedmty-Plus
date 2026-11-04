@@ -67,6 +67,9 @@ window.openManualAttendanceModal = window.openManualAttendanceModal || function(
 window.closeManualAttendanceModal = window.closeManualAttendanceModal || function() {};
 window.openAttendanceExportModal = window.openAttendanceExportModal || function() {};
 window.closeAttendanceExportModal = window.closeAttendanceExportModal || function() {};
+window.openEditServantModal = window.openEditServantModal || function() {};
+window.closeEditServantModal = window.closeEditServantModal || function() {};
+window.saveEditedServant = window.saveEditedServant || function() {};
 
 
 window.appErrorLogs = [];
@@ -4579,6 +4582,90 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 </div>
 
 <!-- نافذة قائمة الحضور اليدوي -->
+
+
+<!-- نافذة تعديل بيانات الخادم الشاملة -->
+<div id="editServantModal" class="modal" style="display:none; z-index:4600;">
+  <div class="modal-content" style="max-width:560px; text-align:right;">
+    <span class="close-btn" onclick="closeEditServantModal()">&times;</span>
+    <h3 style="margin-top:0; color:var(--primary); border:none; display:flex; align-items:center; gap:8px;">
+      <span>✏️</span> تعديل بيانات وصلاحيات الخادم
+    </h3>
+    
+    <input type="hidden" id="edit_s_original_id">
+    
+    <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">كود الخادم:</label>
+        <input type="text" id="edit_s_code" placeholder="مثال: 101" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+      
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">اسم الخادم الكامل:</label>
+        <input type="text" id="edit_s_name" placeholder="الاسم الكامل" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+      
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">رقم الهاتف (الواتساب):</label>
+        <input type="text" id="edit_s_phone" placeholder="01xxxxxxxxx" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+      
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">تاريخ الميلاد:</label>
+        <input type="date" id="edit_s_dob" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+      
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">الصلاحية الأمنية في المنظومة:</label>
+        <select id="edit_s_permission" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+          <option value="admin">أمين خدمة (تحكم كامل admin)</option>
+          <option value="full">خادم متكامل (حضور وتعديل full)</option>
+          <option value="scanner_only">مسح حضور بالكاميرا فقط (scanner_only)</option>
+          <option value="attend_only">تسجيل حضور فقط (attend_only)</option>
+          <option value="view_only">مشاهدة واطلاع فقط (view_only)</option>
+          <option value="developer">مطور نظام (developer)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">الصفة / الدور في الخدمة:</label>
+        <input type="text" id="edit_s_roleType" placeholder="مثال: أمين خدمة، خادم أسرة" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">المرحلة المسندة:</label>
+        <select id="edit_s_stage" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+          <option value="عام">عام (مشترك للفرقتين)</option>
+          <option value="الفرقة الأولى">الفرقة الأولى (سنة أولى)</option>
+          <option value="الفرقة الثانية">الفرقة الثانية (سنة ثانية)</option>
+        </select>
+      </div>
+
+      <div>
+        <label style="font-weight:bold; font-size:12px; color:#334155;">أب الاعتراف:</label>
+        <input type="text" id="edit_s_confessor" placeholder="أب الاعتراف" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+      </div>
+
+      <div style="grid-column:1/-1;">
+        <label style="font-weight:bold; font-size:12px; color:#334155;">حالة الحساب:</label>
+        <select id="edit_s_status" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+          <option value="active">نشط 🟢 (مفعل بالخدمة)</option>
+          <option value="inactive">موقوف 🔴 (معطل مؤقتاً)</option>
+        </select>
+      </div>
+
+      <div style="grid-column:1/-1; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px; border-radius:8px; margin-top:5px;">
+        <label style="font-weight:bold; color:#166534; font-size:12px;">🔑 تعيين / تغيير كلمة مرور الخادم (اتركها فارغة إذا لم ترغب في التعديل):</label>
+        <input type="password" id="edit_s_password" placeholder="اكتب كلمة مرور جديدة للخادم..." autocomplete="new-password" style="width:100%; padding:8px; border:1px solid #86efac; border-radius:6px; margin-top:4px;">
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <button type="button" class="btn-success" onclick="saveEditedServant()" style="flex:1; margin:0; font-weight:bold; font-size:14px; padding:12px; border-radius:8px; cursor:pointer;">حفظ كافة التعديلات سحابياً ومحلياً 💾</button>
+      <button type="button" class="btn-mini" onclick="closeEditServantModal()" style="background:#b2bec3; color:#2d3436; margin:0; padding:12px 20px; border-radius:8px; cursor:pointer;">إلغاء ❌</button>
+    </div>
+  </div>
+</div>
 
 <div id="manualAttendanceModal" class="modal" style="z-index:4000;">
 

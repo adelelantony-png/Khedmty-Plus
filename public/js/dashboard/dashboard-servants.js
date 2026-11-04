@@ -419,7 +419,7 @@ tr.innerHTML = `
 
 : `<button class="btn-mini btn-purple" onclick="linkServantToCloudAuth(${s.id})">ربط سحابي 🔐</button>`}</td>
 
-<td data-label="تعديل" class="admin-only"><button class="btn-mini btn-warning" onclick="editServant(${s.id})">تعديل</button></td>
+<td data-label="تعديل" class="admin-only"><button class="btn-mini btn-warning" onclick="openEditServantModal('${escapeHtml(s.code || s.id)}')">تعديل</button></td>
 
 <td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', ${s.id}, '${escapeHtml(s.name)}')">🕘</button></td>
 
@@ -597,72 +597,144 @@ document.getElementById('newServantCode').value = '';
 
 }
 
+// ==========================================
+// ✏️ نافذة التعديل الشاملة لكافة بيانات وصلاحيات الخدام
+// ==========================================
+function openEditServantModal(id) {
+    if (!servants || servants.length === 0) return alert("لا يوجد خدام مسجلون حالياً.");
+    let s = servants.find(x => String(x.id) === String(id) || String(x.code) === String(id));
+    if (!s) return alert("تعذر العثور على بيانات الخادم!");
+
+    const origIdEl = document.getElementById('edit_s_original_id');
+    const codeEl = document.getElementById('edit_s_code');
+    const nameEl = document.getElementById('edit_s_name');
+    const phoneEl = document.getElementById('edit_s_phone');
+    const dobEl = document.getElementById('edit_s_dob');
+    const permEl = document.getElementById('edit_s_permission');
+    const roleTypeEl = document.getElementById('edit_s_roleType');
+    const stageEl = document.getElementById('edit_s_stage');
+    const confessorEl = document.getElementById('edit_s_confessor');
+    const statusEl = document.getElementById('edit_s_status');
+    const passEl = document.getElementById('edit_s_password');
+
+    if (origIdEl) origIdEl.value = s.id || s.code || '';
+    if (codeEl) codeEl.value = s.code || s.id || '';
+    if (nameEl) nameEl.value = s.name || '';
+    if (phoneEl) phoneEl.value = (s.phone || '').toString().trim().replace(/\.0$/, '');
+
+    let cleanDob = (s.dob || '').toString().trim().split(' ')[0].split('T')[0];
+    if (dobEl) dobEl.value = cleanDob || '';
+
+    let perm = s.permission || s.role || 'full';
+    if (permEl) permEl.value = perm;
+
+    if (roleTypeEl) roleTypeEl.value = s.roleType || (perm === 'admin' ? 'أمين خدمة' : 'خادم');
+    if (stageEl) stageEl.value = s.stage || 'عام';
+    if (confessorEl) confessorEl.value = s.confessor || 'أبونا';
+    if (statusEl) statusEl.value = s.status || 'active';
+    if (passEl) passEl.value = '';
+
+    const modal = document.getElementById('editServantModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
+}
+
+function closeEditServantModal() {
+    const modal = document.getElementById('editServantModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+}
+
+async function saveEditedServant() {
+    const origId = document.getElementById('edit_s_original_id')?.value;
+    let s = servants.find(x => String(x.id) === String(origId) || String(x.code) === String(origId));
+    if (!s) return alert("خطأ: لم يتم العثور على سجل الخادم!");
+
+    const newCode = (document.getElementById('edit_s_code')?.value || '').trim();
+    const newName = (document.getElementById('edit_s_name')?.value || '').trim();
+    const rawPhone = (document.getElementById('edit_s_phone')?.value || '').trim();
+    const newPhone = normalizePhoneNumber(rawPhone) || rawPhone;
+    const newDob = (document.getElementById('edit_s_dob')?.value || '').trim();
+    const newPerm = document.getElementById('edit_s_permission')?.value || 'full';
+    const newRoleType = (document.getElementById('edit_s_roleType')?.value || '').trim() || 'خادم';
+    const newStage = document.getElementById('edit_s_stage')?.value || 'عام';
+    const newConfessor = (document.getElementById('edit_s_confessor')?.value || '').trim();
+    const newStatus = document.getElementById('edit_s_status')?.value || 'active';
+    const newPass = (document.getElementById('edit_s_password')?.value || '').trim();
+
+    if (!newCode) return alert("⚠️ يرجى إدخال كود الخادم!");
+    if (!newName) return alert("⚠️ يرجى إدخال اسم الخادم الكامل!");
+
+    // فحص عدم تكرار كود الخادم مع شخص آخر
+    const dupCode = servants.some(x => String(x.id) !== String(s.id) && String(x.code) !== String(s.code) && String(x.code || x.id).trim() === newCode);
+    if (dupCode) return alert(`⛔ تنبيه: كود الخادم [${newCode}] مسجل بالفعل لخادم آخر!`);
+
+    // فحص عدم تكرار الاسم مع شخص آخر
+    const dupName = servants.some(x => String(x.id) !== String(s.id) && String(x.code) !== String(s.code) && (x.name || '').trim().toLowerCase() === newName.toLowerCase());
+    if (dupName) return alert(`⛔ تنبيه: الاسم [${newName}] مسجل بالفعل لخادم آخر!`);
+
+    // فحص عدم تكرار رقم الهاتف
+    if (newPhone) {
+        const dupPhone = servants.some(x => String(x.id) !== String(s.id) && String(x.code) !== String(s.code) && normalizePhoneNumber(x.phone) === newPhone);
+        if (dupPhone) return alert(`⛔ تنبيه: رقم الهاتف [${newPhone}] مسجل بالفعل لخادم آخر!`);
+    }
+
+    const oldSnapshot = Object.assign({}, s);
+    saveVersionSnapshot('servant', s.id, oldSnapshot.name, oldSnapshot);
+
+    // تطبيق التعديلات
+    s.code = newCode;
+    s.name = newName;
+    s.phone = newPhone;
+    s.dob = newDob;
+    s.permission = newPerm;
+    s.role = (newPerm === 'admin') ? 'admin' : 'servant';
+    s.roleType = newRoleType;
+    s.stage = newStage;
+    s.confessor = newConfessor;
+    s.status = newStatus;
+
+    if (newPass) {
+        if (typeof hashPassword === 'function') {
+            try { s.password = await hashPassword(newPass); } catch (e) { s.password = newPass; }
+        } else {
+            s.password = newPass;
+        }
+    }
+
+    // حفظ في التخزين المحلي
+    localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
+
+    // مزامنة فورية مع سحابة Firestore
+    if (isFirebaseActive && fsdb) {
+        try {
+            await fsdb.collection('servants').doc(String(s.code || s.id)).set(s, { merge: true });
+        } catch (errCloud) {
+            console.warn("Cloud single save err:", errCloud);
+            syncToCloud('servants', servants);
+        }
+    } else {
+        syncToCloud('servants', servants);
+    }
+
+    // تحديث كافة الجداول والواجهات
+    renderServantsTable();
+    renderServantsAttendanceTable();
+    populatePlanServantsDropdown();
+    checkUpcomingBirthdays();
+    updateRoleUI();
+
+    closeEditServantModal();
+    logActivity("تعديل شامل لخادم", s.name, `كود: ${s.code} | هاتف: ${s.phone} | صلاحية: ${s.permission}`);
+    alert(`✅ تم حفظ وتحديث كافة بيانات الخادم [${s.name}] بنجاح تام سحابياً ومحلياً!`);
+}
+
 function editServant(id) {
-
-let s = servants.find(x => String(x.id) === String(id) || String(x.code) === String(id));
-
-if (!s) return;
-
-let oldSnapshot = Object.assign({}, s);
-
-let newName = prompt("تعديل اسم الخادم:", s.name);
-
-if (newName && newName.trim()) {
-
-let checkName = newName.trim();
-
-let dupName = servants.some(x => String(x.id) !== String(id) && String(x.code) !== String(id) && (x.name || '').trim().toLowerCase() === checkName.toLowerCase());
-
-if (dupName) {
-
-return alert(`⛔ تنبيه: الاسم "${checkName}" مسجل بالفعل لخادم آخر ولا يقبل التكرار!`);
-
-}
-
-s.name = checkName;
-
-}
-
-let newPhone = prompt("تعديل رقم الهاتف:", s.phone);
-
-if (newPhone && newPhone.trim()) {
-
-let checkPhone = normalizePhoneNumber(newPhone.trim()) || newPhone.trim();
-
-let dupPhone = servants.some(x => String(x.id) !== String(id) && String(x.code) !== String(id) && normalizePhoneNumber(x.phone) === checkPhone);
-
-if (dupPhone) {
-
-return alert(`⛔ تنبيه: رقم الهاتف "${checkPhone}" مسجل بالفعل لخادم آخر ولا يمكن تكراره!`);
-
-}
-
-s.phone = checkPhone;
-
-}
-
-saveVersionSnapshot('servant', s.id, oldSnapshot.name, oldSnapshot);
-
-localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(servants));
-
-if (isFirebaseActive && fsdb) {
-
-fsdb.collection('servants').doc(String(s.code || s.id)).set(s, { merge: true })
-
-.catch(() => syncToCloud('servants', servants));
-
-} else {
-
-syncToCloud('servants', servants);
-
-}
-
-logActivity("تعديل خادم", s.name, `هاتف: ${s.phone}`);
-
-renderServantsTable();
-
-renderServantsAttendanceTable();
-
+    openEditServantModal(id);
 }
 
 function deleteServant(id) {
@@ -829,7 +901,11 @@ checkLocalStorageUsage();
 
 // Explicit Window Exports
 if (typeof window !== 'undefined') {
-  window.renderServantsTable = renderServantsTable;
+  window.openEditServantModal = openEditServantModal;
+window.closeEditServantModal = closeEditServantModal;
+window.saveEditedServant = saveEditedServant;
+window.editServant = editServant;
+window.renderServantsTable = renderServantsTable;
   window.renderServantsAttendanceTable = renderServantsAttendanceTable;
   window.registerActiveSession = registerActiveSession;
   window.listenToActiveSessions = listenToActiveSessions;
