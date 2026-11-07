@@ -658,13 +658,13 @@ function renderRadarAbsenceTableBody() {
 
         return `
             <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : 'transparent'};">
-                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #0c2461;">${escapeHtml(m.name)}</td>
-                <td data-label="الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(m.code)}</td>
-                <td data-label="الفرقة / المرحلة" style="padding: 8px;">${escapeHtml(m.stage)}</td>
-                <td data-label="النوع" style="padding: 8px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
-                <td data-label="أسابيع الغياب" style="padding: 8px;">${badgeHtml}</td>
-                <td data-label="الهاتف" style="padding: 8px;">${m.phone || '-'}</td>
-                <td data-label="الإجراء الرعوي" style="padding: 8px;">
+                <td data-label="المخدوم" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #0c2461; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</td>
+                <td data-label="الكود" style="padding: 8px 4px; font-weight: bold; font-family: monospace;">${escapeHtml(m.code)}</td>
+                <td data-label="الفرقة / المرحلة" style="padding: 8px 4px; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(m.stage)}">${escapeHtml(m.stage)}</td>
+                <td data-label="النوع" style="padding: 8px 4px;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
+                <td data-label="أسابيع الغياب" style="padding: 8px 4px;">${badgeHtml}</td>
+                <td data-label="الهاتف" style="padding: 8px 4px; font-family: monospace; font-size: 0.8rem; white-space: nowrap;" dir="ltr">${m.phone || '-'}</td>
+                <td data-label="الإجراء الرعوي" style="padding: 8px 4px;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${m.phone ? `
                             <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this, '${escapeHtml(m.gender || '')}')" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -2721,35 +2721,35 @@ function renderAttendanceExportReport() {
                         المعروض: ${list.length} من أصل ${totalCount} مخدوم
                     </span>
                 </div>
-                <div class="table-responsive-wrapper">
-                    <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:center;">
+                <div class="table-responsive-wrapper" style="width:100%; overflow-x:hidden !important; margin:0; border:none; border-radius:0;">
+                    <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:0.82rem; text-align:center;">
                         <thead>
                             <tr style="background:#f8fafc; color:#334155; border-bottom:2px solid #e2e8f0; font-weight:900;">
-                                <th style="padding:10px 6px; width:40px;">م</th>
-                                <th style="padding:10px 8px; width:65px;">الكود</th>
-                                <th style="padding:10px 14px; text-align:right;">اسم المخدوم</th>
-                                <th style="padding:10px 10px; width:150px;">حالة الحضور</th>
-                                <th style="padding:10px 8px; width:90px;">وقت الدخول</th>
-                                <th style="padding:10px 12px; text-align:right;">الملاحظة الرعوية / العذر</th>
-                                <th style="padding:10px 10px; width:120px;">الهاتف</th>
+                                <th style="padding:9px 4px; width:4.5%;">م</th>
+                                <th style="padding:9px 4px; width:8%;">الكود</th>
+                                <th style="padding:9px 8px; width:25%; text-align:right;">اسم المخدوم</th>
+                                <th style="padding:9px 6px; width:17%;">حالة الحضور</th>
+                                <th style="padding:9px 4px; width:11%;">وقت الدخول</th>
+                                <th style="padding:9px 8px; width:20.5%; text-align:right;">الملاحظة الرعوية / العذر</th>
+                                <th style="padding:9px 4px; width:14%;">الهاتف</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${list.map((s, idx) => `
                                 <tr style="border-bottom:1px solid #f1f5f9; background:${idx % 2 === 0 ? '#ffffff' : '#fcfcfc'}; transition:background 0.15s ease;">
-                                    <td style="padding:9px 6px; color:#94a3b8; font-weight:bold; font-size:0.82rem;">${idx + 1}</td>
-                                    <td style="padding:9px 8px; font-weight:800; color:#475569; font-family:monospace;">${s.code}</td>
-                                    <td style="padding:9px 14px; text-align:right; font-weight:900; color:#0f172a;">${s.name}</td>
-                                    <td style="padding:9px 10px;">
-                                        <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:999px; font-weight:800; font-size:0.8rem; color:${s.color}; background:${s.bgColor}; border:1.5px solid ${s.color}33;">
+                                    <td style="padding:7px 4px; color:#94a3b8; font-weight:bold; font-size:0.78rem;">${idx + 1}</td>
+                                    <td style="padding:7px 4px; font-weight:800; color:#475569; font-family:monospace; font-size:0.8rem;">${s.code}</td>
+                                    <td style="padding:7px 8px; text-align:right; font-weight:900; color:#0f172a; font-size:0.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.name}">${s.name}</td>
+                                    <td style="padding:7px 4px;">
+                                        <span style="display:inline-flex; align-items:center; justify-content:center; gap:3px; padding:2px 8px; border-radius:999px; font-weight:800; font-size:0.74rem; white-space:nowrap; color:${s.color}; background:${s.bgColor}; border:1px solid ${s.color}33; max-width:100%; overflow:hidden; text-overflow:ellipsis;">
                                             ${s.icon} ${s.label}
                                         </span>
                                     </td>
-                                    <td style="padding:9px 8px; color:#1e293b; font-weight:bold; font-size:0.84rem;" dir="ltr">${s.time || '-'}</td>
-                                    <td style="padding:9px 12px; text-align:right; font-size:0.82rem; font-weight:bold; color:${s.status === 'excused' ? '#0369a1' : (s.status === 'severe_delay' ? '#b91c1c' : (s.status === 'minor_delay' ? '#b45309' : (s.status === 'absent' ? '#991b1b' : '#15803d')))}">
+                                    <td style="padding:7px 4px; color:#1e293b; font-weight:bold; font-size:0.78rem; white-space:nowrap;" dir="ltr">${s.time || '-'}</td>
+                                    <td style="padding:7px 8px; text-align:right; font-size:0.78rem; font-weight:bold; color:${s.status === 'excused' ? '#0369a1' : (s.status === 'severe_delay' ? '#b91c1c' : (s.status === 'minor_delay' ? '#b45309' : (s.status === 'absent' ? '#991b1b' : '#15803d')))}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.note}">
                                         ${s.note}
                                     </td>
-                                    <td style="padding:9px 10px; color:#64748b; font-size:0.82rem; font-family:monospace;" dir="ltr">${s.phone || '-'}</td>
+                                    <td style="padding:7px 4px; color:#64748b; font-size:0.78rem; font-family:monospace; white-space:nowrap;" dir="ltr">${s.phone || '-'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>

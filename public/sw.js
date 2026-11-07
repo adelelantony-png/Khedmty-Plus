@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v6.8'; // Meeting Pulse Dedicated WhatsApp Share Toolbar & Servant Permissions Fix
+const CACHE_NAME = 'khedmety-ultra-v6.9'; // Eliminate Horizontal Scrollbar & Fix Table Layout
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
