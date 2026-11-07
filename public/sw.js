@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.6'; // Excuse Full Preview Bubble Modal & Cumulative Excuse History per Student
+const CACHE_NAME = 'khedmety-ultra-v5.7'; // 5-Column Consolidated Radar Layout & Perfect Screen Fitting
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

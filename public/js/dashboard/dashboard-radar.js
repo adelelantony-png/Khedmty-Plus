@@ -1243,23 +1243,15 @@ function renderRadarExcusesTable() {
     }
 
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; color: #166534; font-weight: bold; background: #f0fdf4; border-radius: 8px;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
         return;
     }
 
     const allExcusesSource = window.lastRadarExcusesList || [];
 
     tbody.innerHTML = list.map(e => {
-        let statusBadge = '';
-        if (e.status === 'pending') {
-            statusBadge = '<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde047; font-size:0.78rem;">⏳ قيد المراجعة</span>';
-        } else if (e.status === 'accepted') {
-            statusBadge = '<span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem;">✅ عذر مقبول</span>';
-        } else {
-            statusBadge = '<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem;">❌ غير مقبول</span>';
-        }
-
         const isPending = e.status === 'pending';
+        const isAccepted = e.status === 'accepted';
         const timing = evaluateExcuseTiming(e.created_at, e.friday_date);
 
         // حساب عدد الاعتذارات التراكمي لهذا المخدوم
@@ -1274,49 +1266,94 @@ function renderRadarExcusesTable() {
         });
         const totalStudentExcuses = studentAll.length;
 
+        // شارة سجل الأعذار التراكمي الأنيقة
+        const historyPill = totalStudentExcuses > 1
+            ? `<button type="button" onclick="previewFullExcuseModal(${e.id})" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:8px; font-size:0.7rem; padding:1px 6px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" title="اضغط لعرض كافة أعذاره هذا العام"><i class="fa-solid fa-clock-rotate-left"></i> ${totalStudentExcuses} أعذار</button>`
+            : `<span style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; border-radius:8px; font-size:0.7rem; padding:1px 6px; font-weight:700;">🌟 عذر أول</span>`;
+
+        // عمود القرار الرعوي المدمج الأنيق
+        let actionContent = '';
+        if (isPending) {
+            actionContent = `
+                <div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="padding:6px 12px; font-size:0.78rem; background:#10b981; color:white; border:none; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 3px rgba(16,185,129,0.3); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                        <i class="fa-solid fa-check"></i> قبول ✅
+                    </button>
+                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="padding:6px 9px; font-size:0.78rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+                        <i class="fa-solid fa-xmark"></i> رفض ❌
+                    </button>
+                </div>
+            `;
+        } else if (isAccepted) {
+            actionContent = `
+                <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
+                        ✅ عذر مقبول
+                    </span>
+                    <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
+                        ${escapeHtml(e.servant_notes || 'معتمد')}
+                    </span>
+                </div>
+            `;
+        } else {
+            actionContent = `
+                <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
+                        ❌ غير مقبول
+                    </span>
+                    <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
+                        ${escapeHtml(e.servant_notes || 'مرفوض')}
+                    </span>
+                </div>
+            `;
+        }
+
         return `
-            <tr style="border-bottom: 1px solid #fef08a; background: ${isPending ? '#fffdf0' : 'transparent'};">
-                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">
-                    <div>${escapeHtml(e.student_name)}</div>
-                    <div style="margin-top: 3px;">
-                        <button type="button" onclick="previewFullExcuseModal(${e.id})" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 0.72rem; padding: 1px 7px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="عرض سجل أعذار هذا المخدوم">
-                            <i class="fa-solid fa-clock-rotate-left"></i> ${totalStudentExcuses > 1 ? `سجل: ${totalStudentExcuses} أعذار` : 'عذر أول 🌟'}
-                        </button>
+            <tr style="border-bottom: 1px solid #f1f5f9; background: ${isPending ? '#fffdf7' : '#ffffff'}; transition: background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='${isPending ? '#fffdf7' : '#ffffff'}'">
+                <!-- 1. المخدوم والمرحلة -->
+                <td data-label="المخدوم" style="padding: 10px 14px; text-align: right; vertical-align: middle;">
+                    <div style="font-weight: 800; font-size: 0.92rem; color: #0f172a;">${escapeHtml(e.student_name)}</div>
+                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap;">
+                        <span style="font-size: 0.74rem; color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 6px; font-weight: 600;">
+                            ${escapeHtml(e.stage || 'سنة أولى')} • #${escapeHtml(e.student_code || '-')}
+                        </span>
+                        ${historyPill}
                     </div>
                 </td>
-                <td data-label="الفرقة / الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
-                <td data-label="جمعة الغياب" style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
-                <td data-label="وقت الورود والمهلة" style="padding: 6px 8px; font-size: 0.8rem;">
-                    <div style="font-weight: bold; color: #1e293b;">${timing.weekdayName} ${timing.timeStr}</div>
-                    <span style="display:inline-block; font-size:0.73rem; font-weight:800; color:${timing.badgeColor}; background:${timing.bgColor}; border-radius:6px; padding:2px 6px; margin-top:2px;">
-                        ${timing.shortLabel}
+
+                <!-- 2. جمعة الغياب ووقت الورود -->
+                <td data-label="الجمعة والتوقيت" style="padding: 10px 8px; text-align: center; vertical-align: middle;">
+                    <div style="font-weight: 800; font-size: 0.84rem; color: #0c2461;">${escapeHtml(e.friday_date)}</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
+                        <span style="font-size: 0.75rem; color: #334155; font-weight: 600;">${timing.weekdayName} ${timing.timeStr}</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: ${timing.badgeColor}; background: ${timing.bgColor}; border-radius: 4px; padding: 1px 6px;">
+                            ${timing.shortLabel}
+                        </span>
+                    </div>
+                </td>
+
+                <!-- 3. السبب المصنف -->
+                <td data-label="السبب" style="padding: 10px 8px; text-align: center; vertical-align: middle;">
+                    <span style="display: inline-block; font-size: 0.78rem; font-weight: 700; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 9px;">
+                        ${escapeHtml(e.reason_category || 'اعتذار عام 🕊️')}
                     </span>
                 </td>
-                <td data-label="السبب" style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
-                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 240px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
-                        <span onclick="previewFullExcuseModal(${e.id})" style="font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 165px; display: inline-block; cursor: pointer;" title="اضغط لمعاينة الرسالة كاملة وسجل المخدوم">
-                            "${escapeHtml(e.message_text)}"
+
+                <!-- 4. بطاقة رسالة الواتساب المتماسكة مع زر المعاينة -->
+                <td data-label="رسالة الواتساب" style="padding: 10px 12px; text-align: right; vertical-align: middle;">
+                    <div onclick="previewFullExcuseModal(${e.id})" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#dcfce7'; this.style.borderColor='#86efac';" onmouseout="this.style.background='#f0fdf4'; this.style.borderColor='#bbf7d0';" title="اضغط لمعاينة الرسالة كاملة وسجل المخدوم">
+                        <span style="font-size: 0.8rem; color: #166534; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 175px; font-weight: 500;">
+                            💬 "${escapeHtml(e.message_text)}"
                         </span>
-                        <button type="button" class="btn-custom" onclick="previewFullExcuseModal(${e.id})" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer; white-space: nowrap; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" title="معاينة الرسالة كاملة وسجل المخدوم">
+                        <span style="background: #059669; color: #ffffff; font-size: 0.72rem; font-weight: 800; border-radius: 5px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,0.08); flex-shrink: 0;">
                             <i class="fa-solid fa-eye"></i> معاينة
-                        </button>
+                        </span>
                     </div>
                 </td>
-                <td data-label="الحالة" style="padding: 8px;">${statusBadge}</td>
-                <td data-label="الإجراء الرعوي" style="padding: 8px;">
-                    <div style="display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: wrap;">
-                        ${isPending ? `
-                            <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="fa-solid fa-check"></i> قبول العذر ✅
-                            </button>
-                            <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="padding: 4px 8px; font-size: 0.75rem; background: #ef4444; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="fa-solid fa-xmark"></i> رفض ❌
-                            </button>
-                        ` : `
-                            <span style="font-size:0.75rem; color:#64748b;">${escapeHtml(e.servant_notes || 'تم حسمه')}</span>
-                        `}
-                    </div>
+
+                <!-- 5. القرار الرعوي والحالة -->
+                <td data-label="القرار الرعوي" style="padding: 10px 10px; text-align: center; vertical-align: middle;">
+                    ${actionContent}
                 </td>
             </tr>
         `;

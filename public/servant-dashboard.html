@@ -2236,23 +2236,20 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     </div>
                 </div>
 
-                <div class="table-responsive-wrapper">
+                <div class="table-responsive-wrapper" style="border-radius: 12px; border: 1.5px solid #cbd5e1; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.04); background: #ffffff;">
                     <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: center;">
                         <thead>
-                            <tr style="background: #fefce8; border-bottom: 2px solid #fde047; color: #78350f;">
-                                <th style="padding: 10px 8px; text-align: right;">المخدوم</th>
-                                <th style="padding: 10px 8px;">الفرقة / الكود</th>
-                                <th style="padding: 10px 8px;">جمعة الغياب</th>
-                                <th style="padding: 10px 8px; width: 170px;">تاريخ وساعة الورود / المهلة</th>
-                                <th style="padding: 10px 8px;">السبب المصنف</th>
-                                <th style="padding: 10px 8px; text-align: right; max-width: 240px;">نص رسالة الواتساب</th>
-                                <th style="padding: 10px 8px;">الحالة</th>
-                                <th style="padding: 10px 8px;">الإجراء الرعوي</th>
+                            <tr style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #ffffff; font-size: 0.84rem;">
+                                <th style="padding: 12px 14px; text-align: right; width: 23%; border-radius: 0 10px 0 0;">👤 المخدوم والمرحلة</th>
+                                <th style="padding: 12px 8px; width: 19%;">🗓️ جمعة الغياب والتوقيت</th>
+                                <th style="padding: 12px 8px; width: 14%;">🏷️ السبب المصنف</th>
+                                <th style="padding: 12px 12px; text-align: right; width: 26%;">💬 رسالة الواتساب الأصلية</th>
+                                <th style="padding: 12px 10px; width: 18%; border-radius: 10px 0 0 0;">⚖️ القرار الرعوي</th>
                             </tr>
                         </thead>
                         <tbody id="radar_excusesTableBody">
                             <tr>
-                                <td colspan="8" style="padding: 16px; color: #78350f; font-weight: bold;">جاري فحص رادار الاعتذارات الواردة... 🔔</td>
+                                <td colspan="5" style="padding: 18px; color: #78350f; font-weight: bold;">جاري فحص رادار الاعتذارات الواردة... 🔔</td>
                             </tr>
                         </tbody>
                     </table>
