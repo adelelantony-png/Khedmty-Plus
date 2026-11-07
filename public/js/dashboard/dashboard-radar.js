@@ -1595,48 +1595,44 @@ function renderRadarExcusesTable() {
         let actionContent = '';
         if (isPending) {
             actionContent = `
-                <div style="display:flex; gap:5px; justify-content:center; align-items:center; flex-wrap:wrap;">
-                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="width:auto !important; margin:0 !important; padding:6px 11px; font-size:0.78rem; background:#10b981; color:white; border:none; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 3px rgba(16,185,129,0.3); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                        <i class="fa-solid fa-check"></i> قبول ✅
-                    </button>
-                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="width:auto !important; margin:0 !important; padding:6px 9px; font-size:0.78rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
-                        <i class="fa-solid fa-xmark"></i> رفض ❌
-                    </button>
-                    <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:6px 8px; font-size:0.75rem; background:#f8fafc; color:#64748b; border:1px solid #cbd5e1; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center;" title="إلغاء وحذف هذا الاعتذار نهائياً">
-                        <i class="fa-solid fa-trash-can text-danger"></i>
+                <div style="display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center; width:100%; max-width:130px; margin:0 auto;">
+                    <!-- الصف الأول: قبول ورفض جنباً إلى جنب بتماثل تام -->
+                    <div style="display:flex; gap:4px; width:100%;">
+                        <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="flex:1; width:auto !important; margin:0 !important; padding:6px 4px; font-size:0.75rem; background:#10b981; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:3px; box-shadow:0 1px 2px rgba(16,185,129,0.25); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="اعتماد العذر كرسمي مقبول">
+                            <i class="fa-solid fa-check"></i> قبول
+                        </button>
+                        <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="flex:1; width:auto !important; margin:0 !important; padding:6px 4px; font-size:0.75rem; background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-radius:6px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:3px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fff1f2'" title="رفض العذر">
+                            <i class="fa-solid fa-xmark"></i> رفض
+                        </button>
+                    </div>
+                    <!-- الصف الثاني: زر الإلغاء والحذف بعرض كامل منظم -->
+                    <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:100% !important; margin:0 !important; padding:3px 6px; font-size:0.68rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; border-radius:5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.color='#dc2626'; this.style.borderColor='#fca5a5'; this.style.background='#fef2f2';" onmouseout="this.style.color='#64748b'; this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';" title="إلغاء وحذف هذا الاعتذار نهائياً">
+                        <i class="fa-solid fa-trash-can text-danger" style="font-size:10px;"></i> حذف العذر
                     </button>
                 </div>
             `;
         } else if (isAccepted) {
             actionContent = `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
-                            ✅ عذر مقبول
-                        </span>
-                        <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:2px 7px; font-size:0.72rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" title="إلغاء وحذف هذا العذر">
-                            <i class="fa-solid fa-trash-can"></i> إلغاء
-                        </button>
-                    </div>
-                    <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
-                        ${escapeHtml(e.servant_notes || 'معتمد')}
+                <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; max-width:130px; margin:0 auto;">
+                    <span class="badge" style="width:100%; text-align:center; background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.75rem; padding:4px 6px; font-weight:800; border-radius:6px; box-shadow:0 1px 2px rgba(16,185,129,0.15);">
+                        ✅ عذر مقبول
                     </span>
+                    <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:100% !important; margin:0 !important; padding:3px 6px; font-size:0.68rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; border-radius:5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.color='#dc2626'; this.style.borderColor='#fca5a5'; this.style.background='#fef2f2';" onmouseout="this.style.color='#64748b'; this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';" title="إلغاء وحذف هذا العذر">
+                        <i class="fa-solid fa-trash-can text-danger" style="font-size:10px;"></i> تراجع / إلغاء
+                    </button>
+                    ${e.servant_notes ? `<span style="font-size:0.68rem; color:#64748b; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes)}">${escapeHtml(e.servant_notes)}</span>` : ''}
                 </div>
             `;
         } else {
             actionContent = `
-                <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                    <div style="display:flex; align-items:center; gap:5px;">
-                        <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
-                            ❌ غير مقبول
-                        </span>
-                        <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:2px 7px; font-size:0.72rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" title="إلغاء وحذف هذا العذر">
-                            <i class="fa-solid fa-trash-can"></i> إلغاء
-                        </button>
-                    </div>
-                    <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
-                        ${escapeHtml(e.servant_notes || 'مرفوض')}
+                <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; max-width:130px; margin:0 auto;">
+                    <span class="badge" style="width:100%; text-align:center; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.75rem; padding:4px 6px; font-weight:800; border-radius:6px;">
+                        ❌ غير مقبول
                     </span>
+                    <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:100% !important; margin:0 !important; padding:3px 6px; font-size:0.68rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; border-radius:5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.color='#dc2626'; this.style.borderColor='#fca5a5'; this.style.background='#fef2f2';" onmouseout="this.style.color='#64748b'; this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';" title="حذف السجل نهائياً">
+                        <i class="fa-solid fa-trash-can text-danger" style="font-size:10px;"></i> حذف السجل
+                    </button>
+                    ${e.servant_notes ? `<span style="font-size:0.68rem; color:#64748b; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes)}">${escapeHtml(e.servant_notes)}</span>` : ''}
                 </div>
             `;
         }
