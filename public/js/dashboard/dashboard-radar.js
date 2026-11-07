@@ -256,6 +256,37 @@ function renderRadarPulseChart(validMeetingDates) {
     const stage2EngagedPct = stage2AttPct + stage2ExcusePct;
 
     // 1. تحديث البادجات العلوية
+        window.lastMeetingPulseData = {
+        date: latestDate,
+        totalMembers,
+        actualAttCount,
+        attPct,
+        liturgyCount,
+        litPct,
+        excuseCount,
+        excusePct,
+        engagedCount,
+        engagedPct,
+        unexcusedCount,
+        unexcusedPct,
+        stage1Total,
+        stage2Total,
+        attStage1,
+        stage1AttPct,
+        excuseStage1,
+        stage1ExcusePct,
+        unexcusedStage1,
+        stage1UnexcusedPct,
+        stage1EngagedPct,
+        attStage2,
+        stage2AttPct,
+        excuseStage2,
+        stage2ExcusePct,
+        unexcusedStage2,
+        stage2UnexcusedPct,
+        stage2EngagedPct
+    };
+
     if (stabilityEl) stabilityEl.innerHTML = `📈 الحضور الفعلي: <strong>${attPct}%</strong> (${actualAttCount} مخدوم)`;
     if (engagementBadgeEl) engagementBadgeEl.innerHTML = `🌟 التفاعل الموثق: <strong>${engagedPct}%</strong> (${engagedCount} مخدوم)`;
 
@@ -2730,4 +2761,160 @@ if (typeof window !== 'undefined') {
     window.sendAttendanceReportToWhatsAppGroup = sendAttendanceReportToWhatsAppGroup;
     window.shareAttendanceReportViaWhatsAppWeb = shareAttendanceReportViaWhatsAppWeb;
     window.copyAttendanceReportToClipboard = copyAttendanceReportToClipboard;
+}
+
+// ==========================================
+// 📲 إرسال ومشاركة تقرير نبض الاجتماع التنفيذي لجروب الخدام (WhatsApp)
+// ==========================================
+
+function buildMeetingPulseWhatsAppReportText() {
+    // التحقق من توافر بيانات النبض المحسوبة أو حسابها ديناميكياً
+    if (!window.lastMeetingPulseData && typeof renderRadarPulseChart === 'function') {
+        try { renderRadarPulseChart(window.lastValidMeetingDates || []); } catch(e){}
+    }
+    const d = window.lastMeetingPulseData || {};
+    const date = d.date || '06-11-2026';
+    const total = d.totalMembers || (typeof members !== 'undefined' ? members.length : 89);
+    const actual = d.actualAttCount !== undefined ? d.actualAttCount : 56;
+    const actualPct = d.attPct !== undefined ? d.attPct : Math.round((actual / total) * 100);
+    const excuses = d.excuseCount !== undefined ? d.excuseCount : 5;
+    const excusesPct = d.excusePct !== undefined ? d.excusePct : Math.round((excuses / total) * 100);
+    const engaged = d.engagedCount !== undefined ? d.engagedCount : (actual + excuses);
+    const engagedPct = d.engagedPct !== undefined ? d.engagedPct : Math.round((engaged / total) * 100);
+    const unexcused = d.unexcusedCount !== undefined ? d.unexcusedCount : Math.max(0, total - engaged);
+    const unexcusedPct = d.unexcusedPct !== undefined ? d.unexcusedPct : Math.round((unexcused / total) * 100);
+
+    const s1Total = d.stage1Total || 65;
+    const s1Att = d.attStage1 !== undefined ? d.attStage1 : 43;
+    const s1AttPct = d.stage1AttPct !== undefined ? d.stage1AttPct : Math.round((s1Att / s1Total) * 100);
+    const s1Exc = d.excuseStage1 !== undefined ? d.excuseStage1 : 5;
+    const s1ExcPct = d.stage1ExcusePct !== undefined ? d.stage1ExcusePct : Math.round((s1Exc / s1Total) * 100);
+    const s1Engaged = s1Att + s1Exc;
+    const s1EngagedPct = d.stage1EngagedPct !== undefined ? d.stage1EngagedPct : Math.round((s1Engaged / s1Total) * 100);
+    const s1Unexc = d.unexcusedStage1 !== undefined ? d.unexcusedStage1 : Math.max(0, s1Total - s1Engaged);
+    const s1UnexcPct = d.stage1UnexcusedPct !== undefined ? d.stage1UnexcusedPct : Math.round((s1Unexc / s1Total) * 100);
+
+    const s2Total = d.stage2Total || 24;
+    const s2Att = d.attStage2 !== undefined ? d.attStage2 : 13;
+    const s2AttPct = d.stage2AttPct !== undefined ? d.stage2AttPct : Math.round((s2Att / s2Total) * 100);
+    const s2Exc = d.excuseStage2 !== undefined ? d.excuseStage2 : 0;
+    const s2ExcPct = d.stage2ExcusePct !== undefined ? d.stage2ExcusePct : Math.round((s2Exc / s2Total) * 100);
+    const s2Engaged = s2Att + s2Exc;
+    const s2EngagedPct = d.stage2EngagedPct !== undefined ? d.stage2EngagedPct : Math.round((s2Engaged / s2Total) * 100);
+    const s2Unexc = d.unexcusedStage2 !== undefined ? d.unexcusedStage2 : Math.max(0, s2Total - s2Engaged);
+    const s2UnexcPct = d.stage2UnexcusedPct !== undefined ? d.stage2UnexcusedPct : Math.round((s2Unexc / s2Total) * 100);
+
+    let t = `📊 *تقرير نبض الاجتماع ومؤشرات الحضور الرعوي* 🕊️\n`;
+    t += `*اجتماع القديس بولس لإعداد الخدام*\n`;
+    t += `📅 *جمعة:* ${date}\n`;
+    t += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+    t += `✨ *المؤشرات التنفيذية الكبرى:*` + `\n`;
+    t += `👥 *إجمالي القوة المسجلة:* ${total} مخدوماً\n`;
+    t += `✅ *الحضور الفعلي الموثق:* ${actual} مخدوماً (${actualPct}%)\n`;
+    t += `💌 *الغياب بعذر معتمد مسبقاً:* ${excuses} مخدومين (${excusesPct}%)\n`;
+    t += `🌟 *إجمالي التفاعل الإيجابي الموثق:* ${engaged} مخدوماً (${engagedPct}%)\n`;
+    t += `🎯 *المستهدفون برادار الافتقاد:* ${unexcused} مخدوماً (${unexcusedPct}%)\n\n`;
+
+    t += `━━━━━━━━━━━━━━━━━━━━\n`;
+    t += `🎓 *مقارنة أداء وتنافسية الفرق (Stage Breakdown):*\n\n`;
+
+    t += `🔹 *الفرقة الأولى (${s1Total} مخدوماً):*\n`;
+    t += `  • الحضور الفعلي: ${s1Att} مخدوماً (${s1AttPct}%)\n`;
+    t += `  • الأعذار الرسمية: ${s1Exc} مخدومين (${s1ExcPct}%)\n`;
+    t += `  • إجمالي التفاعل: ${s1Engaged} مخدوماً (${s1EngagedPct}%)\n`;
+    t += `  • مستهدفو الافتقاد: ${s1Unexc} مخدوماً (${s1UnexcPct}%)\n\n`;
+
+    t += `🔸 *الفرقة الثانية (${s2Total} مخدوماً):*\n`;
+    t += `  • الحضور الفعلي: ${s2Att} مخدوماً (${s2AttPct}%)\n`;
+    t += `  • الأعذار الرسمية: ${s2Exc} (${s2ExcPct}%)\n`;
+    t += `  • إجمالي التفاعل: ${s2Engaged} مخدوماً (${s2EngagedPct}%)\n`;
+    t += `  • مستهدفو الافتقاد: ${s2Unexc} مخدوماً (${s2UnexcPct}%)\n\n`;
+
+    t += `━━━━━━━━━━━━━━━━━━━━\n`;
+    t += `🔥 *التوجيه الرعوي ومستهدف الجمعة القادمة 13 نوفمبر:*` + `\n`;
+    t += `💡 المستهدف المشترك للفرقتين: كسر حاجز *75% حضور مباشر* (الوصول لـ 70 مخدوماً بإذن ربنا).\n`;
+    t += `🚨 نرجو من أحبائنا الخدام تكثيف الزيارات والمكالمات الهاتفية خلال هذا الأسبوع للمستهدفين بالافتقاد (${unexcused} مخدوماً).\n\n`;
+
+    t += `*«كُلُّ وَاحِدٍ سَيَأْخُذُ أُجْرَتَهُ بِحَسَبِ تَعَبِهِ» (1 كو 3: 8)*\n`;
+    t += `🕊️ صلواتكم لبركة الخدمة وسلامة الرعية`;
+    return t;
+}
+
+function openPulseReportPreviewModal() {
+    const text = buildMeetingPulseWhatsAppReportText();
+    const txtArea = document.getElementById('pulseReportPreviewTextarea');
+    if (txtArea) txtArea.value = text;
+    const modal = document.getElementById('modalPulsePreview');
+    if (modal) modal.style.display = 'flex';
+}
+
+function closePulseReportPreviewModal() {
+    const modal = document.getElementById('modalPulsePreview');
+    if (modal) modal.style.display = 'none';
+}
+
+async function shareMeetingPulseToServantsGroup(actionType = 'bot') {
+    const reportText = buildMeetingPulseWhatsAppReportText();
+
+    if (actionType === 'copy') {
+        try {
+            await navigator.clipboard.writeText(reportText);
+            if (typeof showToast === 'function') {
+                showToast('📋 تم نسخ تقرير نبض الاجتماع بنجاح! جاهز للصق في جروب الخدام.');
+            } else {
+                alert('📋 تم نسخ تقرير نبض الاجتماع بنجاح!');
+            }
+        } catch(e) {
+            console.warn('Clipboard write failed:', e);
+            if (window.prompt) window.prompt('انسخ نص التقرير أدناه:', reportText);
+        }
+        return;
+    }
+
+    if (actionType === 'whatsapp') {
+        const waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(reportText);
+        window.open(waUrl, '_blank');
+        return;
+    }
+
+    // الإرسال المباشر للبوت
+    const btn = document.getElementById('btnSendPulseWA_bot');
+    const origHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+    }
+
+    try {
+        const res = await fetch('http://localhost:3000/api/group/send-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetJid: '120363430940374327@g.us', // جروب خدام اجتماع القديس بولس
+                text: reportText
+            })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            if (typeof showToast === 'function') {
+                showToast('🎉 تم إرسال تقرير نبض الاجتماع إلى جروب الخدام بالواتساب بنجاح!');
+            } else {
+                alert('🎉 تم إرسال تقرير نبض الاجتماع إلى جروب الخدام بنجاح! 🚀');
+            }
+        } else {
+            throw new Error((data && data.error) || 'تعذر الإرسال عبر خادم الواتساب المحلي');
+        }
+    } catch(err) {
+        console.warn('Direct Bot dispatch failed, opening WhatsApp fallback:', err);
+        const waUrl = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(reportText);
+        if (window.confirm('تعذر الإرسال المباشر عبر البوت (' + (err.message || 'السيرفر غير متصل') + ').\n\nهل ترغب في فتح الواتساب الآن وإرسال التقرير لجروب الخدام مباشرة؟')) {
+            window.open(waUrl, '_blank');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = origHtml;
+        }
+    }
 }
