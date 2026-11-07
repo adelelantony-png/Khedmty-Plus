@@ -487,7 +487,18 @@ function renderRadarDashboard() {
                 : (JSON.parse(localStorage.getItem('khedmty_settings')) || JSON.parse(localStorage.getItem('my_church_settings')) || {}); 
         } catch(e){}
 
-        const serviceStartStr = sSettings.serviceStart || (typeof settings === 'object' && settings.serviceStart) || '2026-11-06';
+        const rawServiceStart = sSettings.serviceStart || (typeof settings === 'object' && settings.serviceStart) || '2026-11-06';
+        let normalizedServiceStart = '2026-11-06';
+        if (rawServiceStart) {
+            const s = String(rawServiceStart).trim();
+            if (s.includes('/')) {
+                const parts = s.split('/');
+                if (parts[0].length === 4) normalizedServiceStart = `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+                else if (parts[2].length === 4) normalizedServiceStart = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            } else if (s.includes('-')) {
+                normalizedServiceStart = s;
+            }
+        }
         const todayIso = new Date().toISOString().split('T')[0];
 
         // فقط لقاءات الجمعة الرسمية التي انعقد فيها الاجتماع فعلياً وضمن نطاق بداية الخدمة
@@ -495,7 +506,7 @@ function renderRadarDashboard() {
             try {
                 const dt = new Date(d);
                 if (dt.getDay() !== 5) return false; // يوم الجمعة فقط
-                if (d < serviceStartStr || d > todayIso) return false;
+                if (d < normalizedServiceStart || d > todayIso) return false;
                 const recs = attendanceRecord[d];
                 const hasData = Array.isArray(recs) ? recs.length > 0 : (recs && typeof recs === 'object' && Object.keys(recs).length > 0);
                 return hasData;
