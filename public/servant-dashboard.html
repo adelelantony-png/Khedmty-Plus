@@ -2159,6 +2159,33 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     </div>
                 </div>
 
+                <!-- شريط إجراءات ومشاركة تقرير نبض الاجتماع التنفيذي مع الخدام -->
+                <div id="pulseShareActionsBar" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 2px solid #86efac; border-radius: 12px; padding: 12px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(16,185,129,0.12);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: #25d366; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 2px 6px rgba(37,211,102,0.3);">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </div>
+                        <div>
+                            <strong style="color: #065f46; font-size: 0.95rem; display: block;">مشاركة تقرير نبض الاجتماع مع جروب الخدام:</strong>
+                            <span style="color: #047857; font-size: 0.78rem;">إرسال لحظي للأرقام والإحصائيات وتنافسية الفرق للجروب بنقرة واحدة 🚀</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('bot')" class="btn-custom" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,211,102,0.35);">
+                            <i class="fa-brands fa-whatsapp" style="font-size:1.15rem;"></i> 📲 إرسال فوري لجروب الخدام
+                        </button>
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('whatsapp')" class="btn-custom" style="background: #ffffff; color: #047857; border: 1.5px solid #10b981; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> فتح في واتساب ويب
+                        </button>
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('copy')" class="btn-custom" style="background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-copy"></i> نسخ التقرير 📋
+                        </button>
+                        <button type="button" onclick="openPulseReportPreviewModal()" class="btn-custom" style="background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-eye"></i> معاينة النص 👁️
+                        </button>
+                    </div>
+                </div>
+
                 <!-- 1. شبكة المؤشرات الرقمية الكبرى الأربعة (4 Executive Pulse Metric Cards) -->
                 <div id="radar_pulseMetricsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-bottom: 18px;">
                     <!-- ديناميكي من JS -->
@@ -9805,22 +9832,22 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 
 </script>
-<script src="js/dashboard/dashboard-servants.js?v=6.7"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=6.7"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=6.7"></script>
-<script src="js/dashboard/dashboard-members.js?v=6.7"></script>
+<script src="js/dashboard/dashboard-servants.js?v=6.8"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=6.8"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=6.8"></script>
+<script src="js/dashboard/dashboard-members.js?v=6.8"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=6.7"></script>
-<script src="js/dashboard/dashboard-plan.js?v=6.7"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=6.7"></script>
+<script src="js/dashboard/dashboard-radar.js?v=6.8"></script>
+<script src="js/dashboard/dashboard-plan.js?v=6.8"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=6.8"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=6.7"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=6.8"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=6.7"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=6.8"></script>
 
-<script src="js/app-updater.js?v=6.7"></script>
+<script src="js/app-updater.js?v=6.8"></script>
 
-<script src="js/pwa-helper.js?v=6.7"></script>
+<script src="js/pwa-helper.js?v=6.8"></script>
 
 <script>
 
@@ -9838,8 +9865,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=6.7"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=6.7"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=6.8"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=6.8"></script>
 
 <script>
 // ==========================================

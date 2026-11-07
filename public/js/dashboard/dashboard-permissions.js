@@ -211,7 +211,7 @@ function getDefaultPermissionsForRole(role) {
         members: 'full',
         excuses: 'full',
         followup: 'full',
-        pulse: 'view',
+        pulse: 'full',
         servants_affairs: 'none',
         servants_mgmt: 'none',
         plan: 'view',
@@ -287,11 +287,11 @@ function applyGranularPermissions(perms) {
         btn.style.display = (excusesLevel === 'full') ? '' : 'none';
     });
 
-    // أزرار نبض الاجتماع (إرسال للجروب بالبوت)
+    // أزرار نبض الاجتماع (إرسال للجروب بالبوت والمشاركة)
     const pulseLevel = perms.pulse || 'none';
-    const pulseActionEls = document.querySelectorAll('#btnSendPulseWA_bot');
+    const pulseActionEls = document.querySelectorAll('#btnSendPulseWA_bot, #pulseShareActionsBar');
     pulseActionEls.forEach(btn => {
-        btn.style.display = (pulseLevel === 'full') ? '' : 'none';
+        btn.style.display = (pulseLevel !== 'none') ? '' : 'none';
     });
 
     // أزرار حضور الدارسين (مسح الكاميرا ومسح اليوم)
