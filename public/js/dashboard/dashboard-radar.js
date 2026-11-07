@@ -1377,15 +1377,39 @@ function classifyAttendanceStatus(attRecord, studentExcuse) {
         if (studentExcuse || (attRecord && attRecord.isExcused)) {
             const excuseText = (studentExcuse && (studentExcuse.reason_category || studentExcuse.raw_text)) || 
                                (attRecord && attRecord.excuseReason) || 'عذر مقبول';
+            
+            // فحص توقيت ورود العذر: هل هو مسبق (قبل/أثناء الاجتماع) أم لاحق (متأخر بعد انتهاء الاجتماع)
+            const isLate = (studentExcuse && (
+                (studentExcuse.servant_notes && studentExcuse.servant_notes.includes('متأخر')) ||
+                studentExcuse.resolved_by === 'late_submission' ||
+                (studentExcuse.created_at && new Date(studentExcuse.created_at).getDay() === 6) ||
+                (studentExcuse.created_at && new Date(studentExcuse.created_at).getDay() === 5 && new Date(studentExcuse.created_at).getHours() >= 16)
+            ));
+
+            if (isLate) {
+                return {
+                    status: 'excused_late',
+                    label: 'عذر لاحق (متأخر)',
+                    badgeClass: 'badge-att-excused-late',
+                    icon: '⚠️',
+                    color: '#d97706',
+                    bgColor: '#fffbeb',
+                    note: `⚠️ عذر لاحق (متأخر): ${excuseText}`,
+                    delayMinutes: 0,
+                    isLateExcuse: true
+                };
+            }
+
             return {
                 status: 'excused',
-                label: 'غياب بعذر مقبول',
+                label: 'عذر مسبق',
                 badgeClass: 'badge-att-excused',
                 icon: '🕊️',
                 color: '#0284c7',
                 bgColor: '#e0f2fe',
-                note: `🕊️ عذر: ${excuseText}`,
-                delayMinutes: 0
+                note: `🕊️ عذر مسبق: ${excuseText}`,
+                delayMinutes: 0,
+                isLateExcuse: false
             };
         }
         return {
@@ -1642,7 +1666,7 @@ function renderAttendanceExportReport() {
         if (item.status === 'on_time' && !showOnTime) return false;
         if (item.status === 'minor_delay' && !showMinor) return false;
         if (item.status === 'severe_delay' && !showSevere) return false;
-        if (item.status === 'excused' && !showExcused) return false;
+        if ((item.status === 'excused' || item.status === 'excused_late') && !showExcused) return false;
         if (item.status === 'absent' && !showAbsent) return false;
         return true;
     };
@@ -1903,8 +1927,12 @@ function buildAttendanceWhatsAppReportText() {
             if (classification.status === 'minor_delay' || classification.status === 'severe_delay') {
                 delaysList.push({ name: mName, stage, label: classification.label, time: attRecord?.time || '', note: classification.note });
             }
-        } else if (classification.status === 'excused') {
-            const excuseEntry = { name: mName, reason: classification.note };
+        } else if (classification.status === 'excused' || classification.status === 'excused_late') {
+            const excuseEntry = { 
+                name: mName, 
+                reason: classification.note, 
+                isLate: classification.status === 'excused_late' 
+            };
             if (stage === 'الفرقة الثانية') stage2Excused.push(excuseEntry);
             else stage1Excused.push(excuseEntry);
         } else {
@@ -1949,12 +1977,25 @@ function buildAttendanceWhatsAppReportText() {
     }
 
     if (totalExcused > 0) {
-        text += `🕊️ *كشف الأعذار الرسمية المقبولة:* (${totalExcused} مخدوم)\n`;
-        let exCounter = 1;
-        [...stage1Excused, ...stage2Excused].forEach(ex => {
-            text += `${exCounter++}. ${ex.name} - ${ex.reason}\n`;
-        });
-        text += `\n`;
+        const allExc = [...stage1Excused, ...stage2Excused];
+        const priorExc = allExc.filter(e => !e.isLate);
+        const lateExc = allExc.filter(e => e.isLate);
+
+        if (priorExc.length > 0) {
+            text += `🕊️ *الأعذار المسبقة (قبل الاجتماع):* (${priorExc.length} مخدوم)\n`;
+            priorExc.forEach((ex, i) => {
+                text += `${i + 1}. ${ex.name} - ${ex.reason}\n`;
+            });
+            text += `\n`;
+        }
+
+        if (lateExc.length > 0) {
+            text += `⚠️ *الأعذار اللاحقة (متأخرة بعد انتهاء الاجتماع):* (${lateExc.length} مخدوم)\n`;
+            lateExc.forEach((ex, i) => {
+                text += `${i + 1}. ${ex.name} - ${ex.reason}\n`;
+            });
+            text += `\n`;
+        }
     }
 
     if (totalAbsent > 0) {

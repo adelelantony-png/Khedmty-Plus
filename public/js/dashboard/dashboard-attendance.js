@@ -2129,3 +2129,104 @@ if (typeof window !== 'undefined') {
   window.selectAttendanceDate = selectAttendanceDate;
 
 }
+
+// ==========================================
+// 🚪 وظائف استيعاب وتسجيل مخدوم جديد على الباب (Quick Walk-in)
+// ==========================================
+function openQuickWalkinModal() {
+    const modal = document.getElementById('quickWalkinModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        const nameInput = document.getElementById('walkin_name');
+        if (nameInput) {
+            nameInput.value = '';
+            setTimeout(() => nameInput.focus(), 150);
+        }
+        const phoneInput = document.getElementById('walkin_phone');
+        if (phoneInput) phoneInput.value = '';
+        const confInput = document.getElementById('walkin_confessor');
+        if (confInput) confInput.value = '';
+    }
+}
+
+function closeQuickWalkinModal() {
+    const modal = document.getElementById('quickWalkinModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function submitQuickWalkinMember() {
+    const nameInput = document.getElementById('walkin_name');
+    const phoneInput = document.getElementById('walkin_phone');
+    const stageInput = document.getElementById('walkin_stage');
+    const confInput = document.getElementById('walkin_confessor');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    let phone = phoneInput ? phoneInput.value.trim().replace(/\D/g, '') : '';
+    const stage = stageInput ? stageInput.value : 'سنة أولى';
+    const confessor = confInput ? confInput.value.trim() : '';
+
+    if (!name || name.length < 3) {
+        if (typeof showToast === 'function') showToast('⚠️ يرجى إدخال اسم المخدوم بشكل صحيح', true);
+        else alert('يرجى إدخال اسم المخدوم بشكل صحيح');
+        return;
+    }
+
+    if (phone && phone.startsWith('0')) {
+        phone = '2' + phone;
+    } else if (phone && !phone.startsWith('20') && phone.length === 10) {
+        phone = '20' + phone;
+    }
+
+    // توليد كود تلقائي جديد
+    let maxCode = 100;
+    if (Array.isArray(members)) {
+        members.forEach(m => {
+            const c = parseInt(m.code, 10);
+            if (!isNaN(c) && c > maxCode && c < 5000) maxCode = c;
+        });
+    }
+    const newCode = String(maxCode + 1);
+    const newId = Date.now();
+
+    const newMember = {
+        id: newId,
+        code: newCode,
+        name: name,
+        phone: phone,
+        stage: stage,
+        confessor: confessor,
+        level: stage,
+        created_at: new Date().toISOString()
+    };
+
+    if (!Array.isArray(members)) members = [];
+    members.push(newMember);
+
+    try {
+        localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members));
+        if (typeof syncToCloud === 'function') syncToCloud('members', members);
+    } catch(e) {
+        console.warn('Error saving new walkin member:', e);
+    }
+
+    // تسجيل الحضور فوراً
+    atomicRegisterAttendance(newMember);
+
+    // تحديث القوائم والشاشات
+    if (typeof renderMembersList === 'function') renderMembersList();
+    if (typeof renderDashboard === 'function') renderDashboard();
+
+    closeQuickWalkinModal();
+
+    if (typeof showToast === 'function') {
+        showToast(`🎉 تم إضافة المخدوم [${name}] وتسجيل حضوره بنجاح! 🚀`);
+    } else {
+        alert(`🎉 تم إضافة المخدوم [${name}] واحتساب حضوره فورياً بنجاح!`);
+    }
+}
+
+if (typeof window !== 'undefined') {
+  window.openQuickWalkinModal = openQuickWalkinModal;
+  window.closeQuickWalkinModal = closeQuickWalkinModal;
+  window.submitQuickWalkinMember = submitQuickWalkinMember;
+}

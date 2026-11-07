@@ -2805,9 +2805,14 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div style="background:#fff; border:1px solid #dfe6e9; padding:12px; border-radius:8px; margin-top:15px;">
 
-<label style="font-size:13px; font-weight:bold;">بحث وتسجيل سريع في اليوم المحدد (<span id="searchActiveDateBadge"></span>):</label>
+<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <label style="font-size:13px; font-weight:bold;">بحث وتسجيل سريع في اليوم المحدد (<span id="searchActiveDateBadge"></span>):</label>
+    <button type="button" class="btn-custom" onclick="openQuickWalkinModal()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color:#ffffff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.83rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 8px rgba(5,150,105,0.25);">
+        <i class="fa-solid fa-user-plus"></i> 🚪 استيعاب مخدوم جديد على الباب (Walk-in)
+    </button>
+</div>
 
-<div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
+<div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
 
 <input type="text" id="manualAttendInput" placeholder="أدخل كود الامتحان أو الاسم..." style="flex:1; min-width:180px; margin:0;" onkeypress="if(event.key==='Enter') manualMarkMemberFromInput()">
 
@@ -6824,6 +6829,24 @@ if (!servantsAttendance[today]) servantsAttendance[today] = [];
 
 // ==========================================
 
+
+// 🧹 تنظيف تلقائي لجلسات أكتوبر التجريبية لضمان بداية نقية للعام الدراسي (Zero Baseline)
+try {
+    const rawAtt = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE) || '{}');
+    let hasOct = false;
+    Object.keys(rawAtt).forEach(k => {
+        if (k < '2026-11-06') {
+            delete rawAtt[k];
+            hasOct = true;
+        }
+    });
+    if (hasOct) {
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(rawAtt));
+        if (typeof attendanceRecord !== 'undefined') attendanceRecord = rawAtt;
+        console.log('🧹 [Clean Baseline] تم تنظيف جلسات أكتوبر التجريبية لبدء السنة من جمعة الانطلاق 6-11-2026');
+    }
+} catch(e) {}
+
 // 7. دوال مساعدة عامة
 
 // ==========================================
@@ -10510,6 +10533,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- حاوية الطباعة الخاصة لتقرير A4 ورقة واحدة -->
 <div id="printableAttendanceReport" style="display:none;"></div>
+
+
+<!-- 🚪 نافذة استيعاب مخدوم جديد على الباب فورياً (Quick Walk-in Modal) -->
+<div id="quickWalkinModal" class="modal" style="display:none; z-index:100000;">
+  <div class="modal-content" style="max-width:520px; text-align:right; border-radius:18px; border:2px solid #10b981; padding:22px; box-shadow:0 12px 32px rgba(0,0,0,0.3);">
+    <span class="close-btn" onclick="closeQuickWalkinModal()">&times;</span>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px;">
+      <div style="font-size:32px;">🚪</div>
+      <div>
+        <h3 style="margin:0; color:#065f46; font-size:1.2rem; font-weight:900;">استيعاب مخدوم جديد على الباب (Walk-in)</h3>
+        <p style="margin:2px 0 0; font-size:0.82rem; color:#64748b;">تسجيل سريع واحتساب الحضور فوراً دون تعطيل طابور الدخول</p>
+      </div>
+    </div>
+
+    <form id="quickWalkinForm" onsubmit="event.preventDefault(); submitQuickWalkinMember();">
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">👤 اسم المخدوم (ثلاثي أو رباعي) *</label>
+        <input type="text" id="walkin_name" required placeholder="مثال: بيشوي عماد رمزي" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box;">
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:0.85rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">📱 رقم هاتف المخدوم (واتساب) *</label>
+        <input type="tel" id="walkin_phone" required placeholder="مثال: 01201234567" style="width:100%; padding:10px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box;" dir="ltr">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🎓 المرحلة *</label>
+          <select id="walkin_stage" style="width:100%; padding:9px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box; background:#fff;">
+            <option value="سنة أولى">الفرقة الأولى (سنة أولى)</option>
+            <option value="سنة ثانية">الفرقة الثانية (سنة ثانية)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block; font-size:0.85rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🕊️ أب الاعتراف</label>
+          <input type="text" id="walkin_confessor" placeholder="مثال: أبونا يوسف" style="width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box;">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="submit" id="btnSubmitWalkin" class="btn-custom" style="flex:1; background:linear-gradient(135deg, #059669 0%, #047857 100%); color:#ffffff; border:none; padding:12px; border-radius:10px; font-weight:900; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 12px rgba(5,150,105,0.3);">
+          <i class="fa-solid fa-check-double"></i> 💾 حفظ وتسجيل الحضور فوراً 🚀
+        </button>
+        <button type="button" class="btn-custom" onclick="closeQuickWalkinModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:12px 18px; border-radius:10px; font-weight:bold; cursor:pointer;">
+          إلغاء
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 </body>
 

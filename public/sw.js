@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.3'; // Pastoral Attendance Matrix, 1-Page A4 PDF, WhatsApp Group Dispatch and Admin Lock
+const CACHE_NAME = 'khedmety-ultra-v5.4'; // Quick Walkin, Prior vs Late Excuses, Courtesy Filter & Zero Baseline
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
