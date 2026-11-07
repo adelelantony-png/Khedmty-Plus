@@ -1,3 +1,67 @@
+
+function evaluateExcuseTiming(createdAtTimestamp, fridayDateStr) {
+    if (!createdAtTimestamp) return { 
+        formattedReceipt: 'غير مسجل', 
+        weekdayName: '',
+        timeStr: '',
+        dateStr: '',
+        label: 'غير محدد', 
+        shortLabel: 'غير محدد', 
+        tier: 'unknown',
+        badgeColor: '#64748b',
+        bgColor: '#f1f5f9'
+    };
+
+    const dt = new Date(Number(createdAtTimestamp));
+    const weekdays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    const weekdayName = weekdays[dt.getDay()];
+    
+    let hours = dt.getHours();
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    const isPm = hours >= 12;
+    hours = hours % 12 || 12;
+    const timeStr = `${hours}:${minutes} ${isPm ? 'م' : 'ص'}`;
+    const dateStr = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    const formattedReceipt = `${weekdayName} ${dateStr} (${timeStr})`;
+
+    const day = dt.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+    let tier = 'within_deadline';
+    let label = '🟢 في المهلة الرسمية (حتى الأربعاء)';
+    let shortLabel = 'في المهلة (حتى الأربعاء)';
+    let badgeColor = '#15803d';
+    let bgColor = '#dcfce7';
+
+    if (day === 4) { // Thursday
+        tier = 'late_thursday';
+        label = '🟡 متأخر (ورد الخميس - خارج مهلة الأربعاء)';
+        shortLabel = 'متأخر (الخميس)';
+        badgeColor = '#b45309';
+        bgColor = '#fef3c7';
+    } else if (day === 5) { // Friday
+        if (dt.getHours() >= 16) {
+            tier = 'post_meeting';
+            label = '⚠️ لاحق (ورد الجمعة مساءً بعد انتهاء الاجتماع)';
+            shortLabel = 'لاحق بعد الاجتماع';
+            badgeColor = '#b91c1c';
+            bgColor = '#fee2e2';
+        } else {
+            tier = 'late_friday';
+            label = '🟠 متأخر جداً (ورد صباح الجمعة)';
+            shortLabel = 'متأخر جداً (الجمعة)';
+            badgeColor = '#c2410c';
+            bgColor = '#ffedd5';
+        }
+    } else if (day === 6) { // Saturday
+        tier = 'post_meeting';
+        label = '⚠️ لاحق (ورد السبت بعد انتهاء الاجتماع)';
+        shortLabel = 'لاحق (السبت)';
+        badgeColor = '#b91c1c';
+        bgColor = '#fee2e2';
+    }
+
+    return { formattedReceipt, weekdayName, timeStr, dateStr, tier, label, shortLabel, badgeColor, bgColor };
+}
+
 // 📡 رادار أمين الخدمة الشامل وشيت الإكسيل الأسبوعي
     // ==========================================
 
@@ -195,7 +259,7 @@ function renderRadarAbsenceTableBody() {
     }
 
     if (displayList.length === 0) {
-        tbodyAbs.innerHTML = `<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد حالات مطابقة لشرط الفلتر حالياً. 🟢</td></tr>`;
+        tbodyAbs.innerHTML = `<tr><td colspan="8" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد حالات مطابقة لشرط الفلتر حالياً. 🟢</td></tr>`;
         return;
     }
 
@@ -1150,7 +1214,7 @@ async function loadRadarExcuses() {
 
     if (badge) badge.textContent = '⏳ 0 اعتذار معلق';
     if (kpiCount) kpiCount.textContent = '0';
-    tbody.innerHTML = '<tr><td colspan="7" style="padding:16px; color:#166534; font-weight:bold; background:#f0fdf4;">نشكر ربنا! لا توجد اعتذارات واردة معلقة حالياً. 🟢</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:16px; color:#166534; font-weight:bold; background:#f0fdf4;">نشكر ربنا! لا توجد اعتذارات واردة معلقة حالياً. 🟢</td></tr>';
 }
 
 function filterRadarExcuses(filterMode = 'pending') {
@@ -1194,14 +1258,21 @@ function renderRadarExcusesTable() {
         }
 
         const isPending = e.status === 'pending';
+        const timing = evaluateExcuseTiming(e.created_at, e.friday_date);
 
         return `
             <tr style="border-bottom: 1px solid #fef08a; background: ${isPending ? '#fffdf0' : 'transparent'};">
                 <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(e.student_name)}</td>
                 <td data-label="الفرقة / الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
                 <td data-label="جمعة الغياب" style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
+                <td data-label="وقت الورود والمهلة" style="padding: 6px 8px; font-size: 0.8rem;">
+                    <div style="font-weight: bold; color: #1e293b;">${timing.weekdayName} ${timing.timeStr}</div>
+                    <span style="display:inline-block; font-size:0.73rem; font-weight:800; color:${timing.badgeColor}; background:${timing.bgColor}; border-radius:6px; padding:2px 6px; margin-top:2px;">
+                        ${timing.shortLabel}
+                    </span>
+                </td>
                 <td data-label="السبب" style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
-                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 260px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
+                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 240px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
                     "${escapeHtml(e.message_text)}"
                 </td>
                 <td data-label="الحالة" style="padding: 8px;">${statusBadge}</td>
@@ -1386,6 +1457,9 @@ function classifyAttendanceStatus(attRecord, studentExcuse) {
                 (studentExcuse.created_at && new Date(studentExcuse.created_at).getDay() === 5 && new Date(studentExcuse.created_at).getHours() >= 16)
             ));
 
+            const timing = evaluateExcuseTiming(studentExcuse?.created_at, attRecord?.date);
+            const timePrefix = timing.timeStr ? ` (ورد ${timing.weekdayName} ${timing.timeStr} - ${timing.shortLabel})` : '';
+
             if (isLate) {
                 return {
                     status: 'excused_late',
@@ -1394,22 +1468,24 @@ function classifyAttendanceStatus(attRecord, studentExcuse) {
                     icon: '⚠️',
                     color: '#d97706',
                     bgColor: '#fffbeb',
-                    note: `⚠️ عذر لاحق (متأخر): ${excuseText}`,
+                    note: `⚠️ عذر: ${excuseText}${timePrefix}`,
                     delayMinutes: 0,
-                    isLateExcuse: true
+                    isLateExcuse: true,
+                    timing: timing
                 };
             }
 
             return {
                 status: 'excused',
-                label: 'عذر مسبق',
+                label: 'عذر في المهلة',
                 badgeClass: 'badge-att-excused',
                 icon: '🕊️',
                 color: '#0284c7',
                 bgColor: '#e0f2fe',
-                note: `🕊️ عذر مسبق: ${excuseText}`,
+                note: `🕊️ عذر: ${excuseText}${timePrefix}`,
                 delayMinutes: 0,
-                isLateExcuse: false
+                isLateExcuse: false,
+                timing: timing
             };
         }
         return {
@@ -1981,8 +2057,11 @@ function buildAttendanceWhatsAppReportText() {
         const priorExc = allExc.filter(e => !e.isLate);
         const lateExc = allExc.filter(e => e.isLate);
 
+        text += `⚖️ *كشف الأعذار وموقفها من مهلة الأربعاء الرسمية:*\n`;
+        text += `📌 _الحد الأقصى المعتمد لاستلام الأعذار هو نهاية يوم الأربعاء._\n\n`;
+
         if (priorExc.length > 0) {
-            text += `🕊️ *الأعذار المسبقة (قبل الاجتماع):* (${priorExc.length} مخدوم)\n`;
+            text += `🔹 *أعذار مسبقة (قبل الاجتماع):* (${priorExc.length} مخدوم)\n`;
             priorExc.forEach((ex, i) => {
                 text += `${i + 1}. ${ex.name} - ${ex.reason}\n`;
             });
@@ -1990,7 +2069,7 @@ function buildAttendanceWhatsAppReportText() {
         }
 
         if (lateExc.length > 0) {
-            text += `⚠️ *الأعذار اللاحقة (متأخرة بعد انتهاء الاجتماع):* (${lateExc.length} مخدوم)\n`;
+            text += `🔸 *أعذار لاحقة (متأخرة بعد انتهاء الاجتماع):* (${lateExc.length} مخدوم)\n`;
             lateExc.forEach((ex, i) => {
                 text += `${i + 1}. ${ex.name} - ${ex.reason}\n`;
             });

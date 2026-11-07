@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.4'; // Quick Walkin, Prior vs Late Excuses, Courtesy Filter & Zero Baseline
+const CACHE_NAME = 'khedmety-ultra-v5.5'; // Wednesday Excuse Deadline Cutoff, Exact Receipt Time Tracking
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
