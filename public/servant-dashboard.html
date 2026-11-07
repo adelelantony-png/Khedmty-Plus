@@ -73,6 +73,10 @@ window.saveEditedServant = window.saveEditedServant || function() {};
 window.deleteServant = window.deleteServant || function() {};
 window.clearAllServants = window.clearAllServants || function() {};
 window.clearTodayServantsAttendance = window.clearTodayServantsAttendance || function() {};
+window.openMyServantProfileModal = window.openMyServantProfileModal || function() {};
+window.closeMyServantProfileModal = window.closeMyServantProfileModal || function() {};
+window.saveMyServantProfile = window.saveMyServantProfile || function() {};
+window.togglePasswordVisibility = window.togglePasswordVisibility || function() {};
 
 
 window.appErrorLogs = [];
@@ -1571,6 +1575,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 المستخدم: <strong id="loggedInUserName">...</strong> 
 
 (<span id="currentRoleBadge" class="role-badge">خادم</span>)
+
+<button type="button" class="btn-mini" onclick="openMyServantProfileModal()" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1d4ed8; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 4px 10px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; box-shadow: 0 1px 3px rgba(29, 78, 216, 0.1); margin: 0 6px;" title="تعديل بيانات ملفي الشخصي">
+  <i class="fa-solid fa-user-pen"></i> ملفي الشخصي 👤
+</button>
 
 <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
 <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
@@ -5084,14 +5092,118 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
       </div>
 
       <div style="grid-column:1/-1; background:#f0fdf4; border:1px solid #bbf7d0; padding:10px; border-radius:8px; margin-top:5px;">
-        <label style="font-weight:bold; color:#166534; font-size:12px;">🔑 تعيين / تغيير كلمة مرور الخادم (اتركها فارغة إذا لم ترغب في التعديل):</label>
-        <input type="password" id="edit_s_password" placeholder="اكتب كلمة مرور جديدة للخادم..." autocomplete="new-password" style="width:100%; padding:8px; border:1px solid #86efac; border-radius:6px; margin-top:4px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+          <label style="font-weight:bold; color:#166534; font-size:12px;">🔑 كلمة مرور الخادم:</label>
+          <span id="edit_s_current_pass_preview" style="font-size:11px; background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:4px; font-weight:bold;">كلمة المرور الحالية: جارِ الفحص...</span>
+        </div>
+        <div style="position:relative;">
+          <input type="password" id="edit_s_password" placeholder="اكتب كلمة مرور جديدة للخادم لتغييرها..." autocomplete="new-password" style="width:100%; padding:8px 36px 8px 8px; border:1px solid #86efac; border-radius:6px; margin-top:4px;">
+          <span onclick="togglePasswordVisibility('edit_s_password')" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px;" title="إظهار/إخفاء">👁️</span>
+        </div>
       </div>
     </div>
 
     <div style="display:flex; gap:10px; margin-top:16px;">
       <button type="button" class="btn-success" onclick="saveEditedServant()" style="flex:1; margin:0; font-weight:bold; font-size:14px; padding:12px; border-radius:8px; cursor:pointer;">حفظ كافة التعديلات سحابياً ومحلياً 💾</button>
       <button type="button" class="btn-mini" onclick="closeEditServantModal()" style="background:#b2bec3; color:#2d3436; margin:0; padding:12px 20px; border-radius:8px; cursor:pointer;">إلغاء ❌</button>
+    </div>
+  </div>
+</div>
+
+<!-- 👤 نافذة تعديل الخادم لملفه الشخصي (Servant Self Profile Edit Modal) -->
+<div id="myServantProfileModal" class="modal" style="display:none; z-index:4700;">
+  <div class="modal-content" style="max-width:560px; text-align:right; border-radius:16px; border:2px solid #3b82f6; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
+      <h3 style="margin:0; color:#0c2461; font-weight:900; font-size:1.2rem; display:flex; align-items:center; gap:8px;">
+        <span style="background:#dbeafe; color:#1d4ed8; width:34px; height:34px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-size:18px;">👤</span>
+        الملف الشخصي للخادم (تحديث البيانات)
+      </h3>
+      <span class="close-btn" onclick="closeMyServantProfileModal()" style="font-size:24px; cursor:pointer; color:#64748b;">&times;</span>
+    </div>
+
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:14px; font-size:0.8rem; color:#475569; line-height:1.6;">
+      💡 <strong>مرحباً بك يا خادم المسيح المبارك:</strong> يمكنك هنا استكمال وتحديث بياناتك الشخصية (كتاريخ ميلادك ورقم هاتفك) لتيسير تواصل أسرة الخدمة معك ومشاركتك أعيادك.
+    </div>
+
+    <!-- بطاقة البيانات المعتمدة للقراءة فقط -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px; margin-bottom:14px;">
+      <div>
+        <span style="font-size:0.75rem; color:#64748b; display:block;">الاسم المسجل بالكشف:</span>
+        <strong id="my_s_name_display" style="font-size:0.92rem; color:#0c2461;">-</strong>
+      </div>
+      <div>
+        <span style="font-size:0.75rem; color:#64748b; display:block;">كود الخادم:</span>
+        <strong id="my_s_code_display" style="font-size:0.92rem; color:#0c2461;">-</strong>
+      </div>
+      <div>
+        <span style="font-size:0.75rem; color:#64748b; display:block;">الدور / الصلاحية:</span>
+        <span id="my_s_role_display" class="badge" style="background:#dbeafe; color:#1e40af; font-size:0.75rem; font-weight:bold;">-</span>
+      </div>
+      <div>
+        <span style="font-size:0.75rem; color:#64748b; display:block;">المرحلة المسندة:</span>
+        <span id="my_s_stage_display" class="badge" style="background:#fef3c7; color:#92400e; font-size:0.75rem; font-weight:bold;">-</span>
+      </div>
+      <div style="grid-column:1/-1; font-size:0.7rem; color:#64748b; border-top:1px dashed #cbd5e1; padding-top:4px; margin-top:4px;">
+        🔒 البيانات أعلاه مُعتمدة من أمانة الخدمة، ولتعديلها يرجى مراجعة أمين الخدمة.
+      </div>
+    </div>
+
+    <!-- حقول التعديل الشخصية -->
+    <div class="form-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+      <div>
+        <label style="font-weight:bold; font-size:0.82rem; color:#1e293b; display:flex; align-items:center; gap:5px; margin-bottom:4px;">
+          🎂 تاريخ الميلاد:
+        </label>
+        <input type="date" id="my_s_dob" style="width:100%; padding:9px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+        <span style="font-size:0.7rem; color:#059669; display:block; margin-top:3px;">🌟 مهم لمعايدة أسرة الخدمة لك بعيد ميلادك</span>
+      </div>
+
+      <div>
+        <label style="font-weight:bold; font-size:0.82rem; color:#1e293b; display:flex; align-items:center; gap:5px; margin-bottom:4px;">
+          📱 رقم الهاتف والواتساب:
+        </label>
+        <input type="tel" id="my_s_phone" placeholder="01xxxxxxxxx" style="width:100%; padding:9px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+        <span style="font-size:0.7rem; color:#64748b; display:block; margin-top:3px;">للتواصل واستلام التكليفات والتحضيرات</span>
+      </div>
+
+      <div style="grid-column:1/-1;">
+        <label style="font-weight:bold; font-size:0.82rem; color:#1e293b; display:flex; align-items:center; gap:5px; margin-bottom:4px;">
+          ✝️ أب الاعتراف:
+        </label>
+        <input type="text" id="my_s_confessor" placeholder="مثال: قدس أبونا بولس / كنيسة الشهيد مارجرجس" style="width:100%; padding:9px 10px; border:1.5px solid #cbd5e1; border-radius:8px; font-size:0.85rem;">
+      </div>
+    </div>
+
+    <!-- قسم تغيير كلمة المرور الشفاف -->
+    <div style="background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); border:1.5px solid #fde047; border-radius:10px; padding:12px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px;">
+        <label style="font-weight:800; font-size:0.85rem; color:#92400e; display:flex; align-items:center; gap:5px;">
+          🔑 تغيير كلمة المرور الشخصية (اختياري):
+        </label>
+        <span style="font-size:0.72rem; color:#b45309; background:#fef9c3; padding:2px 8px; border-radius:4px; font-weight:bold;">اتركها فارغة إن لم ترغب بالتغيير</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+        <div style="position:relative;">
+          <input type="password" id="my_s_new_pass" placeholder="كلمة المرور الجديدة..." style="width:100%; padding:8px 30px 8px 8px; border:1px solid #fcd34d; border-radius:6px; font-size:0.82rem;">
+          <span onclick="togglePasswordVisibility('my_s_new_pass')" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px;">👁️</span>
+        </div>
+        <div style="position:relative;">
+          <input type="password" id="my_s_confirm_pass" placeholder="تأكيد كلمة المرور..." style="width:100%; padding:8px 30px 8px 8px; border:1px solid #fcd34d; border-radius:6px; font-size:0.82rem;">
+          <span onclick="togglePasswordVisibility('my_s_confirm_pass')" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:14px;">👁️</span>
+        </div>
+      </div>
+      <div style="font-size:0.72rem; color:#78350f; margin-top:6px; display:flex; align-items:center; gap:4px;">
+        <span>ℹ️</span> <strong>إشعار الشفافية:</strong> يتم توثيق أي كلمة مرور جديدة لدى أمين الخدمة للرجوع إليها في حالات نسيانها وتقديم الدعم الفني المباشر.
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="btn-success" onclick="saveMyServantProfile()" style="flex:1; margin:0; font-weight:800; font-size:0.95rem; padding:12px; border-radius:8px; cursor:pointer; background:linear-gradient(135deg, #16a34a, #15803d); border:none; color:white; display:flex; align-items:center; justify-content:center; gap:6px;">
+        <i class="fa-solid fa-floppy-disk"></i> حفظ تحديثات ملفي الشخصي 💾
+      </button>
+      <button type="button" onclick="closeMyServantProfileModal()" style="background:#f1f5f9; color:#475569; margin:0; padding:12px 18px; border-radius:8px; cursor:pointer; font-weight:bold; border:1px solid #cbd5e1;">
+        إلغاء ❌
+      </button>
     </div>
   </div>
 </div>

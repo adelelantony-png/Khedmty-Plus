@@ -410,7 +410,7 @@ tr.innerHTML = `
 
 <td data-label="كود الخادم">${escapeHtml(s.code) || escapeHtml(s.id)}</td>
 
-<td data-label="الاسم"><strong>${escapeHtml(s.name)}</strong></td>
+<td data-label="الاسم"><strong>${escapeHtml(s.name)}</strong> ${s.password ? `<span class="badge" style="background:#fef9c3; color:#854d0e; font-size:10px; margin-right:4px; font-weight:normal;" title="كلمة المرور: ${escapeHtml(s.password)}">🔑 مخصصة</span>` : ''}</td>
 
 <td data-label="الهاتف">${escapeHtml(cleanPhone)}</td>
 
@@ -638,6 +638,12 @@ function openEditServantModal(id) {
     if (confessorEl) confessorEl.value = s.confessor || 'أبونا';
     if (statusEl) statusEl.value = s.status || 'active';
     if (passEl) passEl.value = '';
+    const curPassPreview = document.getElementById('edit_s_current_pass_preview');
+    if (curPassPreview) {
+        curPassPreview.innerHTML = s.password 
+            ? 'كلمة المرور الحالية: <strong style="color:#0c2461; font-size:12px; background:#fef08a; padding:1px 6px; border-radius:3px;">' + escapeHtml(s.password) + '</strong>'
+            : 'كلمة المرور الحالية: <span style="color:#64748b;">افتراضية (رقم الهاتف)</span>';
+    }
 
     const modal = document.getElementById('editServantModal');
     if (modal) {
@@ -1008,9 +1014,189 @@ checkLocalStorageUsage();
 
 }
 
+
+// ==========================================
+// 👤 تعديل الخادم لملفه الشخصي بنفسه (Servant Self Profile)
+// ==========================================
+function togglePasswordVisibility(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function openMyServantProfileModal() {
+    const activeStr = localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user');
+    let activeUser = null;
+    try { activeUser = JSON.parse(activeStr); } catch(e) {}
+    if (!activeUser && typeof currentUser !== 'undefined') activeUser = currentUser;
+
+    if (!activeUser) {
+        return alert("يرجى تسجيل الدخول أولاً لتعديل ملفك الشخصي.");
+    }
+
+    const sList = (typeof servants !== 'undefined' && Array.isArray(servants)) ? servants : [];
+    let s = sList.find(x => 
+        (activeUser.id && String(x.id) === String(activeUser.id)) ||
+        (activeUser.code && String(x.code) === String(activeUser.code)) ||
+        (activeUser.name && (x.name || '').trim() === (activeUser.name || '').trim())
+    ) || activeUser;
+
+    const nameEl = document.getElementById('my_s_name_display');
+    const codeEl = document.getElementById('my_s_code_display');
+    const roleEl = document.getElementById('my_s_role_display');
+    const stageEl = document.getElementById('my_s_stage_display');
+    const dobEl = document.getElementById('my_s_dob');
+    const phoneEl = document.getElementById('my_s_phone');
+    const confessorEl = document.getElementById('my_s_confessor');
+    const newPassEl = document.getElementById('my_s_new_pass');
+    const confirmPassEl = document.getElementById('my_s_confirm_pass');
+
+    if (nameEl) nameEl.textContent = s.name || activeUser.name || '-';
+    if (codeEl) codeEl.textContent = s.code || s.id || activeUser.code || '-';
+    if (roleEl) roleEl.textContent = s.roleType || s.permission || s.role || 'خادم';
+    if (stageEl) stageEl.textContent = s.stage || 'عام';
+
+    let cleanDob = (s.dob || activeUser.dob || '').toString().trim().split(' ')[0].split('T')[0];
+    if (dobEl) dobEl.value = cleanDob || '';
+
+    let cleanPhone = (s.phone || activeUser.phone || '').toString().trim().replace(/\.0$/, '');
+    if (phoneEl) phoneEl.value = cleanPhone || '';
+
+    if (confessorEl) confessorEl.value = s.confessor || activeUser.confessor || '';
+
+    if (newPassEl) newPassEl.value = '';
+    if (confirmPassEl) confirmPassEl.value = '';
+
+    const modal = document.getElementById('myServantProfileModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
+}
+
+function closeMyServantProfileModal() {
+    const modal = document.getElementById('myServantProfileModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+}
+
+async function saveMyServantProfile() {
+    const activeStr = localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user');
+    let activeUser = null;
+    try { activeUser = JSON.parse(activeStr); } catch(e) {}
+    if (!activeUser && typeof currentUser !== 'undefined') activeUser = currentUser;
+    if (!activeUser) return alert("خطأ: لم يتم العثور على جلسة الخادم الحالية!");
+
+    const newDob = (document.getElementById('my_s_dob')?.value || '').trim();
+    const rawPhone = (document.getElementById('my_s_phone')?.value || '').trim();
+    const newPhone = (typeof normalizePhoneNumber === 'function') ? (normalizePhoneNumber(rawPhone) || rawPhone) : rawPhone;
+    const newConfessor = (document.getElementById('my_s_confessor')?.value || '').trim();
+    const newPass = (document.getElementById('my_s_new_pass')?.value || '').trim();
+    const confirmPass = (document.getElementById('my_s_confirm_pass')?.value || '').trim();
+
+    // التحقق من كلمة المرور إن أدخلها
+    if (newPass) {
+        if (newPass.length < 4) {
+            return alert("⚠️ كلمة المرور يجب أن تتكون من 4 خانات على الأقل لضمان الأمان.");
+        }
+        if (newPass !== confirmPass) {
+            return alert("⚠️ كلمة المرور وتأكيد كلمة المرور غير متطابقين! يرجى إعادة كتابتهما بدقة.");
+        }
+    }
+
+    const sList = (typeof servants !== 'undefined' && Array.isArray(servants)) ? servants : [];
+    let s = sList.find(x => 
+        (activeUser.id && String(x.id) === String(activeUser.id)) ||
+        (activeUser.code && String(x.code) === String(activeUser.code)) ||
+        (activeUser.name && (x.name || '').trim() === (activeUser.name || '').trim())
+    );
+
+    if (!s) {
+        s = Object.assign({}, activeUser);
+        sList.push(s);
+    }
+
+    if (typeof saveVersionSnapshot === 'function') {
+        saveVersionSnapshot('servant', s.id || s.code, s.name, Object.assign({}, s));
+    }
+
+    s.dob = newDob;
+    if (newPhone) s.phone = newPhone;
+    s.confessor = newConfessor;
+
+    let passChanged = false;
+    if (newPass) {
+        s.password = newPass;
+        s.password_last_changed = new Date().toISOString();
+        passChanged = true;
+    }
+
+    // تحديث بيانات الجلسة الحالية
+    activeUser.dob = newDob;
+    if (newPhone) activeUser.phone = newPhone;
+    activeUser.confessor = newConfessor;
+    if (passChanged) activeUser.password = newPass;
+
+    try {
+        localStorage.setItem('my_church_active_user', JSON.stringify(activeUser));
+        if (sessionStorage.getItem('my_church_active_user')) {
+            sessionStorage.setItem('my_church_active_user', JSON.stringify(activeUser));
+        }
+    } catch(e) {}
+    if (typeof currentUser !== 'undefined') {
+        Object.assign(currentUser, activeUser);
+    }
+
+    // حفظ في التخزين المحلي
+    try {
+        localStorage.setItem(STORAGE_KEYS.SERVANTS, JSON.stringify(sList));
+    } catch(e) {}
+
+    // مزامنة فورية مع سحابة Firestore
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        try {
+            await fsdb.collection('servants').doc(String(s.code || s.id)).set(s, { merge: true });
+        } catch(errCloud) {
+            console.warn("Cloud single save err in self-profile:", errCloud);
+            if (typeof syncToCloud === 'function') syncToCloud('servants', sList);
+        }
+    } else if (typeof syncToCloud === 'function') {
+        syncToCloud('servants', sList);
+    }
+
+    // توثيق حركة التعديل لتكون واضحة للأدمن
+    if (typeof logActivity === 'function') {
+        if (passChanged) {
+            logActivity("تحديث كلمة مرور وملف شخصي", s.name, "قام الخادم [" + s.name + "] بتحديث ملفه الشخصي وتعيين كلمة مرور جديدة: [" + newPass + "] | هاتف: " + (s.phone || '-') + " | ميلاد: " + (s.dob || '-'));
+        } else {
+            logActivity("تحديث ملف شخصي لخادم", s.name, "قام الخادم بتحديث ملفه الشخصي: هاتف [" + (s.phone || '-') + "] | تاريخ ميلاد [" + (s.dob || '-') + "] | أب اعتراف [" + (s.confessor || '-') + "]");
+        }
+    }
+
+    if (typeof renderServantsTable === 'function') renderServantsTable();
+    if (typeof checkUpcomingBirthdays === 'function') checkUpcomingBirthdays();
+    if (typeof renderRadarBirthdays === 'function') renderRadarBirthdays();
+    if (typeof renderRadarDashboard === 'function') renderRadarDashboard();
+
+    closeMyServantProfileModal();
+
+    const successMsg = passChanged
+        ? "✅ تم حفظ وتحديث بياناتك الشخصية بنجاح! تم تعيين كلمة المرور الجديدة وتوثيقها لدى أمانة الخدمة. شكراً لأمانتك 🕊️"
+        : "✅ تم حفظ وتحديث بياناتك الشخصية بنجاح! شكراً لاهتمامك باستكمال بيانات الخدمة 🕊️";
+
+    if (typeof showToast === 'function') showToast(successMsg);
+    else alert(successMsg);
+}
+
 // Explicit Window Exports
 if (typeof window !== 'undefined') {
     window.openEditServantModal = openEditServantModal;
+  window.openMyServantProfileModal = openMyServantProfileModal;
+  window.closeMyServantProfileModal = closeMyServantProfileModal;
+  window.saveMyServantProfile = saveMyServantProfile;
+  window.togglePasswordVisibility = togglePasswordVisibility;
   window.closeEditServantModal = closeEditServantModal;
   window.saveEditedServant = saveEditedServant;
   window.editServant = editServant;
