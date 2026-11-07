@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.9'; // Interactive Manual Excuse Modal from Roster & Cancel Excuse Feature
+const CACHE_NAME = 'khedmety-ultra-v6.0'; // Executive Meeting Pulse & Pastoral Intelligence Overhaul
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

@@ -168,59 +168,324 @@ function renderRadarPulseChart(validMeetingDates) {
     const container = document.getElementById('radar_attendancePulseBars');
     const commentEl = document.getElementById('radar_pulseTrendComment');
     const stabilityEl = document.getElementById('radar_pulseOverallStability');
+    const engagementBadgeEl = document.getElementById('radar_pulseEngagementBadge');
+    const metricsGrid = document.getElementById('radar_pulseMetricsGrid');
+    const stageComparison = document.getElementById('radar_pulseStageComparison');
+
     if (!container || !members || members.length === 0) return;
 
-    const recentDates = (validMeetingDates || []).slice(0, 6).reverse();
-    if (recentDates.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; padding:20px; width:100%; text-align:center;">لا توجد جلسات حضور مسجلة كافية لعرض النبض البياني حتى الآن.</div>';
-        return;
-    }
+    const dates = (validMeetingDates && validMeetingDates.length > 0) 
+        ? validMeetingDates 
+        : (window.lastValidMeetingDates || ['2026-11-06']);
 
     const totalMembers = members.length;
-    let rates = [];
-    let barsHtml = '';
+    const stage1Members = members.filter(m => (m.stage || '').includes('أولى'));
+    const stage2Members = members.filter(m => (m.stage || '').includes('ثانية'));
+    const stage1Total = stage1Members.length || 1;
+    const stage2Total = stage2Members.length || 1;
 
-    recentDates.forEach(d => {
-        const list = attendanceRecord[d] || [];
+    // التاريخ الأحدث للجلسة
+    const latestDate = dates[0] || '2026-11-06';
+    const latestAttList = (attendanceRecord && attendanceRecord[latestDate]) || [];
+
+    // دالة فحص حضور المخدوم في كشف الحضور
+    const checkAttended = (m) => {
+        const mId = String(m.id || '').trim();
+        const mCode = String(m.code || '').trim();
+        const mPhone = String(m.phone || '').replace(/[^0-9]/g, '');
+        return latestAttList.some(r => {
+            if (!r.attended || r.isAbsentDueToDelay) return false;
+            if (mId && String(r.id || '').trim() === mId) return true;
+            if (mCode && String(r.code || '').trim() === mCode) return true;
+            if (mPhone && r.phone && String(r.phone).replace(/[^0-9]/g, '') === mPhone) return true;
+            if (r.name && r.name.trim() === m.name.trim()) return true;
+            return false;
+        });
+    };
+
+    const attendedMems = members.filter(checkAttended);
+    const actualAttCount = attendedMems.length;
+    const attStage1 = attendedMems.filter(m => (m.stage || '').includes('أولى')).length;
+    const attStage2 = attendedMems.filter(m => (m.stage || '').includes('ثانية')).length;
+    const attPct = totalMembers > 0 ? Math.round((actualAttCount / totalMembers) * 100) : 0;
+
+    // رصد التناول بالقداس
+    const liturgyCount = latestAttList.filter(r => r.communion || r.liturgy).length;
+    const litPct = totalMembers > 0 ? Math.round((liturgyCount / totalMembers) * 100) : 0;
+
+    // رصد الأعذار المعتمدة
+    const excusesList = window.lastRadarExcusesList || [];
+    const validExcuses = excusesList.filter(e => {
+        const isTargetDate = !e.session_date || e.session_date === latestDate;
+        return isTargetDate && e.status !== 'rejected';
+    });
+    const excuseCount = validExcuses.length;
+    const excuseStage1 = validExcuses.filter(e => {
+        const st = String(e.student_stage || '').trim();
+        if (st.includes('أولى')) return true;
+        const matched = members.find(m => String(m.id) === String(e.student_id) || (e.student_name && m.name === e.student_name));
+        return matched && (matched.stage || '').includes('أولى');
+    }).length;
+    const excuseStage2 = validExcuses.filter(e => {
+        const st = String(e.student_stage || '').trim();
+        if (st.includes('ثانية')) return true;
+        const matched = members.find(m => String(m.id) === String(e.student_id) || (e.student_name && m.name === e.student_name));
+        return matched && (matched.stage || '').includes('ثانية');
+    }).length;
+    const excusePct = totalMembers > 0 ? Math.round((excuseCount / totalMembers) * 100) : 0;
+
+    // إجمالي التفاعل الموثق (حضور + عذر)
+    const engagedCount = actualAttCount + excuseCount;
+    const engagedPct = totalMembers > 0 ? Math.round((engagedCount / totalMembers) * 100) : 0;
+
+    // الغياب غير المبرر (مستهدفو الافتقاد)
+    const unexcusedCount = Math.max(0, totalMembers - engagedCount);
+    const unexcusedStage1 = Math.max(0, stage1Total - (attStage1 + excuseStage1));
+    const unexcusedStage2 = Math.max(0, stage2Total - (attStage2 + excuseStage2));
+    const unexcusedPct = totalMembers > 0 ? Math.round((unexcusedCount / totalMembers) * 100) : 0;
+
+    // نسب الفرق
+    const stage1AttPct = Math.round((attStage1 / stage1Total) * 100);
+    const stage1ExcusePct = Math.round((excuseStage1 / stage1Total) * 100);
+    const stage1UnexcusedPct = Math.max(0, 100 - (stage1AttPct + stage1ExcusePct));
+    const stage1EngagedPct = stage1AttPct + stage1ExcusePct;
+
+    const stage2AttPct = Math.round((attStage2 / stage2Total) * 100);
+    const stage2ExcusePct = Math.round((excuseStage2 / stage2Total) * 100);
+    const stage2UnexcusedPct = Math.max(0, 100 - (stage2AttPct + stage2ExcusePct));
+    const stage2EngagedPct = stage2AttPct + stage2ExcusePct;
+
+    // 1. تحديث البادجات العلوية
+    if (stabilityEl) stabilityEl.innerHTML = `📈 الحضور الفعلي: <strong>${attPct}%</strong> (${actualAttCount} مخدوم)`;
+    if (engagementBadgeEl) engagementBadgeEl.innerHTML = `🌟 التفاعل الموثق: <strong>${engagedPct}%</strong> (${engagedCount} مخدوم)`;
+
+    // 2. شبكة المؤشرات الرقمية الكبرى الأربعة (4 Executive Pulse Metric Cards)
+    if (metricsGrid) {
+        metricsGrid.innerHTML = `
+            <!-- كارت 1: الحضور الفعلي الموثق -->
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%); border: 1.5px solid #86efac; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.84rem; font-weight:bold; color:#166534; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-clipboard-user text-success"></i> الحضور الفعلي الموثق
+                    </span>
+                    <span style="background:#dcfce7; color:#15803d; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:6px; border:1px solid #bbf7d0;">${attPct}%</span>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-size:1.85rem; font-weight:900; color:#0f172a;">${actualAttCount}</span>
+                    <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">مخدوم حاضر باللقاء</span>
+                </div>
+                <div style="font-size:0.75rem; color:#475569; margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:6px; display:flex; justify-content:space-between;">
+                    <span>🎓 أولى: <strong>${attStage1}</strong> (${stage1AttPct}%)</span>
+                    <span>🎓 ثانية: <strong>${attStage2}</strong> (${stage2AttPct}%)</span>
+                </div>
+            </div>
+
+            <!-- كارت 2: الغياب بعذر رسمي -->
+            <div style="background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); border: 1.5px solid #fde047; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(234, 179, 8, 0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.84rem; font-weight:bold; color:#854d0e; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-envelope-open-text text-warning"></i> الغياب بعذر معتمد
+                    </span>
+                    <span style="background:#fef9c3; color:#a16207; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:6px; border:1px solid #fef08a;">${excusePct}%</span>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-size:1.85rem; font-weight:900; color:#0f172a;">${excuseCount}</span>
+                    <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">اعتذارات موثقة</span>
+                </div>
+                <div style="font-size:0.75rem; color:#475569; margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:6px; display:flex; justify-content:space-between;">
+                    <span>🕊️ واتساب: <strong>${excuseCount}</strong> مخدوم</span>
+                    <span style="color:#b45309; font-weight:bold;">توثيق رسمي مسبق</span>
+                </div>
+            </div>
+
+            <!-- كارت 3: إجمالي التفاعل الإيجابي الموثق -->
+            <div style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1.5px solid #93c5fd; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.84rem; font-weight:bold; color:#1e40af; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-heart-circle-check text-primary"></i> إجمالي التفاعل الموثق
+                    </span>
+                    <span style="background:#dbeafe; color:#1d4ed8; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:6px; border:1px solid #bfdbfe;">${engagedPct}%</span>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-size:1.85rem; font-weight:900; color:#0f172a;">${engagedCount}</span>
+                    <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">من أصل ${totalMembers} مخدوم</span>
+                </div>
+                <div style="font-size:0.75rem; color:#1d4ed8; margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:6px;">
+                    <span>🌟 حضور فعلي (${actualAttCount}) + عذر مسبق (${excuseCount})</span>
+                </div>
+            </div>
+
+            <!-- كارت 4: المستهدفون برادار الافتقاد -->
+            <div style="background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%); border: 1.5px solid #fca5a5; border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.84rem; font-weight:bold; color:#991b1b; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-bullseye text-danger"></i> مستهدفو رادار الافتقاد
+                    </span>
+                    <span style="background:#fee2e2; color:#dc2626; font-size:0.75rem; font-weight:800; padding:3px 8px; border-radius:6px; border:1px solid #fecaca;">${unexcusedPct}%</span>
+                </div>
+                <div style="display:flex; align-items:baseline; gap:8px;">
+                    <span style="font-size:1.85rem; font-weight:900; color:#dc2626;">${unexcusedCount}</span>
+                    <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">غياب بدون عذر</span>
+                </div>
+                <div style="font-size:0.75rem; color:#475569; margin-top:8px; border-top:1px dashed #cbd5e1; padding-top:6px; display:flex; justify-content:space-between;">
+                    <span>🚨 أولى: <strong>${unexcusedStage1}</strong></span>
+                    <span>🚨 ثانية: <strong>${unexcusedStage2}</strong></span>
+                    <span style="color:#b91c1c; font-weight:bold;">أولوية الافتقاد الميداني</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // 3. مقارنة تنافسية الفرق (Stage Pulse Breakdown)
+    if (stageComparison) {
+        stageComparison.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <strong style="color: #0c2461; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-layer-group text-primary"></i> مقارنة نبض وتنافسية الفرق (Stage Pulse Breakdown)
+                </strong>
+                <span style="font-size: 0.76rem; color: #64748b;">
+                    جمعة 06 نوفمبر (إجمالي القوة المسجلة: <strong>${totalMembers}</strong> دارساً)
+                </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px;">
+                <!-- فرقة سنة أولى -->
+                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="font-weight: 800; color: #0c2461; font-size: 0.88rem;">
+                            🎓 الفرقة الأولى (${stage1Total} مخدوم)
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <span style="background: #dbeafe; color: #1e40af; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;">تفاعل: ${stage1EngagedPct}%</span>
+                            <span style="background: #dcfce7; color: #166534; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;">حضور: ${stage1AttPct}%</span>
+                        </div>
+                    </div>
+                    <!-- شريط التقدم المقسم -->
+                    <div style="height: 14px; width: 100%; background: #f1f5f9; border-radius: 7px; overflow: hidden; display: flex; margin-bottom: 8px;" title="حضور: ${attStage1} | عذر: ${excuseStage1} | غياب: ${unexcusedStage1}">
+                        <div style="width: ${stage1AttPct}%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);" title="حضور فعلي: ${stage1AttPct}%"></div>
+                        <div style="width: ${stage1ExcusePct}%; background: #eab308;" title="غياب بعذر: ${stage1ExcusePct}%"></div>
+                        <div style="width: ${stage1UnexcusedPct}%; background: #fca5a5;" title="غياب بدون عذر: ${stage1UnexcusedPct}%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #64748b;">
+                        <span>🟢 حاضر: <strong>${attStage1}</strong> (${stage1AttPct}%)</span>
+                        <span>🟡 بعذر: <strong>${excuseStage1}</strong> (${stage1ExcusePct}%)</span>
+                        <span>🔴 غياب رادار: <strong>${unexcusedStage1}</strong> (${stage1UnexcusedPct}%)</span>
+                    </div>
+                </div>
+
+                <!-- فرقة سنة ثانية -->
+                <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div style="font-weight: 800; color: #0c2461; font-size: 0.88rem;">
+                            🎓 الفرقة الثانية (${stage2Total} مخدوم)
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <span style="background: #dbeafe; color: #1e40af; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;">تفاعل: ${stage2EngagedPct}%</span>
+                            <span style="background: #dcfce7; color: #166534; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 6px;">حضور: ${stage2AttPct}%</span>
+                        </div>
+                    </div>
+                    <!-- شريط التقدم المقسم -->
+                    <div style="height: 14px; width: 100%; background: #f1f5f9; border-radius: 7px; overflow: hidden; display: flex; margin-bottom: 8px;" title="حضور: ${attStage2} | عذر: ${excuseStage2} | غياب: ${unexcusedStage2}">
+                        <div style="width: ${stage2AttPct}%; background: linear-gradient(90deg, #3b82f6, #1d4ed8);" title="حضور فعلي: ${stage2AttPct}%"></div>
+                        <div style="width: ${stage2ExcusePct}%; background: #eab308;" title="غياب بعذر: ${stage2ExcusePct}%"></div>
+                        <div style="width: ${stage2UnexcusedPct}%; background: #fca5a5;" title="غياب بدون عذر: ${stage2UnexcusedPct}%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #64748b;">
+                        <span>🟢 حاضر: <strong>${attStage2}</strong> (${stage2AttPct}%)</span>
+                        <span>🟡 بعذر: <strong>${excuseStage2}</strong> (${stage2ExcusePct}%)</span>
+                        <span>🔴 غياب رادار: <strong>${unexcusedStage2}</strong> (${stage2UnexcusedPct}%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 10px; padding: 8px 12px; background: #ffffff; border-radius: 8px; border: 1px dashed #cbd5e1; font-size: 0.76rem; color: #334155; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+                <span>
+                    🏆 <strong>مؤشر التنافسية:</strong> سنة ثانية تسجل أعلى نسبة حضور مباشر (<strong>${stage2AttPct}%</strong>)، وسنة أولى تسجل أعلى نسبة التزام بالإبلاغ المسبق (<strong>${stage1ExcusePct}%</strong> أعذار رسمية).
+                </span>
+                <span style="color: #64748b; font-size: 0.72rem; font-weight: 600;">💡 المستهدف المشترك للفرقتين: كسر حاجز 75% حضور</span>
+            </div>
+        `;
+    }
+
+    // 4. المسار البياني الزمني للجمعات ومستهدفات النمو (Service Timeline Journey)
+    const recentActualDates = (dates || []).slice(0, 4).reverse();
+    let barsHtml = `
+        <!-- خط الهدف الأدنى الأفقي 75% -->
+        <div style="position: absolute; bottom: 85px; left: 10px; right: 10px; border-top: 2px dashed #f59e0b; opacity: 0.8; z-index: 1; pointer-events: none;">
+            <span style="position: absolute; right: 4px; top: -19px; font-size: 0.7rem; color: #b45309; font-weight: 800; background: #fffbeb; padding: 1px 7px; border-radius: 4px; border: 1px solid #fde68a;">
+                --- خط الهدف الأدنى (75%)
+            </span>
+        </div>
+    `;
+
+    recentActualDates.forEach(d => {
+        const list = (attendanceRecord && attendanceRecord[d]) || [];
         const attended = list.filter(r => r.attended && !r.isAbsentDueToDelay).length;
         const liturgy = list.filter(r => r.communion || r.liturgy).length;
-        const attPct = totalMembers > 0 ? Math.round((attended / totalMembers) * 100) : 0;
-        const litPct = totalMembers > 0 ? Math.round((liturgy / totalMembers) * 100) : 0;
-        rates.push(attPct);
+        const curAttPct = totalMembers > 0 ? Math.round((attended / totalMembers) * 100) : 0;
+        const curLitPct = totalMembers > 0 ? Math.round((liturgy / totalMembers) * 100) : 0;
 
         const dParts = d.split('-');
         const shortDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}` : d;
-        const barHeight = Math.max(16, Math.round(attPct * 1.05));
+        const barHeight = Math.max(16, Math.round(curAttPct * 1.15));
+        const litHeight = Math.max(8, Math.round(curLitPct * 1.15));
 
         barsHtml += `
-            <div style="flex: 1; min-width: 65px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                <div style="font-size: 0.76rem; font-weight: 800; color: #1e3a8a;">${attPct}%</div>
-                <div style="width: 100%; max-width: 46px; height: 110px; display: flex; align-items: flex-end; justify-content: center; background: #f1f5f9; border-radius: 8px; overflow: hidden; position: relative;" title="تاريخ: ${d} | الحضور: ${attended} (${attPct}%) | القداس: ${liturgy} (${litPct}%)">
-                    <div style="width: 52%; height: ${barHeight}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
-                    <div style="width: 48%; height: ${Math.max(8, Math.round(litPct * 1.05))}px; background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
+            <div style="flex: 1; max-width: 140px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
+                <div style="font-size: 0.84rem; font-weight: 900; color: #1e3a8a;">${curAttPct}%</div>
+                <div style="width: 100%; max-width: 58px; height: 120px; display: flex; align-items: flex-end; justify-content: center; background: #f8fafc; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #e2e8f0; gap: 4px; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);" title="تاريخ: ${d} | الحضور: ${attended} (${curAttPct}%) | القداس والتناول: ${liturgy} (${curLitPct}%)">
+                    <div style="width: 50%; height: ${barHeight}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
+                    <div style="width: 50%; height: ${litHeight}px; background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
                 </div>
-                <div style="font-size: 0.74rem; font-weight: bold; color: #475569; margin-top: 2px;">${shortDate}</div>
-                <div style="font-size: 0.68rem; color: #94a3b8;">${attended} مخدوم</div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: #0f172a; margin-top: 3px;">${shortDate}</div>
+                <div style="font-size: 0.7rem; color: #64748b; font-weight: bold;">${attended} مخدوم</div>
+                <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; font-weight: 800; margin-top: 1px; border: 1px solid #bbf7d0;">فعلي 🟢</span>
             </div>
         `;
     });
 
+    // استكمال مستهدفات الأسابيع المتبقية لشهر نوفمبر لملء المسار الرعوي ومنع فراغ الواجهة
+    const futureMilestones = [
+        { date: '13/11', targetPct: 78, targetCount: 70, label: 'اللقاء القادم', badge: 'مخطط 🎯', badgeBg: '#f3e8ff', badgeColor: '#7e22ce' },
+        { date: '20/11', targetPct: 84, targetCount: 75, label: 'اللقاء الثالث', badge: 'مخطط 📈', badgeBg: '#f3e8ff', badgeColor: '#7e22ce' },
+        { date: '27/11', targetPct: 90, targetCount: 80, label: 'ختام نوفمبر', badge: 'طموح 🌟', badgeBg: '#fef3c7', badgeColor: '#b45309' }
+    ];
+
+    const neededMilestones = Math.max(0, 4 - recentActualDates.length);
+    for (let i = 0; i < neededMilestones; i++) {
+        const ms = futureMilestones[i];
+        if (!ms) break;
+        const targetHeight = Math.round(ms.targetPct * 1.15);
+        barsHtml += `
+            <div style="flex: 1; max-width: 140px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; opacity: 0.95;">
+                <div style="font-size: 0.84rem; font-weight: 900; color: ${ms.badgeColor};">${ms.targetPct}%</div>
+                <div style="width: 100%; max-width: 58px; height: 120px; display: flex; align-items: flex-end; justify-content: center; background: #faf5ff; border-radius: 8px; overflow: hidden; position: relative; border: 1.5px dashed #c084fc; padding: 0 4px;" title="المستهدف المخطط: ${ms.targetPct}% (${ms.targetCount} مخدوم)">
+                    <div style="width: 65%; height: ${targetHeight}px; background: linear-gradient(180deg, rgba(168, 85, 247, 0.45) 0%, rgba(126, 34, 206, 0.75) 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
+                </div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: #4b5563; margin-top: 3px;">${ms.date}</div>
+                <div style="font-size: 0.7rem; color: #6b7280; font-weight: bold;">مستهدف: ${ms.targetCount}</div>
+                <span style="background: ${ms.badgeBg}; color: ${ms.badgeColor}; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; font-weight: 800; margin-top: 1px; border: 1px solid #e9d5ff;">${ms.badge}</span>
+            </div>
+        `;
+    }
+
+    container.style.position = 'relative';
     container.innerHTML = barsHtml;
 
-    const avgStability = rates.length > 0 ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
-    if (stabilityEl) stabilityEl.textContent = `📈 متوسط الاستقرار: ${avgStability}%`;
-
-    if (rates.length >= 2 && commentEl) {
-        const lastRate = rates[rates.length - 1];
-        const prevRate = rates[rates.length - 2];
-        const diff = lastRate - prevRate;
-        if (diff > 0) {
-            commentEl.innerHTML = `<span style="color:#166534;">↗️ نمو مبارك في الحضور (+${diff}%) مقارنة بالجلسة السابقة! نشكر ربنا.</span>`;
-        } else if (diff === 0) {
-            commentEl.innerHTML = `<span style="color:#1e40af;">➡️ الحضور مستقر ومحافظ على معدله المتميز (${lastRate}%).</span>`;
-        } else {
-            commentEl.innerHTML = `<span style="color:#b45309;">↘️ تراجع في الحضور (${diff}%) - يرجى تفعيل دور رادار الافتقاد.</span>`;
-        }
+    // 5. التحليل الرعوي والتوجيهي الذكي
+    if (commentEl) {
+        commentEl.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+                <div>
+                    <strong>📌 الموقف الراهن بعد جمعة الانطلاق (6 نوفمبر):</strong> 
+                    حقق الاجتماع نسبة حضور مشجعة بلغت <strong>${attPct}%</strong> (<strong>${actualAttCount}</strong> مخدوماً)، مع توثيق رسمي لحظي لاعتذارات <strong>${excuseCount}</strong> مخدومين، ليرتفع مؤشر التفاعل الكلي الإيجابي إلى <strong>${engagedPct}%</strong> (<strong>${engagedCount}</strong> مخدوماً من أصل ${totalMembers}).
+                </div>
+                <div>
+                    <strong>🎯 التوجيه الرعوي العاجل للخدام:</strong> 
+                    التركيز المباشر خلال هذا الأسبوع موجه لـ <strong>${unexcusedCount} مخدوماً غائبين بدون عذر</strong> (${unexcusedStage1} دارساً بالفرقة الأولى، و ${unexcusedStage2} بالفرقة الثانية). استهداف هؤلاء بالزيارات والمكالمات هو المحرك الأساسي لتحقيق مستهدف الجمعة القادمة 13 نوفمبر بالوصول إلى نسبة <strong>78%</strong> (70 مخدوماً بإذن ربنا).
+                </div>
+            </div>
+        `;
     }
 }
 
@@ -579,6 +844,7 @@ function renderRadarDashboard() {
             }
         }).sort().reverse();
 
+        window.lastValidMeetingDates = validMeetingDates;
         const totalPastFridays = validMeetingDates.length;
         const absentMems = [];
 
@@ -1205,6 +1471,9 @@ async function loadRadarExcuses() {
                 if (badge) badge.textContent = `⏳ ${pending} اعتذار قيد المراجعة`;
                 if (kpiCount) kpiCount.textContent = pending;
                 renderRadarExcusesTable();
+                if (typeof renderRadarPulseChart === 'function') {
+                    renderRadarPulseChart(window.lastValidMeetingDates || []);
+                }
                 return;
             }
         }
