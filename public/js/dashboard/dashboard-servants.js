@@ -416,7 +416,9 @@ tr.innerHTML = `
 
 <td data-label="تاريخ الميلاد">${escapeHtml(cleanDob) || '-'}</td>
 
-<td data-label="الصلاحية"><span class="role-badge" style="background:var(--accent);">${escapeHtml(s.permission || s.role || 'خادم')}</span></td>
+<td data-label="الصلاحية">
+    ${s.customPermissions ? `<span class="badge" style="background:#f3e8ff; color:#7e22ce; border:1px solid #d8b4fe; font-size:11px; font-weight:800; display:inline-flex; align-items:center; gap:4px;" title="صلاحيات مخصصة بالتفصيل لكل أوبشن">⚙️ مخصص دقيق</span>` : `<span class="role-badge" style="background:var(--accent);">${escapeHtml(s.permission || s.role || 'خادم')}</span>`}
+</td>
 
 <td data-label="الحساب السحابي">${s.cloudUid
 
@@ -424,7 +426,11 @@ tr.innerHTML = `
 
 : `<button class="btn-mini btn-purple" onclick="linkServantToCloudAuth(${s.id})">ربط سحابي 🔐</button>`}</td>
 
-<td data-label="تعديل" class="admin-only"><button class="btn-mini btn-warning" onclick="openEditServantModal('${escapeHtml(s.code || s.id)}')">تعديل</button></td>
+<td data-label="تعديل" class="admin-only" style="white-space:nowrap;">
+    <button class="btn-mini btn-warning" onclick="openEditServantModal('${escapeHtml(s.code || s.id)}')" title="تعديل البيانات الأساسية">تعديل</button>
+    <button class="btn-mini" style="background:#4f46e5; color:#ffffff; margin-right:3px;" onclick="openServantPermissionsModal('${escapeHtml(s.code || s.id)}')" title="تخصيص الصلاحيات بالتفصيل الممل لهذا الخادم">🛡️ الصلاحيات</button>
+    <button class="btn-mini" style="background:#0284c7; color:#ffffff; margin-right:3px;" onclick="previewDashboardAsServant('${escapeHtml(s.code || s.id)}')" title="معاينة لوحة التحكم الحية كما يراها هذا الخادم بالضبط">👁️ معاينة</button>
+</td>
 
 <td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', ${s.id}, '${escapeHtml(s.name)}')">🕘</button></td>
 

@@ -5030,6 +5030,97 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <!-- نافذة قائمة الحضور اليدوي -->
 
 
+
+<!-- 🛡️ نافذة تخصيص وضبط صلاحيات الخادم بالتفصيل الممل (Granular Servant Permissions Modal) -->
+<div id="servantPermissionsModal" class="modal" style="display:none; z-index:100000; background:rgba(15,23,42,0.7); backdrop-filter:blur(5px);">
+  <div class="modal-content" style="max-width:860px; width:95%; text-align:right; border-radius:20px; border:2px solid #4f46e5; padding:24px; box-shadow:0 20px 48px rgba(0,0,0,0.4); background:#ffffff; max-height:92vh; display:flex; flex-direction:column;">
+    
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px; flex-shrink:0;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:44px; height:44px; border-radius:12px; background:#eff6ff; color:#4f46e5; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 2px 8px rgba(79,70,229,0.2);">
+          <i class="fa-solid fa-sliders"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; color:#0f172a; font-size:1.2rem; font-weight:900;">
+            تخصيص صلاحيات الخادم بالتفصيل الممل
+          </h3>
+          <p style="margin:2px 0 0; font-size:0.8rem; color:#64748b;">
+            تحديد مستوى الوصول (إدارة كاملة 🟢 • مشاهدة فقط 🟡 • إخفاء تام 🔴) لكل أوبشن وقسم في المنظومة
+          </p>
+        </div>
+      </div>
+      <span class="close-btn" onclick="closeServantPermissionsModal()" style="font-size:26px; cursor:pointer; color:#94a3b8; line-height:1;">&times;</span>
+    </div>
+
+    <!-- بطاقة الخادم المختصرة + قوالب التعيين السريع -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:12px 16px; margin-bottom:14px; flex-shrink:0;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <div>
+          <strong style="color:#0c2461; font-size:1.05rem;" id="permModal_servantName">-</strong>
+          <span style="font-size:0.78rem; color:#64748b; margin-right:8px;" id="permModal_servantMeta">كود الخادم: -</span>
+        </div>
+        <span id="permModal_currentRoleBadge" class="badge" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; font-size:0.8rem; padding:4px 10px; font-weight:800;">
+          خادم
+        </span>
+      </div>
+
+      <!-- أشرطة القوالب السريعة -->
+      <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; border-top:1px dashed #cbd5e1; padding-top:8px;">
+        <span style="font-size:0.75rem; color:#475569; font-weight:bold;">⚡ قوالب جاهزة سريعة:</span>
+        <button type="button" onclick="applyPermissionPresetToModal('admin')" style="background:#fdf4ff; color:#a21caf; border:1px solid #f0abfc; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+          👑 أمين خدمة (شامل)
+        </button>
+        <button type="button" onclick="applyPermissionPresetToModal('semi_admin')" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;" title="إدارة كاملة للرعاية والدارسين مع حجب شؤون وتحضيرات الخدام">
+          🛡️ نائب أمين (شبه أدمن)
+        </button>
+        <button type="button" onclick="applyPermissionPresetToModal('followup_lead')" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+          👥 مسؤول افتقاد وأعذار
+        </button>
+        <button type="button" onclick="applyPermissionPresetToModal('scanner_only')" style="background:#fffbeb; color:#b45309; border:1px solid #fde68a; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+          📷 مسجل حضور فقط
+        </button>
+        <button type="button" onclick="applyPermissionPresetToModal('view_only')" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:3px 10px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+          👁️ مشاهدة واطلاع فقط
+        </button>
+      </div>
+    </div>
+
+    <!-- جدول مصفوفة الصلاحيات مع التمرير -->
+    <div style="flex:1; overflow-y:auto; border:1.5px solid #cbd5e1; border-radius:12px; margin-bottom:14px; background:#ffffff;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.86rem;">
+        <thead style="position:sticky; top:0; background:#1e3a8a; color:#ffffff; z-index:2;">
+          <tr>
+            <th style="padding:10px 14px; text-align:right; width:45%;">القسم / الخاصية</th>
+            <th style="padding:10px 10px; text-align:center; width:20%;">التصنيف</th>
+            <th style="padding:10px 14px; text-align:center; width:35%;">مستوى الوصول والصلاحية</th>
+          </tr>
+        </thead>
+        <tbody id="permModal_modulesTbody">
+          <!-- ديناميكي من JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- أزرار الإجراءات السفلية -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; border-top:1.5px solid #f1f5f9; padding-top:14px; flex-shrink:0;">
+      <button type="button" onclick="closeServantPermissionsModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; padding:9px 18px; font-weight:800; cursor:pointer;">
+        إلغاء
+      </button>
+
+      <div style="display:flex; gap:10px;">
+        <button type="button" onclick="previewDashboardAsServant(currentConfiguringServantId)" style="background:#eff6ff; color:#1d4ed8; border:1.5px solid #bfdbfe; border-radius:8px; padding:9px 18px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-eye"></i> معاينة الواجهة حياً بهذا الخادم 👁️
+        </button>
+        <button type="button" onclick="saveServantPermissions()" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; border:none; border-radius:8px; padding:9px 22px; font-weight:800; cursor:pointer; box-shadow:0 2px 8px rgba(16,185,129,0.3); display:inline-flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-floppy-disk"></i> حفظ وتطبيق الصلاحيات فوراً 💾
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <!-- نافذة تعديل بيانات الخادم الشاملة -->
 <div id="editServantModal" class="modal" style="display:none; z-index:4600;">
   <div class="modal-content" style="max-width:560px; text-align:right;">
@@ -5064,6 +5155,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
       <div>
         <label style="font-weight:bold; font-size:12px; color:#334155;">الصلاحية الأمنية في المنظومة:</label>
         <select id="edit_s_permission" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px;">
+          <option value="custom">مخصص بالتفصيل ⚙️ (Custom Granular Matrix)</option>
           <option value="admin">أمين خدمة (تحكم كامل admin)</option>
           <option value="full">خادم متكامل (حضور وتعديل full)</option>
           <option value="scanner_only">مسح حضور بالكاميرا فقط (scanner_only)</option>
@@ -9399,7 +9491,13 @@ document.querySelectorAll('.can-attend').forEach(el => el.style.display = canAtt
 
 document.querySelectorAll('.can-edit').forEach(el => el.style.display = canEdit ? '' : 'none');
 
-document.querySelectorAll('.admin-or-servant').forEach, el => el.style.display = (isAdmin || currentPermission === 'full') ? '' : 'none';
+document.querySelectorAll('.admin-or-servant').forEach(el => el.style.display = (isAdmin || currentPermission === 'full') ? '' : 'none');
+
+    // تطبيق مصفوفة الصلاحيات التفصيلية بالكامل
+    if (typeof applyGranularPermissions === 'function') {
+        const userPerms = (typeof currentUser !== 'undefined' && currentUser) ? getServantEffectivePermissions(currentUser) : getDefaultPermissionsForRole(currentPermission);
+        applyGranularPermissions(userPerms);
+    }
 
 }
 
@@ -9708,6 +9806,7 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="js/dashboard/dashboard-servants.js"></script>
+    <script src="js/dashboard/dashboard-permissions.js"></script>
 <script src="js/dashboard/dashboard-attendance.js"></script>
 <script src="js/dashboard/dashboard-members.js"></script>
 
