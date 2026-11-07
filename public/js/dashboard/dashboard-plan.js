@@ -566,17 +566,50 @@ if (listDiv) listDiv.innerHTML = "✨ لا توجد فعاليات أو رحلا
 
 } else {
 
-if (listDiv) listDiv.innerHTML = upcomingList.slice(0, 4).map(item => `
+if (listDiv) {
+    listDiv.innerHTML = upcomingList.slice(0, 5).map(item => {
+        const isStage1 = (item.responsible || '').includes('الأولى') || (item.stage || '').includes('الأولى');
+        const isStage2 = (item.responsible || '').includes('الثانية') || (item.stage || '').includes('الثانية');
 
-<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ccc; padding:4px 0; flex-wrap:wrap; gap:5px;">
+        let badgeBg = '#eff6ff';
+        let badgeColor = '#1d4ed8';
+        let badgeBorder = '#bfdbfe';
+        let badgeIcon = 'fa-user-check';
 
-<span>📌 [<strong>${item.date}</strong>] - <strong>${item.title}</strong></span>
+        if (isStage2) {
+            badgeBg = '#fdf4ff';
+            badgeColor = '#86198f';
+            badgeBorder = '#f5d0fe';
+        } else if (!isStage1) {
+            badgeBg = '#f0fdf4';
+            badgeColor = '#15803d';
+            badgeBorder = '#bbf7d0';
+        }
 
-<span class="role-badge" style="background:#2c3e50; font-size:10px;">المسؤول: ${item.responsible}</span>
+        const typeColor = (item.type === 'محاضرة') ? '#2563eb' : ((item.type === 'امتحان') ? '#d97706' : '#7c3aed');
+        const safeTitle = (typeof escapeHtml === 'function') ? escapeHtml(item.title) : item.title;
+        const safeResp = (typeof escapeHtml === 'function') ? escapeHtml(item.responsible || 'غير محدد') : (item.responsible || 'غير محدد');
+        const safeDate = (typeof escapeHtml === 'function') ? escapeHtml(item.date) : item.date;
+        const safeType = (typeof escapeHtml === 'function' && item.type) ? escapeHtml(item.type) : item.type;
 
-</div>
-
-`).join('');
+        return `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 7px 4px; flex-wrap: wrap; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap;">
+                <span style="background: #ffffff; border: 1.5px solid #cbd5e1; color: #0c2461; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.74rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                    📅 ${safeDate}
+                </span>
+                <span style="color: #0c2461; font-weight: 800; font-size: 0.84rem;">
+                    ${safeTitle}
+                </span>
+                ${safeType ? `<span style="background: ${badgeBg}; color: ${typeColor}; font-size: 0.7rem; font-weight: bold; padding: 1px 7px; border-radius: 4px; border: 1px solid ${badgeBorder};">${safeType}</span>` : ''}
+            </div>
+            <span style="background: ${badgeBg}; color: ${badgeColor}; border: 1.5px solid ${badgeBorder}; font-size: 0.73rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fa-solid ${badgeIcon}"></i> المسؤول: ${safeResp}
+            </span>
+        </div>
+        `;
+    }).join('');
+}
 
 }
 

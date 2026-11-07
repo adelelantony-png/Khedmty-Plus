@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v6.1'; // Servant Self-Profile Edit & Admin Password Transparency
+const CACHE_NAME = 'khedmety-ultra-v6.2'; // Plan Upcoming Events Styling & Readability Overhaul
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
