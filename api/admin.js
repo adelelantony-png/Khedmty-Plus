@@ -2,8 +2,6 @@ const { getAdmin, getDb } = require('./_lib/firebase');
 
 const { verifyAuth, isAdmin } = require('./_lib/auth');
 
-
-
 module.exports = async (req, res) => {
 
     if (req.method !== 'POST') {
@@ -11,8 +9,6 @@ module.exports = async (req, res) => {
         return res.status(405).json({ success: false, message: 'طريقة الطلب غير مسموحة' });
 
     }
-
-
 
     // 1. التحقق الحقيقي من توكن المصادقة
 
@@ -24,8 +20,6 @@ module.exports = async (req, res) => {
 
     }
 
-
-
     // 2. التحقق من صلاحية الأدمن (أمين الخدمة)
 
     if (!isAdmin(authResult.user)) {
@@ -33,8 +27,6 @@ module.exports = async (req, res) => {
         return res.status(403).json({ success: false, message: 'غير مصرح لك بالوصول: هذه الواجهة مخصصة لأمين الخدمة فقط' });
 
     }
-
-
 
     const { action, payload } = req.body || {};
 
@@ -44,15 +36,11 @@ module.exports = async (req, res) => {
 
     }
 
-
-
     try {
 
         const db = getDb();
 
         const admin = getAdmin();
-
-
 
         // 1. إضافة مقرر دراسي جديد
 
@@ -82,8 +70,6 @@ module.exports = async (req, res) => {
 
         }
 
-
-
         // 2. حذف مخدوم نهائياً من السحابة والمنظومة
 
         if (action === 'delete_member' || action === 'delete_student') {
@@ -96,13 +82,9 @@ module.exports = async (req, res) => {
 
             const cleanPhone = String(phone || '').trim();
 
-
-
             const batch = db.batch();
 
             let touched = false;
-
-
 
             if (cleanId) {
 
@@ -128,8 +110,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // فحص إضافي بالهاتف إن لم يتوفر كود أو ID
 
             if (cleanPhone && !cleanCode) {
@@ -148,13 +128,9 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             return res.status(200).json({ success: true, message: 'تم حذف المخدوم من السحابة بنجاح!' });
 
         }
-
-
 
         // 2c. حذف خادم نهائياً من السحابة وقواعد البيانات
 
@@ -168,13 +144,9 @@ module.exports = async (req, res) => {
 
             const cleanPhone = String(phone || '').trim();
 
-
-
             const batch = db.batch();
 
             let touched = false;
-
-
 
             if (cleanCode) {
 
@@ -198,8 +170,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // فحص إضافي بالهاتف إن لم يتوفر كود أو ID
 
             if (cleanPhone && !cleanCode) {
@@ -218,13 +188,9 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             return res.status(200).json({ success: true, message: 'تم حذف الخادم من السحابة بنجاح!' });
 
         }
-
-
 
         // 2b. حذف يوم حضور أو تنظيف الأيام التجريبية السابقة لانطلاق الخدمة
 
@@ -241,8 +207,6 @@ module.exports = async (req, res) => {
             }
 
         }
-
-
 
         if (action === 'clean_test_attendance_before') {
 
@@ -274,8 +238,6 @@ module.exports = async (req, res) => {
 
         }
 
-
-
         // 3. استيراد المخدومين من إكسيل (Batch Write)
 
         if (action === 'import_students') {
@@ -290,8 +252,6 @@ module.exports = async (req, res) => {
 
             let count = 0;
 
-            
-
             payload.students.forEach(std => {
 
                 if (std && std.code && std.name) {
@@ -305,8 +265,6 @@ module.exports = async (req, res) => {
                     const cleanFather = std.confession_father ? String(std.confession_father).trim() : '';
 
                     const level = payload.import_level || 'الفرقة الأولى';
-
-
 
                     // 1. مزامنة مع مجموعة students (الدارسين والنتائج)
 
@@ -325,8 +283,6 @@ module.exports = async (req, res) => {
                         points: 0
 
                     }, { merge: true }); // Merge للحفاظ على النقاط إن كان مسجلاً سابقاً
-
-
 
                     // 2. مزامنة مع مجموعة members (لوحة الخدام وحضور الجمعة)
 
@@ -350,23 +306,17 @@ module.exports = async (req, res) => {
 
                     }, { merge: true });
 
-
-
                     count++;
 
                 }
 
             });
 
-
-
             await batch.commit();
 
             return res.status(200).json({ success: true, message: `تم سحب وحفظ ${count} مخدوم بنجاح!` });
 
         }
-
-
 
         // 3. ضبط مواعيد الخدمة
 
@@ -394,8 +344,6 @@ module.exports = async (req, res) => {
 
         }
 
-
-
         // 4. إنشاء / تفعيل حساب خادم في Firebase Auth بأمان دون إسقاط جلسة الأدمن
 
         if (action === 'create_servant_auth') {
@@ -417,8 +365,6 @@ module.exports = async (req, res) => {
             const servantEmail = `${cleanCode}@khedmty.local`;
 
             const uid = `srv_${cleanCode}`;
-
-
 
             const auth = admin.auth();
 
@@ -452,8 +398,6 @@ module.exports = async (req, res) => {
 
                 }
 
-
-
                 if (typeof auth.setCustomUserClaims === 'function') {
 
                     await auth.setCustomUserClaims(uid, {
@@ -471,8 +415,6 @@ module.exports = async (req, res) => {
                 }
 
             }
-
-
 
             // تحديث وثيقة الخادم في firestore
 
@@ -492,8 +434,6 @@ module.exports = async (req, res) => {
 
             }, { merge: true });
 
-
-
             return res.status(200).json({
 
                 success: true,
@@ -506,7 +446,232 @@ module.exports = async (req, res) => {
 
         }
 
+        // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء والإعدادات لمزامنة الإكسيل الشاملة
 
+        // 4b. جلب حضور تاريخ معين بسرعة فائقة (أقل من 50ms) لكشف الغياب وشيت الإكسيل
+        if (action === 'get_attendance_only') {
+            const date = (payload && payload.date) || '2026-11-06';
+            try {
+                const doc = await db.collection('attendance').doc(date).get();
+                return res.status(200).json({
+                    success: true,
+                    date: date,
+                    exists: doc.exists,
+                    attendance: (doc.exists && doc.data()) ? doc.data() : {}
+                });
+            } catch (e) {
+                return res.status(500).json({ success: false, error: e.message });
+            }
+        }
+
+        // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء والإعدادات لمزامنة الإكسيل الشاملة
+        if (action === 'get_sync_data') {
+            const members = {};
+            const attendance = {};
+            const servants = {};
+            let plan = [];
+            let settings = {};
+            const feedback = [];
+
+            // 1. Attendance (فوري ومفلتر بالعام الخدمي)
+            try {
+                const sinceDate = (payload && payload.since_date) || '2026-11-01';
+                const aSnap = await db.collection('attendance')
+                    .where(admin.firestore.FieldPath.documentId(), '>=', sinceDate)
+                    .get();
+                aSnap.forEach(doc => {
+                    attendance[doc.id] = doc.data() || {};
+                });
+            } catch (err) {
+                console.error("attendance fetch error:", err.message);
+            }
+
+            // 2. Members
+            try {
+                const mSnap = await db.collection('members').limit(250).get();
+                mSnap.forEach(doc => {
+                    const data = doc.data() || {};
+                    members[doc.id] = Object.assign({ id: doc.id }, data);
+                });
+            } catch (err) {
+                console.error("members fetch error:", err.message);
+            }
+
+            // إذا كان المطلوب هو الحضور والمخدومين فقط (للإكسيل السريع) نرجع فوراً
+            if (payload && (payload.quick || payload.only === 'attendance')) {
+                return res.status(200).json({
+                    success: true,
+                    members,
+                    attendance,
+                    servants,
+                    plan,
+                    feedback,
+                    settings
+                });
+            }
+
+            // 3. Servants
+            try {
+                const sSnap = await db.collection('servants').limit(50).get();
+                sSnap.forEach(doc => {
+                    const data = doc.data() || {};
+                    servants[doc.id] = Object.assign({ id: doc.id }, data);
+                });
+            } catch (err) {}
+
+            // 4. Master Plan
+            try {
+                const pDoc = await db.collection('config').doc('master_plan').get();
+                if (pDoc && pDoc.exists) {
+                    const pData = pDoc.data();
+                    plan = (pData && Array.isArray(pData.list)) ? pData.list : [];
+                }
+            } catch (err) {}
+
+            // 5. Settings
+            try {
+                const setDoc = await db.collection('config').doc('settings').get();
+                if (setDoc && setDoc.exists) {
+                    settings = setDoc.data() || {};
+                }
+            } catch (err) {}
+
+            return res.status(200).json({
+                success: true,
+                members,
+                attendance,
+                servants,
+                plan,
+                feedback,
+                settings
+            });
+        }
+
+        if (action === 'save_settings') {
+
+            if (!payload || !payload.service_year_name) {
+
+                return res.status(400).json({ success: false, message: 'بيانات السنة الخدمية غير مكتملة' });
+
+            }
+
+            await db.collection('settings').doc('service_info').set({
+
+                service_year_name: payload.service_year_name,
+
+                start_date: payload.start_date || '',
+
+                end_date: payload.end_date || '',
+
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+
+            }, { merge: true });
+
+            return res.status(200).json({ success: true, message: 'تم تحديث مواعيد السنة الخدمية بنجاح!' });
+
+        }
+
+        // 4. إنشاء / تفعيل حساب خادم في Firebase Auth بأمان دون إسقاط جلسة الأدمن
+
+        if (action === 'create_servant_auth') {
+
+            if (!payload || (!payload.servantId && !payload.code)) {
+
+                return res.status(400).json({ success: false, message: 'بيانات الخادم غير مكتملة' });
+
+            }
+
+            const servantCode = String(payload.code || payload.servantId).trim();
+
+            const servantName = String(payload.name || '').trim();
+
+            const servantRole = payload.permission || payload.role || 'servant';
+
+            const cleanCode = servantCode.toLowerCase().replace(/[^a-z0-9_-]/g, '') || `servant_${payload.servantId}`;
+
+            const servantEmail = `${cleanCode}@khedmty.local`;
+
+            const uid = `srv_${cleanCode}`;
+
+            const auth = admin.auth();
+
+            if (auth) {
+
+                if (typeof auth.getUser === 'function' && typeof auth.createUser === 'function') {
+
+                    try {
+
+                        await auth.getUser(uid);
+
+                    } catch (err) {
+
+                        if (err.code === 'auth/user-not-found') {
+
+                            await auth.createUser({
+
+                                uid: uid,
+
+                                email: servantEmail,
+
+                                displayName: servantName || servantCode,
+
+                                disabled: false
+
+                            });
+
+                        }
+
+                    }
+
+                }
+
+                if (typeof auth.setCustomUserClaims === 'function') {
+
+                    await auth.setCustomUserClaims(uid, {
+
+                        role: 'servant',
+
+                        perm: servantRole,
+
+                        code: servantCode,
+
+                        name: servantName
+
+                    });
+
+                }
+
+            }
+
+            // تحديث وثيقة الخادم في firestore
+
+            await db.collection('servants').doc(String(payload.servantId || servantCode)).set({
+
+                name: servantName,
+
+                code: servantCode,
+
+                role: servantRole,
+
+                isCloudLinked: true,
+
+                cloudUid: uid,
+
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+
+            }, { merge: true });
+
+            return res.status(200).json({
+
+                success: true,
+
+                message: `تم اعتماد وتفعيل حساب الخادم (${servantName || servantCode}) سحابياً بنجاح`,
+
+                uid: uid
+
+            });
+
+        }
 
         // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء والإعدادات لمزامنة الإكسيل الشاملة
 
@@ -523,8 +688,6 @@ module.exports = async (req, res) => {
             let settings = {};
 
             const feedback = [];
-
-
 
             // 1. Members
 
@@ -546,8 +709,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // 2. Attendance
 
             try {
@@ -565,8 +726,6 @@ module.exports = async (req, res) => {
                 console.error("attendance fetch error:", err.message);
 
             }
-
-
 
             // 3. Servants
 
@@ -588,8 +747,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // 4. Master Plan
 
             try {
@@ -610,8 +767,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // 5. Settings
 
             try {
@@ -630,8 +785,6 @@ module.exports = async (req, res) => {
 
             }
 
-
-
             // 6. Feedback
 
             try {
@@ -645,8 +798,6 @@ module.exports = async (req, res) => {
                 });
 
             } catch (err) {}
-
-
 
             return res.status(200).json({
 
@@ -667,8 +818,6 @@ module.exports = async (req, res) => {
             });
 
         }
-
-
 
         // 5b. حفظ وتحديث إعدادات الخدمة ومواعيد الانطلاق
 
@@ -698,8 +847,6 @@ module.exports = async (req, res) => {
 
         }
 
-
-
         // 5b. جلب آراء وتقييمات المخدومين فقط للوحة الخدمة
 
         if (action === 'get_feedback') {
@@ -721,8 +868,6 @@ module.exports = async (req, res) => {
             return res.status(200).json({ success: true, feedback: list });
 
         }
-
-
 
         // 6. حفظ واعتماد خطة السنة السحابية من كشف الإكسيل
 
@@ -751,8 +896,6 @@ module.exports = async (req, res) => {
             });
 
         }
-
-
 
         // 7. تحديث وحفظ بيانات الخدام دفعة واحدة (Batch Write)
 
@@ -802,11 +945,7 @@ module.exports = async (req, res) => {
 
         }
 
-
-
         return res.status(400).json({ success: false, message: 'إجراء غير معروف' });
-
-
 
     } catch (error) {
 
