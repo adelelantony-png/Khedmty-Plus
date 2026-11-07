@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.7'; // 5-Column Consolidated Radar Layout & Perfect Screen Fitting
+const CACHE_NAME = 'khedmety-ultra-v5.8'; // Consistent 3-Tier Vertical Timing Layout (Date / Time / Deadline Badge)
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

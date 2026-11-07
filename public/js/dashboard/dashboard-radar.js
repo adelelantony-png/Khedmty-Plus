@@ -1321,12 +1321,16 @@ function renderRadarExcusesTable() {
                     </div>
                 </td>
 
-                <!-- 2. جمعة الغياب ووقت الورود -->
+                <!-- 2. جمعة الغياب ووقت الورود (تنسيق منظم: التاريخ / الوقت / شارة الملاحظة) -->
                 <td data-label="الجمعة والتوقيت" style="padding: 10px 8px; text-align: center; vertical-align: middle;">
-                    <div style="font-weight: 800; font-size: 0.84rem; color: #0c2461;">${escapeHtml(e.friday_date)}</div>
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
-                        <span style="font-size: 0.75rem; color: #334155; font-weight: 600;">${timing.weekdayName} ${timing.timeStr}</span>
-                        <span style="font-size: 0.7rem; font-weight: 800; color: ${timing.badgeColor}; background: ${timing.bgColor}; border-radius: 4px; padding: 1px 6px;">
+                    <div style="font-weight: 800; font-size: 0.88rem; color: #0c2461; line-height: 1.25; margin-bottom: 3px;">
+                        ${escapeHtml(e.friday_date)}
+                    </div>
+                    <div style="font-size: 0.78rem; color: #334155; font-weight: 600; line-height: 1.25; margin-bottom: 4px;">
+                        ${timing.weekdayName} ${timing.timeStr}
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <span style="display: inline-block; font-size: 0.72rem; font-weight: 800; color: ${timing.badgeColor}; background: ${timing.bgColor}; border-radius: 6px; padding: 2px 8px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                             ${timing.shortLabel}
                         </span>
                     </div>
