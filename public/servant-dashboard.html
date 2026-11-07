@@ -2252,7 +2252,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                         </thead>
                         <tbody id="radar_excusesTableBody">
                             <tr>
-                                <td colspan="7" style="padding: 16px; color: #78350f; font-weight: bold;">جاري فحص رادار الاعتذارات الواردة... 🔔</td>
+                                <td colspan="8" style="padding: 16px; color: #78350f; font-weight: bold;">جاري فحص رادار الاعتذارات الواردة... 🔔</td>
                             </tr>
                         </tbody>
                     </table>
@@ -10582,6 +10582,88 @@ document.addEventListener('DOMContentLoaded', () => {
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- 💬 نافذة معاينة رسالة الاعتذار كاملة وسجل اعتذارات المخدوم (Excuse Preview & History Modal) -->
+<div id="modalExcuseDetail" class="modal" style="display:none; z-index:100000; background:rgba(15,23,42,0.65); backdrop-filter:blur(4px);">
+  <div class="modal-content" style="max-width:580px; width:92%; text-align:right; border-radius:20px; border:2px solid #10b981; padding:22px; box-shadow:0 16px 36px rgba(0,0,0,0.35); background:#ffffff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#dcfce7; color:#15803d; display:flex; align-items:center; justify-content:center; font-size:20px;">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; color:#0f172a; font-size:1.15rem; font-weight:900;">معاينة رسالة الاعتذار الأصلية</h3>
+          <p style="margin:2px 0 0; font-size:0.8rem; color:#64748b;" id="excuseModalSubtitle">واردة عبر واتساب الخدمة الرسمي</p>
+        </div>
+      </div>
+      <span class="close-btn" onclick="closeExcuseDetailModal()" style="font-size:26px; cursor:pointer; color:#94a3b8; line-height:1;">&times;</span>
+    </div>
+
+    <!-- بطاقة معلومات المخدوم وتوقيت المهلة -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+        <div>
+          <span style="font-size:1rem; font-weight:900; color:#1e293b;" id="excuseModalStudentName">-</span>
+          <span style="font-size:0.8rem; color:#64748b; margin-right:6px;" id="excuseModalStudentMeta">(- | -)</span>
+        </div>
+        <a id="excuseModalWhatsAppBtn" href="#" target="_blank" style="background:#25d366; color:#ffffff; padding:4px 10px; border-radius:8px; font-size:0.78rem; font-weight:bold; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+          <i class="fa-brands fa-whatsapp"></i> محادثة واتساب
+        </a>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.82rem;">
+        <div>
+          <span style="color:#64748b;">جمعة الغياب:</span>
+          <strong style="color:#0c2461; margin-right:4px;" id="excuseModalFridayDate">-</strong>
+        </div>
+        <div>
+          <span style="color:#64748b;">السبب المصنف:</span>
+          <span class="badge bg-light text-dark border" style="margin-right:4px;" id="excuseModalReasonBadge">-</span>
+        </div>
+        <div style="grid-column: span 2;">
+          <span style="color:#64748b;">وقت الورود والمهلة:</span>
+          <span id="excuseModalTimingBadge" style="margin-right:4px;">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- فقاعة رسالة الواتساب الأصلية (WhatsApp Chat Bubble) -->
+    <div style="margin-bottom:16px;">
+      <label style="display:block; font-size:0.82rem; font-weight:bold; color:#475569; margin-bottom:6px;">
+        💬 نص الرسالة الأصلية كما كتبها المخدوم:
+      </label>
+      <div style="background:#dcf8c6; border:1px solid #bbf7d0; border-radius:14px 14px 2px 14px; padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); position:relative;">
+        <div id="excuseModalFullMessage" style="white-space:pre-wrap; word-break:break-word; font-size:0.92rem; line-height:1.65; color:#0f172a; direction:rtl; text-align:right;">
+          -
+        </div>
+        <div style="display:flex; justify-content:flex-end; align-items:center; gap:4px; margin-top:8px; font-size:0.72rem; color:#4b5563;">
+          <span id="excuseModalBubbleTime">--:--</span>
+          <i class="fa-solid fa-check-double" style="color:#2563eb;"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- سجل اعتذارات المخدوم التراكمي هذا العام -->
+    <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:12px; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong style="color:#0369a1; font-size:0.85rem; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-clock-rotate-left"></i> سجل كافة اعتذارات هذا المخدوم (طوال العام)
+        </strong>
+        <span class="badge" id="excuseModalHistoryCountBadge" style="background:#0284c7; color:#fff; font-size:0.75rem;">
+          0 اعتذار
+        </span>
+      </div>
+      <div id="excuseModalHistoryContainer" style="max-height:140px; overflow-y:auto; font-size:0.78rem;">
+        <!-- يتم ملؤها ديناميكياً -->
+      </div>
+    </div>
+
+    <!-- أزرار الإجراء والقرار الرعوي -->
+    <div id="excuseModalActionRow" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center;">
+      <!-- ديناميكي: قبول / رفض أو حالة الحسم -->
+    </div>
   </div>
 </div>
 

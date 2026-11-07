@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.5'; // Wednesday Excuse Deadline Cutoff, Exact Receipt Time Tracking
+const CACHE_NAME = 'khedmety-ultra-v5.6'; // Excuse Full Preview Bubble Modal & Cumulative Excuse History per Student
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

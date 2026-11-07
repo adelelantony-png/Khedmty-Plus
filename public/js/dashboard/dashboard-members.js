@@ -1051,20 +1051,61 @@ let dates = Object.keys(attendanceRecord).sort().reverse();
 
 let hasAtt = false;
 
+// دمج سجل اعتذارات المخدوم الرسمية طوال العام
+const mPhoneClean = String(m.phone || '').replace(/\D/g, '');
+const mExcusesList = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList)) 
+    ? window.lastRadarExcusesList.filter(ex => {
+        if (m.code && ex.student_code && String(m.code) === String(ex.student_code)) return true;
+        if (mPhoneClean && ex.student_phone) {
+            const ep = String(ex.student_phone).replace(/\D/g, '');
+            if (mPhoneClean.slice(-8) === ep.slice(-8)) return true;
+        }
+        return m.name && ex.student_name === m.name;
+    }) 
+    : [];
+
 dates.forEach(d => {
+    let rec = (attendanceRecord[d] || []).find(a => a.id.toString() === m.id.toString());
+    const matchedExcuse = mExcusesList.find(ex => ex.friday_date === d);
 
-let rec = (attendanceRecord[d] || []).find(a => a.id.toString() === m.id.toString());
+    if (rec || matchedExcuse) {
+        hasAtt = true;
+        let stat = '';
+        let displayTime = rec ? rec.time : '--:--';
 
-if (rec) {
+        if (rec && rec.isAbsentDueToDelay) {
+            stat = '<span style="color:red; font-weight:bold;">تأخير شديد</span>';
+        } else if (rec && rec.isBonusEvent) {
+            stat = '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>';
+        } else if ((rec && rec.isExcused) || (matchedExcuse && matchedExcuse.status === 'accepted')) {
+            const reason = (rec && rec.excuseReason) || (matchedExcuse && matchedExcuse.reason_category) || 'عذر مقبول';
+            const timing = matchedExcuse && typeof evaluateExcuseTiming === 'function' ? evaluateExcuseTiming(matchedExcuse.created_at, matchedExcuse.friday_date) : null;
+            const timeTag = timing ? ` <small style="font-size:0.75rem; color:${timing.badgeColor};">(${timing.shortLabel})</small>` : '';
+            stat = `<span style="color:#0284c7; font-weight:bold;">🕊️ غياب بعذر: ${escapeHtml(reason)}${timeTag}</span>`;
+            if (matchedExcuse && timing && timing.timeStr) displayTime = timing.timeStr;
+        } else if (matchedExcuse && matchedExcuse.status === 'pending') {
+            stat = '<span style="color:#b45309; font-weight:bold;">⏳ اعتذار قيد المراجعة</span>';
+        } else if (matchedExcuse && matchedExcuse.status === 'rejected') {
+            stat = '<span style="color:#b91c1c; font-weight:bold;">❌ اعتذار غير مقبول</span>';
+        } else {
+            stat = '<span style="color:green; font-weight:bold;">حاضر جمعة</span>';
+        }
 
-hasAtt = true;
+        atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${displayTime}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;">${stat}</td></tr>`;
+    }
+});
 
-let stat = rec.isAbsentDueToDelay ? '<span style="color:red; font-weight:bold;">تأخير شديد</span>' : (rec.isBonusEvent ? '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>' : '<span style="color:green; font-weight:bold;">حاضر جمعة</span>');
-
-atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${rec.time}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;">${stat}</td></tr>`;
-
-}
-
+// فحص أي جمعة بها اعتذار معتمد للمخدوم لكن اليوم غير مضاف في attendanceRecord
+mExcusesList.forEach(ex => {
+    if (!dates.includes(ex.friday_date)) {
+        hasAtt = true;
+        const timing = typeof evaluateExcuseTiming === 'function' ? evaluateExcuseTiming(ex.created_at, ex.friday_date) : null;
+        const timeTag = timing ? ` <small style="font-size:0.75rem; color:${timing.badgeColor};">(${timing.shortLabel})</small>` : '';
+        const stLabel = ex.status === 'accepted' ? '🕊️ غياب بعذر' : (ex.status === 'pending' ? '⏳ عذر قيد المراجعة' : '❌ عذر غير مقبول');
+        const stColor = ex.status === 'accepted' ? '#0284c7' : (ex.status === 'pending' ? '#b45309' : '#b91c1c');
+        const stat = `<span style="color:${stColor}; font-weight:bold;">${stLabel}: ${escapeHtml(ex.reason_category || 'عذر')}${timeTag}</span>`;
+        atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${escapeHtml(ex.friday_date)}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${(timing && timing.timeStr) || '--:--'}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;">${stat}</td></tr>`;
+    }
 });
 
 if (!hasAtt) atb.innerHTML = '<tr><td colspan="3" class="empty-state">لم يحضر أي اجتماع حتى الآن</td></tr>';

@@ -1243,9 +1243,11 @@ function renderRadarExcusesTable() {
     }
 
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; color: #166534; font-weight: bold; background: #f0fdf4;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
         return;
     }
+
+    const allExcusesSource = window.lastRadarExcusesList || [];
 
     tbody.innerHTML = list.map(e => {
         let statusBadge = '';
@@ -1260,9 +1262,28 @@ function renderRadarExcusesTable() {
         const isPending = e.status === 'pending';
         const timing = evaluateExcuseTiming(e.created_at, e.friday_date);
 
+        // حساب عدد الاعتذارات التراكمي لهذا المخدوم
+        const phoneClean = String(e.student_phone || '').replace(/\D/g, '');
+        const studentAll = allExcusesSource.filter(item => {
+            if (e.student_code && item.student_code && String(e.student_code) === String(item.student_code)) return true;
+            if (phoneClean && item.student_phone) {
+                const ip = String(item.student_phone).replace(/\D/g, '');
+                if (phoneClean.slice(-8) === ip.slice(-8)) return true;
+            }
+            return item.student_name && item.student_name === e.student_name;
+        });
+        const totalStudentExcuses = studentAll.length;
+
         return `
             <tr style="border-bottom: 1px solid #fef08a; background: ${isPending ? '#fffdf0' : 'transparent'};">
-                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">${escapeHtml(e.student_name)}</td>
+                <td data-label="المخدوم" style="padding: 8px; text-align: right; font-weight: bold; color: #78350f;">
+                    <div>${escapeHtml(e.student_name)}</div>
+                    <div style="margin-top: 3px;">
+                        <button type="button" onclick="previewFullExcuseModal(${e.id})" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 6px; font-size: 0.72rem; padding: 1px 7px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" title="عرض سجل أعذار هذا المخدوم">
+                            <i class="fa-solid fa-clock-rotate-left"></i> ${totalStudentExcuses > 1 ? `سجل: ${totalStudentExcuses} أعذار` : 'عذر أول 🌟'}
+                        </button>
+                    </div>
+                </td>
                 <td data-label="الفرقة / الكود" style="padding: 8px; font-weight: bold;">${escapeHtml(e.student_code || '-')} (${escapeHtml(e.stage || 'عام')})</td>
                 <td data-label="جمعة الغياب" style="padding: 8px; font-weight: bold; color: #0c2461;">${escapeHtml(e.friday_date)}</td>
                 <td data-label="وقت الورود والمهلة" style="padding: 6px 8px; font-size: 0.8rem;">
@@ -1272,8 +1293,15 @@ function renderRadarExcusesTable() {
                     </span>
                 </td>
                 <td data-label="السبب" style="padding: 8px;"><span class="badge bg-light text-dark border">${escapeHtml(e.reason_category)}</span></td>
-                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 240px; font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(e.message_text)}">
-                    "${escapeHtml(e.message_text)}"
+                <td data-label="رسالة الواتساب" style="padding: 8px; text-align: right; max-width: 240px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+                        <span onclick="previewFullExcuseModal(${e.id})" style="font-size: 0.8rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 165px; display: inline-block; cursor: pointer;" title="اضغط لمعاينة الرسالة كاملة وسجل المخدوم">
+                            "${escapeHtml(e.message_text)}"
+                        </span>
+                        <button type="button" class="btn-custom" onclick="previewFullExcuseModal(${e.id})" style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 6px; padding: 2px 7px; font-size: 0.72rem; cursor: pointer; white-space: nowrap; font-weight: 800; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" title="معاينة الرسالة كاملة وسجل المخدوم">
+                            <i class="fa-solid fa-eye"></i> معاينة
+                        </button>
+                    </div>
                 </td>
                 <td data-label="الحالة" style="padding: 8px;">${statusBadge}</td>
                 <td data-label="الإجراء الرعوي" style="padding: 8px;">
@@ -1301,9 +1329,11 @@ async function resolveExcuseAction(id, action, btn) {
     const servantNote = prompt(isAccept ? 'اكتب ملاحظة الاعتماد (اختياري):' : 'اكتب سبب رفض العذر للمخدوم:', defaultNote);
     if (servantNote === null) return;
 
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحسم...';
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحسم...';
+    }
 
     try {
         const res = await fetch(`http://127.0.0.1:3000/api/excuses/${id}/action`, {
@@ -1328,17 +1358,174 @@ async function resolveExcuseAction(id, action, btn) {
                 markStudentExcusedInAttendance(data.excuse);
             }
 
-            loadRadarExcuses();
+            await loadRadarExcuses();
+
+            // تحديث نافذة المعاينة إذا كانت مفتوحة
+            const modal = document.getElementById('modalExcuseDetail');
+            if (modal && modal.style.display !== 'none') {
+                previewFullExcuseModal(id);
+            }
         } else {
             alert('تعذر تحديث حالة الاعتذار. تأكد من تشغيل السيرفر.');
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
     } catch(err) {
         alert('خطأ في الاتصال: ' + err.message);
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
     }
+}
+
+// 💬 دوال معاينة رسالة الاعتذار كاملة وسجل اعتذارات المخدوم
+function previewFullExcuseModal(excuseId) {
+    const list = window.lastRadarExcusesList || [];
+    const excuse = list.find(e => String(e.id) === String(excuseId));
+    if (!excuse) return;
+
+    const modal = document.getElementById('modalExcuseDetail');
+    if (!modal) return;
+
+    const timing = evaluateExcuseTiming(excuse.created_at, excuse.friday_date);
+
+    const elName = document.getElementById('excuseModalStudentName');
+    const elMeta = document.getElementById('excuseModalStudentMeta');
+    const elWaBtn = document.getElementById('excuseModalWhatsAppBtn');
+    const elFriday = document.getElementById('excuseModalFridayDate');
+    const elReason = document.getElementById('excuseModalReasonBadge');
+    const elTiming = document.getElementById('excuseModalTimingBadge');
+    const elMsg = document.getElementById('excuseModalFullMessage');
+    const elBubbleTime = document.getElementById('excuseModalBubbleTime');
+
+    if (elName) elName.innerText = excuse.student_name || 'مخدوم';
+    if (elMeta) elMeta.innerText = `(${excuse.student_code || '-'} | ${excuse.stage || 'عام'})`;
+
+    const cleanPhone = String(excuse.student_phone || '').replace(/\D/g, '');
+    if (elWaBtn) {
+        if (cleanPhone) {
+            elWaBtn.href = `https://wa.me/${cleanPhone}`;
+            elWaBtn.style.display = 'inline-flex';
+        } else {
+            elWaBtn.style.display = 'none';
+        }
+    }
+
+    if (elFriday) elFriday.innerText = excuse.friday_date || '-';
+    if (elReason) elReason.innerText = excuse.reason_category || 'اعتذار عام 🕊️';
+
+    if (elTiming) {
+        elTiming.innerHTML = `
+            <strong style="color:#1e293b;">${timing.weekdayName} ${timing.timeStr}</strong>
+            <span style="display:inline-block; font-size:0.75rem; font-weight:800; color:${timing.badgeColor}; background:${timing.bgColor}; border-radius:6px; padding:2px 8px; margin-right:4px;">
+                ${timing.shortLabel}
+            </span>
+        `;
+    }
+
+    if (elMsg) {
+        elMsg.innerText = excuse.message_text || '(لا يوجد نص رسالة)';
+    }
+    if (elBubbleTime) {
+        elBubbleTime.innerText = timing.timeStr || '';
+    }
+
+    // عرض سجل كافة اعتذارات هذا المخدوم طوال العام
+    renderStudentExcuseHistoryInModal(excuse);
+
+    // صف أزرار الإجراء الرعوي
+    const actionRow = document.getElementById('excuseModalActionRow');
+    if (actionRow) {
+        if (excuse.status === 'pending') {
+            actionRow.innerHTML = `
+                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'accept', this)" style="background:#10b981; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-check"></i> قبول العذر كعذر مقبول ✅
+                </button>
+                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'reject', this)" style="background:#ef4444; color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-xmark"></i> رفض العذر ❌
+                </button>
+                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
+                    إغلاق
+                </button>
+            `;
+        } else {
+            const isAcc = excuse.status === 'accepted';
+            actionRow.innerHTML = `
+                <div style="flex:1; text-align:right; font-size:0.82rem; color:${isAcc ? '#15803d' : '#b91c1c'}; font-weight:bold; display:flex; align-items:center; gap:6px;">
+                    <span>${isAcc ? '✅ معتمد كعذر مقبول' : '❌ تم رفض العذر'}:</span>
+                    <span style="color:#64748b; font-weight:normal;">${escapeHtml(excuse.servant_notes || '')} (${escapeHtml(excuse.resolved_by || 'الخادم')})</span>
+                </div>
+                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
+                    إغلاق
+                </button>
+            `;
+        }
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeExcuseDetailModal() {
+    const modal = document.getElementById('modalExcuseDetail');
+    if (modal) modal.style.display = 'none';
+}
+
+function renderStudentExcuseHistoryInModal(currentExcuse) {
+    const container = document.getElementById('excuseModalHistoryContainer');
+    const badge = document.getElementById('excuseModalHistoryCountBadge');
+    if (!container) return;
+
+    const list = window.lastRadarExcusesList || [];
+    const phoneClean = String(currentExcuse.student_phone || '').replace(/\D/g, '');
+    const studentHistory = list.filter(item => {
+        if (currentExcuse.student_code && item.student_code && String(currentExcuse.student_code) === String(item.student_code)) return true;
+        if (phoneClean && item.student_phone) {
+            const p = String(item.student_phone).replace(/\D/g, '');
+            if (phoneClean.slice(-8) === p.slice(-8)) return true;
+        }
+        return item.student_name && item.student_name === currentExcuse.student_name;
+    });
+
+    if (badge) badge.innerText = `${studentHistory.length} اعتذار`;
+
+    if (studentHistory.length === 0) {
+        container.innerHTML = '<div style="color:#64748b; padding:8px; text-align:center;">لا توجد اعتذارات مسجلة لهذا المخدوم.</div>';
+        return;
+    }
+
+    container.innerHTML = `
+        <table style="width:100%; border-collapse:collapse; font-size:0.78rem; text-align:right;">
+            <thead>
+                <tr style="background:#e0f2fe; color:#0369a1; border-bottom:1px solid #bae6fd;">
+                    <th style="padding:4px 6px;">جمعة الغياب</th>
+                    <th style="padding:4px 6px;">ساعة الورود / المهلة</th>
+                    <th style="padding:4px 6px;">السبب المصنف</th>
+                    <th style="padding:4px 6px;">الحالة الرعوية</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${studentHistory.map(h => {
+                    const t = evaluateExcuseTiming(h.created_at, h.friday_date);
+                    let stBadge = h.status === 'accepted' ? '<span style="color:#15803d; font-weight:bold;">✅ مقبول</span>' : (h.status === 'rejected' ? '<span style="color:#b91c1c; font-weight:bold;">❌ مرفوض</span>' : '<span style="color:#b45309; font-weight:bold;">⏳ قيد المراجعة</span>');
+                    const isCurr = h.id === currentExcuse.id;
+                    return `
+                        <tr style="border-bottom:1px solid #f1f5f9; background:${isCurr ? '#fef9c3' : '#fff'};">
+                            <td style="padding:5px 6px; font-weight:bold; color:#0c2461;">${escapeHtml(h.friday_date)} ${isCurr ? '<span style="font-size:0.7rem; color:#b45309;">(المعروض)</span>' : ''}</td>
+                            <td style="padding:5px 6px;">
+                                <span>${t.weekdayName} ${t.timeStr}</span>
+                                <span style="font-size:0.7rem; color:${t.badgeColor}; font-weight:bold; margin-right:3px;">${t.shortLabel}</span>
+                            </td>
+                            <td style="padding:5px 6px; color:#475569;">${escapeHtml(h.reason_category)}</td>
+                            <td style="padding:5px 6px;">${stBadge}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    `;
 }
 
 function markStudentExcusedInAttendance(excuse) {
@@ -1420,6 +1607,9 @@ if (typeof window !== 'undefined') {
     window.filterRadarExcuses = filterRadarExcuses;
     window.resolveExcuseAction = resolveExcuseAction;
     window.manualRecordStudentExcuse = manualRecordStudentExcuse;
+    window.previewFullExcuseModal = previewFullExcuseModal;
+    window.closeExcuseDetailModal = closeExcuseDetailModal;
+    window.renderStudentExcuseHistoryInModal = renderStudentExcuseHistoryInModal;
 }
 
 
