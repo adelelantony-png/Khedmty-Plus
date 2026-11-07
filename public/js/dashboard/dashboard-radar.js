@@ -489,8 +489,27 @@ function renderRadarPulseChart(validMeetingDates) {
     }
 }
 
-function sendWhatsAppAbsenceDirect(name, phone, weeks, btn) {
-    const rawMsg = `سلام ونعمة يا أخي الحبيب ${name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام، ومكانك غالي علينا. حابين نطمئن عليك ونسمع صوتك، وربنا يدبر ونفرح بوجودك معنا الجمعة القادمة بالقداس والاجتماع 🕊️`;
+function sendWhatsAppAbsenceDirect(name, phone, weeks, btn, gender) {
+    let isF = false;
+    if (gender) {
+        const g = String(gender).trim();
+        isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
+    } else if (typeof members !== 'undefined' && Array.isArray(members)) {
+        const cleanP = String(phone || '').replace(/[^0-9]/g, '');
+        const found = members.find(m => m.name === name || (cleanP && String(m.phone || '').replace(/[^0-9]/g, '') === cleanP));
+        if (found) {
+            const g = String(found.gender || found.stage || '').trim();
+            isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
+        }
+    }
+
+    const salutation = isF ? `سلام ونعمة يا أختي الحبيبة ${name} ✝️` : `سلام ونعمة يا أخي الحبيب ${name} ✝️`;
+    const meetingTitle = isF ? 'اجتماع القديس بولس لإعداد الخادمات' : 'اجتماع القديس بولس لإعداد الخدام';
+    const missText = isF
+        ? `افتقدناكِ جداً في ${meetingTitle} الجمعة الماضية، ومكانكِ غالي علينا. حابين نطمئن عليكِ ونسمع صوتكِ. ربنا يدبر ونفرح بوجودكِ معنا الجمعة القادمة بالقداس والاجتماع 🕊️`
+        : `افتقدناك جداً في ${meetingTitle} الجمعة الماضية، ومكانك غالي علينا. حابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونفرح بوجودك معنا الجمعة القادمة بالقداس والاجتماع 🕊️`;
+
+    const rawMsg = `${salutation}\n${missText}`;
     if (typeof sendWhatsAppDirectMessage === 'function') {
         return sendWhatsAppDirectMessage(phone, rawMsg, btn);
     }
@@ -531,7 +550,13 @@ function renderRadarAbsenceTableBody() {
     tbodyAbs.innerHTML = displayList.map(m => {
         let cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
-        const waMsg = encodeURIComponent(`سلام ونعمة يا أخي الحبيب ${m.name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام الجمعة الماضية، وحابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونشوفك الجمعة القادمة بالقداس والاجتماع 🕊️`);
+        const isF = (m.gender === 'بنات' || m.gender === 'female' || m.gender === 'أنثى');
+        const salutation = isF ? `سلام ونعمة يا أختي الحبيبة ${m.name} ✝️` : `سلام ونعمة يا أخي الحبيب ${m.name} ✝️`;
+        const meetingTitle = isF ? 'اجتماع القديس بولس لإعداد الخادمات' : 'اجتماع القديس بولس لإعداد الخدام';
+        const missText = isF
+            ? `افتقدناكِ جداً في ${meetingTitle} الجمعة الماضية، ومكانكِ غالي علينا. حابين نطمئن عليكِ ونسمع صوتكِ. ربنا يدبر ونفرح بوجودكِ معنا الجمعة القادمة بالقداس والاجتماع 🕊️`
+            : `افتقدناك جداً في ${meetingTitle} الجمعة الماضية، ومكانك غالي علينا. حابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونفرح بوجودك معنا الجمعة القادمة بالقداس والاجتماع 🕊️`;
+        const waMsg = encodeURIComponent(`${salutation}\n${missText}`);
 
         const isCritical = m.consecutiveWeeks >= 3;
         let badgeHtml = '';
@@ -554,7 +579,7 @@ function renderRadarAbsenceTableBody() {
                 <td data-label="الإجراء الرعوي" style="padding: 8px;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${m.phone ? `
-                            <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this, '${escapeHtml(m.gender || '')}')" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                 <i class="fa-brands fa-whatsapp"></i> افتقاد واتساب 🚀
                             </button>
                             <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 6px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;" title="فتح يدوي">📲</a>
@@ -671,7 +696,14 @@ function renderRadarBirthdays(filterMode = 'week') {
                     ? (p.month === currentMonth && Math.abs(diffDays) <= 4)
                     : (p.month === currentMonth);
                 if (isMatch) {
-                    list.push({ name: m.name, role: 'دارس (' + (m.stage || 'سنة أولى') + ')', phone: m.phone || '', date: `${p.day}/${p.month}`, diffDays });
+                    list.push({ 
+                        name: m.name, 
+                        gender: m.gender || 'بنين',
+                        role: 'دارس (' + (m.stage || 'سنة أولى') + ')', 
+                        phone: m.phone || '', 
+                        date: `${p.day}/${p.month}`, 
+                        diffDays 
+                    });
                 }
             }
         }
@@ -686,7 +718,15 @@ function renderRadarBirthdays(filterMode = 'week') {
                     ? (p.month === currentMonth && Math.abs(diffDays) <= 4)
                     : (p.month === currentMonth);
                 if (isMatch) {
-                    list.push({ name: s.name, role: 'خادم (' + (s.role || 'خادم') + ')', phone: s.phone || '', date: `${p.day}/${p.month}`, diffDays });
+                    const servGender = s.gender || ((s.role && s.role.includes('خادمة')) ? 'بنات' : 'بنين');
+                    list.push({ 
+                        name: s.name, 
+                        gender: servGender,
+                        role: 'خادم (' + (s.role || 'خادم') + ')', 
+                        phone: s.phone || '', 
+                        date: `${p.day}/${p.month}`, 
+                        diffDays 
+                    });
                 }
             }
         }
@@ -703,7 +743,11 @@ function renderRadarBirthdays(filterMode = 'week') {
     tbody.innerHTML = list.map(b => {
         let cleanPhone = (b.phone || '').replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
-        const waMsg = encodeURIComponent(`كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`);
+        const isF = (b.gender === 'بنات' || b.gender === 'female' || b.gender === 'أنثى');
+        const waMsg = encodeURIComponent(isF
+            ? `كل سنة وأنتِ طيبة يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+            : `كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+        );
 
         let statusBadge = '';
         if (b.diffDays === 0) {
@@ -724,7 +768,7 @@ function renderRadarBirthdays(filterMode = 'week') {
                 <td data-label="تهنئة واتساب" style="padding: 8px;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${cleanPhone ? `
-                            <button type="button" class="btn-custom" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${cleanPhone}', this)" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <button type="button" class="btn-custom" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${cleanPhone}', this, '${escapeHtml(b.gender || '')}')" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                 <i class="fa-brands fa-whatsapp"></i> تهنئة واتساب 🚀
                             </button>
                             <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 6px; font-size: 0.75rem; background: #fefce8; color: #854d0e; border: 1px solid #fef08a; text-decoration: none; border-radius: 6px;" title="فتح يدوي">📲</a>
@@ -762,7 +806,10 @@ async function sendBatchWeeklyBirthdays(btn) {
         let cleanPhone = item.phone.replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
 
-        const rawMsg = `كل سنة وأنت طيب يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`;
+        const isF = (item.gender === 'بنات' || item.gender === 'female' || item.gender === 'أنثى');
+        const rawMsg = isF
+            ? `كل سنة وأنتِ طيبة يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+            : `كل سنة وأنت طيب يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`;
         
         try {
             const res = await fetch('http://127.0.0.1:3000/api/send-message', {

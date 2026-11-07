@@ -664,8 +664,23 @@ async function sendWhatsAppDirectMessage(phone, message, btnEl) {
     }
 }
 
-function sendWhatsAppBirthdayDirect(name, phone, btnEl) {
-    const rawMsg = 'كل سنة وأنت طيب يا ' + name + ' وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨';
+function sendWhatsAppBirthdayDirect(name, phone, btnEl, gender) {
+    let isF = false;
+    if (gender) {
+        const g = String(gender).trim();
+        isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
+    } else if (typeof members !== 'undefined' && Array.isArray(members)) {
+        const cleanP = String(phone || '').replace(/[^0-9]/g, '');
+        const found = members.find(m => m.name === name || (cleanP && String(m.phone || '').replace(/[^0-9]/g, '') === cleanP));
+        if (found) {
+            const g = String(found.gender || found.stage || '').trim();
+            isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
+        }
+    }
+
+    const rawMsg = isF
+        ? `كل سنة وأنتِ طيبة يا ${name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+        : `كل سنة وأنت طيب يا ${name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`;
     return sendWhatsAppDirectMessage(phone, rawMsg, btnEl);
 }
 
@@ -733,7 +748,7 @@ let parsed = parseDobParts(m.dob);
 
 if (parsed && parsed.month === currentMonth && Math.abs(parsed.day - currentDay) <= 4) {
 
-matchedBirthdays.push({ name: m.name, phone: m.phone, type: 'دارس', date: `${parsed.day}/${parsed.month}` });
+matchedBirthdays.push({ name: m.name, phone: m.phone, gender: m.gender || 'بنين', type: 'دارس', date: `${parsed.day}/${parsed.month}` });
 
 }
 
@@ -751,7 +766,8 @@ let parsed = parseDobParts(s.dob);
 
 if (parsed && parsed.month === currentMonth && Math.abs(parsed.day - currentDay) <= 4) {
 
-matchedBirthdays.push({ name: s.name, phone: s.phone, type: 'خادم', date: `${parsed.day}/${parsed.month}` });
+const servG = s.gender || ((s.role && s.role.includes('خادمة')) ? 'بنات' : 'بنين');
+matchedBirthdays.push({ name: s.name, phone: s.phone, gender: servG, type: 'خادم', date: `${parsed.day}/${parsed.month}` });
 
 }
 
@@ -771,14 +787,18 @@ return;
 
 box.innerHTML = matchedBirthdays.map(b => {
     let cleanPhone = formatWhatsAppPhone(b.phone);
-    let waMsg = encodeURIComponent(`كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`);
+    const isF = (b.gender === 'بنات' || b.gender === 'female' || b.gender === 'أنثى');
+    let waMsg = encodeURIComponent(isF
+        ? `كل سنة وأنتِ طيبة يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+        : `كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
+    );
 
     return `
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ffeaa7; padding:6px 0; flex-wrap:wrap; gap:6px;">
         <span>🎉 <strong>${escapeHtml(b.name)}</strong> (${escapeHtml(b.type)}) - ${escapeHtml(b.date)}</span>
         <div style="display:flex; gap:4px; align-items:center;">
             ${cleanPhone ? `
-                <button type="button" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${escapeHtml(cleanPhone)}', this)" class="btn-mini btn-success" style="cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
+                <button type="button" onclick="sendWhatsAppBirthdayDirect('${escapeHtml(b.name)}', '${escapeHtml(cleanPhone)}', this, '${escapeHtml(b.gender || '')}')" class="btn-mini btn-success" style="cursor:pointer; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
                     <i class="fa-brands fa-whatsapp"></i> إرسال عبر واتساب 🚀
                 </button>
                 <a href="https://wa.me/${encodeURIComponent(cleanPhone)}?text=${waMsg}" target="_blank" class="btn-mini" style="background:#f1f5f9; color:#334155; text-decoration:none;" title="فتح يدوي">📲</a>
