@@ -1371,46 +1371,81 @@ function parseRadarTimeToMinutes(timeStr) {
     return h * 60 + m;
 }
 
-function classifyAttendanceStatus(attRecord) {
-    if (!attRecord || !attRecord.attended) {
+function classifyAttendanceStatus(attRecord, studentExcuse) {
+    // 1. إذا كان المخدوم غائباً
+    if (!attRecord || (!attRecord.attended && !attRecord.time)) {
+        if (studentExcuse || (attRecord && attRecord.isExcused)) {
+            const excuseText = (studentExcuse && (studentExcuse.reason_category || studentExcuse.raw_text)) || 
+                               (attRecord && attRecord.excuseReason) || 'عذر مقبول';
+            return {
+                status: 'excused',
+                label: 'غياب بعذر مقبول',
+                badgeClass: 'badge-att-excused',
+                icon: '🕊️',
+                color: '#0284c7',
+                bgColor: '#e0f2fe',
+                note: `🕊️ عذر: ${excuseText}`,
+                delayMinutes: 0
+            };
+        }
         return {
             status: 'absent',
             label: 'غائب',
             badgeClass: 'badge-att-absent',
             icon: '❌',
             color: '#dc2626',
-            bgColor: '#fef2f2'
+            bgColor: '#fef2f2',
+            note: 'غائب بدون عذر',
+            delayMinutes: 0
         };
     }
+
+    // 2. إذا كان المخدوم حاضراً
     const timeStr = attRecord.time || '';
     const totalM = parseRadarTimeToMinutes(timeStr);
-    if (attRecord.isAbsentDueToDelay || (totalM !== null && totalM >= 795)) { // 1:15 PM and later
+    
+    // الموعد الرسمي هو 1:00 م (780 دقيقة)
+    const baseMinutes = 780;
+    const diff = (totalM !== null && totalM > baseMinutes) ? (totalM - baseMinutes) : 0;
+
+    // تأخير شديد (≥ 1:15 م = 795 دقيقة أو تم تعليمه كغياب بسبب التأخير)
+    if (attRecord.isAbsentDueToDelay || (totalM !== null && totalM >= 795)) {
         return {
             status: 'severe_delay',
-            label: 'تأخير شديد (≥ 1:15)',
+            label: 'تأخير شديد',
             badgeClass: 'badge-att-severe',
             icon: '🔴',
-            color: '#b91c1c',
-            bgColor: '#fee2e2'
+            color: '#dc2626',
+            bgColor: '#fee2e2',
+            note: diff > 0 ? `تأخير شديد (+${diff} دقيقة)` : 'تأخير شديد (≥ 1:15)',
+            delayMinutes: diff
         };
     }
-    if (totalM !== null && totalM >= 781 && totalM <= 794) { // 1:01 to 1:14 PM
+
+    // تأخير بسيط (1:01 م إلى 1:14 م = 781 إلى 794 دقيقة)
+    if (totalM !== null && totalM >= 781 && totalM <= 794) {
         return {
             status: 'minor_delay',
-            label: 'تأخير بسيط (1:01 - 1:14)',
+            label: 'تأخير بسيط',
             badgeClass: 'badge-att-minor',
             icon: '🟡',
-            color: '#b45309',
-            bgColor: '#fef3c7'
+            color: '#d97706',
+            bgColor: '#fef3c7',
+            note: `تأخير بسيط (+${diff} دقيقة)`,
+            delayMinutes: diff
         };
     }
+
+    // في الموعد (≤ 1:00 م)
     return {
         status: 'on_time',
         label: 'حاضر في الموعد',
         badgeClass: 'badge-att-ontime',
         icon: '🟢',
-        color: '#15803d',
-        bgColor: '#f0fdf4'
+        color: '#16a34a',
+        bgColor: '#f0fdf4',
+        note: 'حضور في الموعد تماماً',
+        delayMinutes: 0
     };
 }
 
@@ -1422,8 +1457,11 @@ function normalizeStudentStage(stageStr) {
 
 function getRadarAvailableFridays() {
     const fridays = new Set();
-    if (typeof attendance === 'object' && attendance !== null) {
-        Object.keys(attendance).forEach(d => {
+    const attSource = (typeof attendanceRecord !== 'undefined' && attendanceRecord) ? attendanceRecord :
+                      ((typeof attendance !== 'undefined' && attendance) ? attendance : {});
+
+    if (typeof attSource === 'object' && attSource !== null) {
+        Object.keys(attSource).forEach(d => {
             try {
                 const dt = new Date(d);
                 if (!isNaN(dt.getTime()) && dt.getDay() === 5) {
@@ -1432,6 +1470,7 @@ function getRadarAvailableFridays() {
             } catch(e) {}
         });
     }
+
     // إضافة موعد الانطلاق المعتمد وموعد اليوم إن كان جمعة
     fridays.add('2026-11-06');
     if (typeof today === 'string' && today) {
@@ -1447,8 +1486,16 @@ let activeExportStageTab = 'all';
 
 function setAttendanceExportStageTab(stageKey, btnElement) {
     activeExportStageTab = stageKey;
-    document.querySelectorAll('.stage-filter-btn').forEach(b => b.classList.remove('active'));
-    if (btnElement) btnElement.classList.add('active');
+    document.querySelectorAll('.stage-filter-btn').forEach(b => {
+        b.style.background = 'transparent';
+        b.style.color = '#475569';
+        b.classList.remove('active');
+    });
+    if (btnElement) {
+        btnElement.style.background = '#0f172a';
+        btnElement.style.color = '#ffffff';
+        btnElement.classList.add('active');
+    }
     renderAttendanceExportReport();
 }
 
@@ -1456,7 +1503,7 @@ function renderAttendanceExportReport() {
     const dateSelect = document.getElementById('exportReportDateSelect');
     if (!dateSelect) return;
 
-    // Populate date dropdown if empty
+    // ملء قائمة الجمعات المتاحة إن كانت فارغة
     if (dateSelect.options.length === 0) {
         const availableDates = getRadarAvailableFridays();
         dateSelect.innerHTML = availableDates.map(d => {
@@ -1465,21 +1512,30 @@ function renderAttendanceExportReport() {
     }
 
     const selectedDate = dateSelect.value || '2026-11-06';
-    const dayAttendance = (attendance && attendance[selectedDate]) ? attendance[selectedDate] : {};
+    
+    // جلب كشف الحضور بأمان لدعم المصفوفة والكائنات
+    const rawRecord = (typeof attendanceRecord !== 'undefined' && attendanceRecord) ? attendanceRecord :
+                      ((typeof attendance !== 'undefined' && attendance) ? attendance : {});
+    const dayAttendance = rawRecord[selectedDate] || [];
 
-    // Read checkboxes
+    // جلب قائمة الأعذار الرسمية إن كانت متاحة
+    const excusesList = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList)) ? window.lastRadarExcusesList : [];
+
+    // قراءة حالة مربعات الاختيار (الفلاتر)
     const showOnTime = document.getElementById('chkExportOnTime')?.checked ?? true;
     const showMinor = document.getElementById('chkExportMinor')?.checked ?? true;
     const showSevere = document.getElementById('chkExportSevere')?.checked ?? true;
+    const showExcused = document.getElementById('chkExportExcused')?.checked ?? true;
     const showAbsent = document.getElementById('chkExportAbsent')?.checked ?? true;
 
-    // Group students
+    // تصنيف الطلاب إلى الفرقتين
     const stage1List = [];
     const stage2List = [];
 
     let countOnTime = 0;
     let countMinor = 0;
     let countSevere = 0;
+    let countExcused = 0;
     let countAbsent = 0;
 
     const allMembers = Array.isArray(members) ? members : [];
@@ -1487,26 +1543,41 @@ function renderAttendanceExportReport() {
     allMembers.forEach(m => {
         const mCode = String(m.code || m.id || '').trim();
         const mName = String(m.name || '').trim();
+        const mPhone = String(m.phone || '').trim().replace(/\D/g, '');
         if (!mName || ['500', '50005', '6650', 'admin', '10000001'].includes(mCode)) return;
 
-        // Check attendance record
-        let attRecord = dayAttendance[mCode];
-        if (!attRecord) {
-            // Check by name or phone
-            for (let k in dayAttendance) {
-                if (dayAttendance[k] && (dayAttendance[k].name === mName || dayAttendance[k].phone === m.phone)) {
-                    attRecord = dayAttendance[k];
-                    break;
-                }
-            }
+        // البحث عن سجل الحضور سواء كان مصفوفة أو كائناً
+        let attRecord = null;
+        if (Array.isArray(dayAttendance)) {
+            attRecord = dayAttendance.find(a => 
+                (a.id && String(a.id).trim() === mCode) || 
+                (a.code && String(a.code).trim() === mCode) ||
+                (a.name && a.name.trim() === mName)
+            );
+        } else if (typeof dayAttendance === 'object' && dayAttendance !== null) {
+            attRecord = dayAttendance[mCode] || Object.values(dayAttendance).find(a => a && (a.name === mName || a.phone === m.phone));
         }
 
-        const classification = classifyAttendanceStatus(attRecord);
+        // فحص إذا كان الطالب مسجلاً ضمن الأعذار الرسمية لهذا اليوم
+        let matchedExcuse = null;
+        if (!attRecord || (!attRecord.attended && !attRecord.time)) {
+            matchedExcuse = excusesList.find(ex => {
+                if (!ex) return false;
+                if (ex.friday_date && ex.friday_date !== selectedDate) return false;
+                const exName = (ex.student_name || '').trim();
+                const exPhone = (ex.student_phone || '').trim().replace(/\D/g, '');
+                return (exName && mName && (exName === mName || exName.includes(mName) || mName.includes(exName))) ||
+                       (exPhone && mPhone && (exPhone.includes(mPhone) || mPhone.includes(exPhone)));
+            });
+        }
+
+        const classification = classifyAttendanceStatus(attRecord, matchedExcuse);
         const stage = normalizeStudentStage(m.stage);
 
         if (classification.status === 'on_time') countOnTime++;
         else if (classification.status === 'minor_delay') countMinor++;
         else if (classification.status === 'severe_delay') countSevere++;
+        else if (classification.status === 'excused') countExcused++;
         else countAbsent++;
 
         const studentItem = {
@@ -1515,13 +1586,14 @@ function renderAttendanceExportReport() {
             stage: stage,
             phone: m.phone || '',
             confessor: m.confessor || '',
-            attended: classification.status !== 'absent',
             time: (attRecord && attRecord.time) ? attRecord.time : '',
             status: classification.status,
             label: classification.label,
             icon: classification.icon,
             color: classification.color,
-            bgColor: classification.bgColor
+            bgColor: classification.bgColor,
+            note: classification.note,
+            delayMinutes: classification.delayMinutes
         };
 
         if (stage === 'الفرقة الثانية') {
@@ -1535,11 +1607,12 @@ function renderAttendanceExportReport() {
     const totalAttended = countOnTime + countMinor + countSevere;
     const attPct = totalStudents > 0 ? Math.round((totalAttended / totalStudents) * 100) : 0;
 
-    // Update KPI badges
+    // تحديث بطاقات النبض الإحصائية العلوية
     const elTotal = document.getElementById('kpiExp_total');
     const elOnTime = document.getElementById('kpiExp_ontime');
     const elMinor = document.getElementById('kpiExp_minor');
     const elSevere = document.getElementById('kpiExp_severe');
+    const elExcused = document.getElementById('kpiExp_excused');
     const elAbsent = document.getElementById('kpiExp_absent');
     const elPct = document.getElementById('kpiExp_pct');
 
@@ -1547,25 +1620,29 @@ function renderAttendanceExportReport() {
     if (elOnTime) elOnTime.innerText = countOnTime;
     if (elMinor) elMinor.innerText = countMinor;
     if (elSevere) elSevere.innerText = countSevere;
+    if (elExcused) elExcused.innerText = countExcused;
     if (elAbsent) elAbsent.innerText = countAbsent;
     if (elPct) elPct.innerText = attPct + '%';
 
-    // Update checkbox counts
+    // تحديث أعداد الفلاتر (البادجات)
     const cntOnTimeBadge = document.getElementById('cntBadge_onTime');
     const cntMinorBadge = document.getElementById('cntBadge_minor');
     const cntSevereBadge = document.getElementById('cntBadge_severe');
+    const cntExcusedBadge = document.getElementById('cntBadge_excused');
     const cntAbsentBadge = document.getElementById('cntBadge_absent');
 
     if (cntOnTimeBadge) cntOnTimeBadge.innerText = `(${countOnTime})`;
     if (cntMinorBadge) cntMinorBadge.innerText = `(${countMinor})`;
     if (cntSevereBadge) cntSevereBadge.innerText = `(${countSevere})`;
+    if (cntExcusedBadge) cntExcusedBadge.innerText = `(${countExcused})`;
     if (cntAbsentBadge) cntAbsentBadge.innerText = `(${countAbsent})`;
 
-    // Filter function for rows
+    // دالة فلترة الصفوف بحسب مربعات الاختيار
     const matchesFilter = (item) => {
         if (item.status === 'on_time' && !showOnTime) return false;
         if (item.status === 'minor_delay' && !showMinor) return false;
         if (item.status === 'severe_delay' && !showSevere) return false;
+        if (item.status === 'excused' && !showExcused) return false;
         if (item.status === 'absent' && !showAbsent) return false;
         return true;
     };
@@ -1573,7 +1650,7 @@ function renderAttendanceExportReport() {
     const filteredStage1 = stage1List.filter(matchesFilter);
     const filteredStage2 = stage2List.filter(matchesFilter);
 
-    // Update Stage Tab counts
+    // تحديث أعداد تبويبات المراحل
     const tabAllCount = document.getElementById('stageTabCount_all');
     const tab1Count = document.getElementById('stageTabCount_stage1');
     const tab2Count = document.getElementById('stageTabCount_stage2');
@@ -1581,44 +1658,57 @@ function renderAttendanceExportReport() {
     if (tab1Count) tab1Count.innerText = `(${filteredStage1.length})`;
     if (tab2Count) tab2Count.innerText = `(${filteredStage2.length})`;
 
-    // Helper to generate table HTML
-    const buildTableHtml = (list, stageTitle, totalCount) => {
+    // دالة إنشاء كود الجدول للشاشات
+    const buildTableHtml = (list, stageTitle, totalCount, headerColor = '#0f172a') => {
         if (list.length === 0) {
-            return `<div style="padding:16px; text-align:center; color:#64748b; background:#f8fafc; border-radius:10px;">لا توجد سجلات مطابقة للفلاتر المختارة في ${stageTitle}.</div>`;
+            return `
+                <div style="background:#ffffff; border:1px dashed #cbd5e1; border-radius:12px; padding:20px; text-align:center; color:#64748b; margin-bottom:16px;">
+                    <div style="font-size:1.5rem; margin-bottom:6px;">🔍</div>
+                    <strong>لا توجد سجلات مطابقة للفلاتر المختارة في ${stageTitle}.</strong>
+                    <div style="font-size:0.8rem; margin-top:4px;">يمكنك تفعيل خيارات الفلاتر بالأعلى لعرض كافة المخدومين.</div>
+                </div>
+            `;
         }
         return `
-            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
-                <div style="background:#f1f5f9; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #cbd5e1;">
-                    <strong style="color:#0f172a; font-size:0.95rem;">🎓 ${stageTitle}</strong>
-                    <span style="font-size:0.8rem; font-weight:800; background:#e2e8f0; color:#334155; padding:3px 10px; border-radius:999px;">
-                        المعروض: ${list.length} من ${totalCount}
+            <div style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; overflow:hidden; margin-bottom:20px; box-shadow:0 4px 14px rgba(0,0,0,0.04);">
+                <div style="background:${headerColor}; color:#ffffff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:1.2rem;">🎓</span>
+                        <strong style="font-size:1.05rem; letter-spacing:0.2px;">${stageTitle}</strong>
+                    </div>
+                    <span style="font-size:0.82rem; font-weight:800; background:rgba(255,255,255,0.2); color:#ffffff; padding:4px 12px; border-radius:999px;">
+                        المعروض: ${list.length} من أصل ${totalCount} مخدوم
                     </span>
                 </div>
                 <div class="table-responsive-wrapper">
-                    <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:center;">
+                    <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; font-size:0.88rem; text-align:center;">
                         <thead>
-                            <tr style="background:#f8fafc; color:#475569; border-bottom:1.5px solid #e2e8f0;">
-                                <th style="padding:8px 6px; width:35px;">م</th>
-                                <th style="padding:8px 6px; width:55px;">الكود</th>
-                                <th style="padding:8px 10px; text-align:right;">اسم المخدوم</th>
-                                <th style="padding:8px 8px; width:140px;">الحالة والتصنيف</th>
-                                <th style="padding:8px 6px; width:80px;">وقت الدخول</th>
-                                <th style="padding:8px 8px; width:110px;">الهاتف</th>
+                            <tr style="background:#f8fafc; color:#334155; border-bottom:2px solid #e2e8f0; font-weight:900;">
+                                <th style="padding:10px 6px; width:40px;">م</th>
+                                <th style="padding:10px 8px; width:65px;">الكود</th>
+                                <th style="padding:10px 14px; text-align:right;">اسم المخدوم</th>
+                                <th style="padding:10px 10px; width:150px;">حالة الحضور</th>
+                                <th style="padding:10px 8px; width:90px;">وقت الدخول</th>
+                                <th style="padding:10px 12px; text-align:right;">الملاحظة الرعوية / العذر</th>
+                                <th style="padding:10px 10px; width:120px;">الهاتف</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${list.map((s, idx) => `
-                                <tr style="border-bottom:1px solid #f1f5f9; background:${idx % 2 === 0 ? '#ffffff' : '#fafafa'};">
-                                    <td style="padding:7px 4px; color:#94a3b8; font-size:0.8rem;">${idx + 1}</td>
-                                    <td style="padding:7px 4px; font-weight:bold; color:#64748b; font-family:monospace;">${s.code}</td>
-                                    <td style="padding:7px 10px; text-align:right; font-weight:800; color:#1e293b;">${s.name}</td>
-                                    <td style="padding:7px 6px;">
-                                        <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:0.78rem; color:${s.color}; background:${s.bgColor}; border:1px solid ${s.color}33;">
+                                <tr style="border-bottom:1px solid #f1f5f9; background:${idx % 2 === 0 ? '#ffffff' : '#fcfcfc'}; transition:background 0.15s ease;">
+                                    <td style="padding:9px 6px; color:#94a3b8; font-weight:bold; font-size:0.82rem;">${idx + 1}</td>
+                                    <td style="padding:9px 8px; font-weight:800; color:#475569; font-family:monospace;">${s.code}</td>
+                                    <td style="padding:9px 14px; text-align:right; font-weight:900; color:#0f172a;">${s.name}</td>
+                                    <td style="padding:9px 10px;">
+                                        <span style="display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:999px; font-weight:800; font-size:0.8rem; color:${s.color}; background:${s.bgColor}; border:1.5px solid ${s.color}33;">
                                             ${s.icon} ${s.label}
                                         </span>
                                     </td>
-                                    <td style="padding:7px 6px; color:#334155; font-weight:bold; font-size:0.8rem;" dir="ltr">${s.time || '-'}</td>
-                                    <td style="padding:7px 6px; color:#64748b; font-size:0.8rem; font-family:monospace;" dir="ltr">${s.phone || '-'}</td>
+                                    <td style="padding:9px 8px; color:#1e293b; font-weight:bold; font-size:0.84rem;" dir="ltr">${s.time || '-'}</td>
+                                    <td style="padding:9px 12px; text-align:right; font-size:0.82rem; font-weight:bold; color:${s.status === 'excused' ? '#0369a1' : (s.status === 'severe_delay' ? '#b91c1c' : (s.status === 'minor_delay' ? '#b45309' : (s.status === 'absent' ? '#991b1b' : '#15803d')))}">
+                                        ${s.note}
+                                    </td>
+                                    <td style="padding:9px 10px; color:#64748b; font-size:0.82rem; font-family:monospace;" dir="ltr">${s.phone || '-'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -1628,25 +1718,26 @@ function renderAttendanceExportReport() {
         `;
     };
 
-    // Render tables in UI based on active stage tab
+    // رسم الجداول في واجهة المستخدم بحسب تبويب المرحلة
     const tablesContainer = document.getElementById('exportReportTablesContainer');
     if (tablesContainer) {
         let html = '';
         if (activeExportStageTab === 'all' || activeExportStageTab === 'stage1') {
-            html += buildTableHtml(filteredStage1, 'الفرقة الأولى (سنة أولى)', stage1List.length);
+            html += buildTableHtml(filteredStage1, 'الفرقة الأولى (سنة أولى)', stage1List.length, 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)');
         }
         if (activeExportStageTab === 'all' || activeExportStageTab === 'stage2') {
-            html += buildTableHtml(filteredStage2, 'الفرقة الثانية (سنة ثانية)', stage2List.length);
+            html += buildTableHtml(filteredStage2, 'الفرقة الثانية (سنة ثانية)', stage2List.length, 'linear-gradient(135deg, #065f46 0%, #047857 100%)');
         }
         tablesContainer.innerHTML = html;
     }
 
-    // Build the 1-Page A4 Printable Version
+    // بناء النسخة الطباعية المعتمدة لورقة واحدة A4
     buildOnePagePrintableA4(selectedDate, filteredStage1, filteredStage2, {
         totalStudents,
         countOnTime,
         countMinor,
         countSevere,
+        countExcused,
         countAbsent,
         attPct
     });
@@ -1656,33 +1747,37 @@ function buildOnePagePrintableA4(serviceDate, stage1List, stage2List, stats) {
     const printContainer = document.getElementById('printableAttendanceReport');
     if (!printContainer) return;
 
-    const renderCompactPrintTable = (list, stageTitle) => {
+    const renderCompactPrintTable = (list, stageTitle, headerBg = '#1e3a8a') => {
         return `
-            <div style="margin-bottom:6px; page-break-inside:avoid;">
-                <div style="background:#1e3a8a; color:#ffffff; padding:3px 8px; font-size:8pt; font-weight:bold; display:flex; justify-content:space-between; border-radius:4px 4px 0 0;">
+            <div style="margin-bottom:4px; page-break-inside:avoid;">
+                <div style="background:${headerBg}; color:#ffffff; padding:2px 8px; font-size:7.8pt; font-weight:900; display:flex; justify-content:space-between; border-radius:3px 3px 0 0;">
                     <span>🎓 ${stageTitle}</span>
-                    <span>العدد: ${list.length}</span>
+                    <span>العدد المعروض: ${list.length}</span>
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:7.5pt; text-align:center; border:1px solid #cbd5e1;">
+                <table style="width:100%; border-collapse:collapse; font-size:7pt; text-align:center; border:1px solid #cbd5e1;">
                     <thead>
-                        <tr style="background:#f1f5f9; color:#1e293b; border-bottom:1px solid #cbd5e1;">
-                            <th style="padding:2px 3px; width:22px; border:1px solid #cbd5e1;">م</th>
-                            <th style="padding:2px 3px; width:36px; border:1px solid #cbd5e1;">كود</th>
-                            <th style="padding:2px 6px; text-align:right; border:1px solid #cbd5e1;">اسم المخدوم</th>
-                            <th style="padding:2px 4px; width:90px; border:1px solid #cbd5e1;">حالة الحضور</th>
-                            <th style="padding:2px 4px; width:52px; border:1px solid #cbd5e1;">الوقت</th>
+                        <tr style="background:#f1f5f9; color:#0f172a; border-bottom:1px solid #cbd5e1; font-weight:900;">
+                            <th style="padding:1.5px 2px; width:18px; border:0.5px solid #cbd5e1;">م</th>
+                            <th style="padding:1.5px 2px; width:30px; border:0.5px solid #cbd5e1;">كود</th>
+                            <th style="padding:1.5px 4px; text-align:right; border:0.5px solid #cbd5e1;">اسم المخدوم</th>
+                            <th style="padding:1.5px 3px; width:72px; border:0.5px solid #cbd5e1;">الحالة</th>
+                            <th style="padding:1.5px 2px; width:45px; border:0.5px solid #cbd5e1;">الوقت</th>
+                            <th style="padding:1.5px 4px; text-align:right; border:0.5px solid #cbd5e1;">الملاحظة / العذر</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${list.map((s, idx) => `
-                            <tr style="border-bottom:0.5px solid #e2e8f0; background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
-                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0; color:#64748b;">${idx + 1}</td>
-                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0; font-weight:bold;">${s.code}</td>
-                                <td style="padding:1.5px 6px; text-align:right; border:0.5px solid #e2e8f0; font-weight:bold;">${s.name}</td>
-                                <td style="padding:1.5px 3px; border:0.5px solid #e2e8f0; font-weight:bold; color:${s.color};">
+                            <tr style="border-bottom:0.5px solid #e2e8f0; background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}; line-height:1.2;">
+                                <td style="padding:1.2px 2px; border:0.5px solid #e2e8f0; color:#64748b;">${idx + 1}</td>
+                                <td style="padding:1.2px 2px; border:0.5px solid #e2e8f0; font-weight:bold;">${s.code}</td>
+                                <td style="padding:1.2px 4px; text-align:right; border:0.5px solid #e2e8f0; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:115px;">${s.name}</td>
+                                <td style="padding:1.2px 2px; border:0.5px solid #e2e8f0; font-weight:bold; color:${s.color};">
                                     ${s.label}
                                 </td>
-                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0;" dir="ltr">${s.time || '-'}</td>
+                                <td style="padding:1.2px 2px; border:0.5px solid #e2e8f0;" dir="ltr">${s.time || '-'}</td>
+                                <td style="padding:1.2px 4px; text-align:right; border:0.5px solid #e2e8f0; font-size:6.6pt; color:${s.status === 'excused' ? '#0284c7' : '#475569'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px;">
+                                    ${s.note || '-'}
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -1694,43 +1789,44 @@ function buildOnePagePrintableA4(serviceDate, stage1List, stage2List, stats) {
     printContainer.innerHTML = `
         <div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction:rtl; text-align:right; width:100%; box-sizing:border-box;">
             <!-- Official Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:4px; margin-bottom:6px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:3px; margin-bottom:5px;">
                 <div style="text-align:right;">
-                    <div style="font-size:9.5pt; font-weight:bold; color:#1e3a8a;">كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس الروماني</div>
-                    <div style="font-size:8.5pt; font-weight:bold; color:#475569;">اجتماع القديس بولس الرسول لإعداد الخدام والشباب</div>
+                    <div style="font-size:9pt; font-weight:bold; color:#1e3a8a;">كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس بالطرية</div>
+                    <div style="font-size:8pt; font-weight:bold; color:#475569;">اجتماع القديس بولس الرسول لإعداد الخدام والشباب</div>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:11pt; font-weight:900; color:#1e3a8a;">📊 كشف الحضور والتأخيرات والغياب المعتمد</div>
-                    <div style="font-size:8pt; font-weight:bold; color:#0f766e;">🗓️ تاريخ اللقاء: جمعة ${serviceDate}</div>
+                    <div style="font-size:10.5pt; font-weight:900; color:#1e3a8a;">📊 كشف الحضور والتأخيرات والغياب المعتمد</div>
+                    <div style="font-size:8pt; font-weight:bold; color:#0f766e;">🗓️ لقاء جمعة: ${serviceDate}</div>
                 </div>
-                <div style="text-align:left; font-size:7.5pt; color:#64748b;">
-                    <div>سنة 2026 - 2027</div>
-                    <div>طُبع بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</div>
+                <div style="text-align:left; font-size:7.2pt; color:#64748b;">
+                    <div>العام الدراسي: 2026 - 2027</div>
+                    <div>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</div>
                 </div>
             </div>
 
             <!-- Stats Ribbon -->
-            <div style="display:flex; justify-content:space-between; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:3px 10px; margin-bottom:8px; font-size:8pt; font-weight:bold;">
-                <span>👥 إجمالي المقيدين: <strong>${stats.totalStudents}</strong></span>
+            <div style="display:flex; justify-content:space-between; background:#f8fafc; border:1px solid #cbd5e1; border-radius:3px; padding:2px 8px; margin-bottom:6px; font-size:7.5pt; font-weight:bold;">
+                <span>👥 المقيدين: <strong>${stats.totalStudents}</strong></span>
                 <span style="color:#15803d;">🟢 في الموعد: <strong>${stats.countOnTime}</strong></span>
                 <span style="color:#b45309;">🟡 تأخير بسيط: <strong>${stats.countMinor}</strong></span>
                 <span style="color:#b91c1c;">🔴 تأخير شديد: <strong>${stats.countSevere}</strong></span>
-                <span style="color:#dc2626;">❌ الغياب: <strong>${stats.countAbsent}</strong></span>
+                <span style="color:#0284c7;">🕊️ بعذر: <strong>${stats.countExcused}</strong></span>
+                <span style="color:#dc2626;">❌ غياب: <strong>${stats.countAbsent}</strong></span>
                 <span style="color:#1e3a8a;">📈 نسبة الحضور: <strong>${stats.attPct}%</strong></span>
             </div>
 
             <!-- Dual Columns Layout for Single Page Efficiency -->
-            <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:8px;">
+            <div style="display:grid; grid-template-columns: 1.12fr 0.88fr; gap:6px;">
                 <div>
-                    ${renderCompactPrintTable(stage1List, 'الفرقة الأولى')}
+                    ${renderCompactPrintTable(stage1List, 'الفرقة الأولى', '#1e3a8a')}
                 </div>
                 <div>
-                    ${renderCompactPrintTable(stage2List, 'الفرقة الثانية')}
+                    ${renderCompactPrintTable(stage2List, 'الفرقة الثانية', '#065f46')}
                 </div>
             </div>
 
             <!-- Footer Signatures -->
-            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:4px; border-top:1px dashed #cbd5e1; font-size:7.5pt; color:#475569;">
+            <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:3px; border-top:1px dashed #cbd5e1; font-size:7.2pt; color:#475569;">
                 <div>مسؤول رصد الحضور: ___________________</div>
                 <div>أمين الخدمة: ___________________</div>
                 <div>أب اعتراف الاجتماع: ___________________</div>
@@ -1749,111 +1845,127 @@ function printAttendanceOnePagePDF() {
 function buildAttendanceWhatsAppReportText() {
     const dateSelect = document.getElementById('exportReportDateSelect');
     const selectedDate = dateSelect ? dateSelect.value : '2026-11-06';
-    const dayAttendance = (attendance && attendance[selectedDate]) ? attendance[selectedDate] : {};
+    
+    const rawRecord = (typeof attendanceRecord !== 'undefined' && attendanceRecord) ? attendanceRecord :
+                      ((typeof attendance !== 'undefined' && attendance) ? attendance : {});
+    const dayAttendance = rawRecord[selectedDate] || [];
+
+    const excusesList = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList)) ? window.lastRadarExcusesList : [];
 
     const allMembers = Array.isArray(members) ? members : [];
     const stage1Present = [];
+    const stage1Excused = [];
     const stage1Absent = [];
+
     const stage2Present = [];
+    const stage2Excused = [];
     const stage2Absent = [];
+
     const delaysList = [];
 
     allMembers.forEach(m => {
         const mCode = String(m.code || m.id || '').trim();
         const mName = String(m.name || '').trim();
+        const mPhone = String(m.phone || '').trim().replace(/\D/g, '');
         if (!mName || ['500', '50005', '6650', 'admin', '10000001'].includes(mCode)) return;
 
-        let attRecord = dayAttendance[mCode];
-        if (!attRecord) {
-            for (let k in dayAttendance) {
-                if (dayAttendance[k] && dayAttendance[k].name === mName) {
-                    attRecord = dayAttendance[k];
-                    break;
-                }
-            }
+        let attRecord = null;
+        if (Array.isArray(dayAttendance)) {
+            attRecord = dayAttendance.find(a => 
+                (a.id && String(a.id).trim() === mCode) || 
+                (a.code && String(a.code).trim() === mCode) ||
+                (a.name && a.name.trim() === mName)
+            );
+        } else if (typeof dayAttendance === 'object' && dayAttendance !== null) {
+            attRecord = dayAttendance[mCode] || Object.values(dayAttendance).find(a => a && (a.name === mName || a.phone === m.phone));
         }
 
-        const classification = classifyAttendanceStatus(attRecord);
+        let matchedExcuse = null;
+        if (!attRecord || (!attRecord.attended && !attRecord.time)) {
+            matchedExcuse = excusesList.find(ex => {
+                if (!ex) return false;
+                if (ex.friday_date && ex.friday_date !== selectedDate) return false;
+                const exName = (ex.student_name || '').trim();
+                const exPhone = (ex.student_phone || '').trim().replace(/\D/g, '');
+                return (exName && mName && (exName === mName || exName.includes(mName) || mName.includes(exName))) ||
+                       (exPhone && mPhone && (exPhone.includes(mPhone) || mPhone.includes(exPhone)));
+            });
+        }
+
+        const classification = classifyAttendanceStatus(attRecord, matchedExcuse);
         const stage = normalizeStudentStage(m.stage);
 
-        if (classification.status !== 'absent') {
-            if (stage === 'الفرقة الثانية') stage2Present.push({ name: mName, time: attRecord?.time || '' });
-            else stage1Present.push({ name: mName, time: attRecord?.time || '' });
+        if (classification.status === 'on_time' || classification.status === 'minor_delay' || classification.status === 'severe_delay') {
+            const studentEntry = { name: mName, time: attRecord?.time || '', delayMinutes: classification.delayMinutes };
+            if (stage === 'الفرقة الثانية') stage2Present.push(studentEntry);
+            else stage1Present.push(studentEntry);
 
             if (classification.status === 'minor_delay' || classification.status === 'severe_delay') {
-                delaysList.push({ name: mName, stage, label: classification.label, time: attRecord?.time || '' });
+                delaysList.push({ name: mName, stage, label: classification.label, time: attRecord?.time || '', note: classification.note });
             }
+        } else if (classification.status === 'excused') {
+            const excuseEntry = { name: mName, reason: classification.note };
+            if (stage === 'الفرقة الثانية') stage2Excused.push(excuseEntry);
+            else stage1Excused.push(excuseEntry);
         } else {
             if (stage === 'الفرقة الثانية') stage2Absent.push(mName);
             else stage1Absent.push(mName);
         }
     });
 
-    const totalStudents = stage1Present.length + stage1Absent.length + stage2Present.length + stage2Absent.length;
+    const totalStudents = stage1Present.length + stage1Excused.length + stage1Absent.length + 
+                          stage2Present.length + stage2Excused.length + stage2Absent.length;
     const totalPresent = stage1Present.length + stage2Present.length;
+    const totalExcused = stage1Excused.length + stage2Excused.length;
     const totalAbsent = stage1Absent.length + stage2Absent.length;
     const attPct = totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0;
 
-    let text = `⛪ *كنيسة رئيس الملائكة والشهيد مارجرجس*
-`;
-    text += `📖 *اجتماع القديس بولس الرسول لإعداد الخدام*
-`;
-    text += `📊 *كشف الحضور والتأخيرات والغياب الأسبوعي*
-`;
-    text += `🗓️ لقاء جمعة: ${selectedDate}
+    let text = `⛪ *كنيسة رئيس الملائكة والشهيد مارجرجس بالطرية*\n`;
+    text += `📖 *اجتماع القديس بولس الرسول لإعداد الخدام والشباب*\n`;
+    text += `📊 *كشف الحضور والتأخيرات والغياب الأسبوعي المعتمد*\n`;
+    text += `🗓️ لقاء جمعة: ${selectedDate}\n\n`;
 
-`;
+    text += `━━━━━━━━━━━━━━━━━━━\n`;
+    text += `📈 *الملخص الإحصائي العام:*\n`;
+    text += `👥 إجمالي المقيدين: ${totalStudents} مخدوم\n`;
+    text += `🟢 الحاضرون: ${totalPresent} مخدوم (${attPct}%)\n`;
+    if (delaysList.length > 0) text += `🟡 التأخيرات: ${delaysList.length} مخدوم\n`;
+    if (totalExcused > 0) text += `🕊️ غياب بعذر مقبول: ${totalExcused} مخدوم\n`;
+    text += `❌ غياب بدون عذر: ${totalAbsent} مخدوم\n`;
+    text += `━━━━━━━━━━━━━━━━━━━\n\n`;
 
-    text += `━━━━━━━━━━━━━━━━━━━
-`;
-    text += `📈 *الملخص الإحصائي العام:*
-`;
-    text += `👥 إجمالي المقيدين: ${totalStudents} مخدوم
-`;
-    text += `🟢 إجمالي الحاضرين: ${totalPresent} (${attPct}%)
-`;
-    text += `❌ إجمالي الغياب: ${totalAbsent}
-`;
-    text += `━━━━━━━━━━━━━━━━━━━
+    text += `🎓 *الفرقة الأولى (سنة أولى):*\n`;
+    text += `• الحضور: ${stage1Present.length} | الغياب: ${stage1Absent.length + stage1Excused.length} (منهم ${stage1Excused.length} بعذر)\n\n`;
 
-`;
-
-    text += `🎓 *الفرقة الأولى (سنة أولى):*
-`;
-    text += `• الحضور: ${stage1Present.length} | الغياب: ${stage1Absent.length}
-
-`;
-
-    text += `🎓 *الفرقة الثانية (سنة ثانية):*
-`;
-    text += `• الحضور: ${stage2Present.length} | الغياب: ${stage2Absent.length}
-
-`;
+    text += `🎓 *الفرقة الثانية (سنة ثانية):*\n`;
+    text += `• الحضور: ${stage2Present.length} | الغياب: ${stage2Absent.length + stage2Excused.length} (منهم ${stage2Excused.length} بعذر)\n\n`;
 
     if (delaysList.length > 0) {
-        text += `⏰ *كشف التأخيرات:* (${delaysList.length} مخدوم)
-`;
+        text += `⏰ *كشف التأخيرات:* (${delaysList.length} مخدوم)\n`;
         delaysList.forEach((d, i) => {
-            text += `${i + 1}. ${d.name} (${d.stage}) - ${d.label} [${d.time}]
-`;
+            text += `${i + 1}. ${d.name} (${d.stage}) - ${d.label} [${d.time}] (${d.note})\n`;
         });
-        text += `
-`;
+        text += `\n`;
+    }
+
+    if (totalExcused > 0) {
+        text += `🕊️ *كشف الأعذار الرسمية المقبولة:* (${totalExcused} مخدوم)\n`;
+        let exCounter = 1;
+        [...stage1Excused, ...stage2Excused].forEach(ex => {
+            text += `${exCounter++}. ${ex.name} - ${ex.reason}\n`;
+        });
+        text += `\n`;
     }
 
     if (totalAbsent > 0) {
-        text += `⚠️ *كشف الغائبين للمتابعة والافتقاد:*
-`;
+        text += `⚠️ *كشف الغائبين بدون عذر (للمتابعة والافتقاد الرعوي):*\n`;
         if (stage1Absent.length > 0) {
-            text += `🔹 *سنة أولى:* ${stage1Absent.join('، ')}
-`;
+            text += `🔹 *سنة أولى:* ${stage1Absent.join('، ')}\n`;
         }
         if (stage2Absent.length > 0) {
-            text += `🔹 *سنة ثانية:* ${stage2Absent.join('، ')}
-`;
+            text += `🔹 *سنة ثانية:* ${stage2Absent.join('، ')}\n`;
         }
-        text += `
-`;
+        text += `\n`;
     }
 
     text += `🕊️ *صلوا من أجل الخدمة وكل نفس مباركة*`;
@@ -1865,7 +1977,7 @@ async function sendAttendanceReportToWhatsAppGroup() {
     const btn = document.getElementById('btnSendWA_group');
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '⏳ جاري إرسال التقرير...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري إرسال التقرير...';
     }
 
     try {
@@ -1879,20 +1991,24 @@ async function sendAttendanceReportToWhatsAppGroup() {
         });
         const data = await res.json();
         if (data.success) {
-            alert('🎉 تم إرسال تقرير الحضور والغياب لجروب الخدام بالواتساب بنجاح! 🚀');
+            if (typeof showToast === 'function') {
+                showToast('🎉 تم إرسال تقرير الحضور والتأخيرات إلى جروب الخدام بنجاح!');
+            } else {
+                alert('🎉 تم إرسال تقرير الحضور والغياب لجروب الخدام بالواتساب بنجاح! 🚀');
+            }
         } else {
             throw new Error(data.error || 'تعذر الإرسال');
         }
     } catch(err) {
         console.warn('API send failed, fallback to direct WA link:', err);
         const waLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(reportText)}`;
-        if (confirm(`تعذر الإرسال التلقائي عبر خادم الواتساب المحلي (${err.message}). هل ترغب في فتح واتساب مباشرة لإرسال التقرير لجروب الخدام؟`)) {
+        if (confirm(`تعذر الإرسال المباشر عبر خادم الواتساب المحلي (${err.message}). هل ترغب في فتح واتساب لإرسال التقرير لجروب الخدام؟`)) {
             window.open(waLink, '_blank');
         }
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '📲 إرسال التقرير لجروب الواتس أب الخدام';
+            btn.innerHTML = '<i class="fa-brands fa-whatsapp me-1"></i> 📲 إرسال التقرير لجروب الواتس أب الخدام';
         }
     }
 }
@@ -1905,7 +2021,11 @@ function shareAttendanceReportViaWhatsAppWeb() {
 function copyAttendanceReportToClipboard() {
     const reportText = buildAttendanceWhatsAppReportText();
     navigator.clipboard.writeText(reportText).then(() => {
-        alert('📋 تم نسخ تقرير الحضور والغياب كاملاً للحافظة بنجاح!');
+        if (typeof showToast === 'function') {
+            showToast('📋 تم نسخ تقرير الحضور والغياب كاملاً بنجاح!');
+        } else {
+            alert('📋 تم نسخ تقرير الحضور والغياب كاملاً للحافظة بنجاح!');
+        }
     }).catch(() => {
         prompt('انسخ التقرير يدوياً:', reportText);
     });

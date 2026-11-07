@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.2'; // permanent offline engine with centered visual QR confirmation cards
+const CACHE_NAME = 'khedmety-ultra-v5.3'; // Pastoral Attendance Matrix, 1-Page A4 PDF, WhatsApp Group Dispatch and Admin Lock
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

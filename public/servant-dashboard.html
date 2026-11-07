@@ -2025,8 +2025,12 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                             <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">🔴 تأخير شديد (≥ 1:15)</div>
                             <div style="font-size: 1.4rem; font-weight: 900; color: #dc2626;" id="kpiExp_severe">0</div>
                         </div>
+                        <div style="background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #0369a1; font-weight: bold;">🕊️ غياب بعذر</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #0284c7;" id="kpiExp_excused">0</div>
+                        </div>
                         <div style="background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 10px; padding: 10px; text-align: center;">
-                            <div style="font-size: 0.76rem; color: #be123c; font-weight: bold;">❌ الغياب</div>
+                            <div style="font-size: 0.76rem; color: #be123c; font-weight: bold;">❌ غياب بدون عذر</div>
                             <div style="font-size: 1.4rem; font-weight: 900; color: #e11d48;" id="kpiExp_absent">0</div>
                         </div>
                         <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 10px; text-align: center;">
@@ -2052,9 +2056,13 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                                 <input type="checkbox" id="chkExportSevere" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #dc2626; cursor: pointer;">
                                 <span>🔴 تأخير شديد <span id="cntBadge_severe" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
                             </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #0369a1;">
+                                <input type="checkbox" id="chkExportExcused" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #0284c7; cursor: pointer;">
+                                <span>🕊️ غياب بعذر <span id="cntBadge_excused" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
                             <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #be123c;">
                                 <input type="checkbox" id="chkExportAbsent" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #e11d48; cursor: pointer;">
-                                <span>❌ الغياب <span id="cntBadge_absent" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                                <span>❌ غياب بدون عذر <span id="cntBadge_absent" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
                             </label>
                         </div>
 
@@ -10374,6 +10382,13 @@ window.switchRadarSection = switchRadarSection;
 // ⚡ وظائف محرك المزامنة الثلاثي الشامل
 // ==========================================
 function openTripartiteSyncModal() {
+    const isAdminUser = (typeof currentPermission !== 'undefined' && (currentPermission === 'admin' || currentPermission === 'developer')) ||
+                        (typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'admin' || currentUser.isSuperAdmin || (currentUser.name || '').trim() === 'عادل جورج'));
+    if (!isAdminUser) {
+        if (typeof showToast === 'function') showToast('⚠️ عذراً، محرك المزامنة الثلاثية مخصص لأمين الخدمة (الأدمن) فقط.', true);
+        else alert('عذراً، محرك المزامنة الثلاثية مخصص لأمين الخدمة (الأدمن) فقط.');
+        return;
+    }
     const m = document.getElementById('tripartiteSyncModal');
     if (m) m.style.display = 'flex';
 }
@@ -10386,6 +10401,13 @@ function closeTripartiteSyncModal() {
 window.closeTripartiteSyncModal = closeTripartiteSyncModal;
 
 async function executeTripartiteSync() {
+    const isAdminUser = (typeof currentPermission !== 'undefined' && (currentPermission === 'admin' || currentPermission === 'developer')) ||
+                        (typeof currentUser !== 'undefined' && currentUser && (currentUser.role === 'admin' || currentUser.isSuperAdmin || (currentUser.name || '').trim() === 'عادل جورج'));
+    if (!isAdminUser) {
+        if (typeof showToast === 'function') showToast('⚠️ عملية غير مصرح بها! مخصصة لأمين الخدمة فقط.', true);
+        else alert('عملية غير مصرح بها!');
+        return;
+    }
     const btn = document.getElementById('btnRunTripartiteSync');
     const spinner = document.getElementById('tripartiteSyncSpinner');
     const term = document.getElementById('tripartiteSyncConsole');
@@ -10442,7 +10464,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script src="js/interactive-simulation-guide.js"></script>
 
 <!-- نافذة محرك المزامنة الثلاثي الشامل المعتمد (Excel + SQLite + Cloud) -->
-<div id="tripartiteSyncModal" class="modal" style="display:none; z-index:5000;">
+<div id="tripartiteSyncModal" class="modal admin-only" style="display:none; z-index:5000;">
     <div class="modal-content" style="max-width:680px; text-align:right; border-radius:18px; border:2px solid #10b981; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
         <span class="close-btn" onclick="closeTripartiteSyncModal()">&times;</span>
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:12px;">
