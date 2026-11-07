@@ -74,6 +74,99 @@ function scheduleBackgroundDashboardUpdates() {
     }, 450);
 }
 
+// ==========================================
+// 🚀 نظام التنبيه الذكي اللحظي فوق الكاميرا (Scanner HUD Alert)
+// ==========================================
+let hudTimer = null;
+let feedbackTimer = null;
+function showScannerHUD(status, title, studentName, studentMeta, durationMs = 1800) {
+    const hud = document.getElementById('scannerHUDAlert');
+    const cameraBox = document.getElementById('scannerCameraBox');
+    const overlay = document.getElementById('scannerFeedbackOverlay');
+    const card = document.getElementById('scannerFeedbackCard');
+    const iconText = document.getElementById('feedbackIconText');
+    const titleEl = document.getElementById('feedbackMainTitle');
+    const nameEl = document.getElementById('feedbackStudentName');
+    const metaEl = document.getElementById('feedbackStudentMeta');
+    
+    // 1. إرسال التنبيه العام أيضاً (z-index: 200000)
+    if (typeof showToast === 'function') {
+        showToast(title + (studentName ? ' : ' + studentName : ''), status !== 'success');
+    }
+    
+    // 2. وميض إطار الكاميرا البصري اللحظي
+    if (cameraBox) {
+        cameraBox.classList.remove('flash-success', 'flash-warning', 'flash-error');
+        cameraBox.classList.add('flash-' + status);
+        setTimeout(() => {
+            if (cameraBox) cameraBox.classList.remove('flash-' + status);
+        }, 1200);
+    }
+    
+    const icons = {
+        success: '✔️',
+        warning: '⚠️',
+        error: '❌'
+    };
+    
+    const escape = (str) => (str || '').replace(/[<>&"]/g, '');
+
+    // 3. نافذة التأكيد المرئي الكبيرة في مركز الكاميرا (تظهر لثانيتين كبطاقة واضحة جداً)
+    if (overlay && card) {
+        if (feedbackTimer) clearTimeout(feedbackTimer);
+        card.className = 'scanner-feedback-card card-' + status;
+        if (iconText) iconText.innerText = icons[status] || '✔️';
+        if (titleEl) titleEl.innerText = title;
+        if (nameEl) {
+            nameEl.innerText = studentName || '';
+            nameEl.style.display = studentName ? 'block' : 'none';
+        }
+        if (metaEl) {
+            metaEl.innerText = studentMeta || (status === 'success' ? 'تم الحفظ والتوثيق بنجاح' : (status === 'warning' ? 'مسجل مسبقاً اليوم' : 'يرجى مراجعة إدارة الكنترول'));
+            metaEl.style.display = 'block';
+        }
+        overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+
+        feedbackTimer = setTimeout(() => {
+            overlay.style.transition = 'opacity 0.25s ease';
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.style.transition = '';
+            }, 250);
+        }, durationMs);
+    }
+    
+    // 4. الشريط العلوي العائم HUD
+    if (hud) {
+        if (hudTimer) clearTimeout(hudTimer);
+        hud.className = 'scanner-hud-alert hud-' + status;
+        hud.innerHTML = `
+            <div class="scanner-hud-icon">${icons[status] || '🔔'}</div>
+            <div class="scanner-hud-info">
+                <div class="scanner-hud-title">${escape(title)}</div>
+                ${studentName ? `<div class="scanner-hud-sub">${escape(studentName)} ${studentMeta ? '• ' + escape(studentMeta) : ''}</div>` : ''}
+            </div>
+        `;
+        hud.style.display = 'flex';
+        hud.style.opacity = '1';
+        hud.style.transform = 'none';
+        
+        hudTimer = setTimeout(() => {
+            hud.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            hud.style.opacity = '0';
+            hud.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                hud.style.display = 'none';
+                hud.style.opacity = '1';
+                hud.style.transform = 'none';
+                hud.style.transition = '';
+            }, 300);
+        }, durationMs + 300);
+    }
+}
+
 // 10. تسجيل الحضور الذري
 
 // ==========================================
@@ -145,13 +238,12 @@ if (!attendanceRecord[activeSelectedDate]) attendanceRecord[activeSelectedDate] 
 let localExisting = attendanceRecord[activeSelectedDate].find(a => a.id.toString() === member.id.toString());
 
 if (localExisting) {
-
-playBeepSound('error');
-
-showToast(`⚠️ مسجل بالفعل في (${activeSelectedDate}): ${member.name}`, true);
-
-return;
-
+    playBeepSound('error');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate([80, 50, 80]); } catch(e){}
+    }
+    showScannerHUD('warning', 'تم التسجيل مسبقاً ⚠️', member.name, 'مسجل بالفعل اليوم بالخدمة');
+    return;
 }
 
 attendanceRecord[activeSelectedDate].unshift(newRecord);
@@ -181,17 +273,17 @@ if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function
 }
 
 if (isAbsent) {
-
-playBeepSound('error');
-
-showToast(`⚠️ ${member.name} (تأخير شديد - محفوظ محلياً 📱)`, true);
-
+    playBeepSound('error');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate([80, 50, 80]); } catch(e){}
+    }
+    showScannerHUD('warning', 'تم التسجيل (تأخير شديد) ⚠️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
 } else {
-
-playBeepSound('success');
-
-showToast(`✅ تم تسجيل حضور: ${member.name} (${activeSelectedDate} - محفوظ محلياً بدون نت 📱)`);
-
+    playBeepSound('success');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(70); } catch(e){}
+    }
+    showScannerHUD('success', 'تم التسجيل بنجاح ✔️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
 }
 
 logActivity("تسجيل حضور (أوفلاين)", member.name, `${activeSelectedDate} - ${isAbsent ? "تأخير" : "حاضر"}`);
@@ -217,21 +309,19 @@ return { conflict: false };
 })).then(result => {
 
 if (result.conflict) {
-
-playBeepSound('error');
-
-let recordedBy = result.existing ? result.existing.scannedBy : 'خادم آخر';
-
-showToast(`⚠️ مسجل مسبقاً في (${activeSelectedDate}) بواسطة: ${recordedBy}`, true);
-
+    playBeepSound('error');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate([80, 50, 80]); } catch(e){}
+    }
+    let recordedBy = result.existing ? result.existing.scannedBy : 'خادم آخر';
+    showScannerHUD('warning', 'تم التسجيل مسبقاً ⚠️', member.name, `مسجل بواسطة: ${recordedBy}`);
 } else {
-
-playBeepSound('success');
-
-showToast(`✅ تم توثيق حضور: ${member.name} سحابياً`);
-
-logActivity("تسجيل حضور", member.name, `تاريخ: ${activeSelectedDate}`);
-
+    playBeepSound('success');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(70); } catch(e){}
+    }
+    showScannerHUD('success', 'تم التسجيل بنجاح ✔️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
+    logActivity("تسجيل حضور", member.name, `تاريخ: ${activeSelectedDate}`);
 }
 
 updateLastSyncTimestamp();
@@ -1834,12 +1924,15 @@ function markAttendance(scannedText) {
             recordServantAttendance(s);
             playBeepSound('success');
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                try { navigator.vibrate(50); } catch(e){}
+                try { navigator.vibrate(70); } catch(e){}
             }
-            showToast(`✅ تم رصد حضور الخادم: ${s.name}`);
+            showScannerHUD('success', 'تم تسجيل حضور الخادم ✔️', s.name, 'خادم بالخدمة ✝️');
         } else {
             playBeepSound('error');
-            showToast(`❌ كود غير مسجل أو غير مقروء`, true);
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                try { navigator.vibrate([100, 60, 100]); } catch(e){}
+            }
+            showScannerHUD('error', 'عفواً الطالب غير مسجل ❌', 'الكود غير موجود في المنظومة', 'يرجى مراجعة إدارة الكنترول');
         }
     }
 }

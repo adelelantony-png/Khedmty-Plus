@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v5.0'; // permanent offline engine with auto roster & instant cache navigation
+const CACHE_NAME = 'khedmety-ultra-v5.2'; // permanent offline engine with centered visual QR confirmation cards
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

@@ -530,6 +530,196 @@ th { background: var(--primary); color: white; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
+/* شريط تنبيه المسح الفوري الذكي HUD Toast لتأكيد التسجيل في ثوانٍ */
+.scanner-hud-alert {
+  position: absolute;
+  top: 60px;
+  left: 18px;
+  right: 18px;
+  z-index: 100010;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 18px;
+  color: #ffffff;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  direction: rtl;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: hudSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+@keyframes hudSlideDown {
+  0% { opacity: 0; transform: translateY(-14px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.scanner-hud-alert.hud-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.96), rgba(5, 150, 105, 0.98));
+  border: 1.5px solid rgba(167, 243, 208, 0.7);
+}
+
+.scanner-hud-alert.hud-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.96), rgba(217, 119, 6, 0.98));
+  border: 1.5px solid rgba(254, 240, 138, 0.7);
+}
+
+.scanner-hud-alert.hud-error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.96), rgba(220, 38, 38, 0.98));
+  border: 1.5px solid rgba(254, 202, 202, 0.7);
+}
+
+.scanner-hud-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.scanner-hud-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  text-align: right;
+}
+
+.scanner-hud-title {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.scanner-hud-sub {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.95;
+  margin-top: 3px;
+}
+
+/* نافذة التأكيد المرئي الفوري في مركز الكاميرا طِبق الأصل */
+.scanner-feedback-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  animation: feedbackOverlayIn 0.16s ease-out;
+  pointer-events: none;
+}
+
+@keyframes feedbackOverlayIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.scanner-feedback-card {
+  width: 100%;
+  max-width: 250px;
+  border-radius: 22px;
+  padding: 16px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-family: 'Cairo', 'Tajawal', sans-serif;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  animation: cardBounceIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes cardBounceIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.scanner-feedback-card.card-success {
+  background: linear-gradient(145deg, #10b981, #047857);
+  border: 2px solid #6ee7b7;
+}
+
+.scanner-feedback-card.card-warning {
+  background: linear-gradient(145deg, #f59e0b, #b45309);
+  border: 2px solid #fde68a;
+}
+
+.scanner-feedback-card.card-error {
+  background: linear-gradient(145deg, #ef4444, #b91c1c);
+  border: 2px solid #fca5a5;
+}
+
+.feedback-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  font-size: 30px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  animation: iconPulse 0.35s ease-out;
+}
+
+@keyframes iconPulse {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.feedback-main-title {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.feedback-student-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0 0 2px 0;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feedback-student-meta {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.92;
+  color: #e2e8f0;
+}
+
+/* وميض فوري لإطار الكاميرا */
+.fast-scanner-camera-box {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  border: 3px solid transparent;
+}
+.fast-scanner-camera-box.flash-success {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.8) !important;
+}
+.fast-scanner-camera-box.flash-warning {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.8) !important;
+}
+.fast-scanner-camera-box.flash-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.8) !important;
+}
+
 .fast-scanner-header {
   display: flex;
   justify-content: space-between;
@@ -722,7 +912,7 @@ th { background: var(--primary); color: white; }
 
 .login-card { background: white; padding: clamp(15px, 4vw, 30px); border-radius: 12px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
-#toastMessage { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--success); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight: bold; font-size: 15px; z-index: 9999; opacity: 0; visibility: hidden; transition: 0.3s; text-align: center; width: 90%; max-width: 300px; }
+#toastMessage { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--success); color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-weight: bold; font-size: 15px; z-index: 200000; opacity: 0; visibility: hidden; transition: 0.3s; text-align: center; width: 90%; max-width: 300px; }
 
 #toastMessage.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
@@ -2562,11 +2752,25 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
       <button type="button" class="fast-scanner-close-btn" onclick="closeFastScannerModal()" title="إغلاق">✕</button>
     </div>
 
+    <!-- شريط تنبيه المسح الفوري الذكي HUD Toast لتأكيد التسجيل في ثوانٍ -->
+    <div id="scannerHUDAlert" class="scanner-hud-alert" style="display:none;"></div>
+
     <!-- المحتوى الداخلي للماسح -->
     <div class="fast-scanner-body">
       <!-- نافذة الكاميرا الدائرية 24px -->
-      <div class="fast-scanner-camera-box">
+      <div class="fast-scanner-camera-box" id="scannerCameraBox">
         <div id="reader"></div>
+        <!-- نافذة التأكيد المرئي الفوري في مركز الكاميرا طِبق الأصل -->
+        <div id="scannerFeedbackOverlay" class="scanner-feedback-overlay" style="display:none;">
+          <div class="scanner-feedback-card" id="scannerFeedbackCard">
+            <div class="feedback-icon-wrapper" id="feedbackIconWrapper">
+              <span id="feedbackIconText">✔️</span>
+            </div>
+            <div class="feedback-main-title" id="feedbackMainTitle">تم التسجيل بنجاح</div>
+            <div class="feedback-student-name" id="feedbackStudentName">اسم الطالب</div>
+            <div class="feedback-student-meta" id="feedbackStudentMeta">سنة أولى • 1:15 م</div>
+          </div>
+        </div>
       </div>
 
       <!-- شارة التاريخ الزرقاء البيضاوية (طِبق الصورة المرفقة) -->
