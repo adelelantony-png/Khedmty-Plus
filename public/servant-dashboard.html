@@ -1156,7 +1156,38 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             box-shadow: 0 6px 16px rgba(15, 39, 68, 0.08);
         }
 
-    </style>
+    
+    /* ========================================== */
+    /* 🖨️ نمط الطباعة الاحترافي لورقة A4 واحدة     */
+    /* ========================================== */
+    @media print {
+        body * {
+            visibility: hidden !important;
+        }
+        #printableAttendanceReport, #printableAttendanceReport * {
+            visibility: visible !important;
+        }
+        #printableAttendanceReport {
+            display: block !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 3mm 5mm !important;
+            box-sizing: border-box !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-size: 8pt !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 3mm 4mm;
+        }
+    }
+
+</style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
 <script src="js/html5-qrcode.min.js"></script>
@@ -1409,6 +1440,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
 
 <a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مزامنة الحضور بالسحابة ☁️</a>
+<div class="tab-btn admin-only" data-group="admin" onclick="openTripartiteSyncModal()" style="background: linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-weight:800; border: 1.5px solid #10b981; box-shadow: 0 2px 8px rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
+    <i class="fa-solid fa-arrows-rotate"></i> ⚡ المزامنة الثلاثية (Excel + CRM + Cloud)
+</div>
 
 <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
 
@@ -1672,6 +1706,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-custom" onclick="switchRadarSection('attExport')" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:#ffffff; font-weight:800; padding:8px 14px; border-radius:10px; border:1px solid #f59e0b; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(217,119,6,0.3);">
+                            <i class="fa-solid fa-file-pdf"></i> كشف الغياب والتأخيرات (A4 PDF وواتساب) 📑
+                        </button>
                         <button type="button" class="btn-custom" onclick="exportWeeklyExcelSheet()" style="background: #10b981; color: #ffffff; border: 1px solid #059669; font-weight: 800; padding: 8px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                             <i class="fa-solid fa-file-excel"></i> تصدير كشف الحضور والقداس الأسبوعي (.xlsx)
                         </button>
@@ -1730,6 +1767,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             
             <!-- أزرار التصفح السريع للرادار (Radar Segmented Pills) -->
             <div class="radar-pill-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; background:#f1f5f9; padding:6px; border-radius:12px; border:1px solid #cbd5e1;">
+                <button type="button" class="radar-pill-btn" id="radarPill_attExport" onclick="switchRadarSection('attExport', this)" style="background:#0f172a; color:#fff; font-weight:900;">
+                    <span>📊</span> كشف الغياب والتأخيرات (A4 PDF وواتساب)
+                </button>
                 <button type="button" class="radar-pill-btn active" id="radarPill_absence" onclick="switchRadarSection('absence', this)">
                     <span>⚠️</span> الغياب والافتقاد الفوري
                 </button>
@@ -1752,6 +1792,129 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     <span>🌐</span> عرض الكل
                 </button>
             </div>
+
+                        <!-- 0. قسم كشف الحضور والتأخيرات والغياب الأسبوعي (A4 PDF & WhatsApp) -->
+            <div id="radarSec_attExport" class="radar-section-panel" style="display:none;">
+                <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #d97706; border-radius: 16px; padding: 20px; margin-bottom: 22px; box-shadow: 0 6px 20px rgba(217,119,6,0.08);">
+                    
+                    <!-- ترويسة القسم واختيار تاريخ اللقاء -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1.5px solid #fed7aa; padding-bottom: 14px;">
+                        <div>
+                            <h3 style="margin: 0; color: #9a3412; font-size: 1.25rem; font-weight: 900; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-file-invoice-dollar text-warning"></i> 📊 كشف الحضور والتأخيرات والغياب الأسبوعي المعتمد
+                            </h3>
+                            <p style="font-size: 0.83rem; color: #64748b; margin: 4px 0 0 0;">
+                                تقرير منظم لاجتماع الجمعة يصنف الحضور في الموعد (≤ 1:00 م)، التأخير البسيط (1:01 - 1:14 م)، التأخير الشديد (≥ 1:15 م)، والغياب، مع تقسيم دقيق للفرقة الأولى والثانية.
+                            </p>
+                        </div>
+
+                        <!-- اختيار تاريخ الجمعة المستهدفة -->
+                        <div style="display: flex; align-items: center; gap: 8px; background: #fff7ed; border: 1.5px solid #fdba74; padding: 6px 14px; border-radius: 12px;">
+                            <label for="exportReportDateSelect" style="font-size: 0.82rem; font-weight: 800; color: #c2410c; margin: 0;">🗓️ تاريخ الجمعة:</label>
+                            <select id="exportReportDateSelect" onchange="renderAttendanceExportReport()" style="padding: 6px 12px; border-radius: 8px; border: 1px solid #fed7aa; font-weight: bold; color: #1e293b; background: #fff; cursor: pointer;">
+                                <!-- يُملأ آلياً -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- بطاقات النبض الإحصائية المصغرة للكشف -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px;">
+                        <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #64748b; font-weight: bold;">👥 إجمالي المقيدين</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #0f172a;" id="kpiExp_total">0</div>
+                        </div>
+                        <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #15803d; font-weight: bold;">🟢 في الموعد (≤ 1:00)</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #16a34a;" id="kpiExp_ontime">0</div>
+                        </div>
+                        <div style="background: #fefce8; border: 1.5px solid #fde047; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #854d0e; font-weight: bold;">🟡 تأخير بسيط (1:01-1:14)</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #ca8a04;" id="kpiExp_minor">0</div>
+                        </div>
+                        <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">🔴 تأخير شديد (≥ 1:15)</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #dc2626;" id="kpiExp_severe">0</div>
+                        </div>
+                        <div style="background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #be123c; font-weight: bold;">❌ الغياب</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #e11d48;" id="kpiExp_absent">0</div>
+                        </div>
+                        <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;">📈 نسبة الحضور</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #2563eb;" id="kpiExp_pct">0%</div>
+                        </div>
+                    </div>
+
+                    <!-- شريط التحكم والفلاتر المتعددة (Checkboxes + Stage Tabs) -->
+                    <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <!-- مربعات الاختيار (التشيك بوكس) المعتمدة للتصنيف -->
+                        <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                            <span style="font-size: 0.82rem; font-weight: 800; color: #334155;">عرض الفئات:</span>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #166534;">
+                                <input type="checkbox" id="chkExportOnTime" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #16a34a; cursor: pointer;">
+                                <span>🟢 في الموعد <span id="cntBadge_onTime" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #b45309;">
+                                <input type="checkbox" id="chkExportMinor" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #d97706; cursor: pointer;">
+                                <span>🟡 تأخير بسيط <span id="cntBadge_minor" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #b91c1c;">
+                                <input type="checkbox" id="chkExportSevere" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #dc2626; cursor: pointer;">
+                                <span>🔴 تأخير شديد <span id="cntBadge_severe" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #be123c;">
+                                <input type="checkbox" id="chkExportAbsent" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #e11d48; cursor: pointer;">
+                                <span>❌ الغياب <span id="cntBadge_absent" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
+                        </div>
+
+                        <!-- أزرار تبديل المرحلة (Stage Tabs) -->
+                        <div style="display: flex; gap: 6px; background: #f1f5f9; padding: 4px; border-radius: 10px; border: 1px solid #cbd5e1;">
+                            <button type="button" class="stage-filter-btn active" onclick="setAttendanceExportStageTab('all', this)" style="padding: 6px 12px; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; background: #0f172a; color: #ffffff;">
+                                الكل <span id="stageTabCount_all"></span>
+                            </button>
+                            <button type="button" class="stage-filter-btn" onclick="setAttendanceExportStageTab('stage1', this)" style="padding: 6px 12px; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; background: transparent; color: #475569;">
+                                الفرقة الأولى <span id="stageTabCount_stage1"></span>
+                            </button>
+                            <button type="button" class="stage-filter-btn" onclick="setAttendanceExportStageTab('stage2', this)" style="padding: 6px 12px; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 800; cursor: pointer; background: transparent; color: #475569;">
+                                الفرقة الثانية <span id="stageTabCount_stage2"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- شريط الإجراءات الكبرى (PDF & WhatsApp Toolbar) -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 16px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <!-- زر تصدير PDF احترافي ورقة واحدة -->
+                            <button type="button" class="btn-custom" onclick="printAttendanceOnePagePDF()" style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(30,58,138,0.25);">
+                                <i class="fa-solid fa-file-pdf"></i> 🖨️ تصدير / طباعة PDF احترافي (ورقة واحدة A4)
+                            </button>
+
+                            <!-- زر الإرسال المباشر لجروب الواتساب -->
+                            <button type="button" id="btnSendWA_group" class="btn-custom" onclick="sendAttendanceReportToWhatsAppGroup()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(5,150,105,0.25);">
+                                <i class="fa-brands fa-whatsapp"></i> 📲 إرسال التقرير لجروب الواتس أب الخدام
+                            </button>
+                        </div>
+
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button type="button" class="btn-custom" onclick="shareAttendanceReportViaWhatsAppWeb()" style="background: #ffffff; color: #047857; border: 1.5px solid #10b981; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; cursor: pointer;" title="مشاركة التقرير عبر واتساب ويب لأي محادثة">
+                                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> فتح في واتساب ويب
+                            </button>
+                            <button type="button" class="btn-custom" onclick="copyAttendanceReportToClipboard()" style="background: #ffffff; color: #475569; border: 1.5px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; cursor: pointer;" title="نسخ نص التقرير كاملاً">
+                                <i class="fa-solid fa-copy me-1"></i> نسخ التقرير نصياً
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- حاوية الجداول المعروضة للشاشات (تُرسم برمجياً) -->
+                    <div id="exportReportTablesContainer">
+                        <div style="padding: 24px; text-align: center; color: #64748b; font-weight: bold;">
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i> جاري تجهيز كشف الحضور والتأخيرات...
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- /radarSec_attExport -->
 
             <div id="radarSec_pulse" class="radar-section-panel" style="display:none;">
             <!-- نبض الاجتماع ومعدل الاستقرار الإحصائي (Meeting Pulse & Trends) -->
@@ -3290,11 +3453,13 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                     </div>
                 </div>
             </div>
+</div><!-- /setSection_reset -->
 
 <!-- ======================================================== -->
             <!-- 🎯 المنظومة الموحدة للبونص ونقاط التشجيع وتخفيضات المؤتمر -->
             <!-- (Unified Incentive, Bonus & Conference Engine)           -->
             <!-- ======================================================== -->
+<div id="setSection_incentives" class="settings-section-panel" style="display:none;">
             <div class="admin-only" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border: 2px solid #3b82f6; padding: 22px; border-radius: 18px; margin: 20px 0; box-shadow: 0 6px 20px rgba(59,130,246,0.08);">
                 
                 <!-- 1. الترويسة الموحدة والشاملة -->
@@ -8255,7 +8420,10 @@ function sendCloudUsageWhatsAppReport() {
 
 let stats = getCloudUsageStats();
 
-let adminPhone = settings.adminWhatsApp || "201200000000";
+let adminPhone = settings.adminWhatsApp;
+if (!adminPhone || adminPhone === "201200000000") {
+    adminPhone = (currentUser && currentUser.phone) ? currentUser.phone : "201220683691";
+}
 
 let cleanPhone = formatWhatsAppPhone(adminPhone);
 
@@ -9978,6 +10146,8 @@ function switchRadarSection(secKey, btnElement) {
                     if (typeof renderRadarBirthdays === 'function') renderRadarBirthdays('week');
                 } else if (secKey === 'security') {
                     if (typeof loadSecurityShieldData === 'function') loadSecurityShieldData();
+                } else if (secKey === 'attExport') {
+                    if (typeof renderAttendanceExportReport === 'function') renderAttendanceExportReport();
                 }
             } catch(e) {
                 console.warn('[Radar] Error triggering section loader:', e);
@@ -9993,6 +10163,55 @@ function switchRadarSection(secKey, btnElement) {
 }
 window.switchRadarSection = switchRadarSection;
 
+
+
+// ==========================================
+// ⚡ وظائف محرك المزامنة الثلاثي الشامل
+// ==========================================
+function openTripartiteSyncModal() {
+    const m = document.getElementById('tripartiteSyncModal');
+    if (m) m.style.display = 'flex';
+}
+window.openTripartiteSyncModal = openTripartiteSyncModal;
+
+function closeTripartiteSyncModal() {
+    const m = document.getElementById('tripartiteSyncModal');
+    if (m) m.style.display = 'none';
+}
+window.closeTripartiteSyncModal = closeTripartiteSyncModal;
+
+async function executeTripartiteSync() {
+    const btn = document.getElementById('btnRunTripartiteSync');
+    const spinner = document.getElementById('tripartiteSyncSpinner');
+    const term = document.getElementById('tripartiteSyncConsole');
+    if (btn) btn.disabled = true;
+    if (spinner) spinner.style.display = 'inline-block';
+    if (term) term.innerHTML = `<span style="color:#38bdf8;">[${new Date().toLocaleTimeString('ar-EG')}] ⏳ بدء تشغيل محرك المزامنة الثلاثي...\n[أمان] جاري إنشاء النسخ الاحتياطية المزدوجة التلقائية...\n</span>`;
+
+    try {
+        const res = await fetch('http://localhost:3000/api/tripartite-sync/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (term) {
+            const out = data.output || data.message || (data.success ? 'اكتملت المزامنة بنجاح' : 'حدث خطأ');
+            term.innerHTML = `<pre style="margin:0; white-space:pre-wrap; color:${data.success ? '#4ade80' : '#f87171'};">${escapeHtml(out)}</pre>`;
+        }
+        if (data.success) {
+            if (typeof showToast === 'function') showToast('🎉 اكتملت المزامنة الثلاثية الشاملة بنجاح 100%!');
+            else alert('🎉 اكتملت المزامنة الثلاثية الشاملة بنجاح 100%!');
+        } else {
+            if (typeof showToast === 'function') showToast('⚠️ اكتملت المزامنة مع بعض التنبيهات', true);
+        }
+    } catch(err) {
+        if (term) term.innerHTML += `\n<span style="color:#ef4444;">[خطأ] تعذر الاتصال بمحرك الواتساب المحلي: ${err.message}\nتأكد من تشغيل خادم المنظومة المحلي على المنفذ 3000.</span>`;
+    } finally {
+        if (btn) btn.disabled = false;
+        if (spinner) spinner.style.display = 'none';
+    }
+}
+window.executeTripartiteSync = executeTripartiteSync;
 
 // Restore Zen mode on startup if enabled
 document.addEventListener('DOMContentLoaded', () => {
@@ -10016,6 +10235,55 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script src="js/interactive-simulation-guide.js"></script>
+
+<!-- نافذة محرك المزامنة الثلاثي الشامل المعتمد (Excel + SQLite + Cloud) -->
+<div id="tripartiteSyncModal" class="modal" style="display:none; z-index:5000;">
+    <div class="modal-content" style="max-width:680px; text-align:right; border-radius:18px; border:2px solid #10b981; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+        <span class="close-btn" onclick="closeTripartiteSyncModal()">&times;</span>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; border-bottom:2px solid #e2e8f0; padding-bottom:12px;">
+            <div style="font-size:32px;">⚡</div>
+            <div>
+                <h3 style="margin:0; color:#065f46; font-size:1.25rem; font-weight:900;">محرك المزامنة الثلاثي الذهبي الشامل (Tripartite Sync)</h3>
+                <p style="margin:2px 0 0 0; font-size:0.83rem; color:#64748b;">مزامنة متزامنة وآمنة بين: كشف الإكسيل الرسمي ⇄ قاعدة بيانات الواتساب ⇄ سحابة خدمتي بلس</p>
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:16px;">
+            <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:1.3rem;">📊</div>
+                <strong style="font-size:0.85rem; color:#166534; display:block;">كشف الإكسيل</strong>
+                <span style="font-size:0.75rem; color:#15803d;">كشف 2026-2027 (.xlsm)</span>
+            </div>
+            <div style="background:#eff6ff; border:1.5px solid #93c5fd; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:1.3rem;">💬</div>
+                <strong style="font-size:0.85rem; color:#1e40af; display:block;">قاعدة الواتساب</strong>
+                <span style="font-size:0.75rem; color:#1d4ed8;">church_crm.db</span>
+            </div>
+            <div style="background:#fef3c7; border:1.5px solid #fcd34d; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:1.3rem;">☁️</div>
+                <strong style="font-size:0.85rem; color:#92400e; display:block;">سحابة المنظومة</strong>
+                <span style="font-size:0.75rem; color:#b45309;">Firebase & Vercel</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <button type="button" id="btnRunTripartiteSync" class="btn-custom" onclick="executeTripartiteSync()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color:#ffffff; border:none; padding:12px 24px; border-radius:10px; font-weight:900; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(5,150,105,0.3);">
+                <i class="fa-solid fa-play"></i> 🚀 بدء المزامنة الثلاثية الآن
+            </button>
+            <span id="tripartiteSyncSpinner" style="display:none; font-size:0.85rem; font-weight:bold; color:#059669;">
+                <i class="fa-solid fa-spinner fa-spin me-1"></i> جاري تنفيذ المزامنة وإنشاء النسخ الاحتياطية...
+            </span>
+        </div>
+
+        <div style="background:#0f172a; border-radius:12px; padding:14px; color:#f8fafc; font-family:Consolas, monospace; font-size:0.82rem; max-height:260px; overflow-y:auto; border:1px solid #334155; line-height:1.6;" id="tripartiteSyncConsole">
+            <span style="color:#94a3b8;">جاهز للتشغيل. اضغط على «بدء المزامنة الثلاثية الآن» لتشغيل المحرك المعتمد...</span>
+        </div>
+    </div>
+</div>
+
+<!-- حاوية الطباعة الخاصة لتقرير A4 ورقة واحدة -->
+<div id="printableAttendanceReport" style="display:none;"></div>
+
 </body>
 
 </html>

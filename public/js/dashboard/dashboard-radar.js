@@ -1292,3 +1292,573 @@ if (typeof window !== 'undefined') {
     window.resolveExcuseAction = resolveExcuseAction;
     window.manualRecordStudentExcuse = manualRecordStudentExcuse;
 }
+
+
+// ============================================================================
+// 📊 منظومة كشف الحضور والتأخيرات والغياب الأسبوعي المعتمد (PDF & WhatsApp)
+// ============================================================================
+
+function parseRadarTimeToMinutes(timeStr) {
+    if (!timeStr) return null;
+    let s = String(timeStr).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).trim();
+    const isPm = s.includes('م') || s.toLowerCase().includes('pm');
+    const isAm = s.includes('ص') || s.toLowerCase().includes('am');
+    const parts = s.match(/\d+/g);
+    if (!parts || parts.length === 0) return null;
+    let h = parseInt(parts[0], 10);
+    let m = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+    if (isPm && h < 12) h += 12;
+    else if (isAm && h === 12) h = 0;
+    else if (!isPm && !isAm && h >= 1 && h <= 6) h += 12; // الجمعة بعد الظهر
+    return h * 60 + m;
+}
+
+function classifyAttendanceStatus(attRecord) {
+    if (!attRecord || !attRecord.attended) {
+        return {
+            status: 'absent',
+            label: 'غائب',
+            badgeClass: 'badge-att-absent',
+            icon: '❌',
+            color: '#dc2626',
+            bgColor: '#fef2f2'
+        };
+    }
+    const timeStr = attRecord.time || '';
+    const totalM = parseRadarTimeToMinutes(timeStr);
+    if (attRecord.isAbsentDueToDelay || (totalM !== null && totalM >= 795)) { // 1:15 PM and later
+        return {
+            status: 'severe_delay',
+            label: 'تأخير شديد (≥ 1:15)',
+            badgeClass: 'badge-att-severe',
+            icon: '🔴',
+            color: '#b91c1c',
+            bgColor: '#fee2e2'
+        };
+    }
+    if (totalM !== null && totalM >= 781 && totalM <= 794) { // 1:01 to 1:14 PM
+        return {
+            status: 'minor_delay',
+            label: 'تأخير بسيط (1:01 - 1:14)',
+            badgeClass: 'badge-att-minor',
+            icon: '🟡',
+            color: '#b45309',
+            bgColor: '#fef3c7'
+        };
+    }
+    return {
+        status: 'on_time',
+        label: 'حاضر في الموعد',
+        badgeClass: 'badge-att-ontime',
+        icon: '🟢',
+        color: '#15803d',
+        bgColor: '#f0fdf4'
+    };
+}
+
+function normalizeStudentStage(stageStr) {
+    const s = String(stageStr || '').trim();
+    if (s.includes('ثان') || s.includes('2')) return 'الفرقة الثانية';
+    return 'الفرقة الأولى';
+}
+
+function getRadarAvailableFridays() {
+    const fridays = new Set();
+    if (typeof attendance === 'object' && attendance !== null) {
+        Object.keys(attendance).forEach(d => {
+            try {
+                const dt = new Date(d);
+                if (!isNaN(dt.getTime()) && dt.getDay() === 5) {
+                    fridays.add(d);
+                }
+            } catch(e) {}
+        });
+    }
+    // إضافة موعد الانطلاق المعتمد وموعد اليوم إن كان جمعة
+    fridays.add('2026-11-06');
+    if (typeof today === 'string' && today) {
+        try {
+            const dtToday = new Date(today);
+            if (dtToday.getDay() === 5) fridays.add(today);
+        } catch(e) {}
+    }
+    return Array.from(fridays).sort().reverse();
+}
+
+let activeExportStageTab = 'all';
+
+function setAttendanceExportStageTab(stageKey, btnElement) {
+    activeExportStageTab = stageKey;
+    document.querySelectorAll('.stage-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btnElement) btnElement.classList.add('active');
+    renderAttendanceExportReport();
+}
+
+function renderAttendanceExportReport() {
+    const dateSelect = document.getElementById('exportReportDateSelect');
+    if (!dateSelect) return;
+
+    // Populate date dropdown if empty
+    if (dateSelect.options.length === 0) {
+        const availableDates = getRadarAvailableFridays();
+        dateSelect.innerHTML = availableDates.map(d => {
+            return `<option value="${d}">${d === '2026-11-06' ? 'جمعة الانطلاق (2026-11-06)' : 'جمعة ' + d}</option>`;
+        }).join('');
+    }
+
+    const selectedDate = dateSelect.value || '2026-11-06';
+    const dayAttendance = (attendance && attendance[selectedDate]) ? attendance[selectedDate] : {};
+
+    // Read checkboxes
+    const showOnTime = document.getElementById('chkExportOnTime')?.checked ?? true;
+    const showMinor = document.getElementById('chkExportMinor')?.checked ?? true;
+    const showSevere = document.getElementById('chkExportSevere')?.checked ?? true;
+    const showAbsent = document.getElementById('chkExportAbsent')?.checked ?? true;
+
+    // Group students
+    const stage1List = [];
+    const stage2List = [];
+
+    let countOnTime = 0;
+    let countMinor = 0;
+    let countSevere = 0;
+    let countAbsent = 0;
+
+    const allMembers = Array.isArray(members) ? members : [];
+
+    allMembers.forEach(m => {
+        const mCode = String(m.code || m.id || '').trim();
+        const mName = String(m.name || '').trim();
+        if (!mName || ['500', '50005', '6650', 'admin', '10000001'].includes(mCode)) return;
+
+        // Check attendance record
+        let attRecord = dayAttendance[mCode];
+        if (!attRecord) {
+            // Check by name or phone
+            for (let k in dayAttendance) {
+                if (dayAttendance[k] && (dayAttendance[k].name === mName || dayAttendance[k].phone === m.phone)) {
+                    attRecord = dayAttendance[k];
+                    break;
+                }
+            }
+        }
+
+        const classification = classifyAttendanceStatus(attRecord);
+        const stage = normalizeStudentStage(m.stage);
+
+        if (classification.status === 'on_time') countOnTime++;
+        else if (classification.status === 'minor_delay') countMinor++;
+        else if (classification.status === 'severe_delay') countSevere++;
+        else countAbsent++;
+
+        const studentItem = {
+            code: mCode,
+            name: mName,
+            stage: stage,
+            phone: m.phone || '',
+            confessor: m.confessor || '',
+            attended: classification.status !== 'absent',
+            time: (attRecord && attRecord.time) ? attRecord.time : '',
+            status: classification.status,
+            label: classification.label,
+            icon: classification.icon,
+            color: classification.color,
+            bgColor: classification.bgColor
+        };
+
+        if (stage === 'الفرقة الثانية') {
+            stage2List.push(studentItem);
+        } else {
+            stage1List.push(studentItem);
+        }
+    });
+
+    const totalStudents = stage1List.length + stage2List.length;
+    const totalAttended = countOnTime + countMinor + countSevere;
+    const attPct = totalStudents > 0 ? Math.round((totalAttended / totalStudents) * 100) : 0;
+
+    // Update KPI badges
+    const elTotal = document.getElementById('kpiExp_total');
+    const elOnTime = document.getElementById('kpiExp_ontime');
+    const elMinor = document.getElementById('kpiExp_minor');
+    const elSevere = document.getElementById('kpiExp_severe');
+    const elAbsent = document.getElementById('kpiExp_absent');
+    const elPct = document.getElementById('kpiExp_pct');
+
+    if (elTotal) elTotal.innerText = totalStudents;
+    if (elOnTime) elOnTime.innerText = countOnTime;
+    if (elMinor) elMinor.innerText = countMinor;
+    if (elSevere) elSevere.innerText = countSevere;
+    if (elAbsent) elAbsent.innerText = countAbsent;
+    if (elPct) elPct.innerText = attPct + '%';
+
+    // Update checkbox counts
+    const cntOnTimeBadge = document.getElementById('cntBadge_onTime');
+    const cntMinorBadge = document.getElementById('cntBadge_minor');
+    const cntSevereBadge = document.getElementById('cntBadge_severe');
+    const cntAbsentBadge = document.getElementById('cntBadge_absent');
+
+    if (cntOnTimeBadge) cntOnTimeBadge.innerText = `(${countOnTime})`;
+    if (cntMinorBadge) cntMinorBadge.innerText = `(${countMinor})`;
+    if (cntSevereBadge) cntSevereBadge.innerText = `(${countSevere})`;
+    if (cntAbsentBadge) cntAbsentBadge.innerText = `(${countAbsent})`;
+
+    // Filter function for rows
+    const matchesFilter = (item) => {
+        if (item.status === 'on_time' && !showOnTime) return false;
+        if (item.status === 'minor_delay' && !showMinor) return false;
+        if (item.status === 'severe_delay' && !showSevere) return false;
+        if (item.status === 'absent' && !showAbsent) return false;
+        return true;
+    };
+
+    const filteredStage1 = stage1List.filter(matchesFilter);
+    const filteredStage2 = stage2List.filter(matchesFilter);
+
+    // Update Stage Tab counts
+    const tabAllCount = document.getElementById('stageTabCount_all');
+    const tab1Count = document.getElementById('stageTabCount_stage1');
+    const tab2Count = document.getElementById('stageTabCount_stage2');
+    if (tabAllCount) tabAllCount.innerText = `(${filteredStage1.length + filteredStage2.length})`;
+    if (tab1Count) tab1Count.innerText = `(${filteredStage1.length})`;
+    if (tab2Count) tab2Count.innerText = `(${filteredStage2.length})`;
+
+    // Helper to generate table HTML
+    const buildTableHtml = (list, stageTitle, totalCount) => {
+        if (list.length === 0) {
+            return `<div style="padding:16px; text-align:center; color:#64748b; background:#f8fafc; border-radius:10px;">لا توجد سجلات مطابقة للفلاتر المختارة في ${stageTitle}.</div>`;
+        }
+        return `
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; margin-bottom:16px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                <div style="background:#f1f5f9; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1.5px solid #cbd5e1;">
+                    <strong style="color:#0f172a; font-size:0.95rem;">🎓 ${stageTitle}</strong>
+                    <span style="font-size:0.8rem; font-weight:800; background:#e2e8f0; color:#334155; padding:3px 10px; border-radius:999px;">
+                        المعروض: ${list.length} من ${totalCount}
+                    </span>
+                </div>
+                <div class="table-responsive-wrapper">
+                    <table class="adaptive-card-table" style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:center;">
+                        <thead>
+                            <tr style="background:#f8fafc; color:#475569; border-bottom:1.5px solid #e2e8f0;">
+                                <th style="padding:8px 6px; width:35px;">م</th>
+                                <th style="padding:8px 6px; width:55px;">الكود</th>
+                                <th style="padding:8px 10px; text-align:right;">اسم المخدوم</th>
+                                <th style="padding:8px 8px; width:140px;">الحالة والتصنيف</th>
+                                <th style="padding:8px 6px; width:80px;">وقت الدخول</th>
+                                <th style="padding:8px 8px; width:110px;">الهاتف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${list.map((s, idx) => `
+                                <tr style="border-bottom:1px solid #f1f5f9; background:${idx % 2 === 0 ? '#ffffff' : '#fafafa'};">
+                                    <td style="padding:7px 4px; color:#94a3b8; font-size:0.8rem;">${idx + 1}</td>
+                                    <td style="padding:7px 4px; font-weight:bold; color:#64748b; font-family:monospace;">${s.code}</td>
+                                    <td style="padding:7px 10px; text-align:right; font-weight:800; color:#1e293b;">${s.name}</td>
+                                    <td style="padding:7px 6px;">
+                                        <span style="display:inline-block; padding:3px 10px; border-radius:999px; font-weight:800; font-size:0.78rem; color:${s.color}; background:${s.bgColor}; border:1px solid ${s.color}33;">
+                                            ${s.icon} ${s.label}
+                                        </span>
+                                    </td>
+                                    <td style="padding:7px 6px; color:#334155; font-weight:bold; font-size:0.8rem;" dir="ltr">${s.time || '-'}</td>
+                                    <td style="padding:7px 6px; color:#64748b; font-size:0.8rem; font-family:monospace;" dir="ltr">${s.phone || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    };
+
+    // Render tables in UI based on active stage tab
+    const tablesContainer = document.getElementById('exportReportTablesContainer');
+    if (tablesContainer) {
+        let html = '';
+        if (activeExportStageTab === 'all' || activeExportStageTab === 'stage1') {
+            html += buildTableHtml(filteredStage1, 'الفرقة الأولى (سنة أولى)', stage1List.length);
+        }
+        if (activeExportStageTab === 'all' || activeExportStageTab === 'stage2') {
+            html += buildTableHtml(filteredStage2, 'الفرقة الثانية (سنة ثانية)', stage2List.length);
+        }
+        tablesContainer.innerHTML = html;
+    }
+
+    // Build the 1-Page A4 Printable Version
+    buildOnePagePrintableA4(selectedDate, filteredStage1, filteredStage2, {
+        totalStudents,
+        countOnTime,
+        countMinor,
+        countSevere,
+        countAbsent,
+        attPct
+    });
+}
+
+function buildOnePagePrintableA4(serviceDate, stage1List, stage2List, stats) {
+    const printContainer = document.getElementById('printableAttendanceReport');
+    if (!printContainer) return;
+
+    const renderCompactPrintTable = (list, stageTitle) => {
+        return `
+            <div style="margin-bottom:6px; page-break-inside:avoid;">
+                <div style="background:#1e3a8a; color:#ffffff; padding:3px 8px; font-size:8pt; font-weight:bold; display:flex; justify-content:space-between; border-radius:4px 4px 0 0;">
+                    <span>🎓 ${stageTitle}</span>
+                    <span>العدد: ${list.length}</span>
+                </div>
+                <table style="width:100%; border-collapse:collapse; font-size:7.5pt; text-align:center; border:1px solid #cbd5e1;">
+                    <thead>
+                        <tr style="background:#f1f5f9; color:#1e293b; border-bottom:1px solid #cbd5e1;">
+                            <th style="padding:2px 3px; width:22px; border:1px solid #cbd5e1;">م</th>
+                            <th style="padding:2px 3px; width:36px; border:1px solid #cbd5e1;">كود</th>
+                            <th style="padding:2px 6px; text-align:right; border:1px solid #cbd5e1;">اسم المخدوم</th>
+                            <th style="padding:2px 4px; width:90px; border:1px solid #cbd5e1;">حالة الحضور</th>
+                            <th style="padding:2px 4px; width:52px; border:1px solid #cbd5e1;">الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${list.map((s, idx) => `
+                            <tr style="border-bottom:0.5px solid #e2e8f0; background:${idx % 2 === 0 ? '#fff' : '#f8fafc'};">
+                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0; color:#64748b;">${idx + 1}</td>
+                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0; font-weight:bold;">${s.code}</td>
+                                <td style="padding:1.5px 6px; text-align:right; border:0.5px solid #e2e8f0; font-weight:bold;">${s.name}</td>
+                                <td style="padding:1.5px 3px; border:0.5px solid #e2e8f0; font-weight:bold; color:${s.color};">
+                                    ${s.label}
+                                </td>
+                                <td style="padding:1.5px 2px; border:0.5px solid #e2e8f0;" dir="ltr">${s.time || '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    };
+
+    printContainer.innerHTML = `
+        <div style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction:rtl; text-align:right; width:100%; box-sizing:border-box;">
+            <!-- Official Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1e3a8a; padding-bottom:4px; margin-bottom:6px;">
+                <div style="text-align:right;">
+                    <div style="font-size:9.5pt; font-weight:bold; color:#1e3a8a;">كنيسة رئيس الملائكة ميخائيل والشهيد مارجرجس الروماني</div>
+                    <div style="font-size:8.5pt; font-weight:bold; color:#475569;">اجتماع القديس بولس الرسول لإعداد الخدام والشباب</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:11pt; font-weight:900; color:#1e3a8a;">📊 كشف الحضور والتأخيرات والغياب المعتمد</div>
+                    <div style="font-size:8pt; font-weight:bold; color:#0f766e;">🗓️ تاريخ اللقاء: جمعة ${serviceDate}</div>
+                </div>
+                <div style="text-align:left; font-size:7.5pt; color:#64748b;">
+                    <div>سنة 2026 - 2027</div>
+                    <div>طُبع بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+            </div>
+
+            <!-- Stats Ribbon -->
+            <div style="display:flex; justify-content:space-between; background:#f8fafc; border:1px solid #cbd5e1; border-radius:4px; padding:3px 10px; margin-bottom:8px; font-size:8pt; font-weight:bold;">
+                <span>👥 إجمالي المقيدين: <strong>${stats.totalStudents}</strong></span>
+                <span style="color:#15803d;">🟢 في الموعد: <strong>${stats.countOnTime}</strong></span>
+                <span style="color:#b45309;">🟡 تأخير بسيط: <strong>${stats.countMinor}</strong></span>
+                <span style="color:#b91c1c;">🔴 تأخير شديد: <strong>${stats.countSevere}</strong></span>
+                <span style="color:#dc2626;">❌ الغياب: <strong>${stats.countAbsent}</strong></span>
+                <span style="color:#1e3a8a;">📈 نسبة الحضور: <strong>${stats.attPct}%</strong></span>
+            </div>
+
+            <!-- Dual Columns Layout for Single Page Efficiency -->
+            <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap:8px;">
+                <div>
+                    ${renderCompactPrintTable(stage1List, 'الفرقة الأولى')}
+                </div>
+                <div>
+                    ${renderCompactPrintTable(stage2List, 'الفرقة الثانية')}
+                </div>
+            </div>
+
+            <!-- Footer Signatures -->
+            <div style="display:flex; justify-content:space-between; margin-top:8px; padding-top:4px; border-top:1px dashed #cbd5e1; font-size:7.5pt; color:#475569;">
+                <div>مسؤول رصد الحضور: ___________________</div>
+                <div>أمين الخدمة: ___________________</div>
+                <div>أب اعتراف الاجتماع: ___________________</div>
+            </div>
+        </div>
+    `;
+}
+
+function printAttendanceOnePagePDF() {
+    renderAttendanceExportReport();
+    setTimeout(() => {
+        window.print();
+    }, 250);
+}
+
+function buildAttendanceWhatsAppReportText() {
+    const dateSelect = document.getElementById('exportReportDateSelect');
+    const selectedDate = dateSelect ? dateSelect.value : '2026-11-06';
+    const dayAttendance = (attendance && attendance[selectedDate]) ? attendance[selectedDate] : {};
+
+    const allMembers = Array.isArray(members) ? members : [];
+    const stage1Present = [];
+    const stage1Absent = [];
+    const stage2Present = [];
+    const stage2Absent = [];
+    const delaysList = [];
+
+    allMembers.forEach(m => {
+        const mCode = String(m.code || m.id || '').trim();
+        const mName = String(m.name || '').trim();
+        if (!mName || ['500', '50005', '6650', 'admin', '10000001'].includes(mCode)) return;
+
+        let attRecord = dayAttendance[mCode];
+        if (!attRecord) {
+            for (let k in dayAttendance) {
+                if (dayAttendance[k] && dayAttendance[k].name === mName) {
+                    attRecord = dayAttendance[k];
+                    break;
+                }
+            }
+        }
+
+        const classification = classifyAttendanceStatus(attRecord);
+        const stage = normalizeStudentStage(m.stage);
+
+        if (classification.status !== 'absent') {
+            if (stage === 'الفرقة الثانية') stage2Present.push({ name: mName, time: attRecord?.time || '' });
+            else stage1Present.push({ name: mName, time: attRecord?.time || '' });
+
+            if (classification.status === 'minor_delay' || classification.status === 'severe_delay') {
+                delaysList.push({ name: mName, stage, label: classification.label, time: attRecord?.time || '' });
+            }
+        } else {
+            if (stage === 'الفرقة الثانية') stage2Absent.push(mName);
+            else stage1Absent.push(mName);
+        }
+    });
+
+    const totalStudents = stage1Present.length + stage1Absent.length + stage2Present.length + stage2Absent.length;
+    const totalPresent = stage1Present.length + stage2Present.length;
+    const totalAbsent = stage1Absent.length + stage2Absent.length;
+    const attPct = totalStudents > 0 ? Math.round((totalPresent / totalStudents) * 100) : 0;
+
+    let text = `⛪ *كنيسة رئيس الملائكة والشهيد مارجرجس*
+`;
+    text += `📖 *اجتماع القديس بولس الرسول لإعداد الخدام*
+`;
+    text += `📊 *كشف الحضور والتأخيرات والغياب الأسبوعي*
+`;
+    text += `🗓️ لقاء جمعة: ${selectedDate}
+
+`;
+
+    text += `━━━━━━━━━━━━━━━━━━━
+`;
+    text += `📈 *الملخص الإحصائي العام:*
+`;
+    text += `👥 إجمالي المقيدين: ${totalStudents} مخدوم
+`;
+    text += `🟢 إجمالي الحاضرين: ${totalPresent} (${attPct}%)
+`;
+    text += `❌ إجمالي الغياب: ${totalAbsent}
+`;
+    text += `━━━━━━━━━━━━━━━━━━━
+
+`;
+
+    text += `🎓 *الفرقة الأولى (سنة أولى):*
+`;
+    text += `• الحضور: ${stage1Present.length} | الغياب: ${stage1Absent.length}
+
+`;
+
+    text += `🎓 *الفرقة الثانية (سنة ثانية):*
+`;
+    text += `• الحضور: ${stage2Present.length} | الغياب: ${stage2Absent.length}
+
+`;
+
+    if (delaysList.length > 0) {
+        text += `⏰ *كشف التأخيرات:* (${delaysList.length} مخدوم)
+`;
+        delaysList.forEach((d, i) => {
+            text += `${i + 1}. ${d.name} (${d.stage}) - ${d.label} [${d.time}]
+`;
+        });
+        text += `
+`;
+    }
+
+    if (totalAbsent > 0) {
+        text += `⚠️ *كشف الغائبين للمتابعة والافتقاد:*
+`;
+        if (stage1Absent.length > 0) {
+            text += `🔹 *سنة أولى:* ${stage1Absent.join('، ')}
+`;
+        }
+        if (stage2Absent.length > 0) {
+            text += `🔹 *سنة ثانية:* ${stage2Absent.join('، ')}
+`;
+        }
+        text += `
+`;
+    }
+
+    text += `🕊️ *صلوا من أجل الخدمة وكل نفس مباركة*`;
+    return text;
+}
+
+async function sendAttendanceReportToWhatsAppGroup() {
+    const reportText = buildAttendanceWhatsAppReportText();
+    const btn = document.getElementById('btnSendWA_group');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ جاري إرسال التقرير...';
+    }
+
+    try {
+        const res = await fetch('http://localhost:3000/api/group/send-report', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                targetJid: '120363430940374327@g.us', // خدام اجتماع القديس بولس الرسول 2027
+                text: reportText
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('🎉 تم إرسال تقرير الحضور والغياب لجروب الخدام بالواتساب بنجاح! 🚀');
+        } else {
+            throw new Error(data.error || 'تعذر الإرسال');
+        }
+    } catch(err) {
+        console.warn('API send failed, fallback to direct WA link:', err);
+        const waLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(reportText)}`;
+        if (confirm(`تعذر الإرسال التلقائي عبر خادم الواتساب المحلي (${err.message}). هل ترغب في فتح واتساب مباشرة لإرسال التقرير لجروب الخدام؟`)) {
+            window.open(waLink, '_blank');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '📲 إرسال التقرير لجروب الواتس أب الخدام';
+        }
+    }
+}
+
+function shareAttendanceReportViaWhatsAppWeb() {
+    const reportText = buildAttendanceWhatsAppReportText();
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(reportText)}`, '_blank');
+}
+
+function copyAttendanceReportToClipboard() {
+    const reportText = buildAttendanceWhatsAppReportText();
+    navigator.clipboard.writeText(reportText).then(() => {
+        alert('📋 تم نسخ تقرير الحضور والغياب كاملاً للحافظة بنجاح!');
+    }).catch(() => {
+        prompt('انسخ التقرير يدوياً:', reportText);
+    });
+}
+
+// Window Exports
+if (typeof window !== 'undefined') {
+    window.renderAttendanceExportReport = renderAttendanceExportReport;
+    window.setAttendanceExportStageTab = setAttendanceExportStageTab;
+    window.printAttendanceOnePagePDF = printAttendanceOnePagePDF;
+    window.sendAttendanceReportToWhatsAppGroup = sendAttendanceReportToWhatsAppGroup;
+    window.shareAttendanceReportViaWhatsAppWeb = shareAttendanceReportViaWhatsAppWeb;
+    window.copyAttendanceReportToClipboard = copyAttendanceReportToClipboard;
+}

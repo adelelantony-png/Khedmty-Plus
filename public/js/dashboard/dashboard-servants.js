@@ -225,54 +225,59 @@ location.reload();
 
 }
 
-function listenToActiveSessions() {
-
-if (!isFirebaseActive || !fsdb) return;
-
-fsdb.collection('active_sessions').onSnapshot(snap => {
-
-const tbody = document.getElementById('activeSessionsTbody');
-
-if (!tbody) return;
-
-tbody.innerHTML = '';
-
-if (snap.empty) {
-
-tbody.innerHTML = '<tr><td colspan="5" class="empty-state">لا توجد أي جلسات نشطة حالياً.</td></tr>';
-
-return;
-
+function renderCurrentDeviceFallback(tbody) {
+    if (!tbody) return;
+    const curName = (typeof currentUser === 'object' && currentUser && currentUser.name) ? currentUser.name : 'أمين الخدمة (أدمن)';
+    tbody.innerHTML = `
+        <tr>
+            <td data-label="اسم الخادم"><strong>${escapeHtml(curName)}</strong> <span style="color:green; font-size:11px;">(أنت - هذا الجهاز)</span></td>
+            <td data-label="نوع الجهاز">${escapeHtml(navigator.userAgent.includes('Mobile') ? 'هاتف محمول 📱' : 'كمبيوتر 💻')}</td>
+            <td data-label="وقت الدخول" dir="ltr">${typeof today === 'string' ? today : ''} ${new Date().toLocaleTimeString('ar-EG')}</td>
+            <td data-label="الحالة"><span class="role-badge" style="background:var(--success);">متصل الآن 🟢</span></td>
+            <td data-label="إجراء الأدمن"><span style="color:#888; font-size:11px;">جلستك الحالية</span></td>
+        </tr>
+    `;
 }
 
-snap.forEach(doc => {
+function listenToActiveSessions() {
+    const tbody = document.getElementById('activeSessionsTbody');
+    if (!tbody) return;
 
-let key = doc.id, sess = doc.data();
+    if (!isFirebaseActive || !fsdb) {
+        renderCurrentDeviceFallback(tbody);
+        return;
+    }
 
-let isMe = (sess.sessionId === myCurrentSessionId);
+    try {
+        fsdb.collection('active_sessions').onSnapshot(snap => {
+            if (!tbody) return;
+            tbody.innerHTML = '';
 
-let tr = document.createElement('tr');
+            if (snap.empty) {
+                renderCurrentDeviceFallback(tbody);
+                return;
+            }
 
-tr.innerHTML = `
-
-<td data-label="اسم الخادم"><strong>${escapeHtml(sess.servantName)}</strong> ${isMe ? '<span style="color:green; font-size:11px;">(أنت)</span>' : ''}</td>
-
-<td data-label="نوع الجهاز">${escapeHtml(sess.device)}</td>
-
-<td data-label="وقت الدخول" dir="ltr">${escapeHtml(sess.loginDate)} ${escapeHtml(sess.loginTime)}</td>
-
-<td data-label="الحالة"><span class="role-badge" style="background:var(--success);">متصل الآن 🟢</span></td>
-
-<td data-label="إجراء الأدمن">${isMe ? '<span style="color:#888; font-size:11px;">جلستك الحالية</span>' : `<button class="btn-mini btn-danger" onclick="terminateSession('${key}', '${escapeHtml(sess.servantName)}')">طرد الجهاز ❌</button>`}</td>
-
-`;
-
-tbody.appendChild(tr);
-
-});
-
-}, err => console.warn('تعذر متابعة الجلسات النشطة:', err.code || err.message));
-
+            snap.forEach(doc => {
+                let key = doc.id, sess = doc.data() || {};
+                let isMe = (sess.sessionId === myCurrentSessionId);
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="اسم الخادم"><strong>${escapeHtml(sess.servantName || 'خادم')}</strong> ${isMe ? '<span style="color:green; font-size:11px;">(أنت)</span>' : ''}</td>
+                    <td data-label="نوع الجهاز">${escapeHtml(sess.device || 'جهاز متصل')}</td>
+                    <td data-label="وقت الدخول" dir="ltr">${escapeHtml(sess.loginDate || '')} ${escapeHtml(sess.loginTime || '')}</td>
+                    <td data-label="الحالة"><span class="role-badge" style="background:var(--success);">متصل الآن 🟢</span></td>
+                    <td data-label="إجراء الأدمن">${isMe ? '<span style="color:#888; font-size:11px;">جلستك الحالية</span>' : `<button class="btn-mini btn-danger" onclick="terminateSession('${key}', '${escapeHtml(sess.servantName || '')}')">طرد الجهاز ❌</button>`}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }, err => {
+            console.warn('تعذر متابعة الجلسات النشطة:', err.code || err.message);
+            renderCurrentDeviceFallback(tbody);
+        });
+    } catch(e) {
+        renderCurrentDeviceFallback(tbody);
+    }
 }
 
 function terminateSession(servantKey, servantName) {
@@ -1016,6 +1021,8 @@ if (typeof window !== 'undefined') {
   window.renderServantsAttendanceTable = renderServantsAttendanceTable;
   window.registerActiveSession = registerActiveSession;
   window.listenToActiveSessions = listenToActiveSessions;
+  window.terminateSession = terminateSession;
+  window.terminateAllSessions = terminateAllSessions;
   window.populatePlanServantsDropdown = populatePlanServantsDropdown;
   window.shareAutoSetupWhatsAppLink = shareAutoSetupWhatsAppLink;
   window.recordServantAttendance = recordServantAttendance;
