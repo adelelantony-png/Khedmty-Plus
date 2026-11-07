@@ -205,9 +205,14 @@ function renderRadarAbsenceTableBody() {
         const waMsg = encodeURIComponent(`سلام ونعمة يا أخي الحبيب ${m.name} ✝️\nافتقدناك جداً في اجتماع القديس بولس لإعداد الخدام الجمعة الماضية، وحابين نطمئن عليك ونسمع صوتك. ربنا يدبر ونشوفك الجمعة القادمة بالقداس والاجتماع 🕊️`);
 
         const isCritical = m.consecutiveWeeks >= 3;
-        const badgeHtml = isCritical 
-            ? `<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.85rem; font-weight:900;">🔴 انقطاع حرج (${m.consecutiveWeeks} أسابيع)</span>`
-            : `<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde047; font-size:0.85rem; font-weight:bold;">🟡 غياب أسبوعين</span>`;
+        let badgeHtml = '';
+        if (m.consecutiveWeeks >= 3) {
+            badgeHtml = `<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.85rem; font-weight:900;">🔴 انقطاع حرج (${m.consecutiveWeeks} أسابيع)</span>`;
+        } else if (m.consecutiveWeeks === 2) {
+            badgeHtml = `<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde047; font-size:0.85rem; font-weight:bold;">🟡 غياب أسبوعين</span>`;
+        } else {
+            badgeHtml = `<span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-size:0.85rem; font-weight:bold;">⚪ غياب أسبوع واحد (${m.consecutiveWeeks} لقاء)</span>`;
+        }
 
         return `
             <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : 'transparent'};">
@@ -476,24 +481,49 @@ function renderRadarDashboard() {
 
         // 2. حساب الغياب المتتالي المحصّن (Absence Radar)
         let sSettings = {};
-        try { sSettings = JSON.parse(localStorage.getItem('my_church_settings')) || {}; } catch(e){}
-        const serviceStartStr = sSettings.serviceStart || '2026-09-01';
+        try { 
+            sSettings = (typeof settings === 'object' && settings) 
+                ? settings 
+                : (JSON.parse(localStorage.getItem('khedmty_settings')) || JSON.parse(localStorage.getItem('my_church_settings')) || {}); 
+        } catch(e){}
+
+        const serviceStartStr = sSettings.serviceStart || (typeof settings === 'object' && settings.serviceStart) || '2026-11-06';
         const todayIso = new Date().toISOString().split('T')[0];
 
-        const validMeetingDates = allDates.filter(d => d >= serviceStartStr && d <= todayIso);
+        // فقط لقاءات الجمعة الرسمية التي انعقد فيها الاجتماع فعلياً وضمن نطاق بداية الخدمة
+        const validMeetingDates = allDates.filter(d => {
+            try {
+                const dt = new Date(d);
+                if (dt.getDay() !== 5) return false; // يوم الجمعة فقط
+                if (d < serviceStartStr || d > todayIso) return false;
+                const recs = attendanceRecord[d];
+                const hasData = Array.isArray(recs) ? recs.length > 0 : (recs && typeof recs === 'object' && Object.keys(recs).length > 0);
+                return hasData;
+            } catch(e) {
+                return false;
+            }
+        }).sort().reverse();
 
+        const totalPastFridays = validMeetingDates.length;
         const absentMems = [];
-        if (validMeetingDates.length > 0) {
+
+        if (totalPastFridays > 0) {
             members.forEach(m => {
-                const mCode = String(m.code || m.id || '');
+                const mCode = String(m.code || m.id || '').trim();
                 let consecAbs = 0;
                 let lastSeen = null;
 
                 for (let i = 0; i < validMeetingDates.length; i++) {
                     const d = validMeetingDates[i];
                     const recs = attendanceRecord[d] || [];
-                    const found = recs.find(r => String(r.id) === String(m.id) || String(r.code) === mCode);
-                    if (found && found.attended && !found.isAbsentDueToDelay) {
+                    let found = null;
+                    if (Array.isArray(recs)) {
+                        found = recs.find(r => String(r.id) === String(m.id) || String(r.code) === mCode || (m.phone && String(r.phone) === String(m.phone)));
+                    } else if (typeof recs === 'object' && recs !== null) {
+                        found = recs[mCode] || Object.values(recs).find(r => r.name === m.name || (m.phone && r.phone === m.phone));
+                    }
+
+                    if (found && (found.attended === true || found.attended === 'true') && !found.isAbsentDueToDelay) {
                         if (!lastSeen) lastSeen = d;
                         break;
                     } else {
@@ -501,7 +531,14 @@ function renderRadarDashboard() {
                     }
                 }
 
-                if (consecAbs >= 2) {
+                // سقف الغياب لا يمكن منطقياً أن يتجاوز عدد الجمعات المنعقدة أصلاً
+                consecAbs = Math.min(consecAbs, totalPastFridays);
+
+                // في الأسبوع الأول للخدمة (لقاء واحد فقط)، نعرض غياب هذا الأسبوع بدقة (أسبوع واحد)
+                // وإذا كانت الخدمة في أسبوعين فأكثر، نرصد الغياب المتتالي (أسبوعين فأكثر)
+                const shouldInclude = (totalPastFridays < 2 && consecAbs === 1) || (totalPastFridays >= 2 && consecAbs >= 2);
+
+                if (shouldInclude) {
                     absentMems.push({
                         id: m.id,
                         code: m.code || m.id,
@@ -520,9 +557,19 @@ function renderRadarDashboard() {
         window.lastRadarAbsentMems = absentMems;
 
         const elAbsCount = document.getElementById('radar_kpiAbsenceCount');
-        if (elAbsCount) elAbsCount.textContent = absentMems.length;
+        if (elAbsCount) {
+            // كارت KPI يعبر عن الغياب المتتالي (2+ أسبوع) فقط
+            const twoWeeksPlus = absentMems.filter(m => m.consecutiveWeeks >= 2);
+            elAbsCount.textContent = twoWeeksPlus.length;
+        }
         const elAbsBadge = document.getElementById('radar_absenceAlertBadge');
-        if (elAbsBadge) elAbsBadge.innerHTML = `<i class="fa-solid fa-bell"></i> تم رصد: ${absentMems.length} مخدومين`;
+        if (elAbsBadge) {
+            if (totalPastFridays < 2) {
+                elAbsBadge.innerHTML = `<i class="fa-solid fa-seedling text-success"></i> تم رصد: ${absentMems.length} غائب (أول لقاء 2026-11-06) 🕊️`;
+            } else {
+                elAbsBadge.innerHTML = `<i class="fa-solid fa-bell"></i> تم رصد: ${absentMems.length} مخدومين`;
+            }
+        }
 
         // رسم جدول الغياب الذكي
         renderRadarAbsenceTableBody();

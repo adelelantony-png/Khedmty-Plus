@@ -5231,7 +5231,8 @@ return n;
 
 function consecutiveFridayAbsences(sCode) {
 
-let fridays = Object.keys(attendanceRecord).filter(d => isFridaySession(d) && (attendanceRecord[d] || []).length > 0).sort().reverse();
+let startStr = (typeof settings === 'object' && settings.serviceStart) ? settings.serviceStart : "2026-11-06";
+let fridays = Object.keys(attendanceRecord).filter(d => isFridaySession(d) && d >= startStr && (attendanceRecord[d] || []).length > 0).sort().reverse();
 
 let n = 0;
 

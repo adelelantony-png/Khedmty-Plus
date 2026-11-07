@@ -1026,8 +1026,9 @@ body {
     // حساب عدد الجمعات المتتالية التي غابها الدارس
     function calculateConsecutiveAbsences(sCode) {
         const codeStr = String(sCode || '').trim();
+        const startStr = (typeof settings === 'object' && settings && settings.serviceStart) ? settings.serviceStart : "2026-11-06";
         const fridays = Object.keys(attendanceRecord || {})
-            .filter(d => isFridaySession(d) && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
+            .filter(d => isFridaySession(d) && d >= startStr && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
             .sort()
             .reverse();
 
