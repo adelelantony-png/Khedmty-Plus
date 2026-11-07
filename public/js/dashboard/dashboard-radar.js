@@ -1976,37 +1976,318 @@ function markStudentExcusedInAttendance(excuse) {
     }
 }
 
-async function manualRecordStudentExcuse() {
-    const sName = prompt('أدخل اسم المخدوم المعتذر:');
-    if (!sName || !sName.trim()) return;
+function getUpcomingFriday() {
+    const d = new Date();
+    const day = d.getDay();
+    const diff = (5 - day + 7) % 7;
+    d.setDate(d.getDate() + diff);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-    const sPhone = prompt('أدخل رقم هاتف المخدوم:');
-    if (!sPhone || !sPhone.trim()) return;
+function safeRadarEscape(str) {
+    if (typeof escapeHtml === 'function') return escapeHtml(str);
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
-    const reason = prompt('أدخل سبب الاعتذار:', 'ظروف خاصة / امتحان');
-    if (reason === null) return;
+async function cancelStudentExcuse(excuseId) {
+    if (!confirm('هل أنت متأكد من رغبتك في إلغاء وحذف هذا الاعتذار نهائياً من رادار الأعذار؟')) return;
 
     try {
-        const res = await fetch('http://127.0.0.1:3000/api/excuses/manual', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': 'khedmety-servant-key-2026'
-            },
-            body: JSON.stringify({
-                name: sName.trim(),
-                phone: sPhone.trim(),
-                reason: reason.trim()
-            })
-        });
+        let deletedExcuse = null;
+        if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+            deletedExcuse = window.lastRadarExcusesList.find(e => String(e.id) === String(excuseId));
+        }
 
-        if (res.ok) {
-            alert('تم تسجيل الاعتذار واعتماده بنجاح! ✅');
-            loadRadarExcuses();
+        try {
+            await fetch(`http://localhost:3000/api/excuses/${excuseId}/cancel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch(netErr) {
+            console.warn('[Cancel Excuse] تعذر الاتصال بالسيرفر، جاري الإلغاء محلياً:', netErr);
+        }
+
+        // إزالة العذر من القائمة المعروضة
+        if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+            window.lastRadarExcusesList = window.lastRadarExcusesList.filter(e => String(e.id) !== String(excuseId));
+        }
+
+        // إلغاء وسم العذر من كشف الحضور إذا كان مسجلاً فيه
+        if (deletedExcuse && typeof attendanceRecord !== 'undefined' && attendanceRecord) {
+            const friday = deletedExcuse.friday_date;
+            if (attendanceRecord[friday]) {
+                const sCode = String(deletedExcuse.student_code || '').trim();
+                const sName = String(deletedExcuse.student_name || '').trim();
+                const sPhone = String(deletedExcuse.student_phone || '').replace(/\D/g, '');
+
+                const item = attendanceRecord[friday].find(r => {
+                    if (sCode && String(r.code || '').trim() === sCode) return true;
+                    if (sPhone && r.phone && String(r.phone).replace(/\D/g, '').slice(-8) === sPhone.slice(-8)) return true;
+                    if (sName && r.name && r.name.trim() === sName) return true;
+                    return false;
+                });
+
+                if (item) {
+                    item.isExcused = false;
+                    item.excuseReason = '';
+                    if (typeof saveAttendanceRecord === 'function') {
+                        saveAttendanceRecord();
+                    } else {
+                        localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord));
+                    }
+                }
+            }
+        }
+
+        // إغلاق نافذة المعاينة إذا كانت مفتوحة
+        closeExcuseDetailModal();
+
+        // تحديث جدول الأعذار فوراً
+        renderRadarExcusesTable();
+
+        // تحديث مؤشرات نبض الاجتماع
+        if (typeof renderRadarPulseChart === 'function') {
+            renderRadarPulseChart(window.lastValidMeetingDates || []);
+        }
+
+        // تحديث نافذة تسجيل العذر اليدوي إذا كانت مفتوحة
+        const manualModal = document.getElementById('manualExcuseModal');
+        if (manualModal && manualModal.style.display !== 'none') {
+            renderManualExcuseModalList();
+        }
+
+        if (typeof showToast === 'function') {
+            showToast('🗑️ تم إلغاء وحذف الاعتذار بنجاح!');
+        } else {
+            alert('🗑️ تم إلغاء وحذف الاعتذار بنجاح!');
         }
     } catch(err) {
-        alert('تعذر تسجيل الاعتذار: ' + err.message);
+        console.error('Error cancelling excuse:', err);
+        alert('تعذر إلغاء الاعتذار: ' + err.message);
     }
+}
+
+function openManualExcuseModal() {
+    const modal = document.getElementById('manualExcuseModal');
+    if (!modal) {
+        console.warn('#manualExcuseModal not found in DOM');
+        return;
+    }
+
+    // ضبط تاريخ جمعة الغياب الافتراضي
+    const dateInput = document.getElementById('manualExcuseDate');
+    if (dateInput && !dateInput.value) {
+        const d = (window.lastValidMeetingDates && window.lastValidMeetingDates[0]) || getUpcomingFriday();
+        dateInput.value = d;
+    }
+
+    // مسح حقل البحث وإعادة الفلتر للوضع الافتراضي
+    const searchInput = document.getElementById('manualExcuseSearchBox');
+    if (searchInput) searchInput.value = '';
+
+    const stageSelect = document.getElementById('manualExcuseStageFilter');
+    if (stageSelect) stageSelect.value = 'all';
+
+    renderManualExcuseModalList();
+    modal.style.display = 'flex';
+}
+
+function closeManualExcuseModal() {
+    const modal = document.getElementById('manualExcuseModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function renderManualExcuseModalList() {
+    const tbody = document.getElementById('manualExcuseModalTbody');
+    if (!tbody) return;
+
+    const allMembers = (typeof members !== 'undefined' && Array.isArray(members)) ? members : [];
+    if (allMembers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#64748b; font-weight:bold;">لا توجد بيانات مخدومين محملة حالياً في النظام.</td></tr>';
+        return;
+    }
+
+    const searchTxt = (document.getElementById('manualExcuseSearchBox')?.value || '').trim().toLowerCase();
+    const stageFilter = document.getElementById('manualExcuseStageFilter')?.value || 'all';
+    const targetFriday = document.getElementById('manualExcuseDate')?.value || getUpcomingFriday();
+
+    const excusesList = window.lastRadarExcusesList || [];
+    const attList = (typeof attendanceRecord !== 'undefined' && attendanceRecord && attendanceRecord[targetFriday]) || [];
+
+    const filtered = allMembers.filter(m => {
+        if (stageFilter !== 'all') {
+            const mStage = (m.stage || '').trim();
+            if (!mStage.includes(stageFilter.replace('سنة ', ''))) return false;
+        }
+        if (searchTxt) {
+            const nameMatch = (m.name || '').toLowerCase().includes(searchTxt);
+            const codeMatch = String(m.code || '').includes(searchTxt);
+            const phoneMatch = String(m.phone || '').replace(/\D/g, '').includes(searchTxt);
+            if (!nameMatch && !codeMatch && !phoneMatch) return false;
+        }
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px; color:#64748b; font-weight:bold;">لا يوجد مخدوم يطابق معايير البحث الحالية. 🔍</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.slice(0, 100).map(m => {
+        const mCode = String(m.code || '').trim();
+        const mPhone = String(m.phone || '').replace(/\D/g, '');
+        const mId = String(m.id || '');
+
+        // هل مسجل له عذر بالفعل لنفس الجمعة؟
+        const existingExcuse = excusesList.find(e => {
+            const isDate = !e.friday_date || e.friday_date === targetFriday;
+            if (!isDate) return false;
+            if (mCode && e.student_code && String(e.student_code).trim() === mCode) return true;
+            if (mPhone && e.student_phone && String(e.student_phone).replace(/\D/g, '').slice(-8) === mPhone.slice(-8)) return true;
+            return e.student_name && e.student_name.trim() === m.name.trim();
+        });
+
+        // هل حاضر بالفعل في هذه الجمعة؟
+        const isAttended = attList.some(r => {
+            if (!r.attended || r.isAbsentDueToDelay) return false;
+            if (mId && String(r.id) === mId) return true;
+            if (mCode && String(r.code) === mCode) return true;
+            return r.name && r.name.trim() === m.name.trim();
+        });
+
+        let statusBadge = '<span style="color:#64748b; font-size:0.78rem;">غياب عادي (لم يسجل)</span>';
+        if (isAttended) {
+            statusBadge = '<span style="color:#15803d; font-weight:800; font-size:0.78rem; background:#dcfce7; padding:2px 8px; border-radius:6px; border:1px solid #bbf7d0;">✅ حاضر باللقاء</span>';
+        } else if (existingExcuse) {
+            statusBadge = `<span style="color:#b45309; font-weight:800; font-size:0.78rem; background:#fef3c7; padding:2px 8px; border-radius:6px; border:1px solid #fde68a;">🕊️ عذر معتمد (${safeRadarEscape(existingExcuse.reason_category || 'مسجل')})</span>`;
+        }
+
+        const safeName = (m.name || '').replace(/'/g, "\\'");
+        const safeCode = (m.code || '').replace(/'/g, "\\'");
+        const safePhone = (m.phone || '').replace(/'/g, "\\'");
+        const safeStage = (m.stage || 'سنة أولى').replace(/'/g, "\\'");
+
+        return `
+            <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='';">
+                <td style="padding:10px 12px;">
+                    <div style="font-weight:bold; color:#0f172a; font-size:0.88rem;">${safeRadarEscape(m.name)}</div>
+                    <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">كود: <strong>${safeRadarEscape(m.code || '-')}</strong> • ${safeRadarEscape(m.stage || 'سنة أولى')}</div>
+                </td>
+                <td style="padding:10px 12px; text-align:center;">
+                    ${statusBadge}
+                </td>
+                <td style="padding:10px 12px; text-align:center;">
+                    ${existingExcuse ? `
+                        <button type="button" onclick="cancelStudentExcuse(${existingExcuse.id})" style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; border-radius:6px; padding:5px 12px; font-size:0.78rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر">
+                            🗑️ إلغاء العذر
+                        </button>
+                    ` : `
+                        <button type="button" onclick="submitManualExcuseFromModal('${m.id}', '${safeCode}', '${safeName}', '${safePhone}', '${safeStage}')" style="background:linear-gradient(135deg, #059669 0%, #047857 100%); color:#fff; border:none; border-radius:6px; padding:6px 14px; font-size:0.8rem; font-weight:bold; cursor:pointer; box-shadow:0 1px 3px rgba(5,150,105,0.25);" title="تسجيل واعتماد عذر فوري لهذا المخدوم">
+                            + تسجيل عذر
+                        </button>
+                    `}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function submitManualExcuseFromModal(memberId, studentCode, studentName, studentPhone, studentStage) {
+    const targetFriday = document.getElementById('manualExcuseDate')?.value || getUpcomingFriday();
+    const reasonCategory = document.getElementById('manualExcuseCategory')?.value || 'اتصال تليفوني بالخادم 📞';
+
+    try {
+        let newExcuseObj = null;
+
+        try {
+            const res = await fetch('http://localhost:3000/api/excuses/manual', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': 'khedmety-servant-key-2026'
+                },
+                body: JSON.stringify({
+                    student_id: memberId,
+                    code: studentCode,
+                    name: studentName,
+                    phone: studentPhone,
+                    stage: studentStage,
+                    reason: reasonCategory,
+                    friday_date: targetFriday
+                })
+            });
+            const data = await res.json();
+            if (data && data.success) {
+                newExcuseObj = data.excuse || {
+                    id: data.id || Date.now(),
+                    student_id: memberId,
+                    student_code: studentCode,
+                    student_name: studentName,
+                    student_phone: studentPhone,
+                    stage: studentStage,
+                    reason_category: reasonCategory,
+                    friday_date: targetFriday,
+                    status: 'accepted',
+                    created_at: Date.now()
+                };
+            }
+        } catch(netErr) {
+            console.warn('[Manual Excuse] خادم الواتساب المحلي غير متصل، جاري الحفظ محلياً:', netErr);
+        }
+
+        if (!newExcuseObj) {
+            newExcuseObj = {
+                id: Date.now(),
+                student_id: memberId,
+                student_code: studentCode,
+                student_name: studentName,
+                student_phone: studentPhone,
+                stage: studentStage,
+                reason_category: reasonCategory,
+                friday_date: targetFriday,
+                status: 'accepted',
+                message_text: 'تم تدوين الاعتذار يدوياً عبر الخادم',
+                created_at: Date.now()
+            };
+        }
+
+        // تحديث القائمة العامة
+        if (!window.lastRadarExcusesList) window.lastRadarExcusesList = [];
+        window.lastRadarExcusesList.unshift(newExcuseObj);
+
+        // حفظ في كشف الحضور
+        markStudentExcusedInAttendance(newExcuseObj);
+
+        // تحديث جدول الأعذار الرئيسي
+        renderRadarExcusesTable();
+
+        // تحديث كارت نبض الاجتماع
+        if (typeof renderRadarPulseChart === 'function') {
+            renderRadarPulseChart(window.lastValidMeetingDates || []);
+        }
+
+        // تحديث القائمة بالنافذة المنبثقة
+        renderManualExcuseModalList();
+
+        if (typeof showToast === 'function') {
+            showToast(`✅ تم تسجيل واعتماد عذر (${studentName}) بنجاح!`);
+        } else {
+            alert(`✅ تم تسجيل واعتماد عذر (${studentName}) بنجاح!`);
+        }
+    } catch(err) {
+        console.error('Error submitting manual excuse:', err);
+        alert('تعذر تسجيل العذر: ' + err.message);
+    }
+}
+
+function manualRecordStudentExcuse() {
+    openManualExcuseModal();
 }
 
 if (typeof window !== 'undefined') {
@@ -2022,6 +2303,7 @@ if (typeof window !== 'undefined') {
     window.closeManualExcuseModal = closeManualExcuseModal;
     window.renderManualExcuseModalList = renderManualExcuseModalList;
     window.submitManualExcuseFromModal = submitManualExcuseFromModal;
+    window.getUpcomingFriday = getUpcomingFriday;
 }
 
 
