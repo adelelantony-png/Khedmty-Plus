@@ -2141,15 +2141,14 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <button type="button" onclick="shareMeetingPulseToServantsGroup('bot')" id="btnSendPulseWA_bot" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 8px; padding: 6px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37,211,102,0.25); transition: transform 0.15s;" title="إرسال فوري لجروب الخدام عبر بوت الواتساب">
-                            <i class="fa-brands fa-whatsapp" style="font-size:1.05rem;"></i> إرسال لجروب الخدام 📲
-                        </button>
-                        <button type="button" onclick="shareMeetingPulseToServantsGroup('copy')" id="btnCopyPulse" style="background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="نسخ التقرير التنفيذي للحافظة">
-                            <i class="fa-solid fa-copy"></i> نسخ التقرير 📋
-                        </button>
-                        <button type="button" onclick="openPulseReportPreviewModal()" id="btnPreviewPulse" style="background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="معاينة نص التقرير قبل الإرسال">
-                            <i class="fa-solid fa-eye"></i> معاينة 👁️
-                        </button>
+                        <div id="pulseHeaderActionBtns" style="display: flex; gap: 8px; align-items: center;">
+                            <button type="button" onclick="shareMeetingPulseToServantsGroup('bot')" id="btnSendPulseWA_bot" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 8px; padding: 6px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37,211,102,0.25); transition: transform 0.15s;" title="إرسال فوري لجروب الخدام عبر بوت الواتساب">
+                                <i class="fa-brands fa-whatsapp" style="font-size:1.05rem;"></i> إرسال إنفوجرافيك 🚀
+                            </button>
+                            <button type="button" onclick="shareMeetingPulseToServantsGroup('download_image')" id="btnDownloadPulseImg" style="background: #ffffff; color: #065f46; border: 1.5px solid #10b981; border-radius: 8px; padding: 6px 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="حفظ بطاقة الإنفوجرافيك كصورة PNG">
+                                <i class="fa-solid fa-download"></i> حفظ صورة 🖼️
+                            </button>
+                        </div>
                         <div id="radar_pulseOverallStability" style="background: #eff6ff; color: #1d4ed8; padding: 5px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 800; border: 1px solid #bfdbfe;">
                             📈 متوسط الحضور: 63%
                         </div>
@@ -2166,22 +2165,28 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                             <i class="fa-brands fa-whatsapp"></i>
                         </div>
                         <div>
-                            <strong style="color: #065f46; font-size: 0.95rem; display: block;">مشاركة تقرير نبض الاجتماع مع جروب الخدام:</strong>
-                            <span style="color: #047857; font-size: 0.78rem;">إرسال لحظي للأرقام والإحصائيات وتنافسية الفرق للجروب بنقرة واحدة 🚀</span>
+                            <strong style="color: #065f46; font-size: 0.95rem; display: block;">مشاركة إنفوجرافيك نبض الاجتماع مع جروب الخدام:</strong>
+                            <span style="color: #047857; font-size: 0.78rem;">إرسال بطاقة الإنفوجرافيك بالألوان والرسومات البيانية والمؤشرات الرعوية بنقرة واحدة 🚀</span>
                         </div>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <button type="button" onclick="shareMeetingPulseToServantsGroup('bot')" class="btn-custom" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,211,102,0.35);">
-                            <i class="fa-brands fa-whatsapp" style="font-size:1.15rem;"></i> 📲 إرسال فوري لجروب الخدام
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('bot')" id="btnSendPulseWA_main" class="btn-custom" style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: white; border: none; border-radius: 8px; padding: 8px 18px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(37,211,102,0.35);">
+                            <i class="fa-brands fa-whatsapp" style="font-size:1.15rem;"></i> 🚀 إرسال إنفوجرافيك مصور لجروب الخدام
                         </button>
-                        <button type="button" onclick="shareMeetingPulseToServantsGroup('whatsapp')" class="btn-custom" style="background: #ffffff; color: #047857; border: 1.5px solid #10b981; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> فتح في واتساب ويب
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('download_image')" class="btn-custom" style="background: #ffffff; color: #065f46; border: 1.5px solid #10b981; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-download"></i> حفظ الصورة 🖼️
                         </button>
-                        <button type="button" onclick="shareMeetingPulseToServantsGroup('copy')" class="btn-custom" style="background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                            <i class="fa-solid fa-copy"></i> نسخ التقرير 📋
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('copy_image')" class="btn-custom" style="background: #ffffff; color: #1e3a8a; border: 1.5px solid #3b82f6; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-copy"></i> نسخ كصورة 📋
                         </button>
-                        <button type="button" onclick="openPulseReportPreviewModal()" class="btn-custom" style="background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('copy')" class="btn-custom" style="background: #ffffff; color: #334155; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            نسخ كنص 📝
+                        </button>
+                        <button type="button" onclick="openPulseReportPreviewModal()" class="btn-custom" style="background: #eff6ff; color: #1d4ed8; border: 1.5px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
                             <i class="fa-solid fa-eye"></i> معاينة النص 👁️
+                        </button>
+                        <button type="button" onclick="shareMeetingPulseToServantsGroup('whatsapp')" class="btn-custom" style="background: #f8fafc; color: #047857; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> ويب
                         </button>
                     </div>
                 </div>
@@ -9832,22 +9837,23 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 
 </script>
-<script src="js/dashboard/dashboard-servants.js?v=6.9"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=6.9"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=6.9"></script>
-<script src="js/dashboard/dashboard-members.js?v=6.9"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.0"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.0"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=6.9"></script>
-<script src="js/dashboard/dashboard-plan.js?v=6.9"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=6.9"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.0"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=6.9"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.0"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=6.9"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=7.0"></script>
 
-<script src="js/app-updater.js?v=6.9"></script>
+<script src="js/app-updater.js?v=7.0"></script>
 
-<script src="js/pwa-helper.js?v=6.9"></script>
+<script src="js/pwa-helper.js?v=7.0"></script>
 
 <script>
 
@@ -9865,8 +9871,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=6.9"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=6.9"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=7.0"></script>
 
 <script>
 // ==========================================

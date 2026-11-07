@@ -3143,37 +3143,44 @@ function buildMeetingPulseWhatsAppReportText() {
     const s2Unexc = d.unexcusedStage2 !== undefined ? d.unexcusedStage2 : Math.max(0, s2Total - s2Engaged);
     const s2UnexcPct = d.stage2UnexcusedPct !== undefined ? d.stage2UnexcusedPct : Math.round((s2Unexc / s2Total) * 100);
 
+    function renderPulseTextProgressBar(pct, len = 10) {
+        const p = Math.min(100, Math.max(0, Number(pct) || 0));
+        const filled = Math.round((p / 100) * len);
+        const empty = Math.max(0, len - filled);
+        return '█'.repeat(filled) + '░'.repeat(empty);
+    }
+
     let t = `📊 *تقرير نبض الاجتماع ومؤشرات الحضور الرعوي* 🕊️\n`;
     t += `*اجتماع القديس بولس لإعداد الخدام*\n`;
     t += `📅 *جمعة:* ${date}\n`;
     t += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
     t += `✨ *المؤشرات التنفيذية الكبرى:*` + `\n`;
-    t += `👥 *إجمالي القوة المسجلة:* ${total} مخدوماً\n`;
-    t += `✅ *الحضور الفعلي الموثق:* ${actual} مخدوماً (${actualPct}%)\n`;
-    t += `💌 *الغياب بعذر معتمد مسبقاً:* ${excuses} مخدومين (${excusesPct}%)\n`;
-    t += `🌟 *إجمالي التفاعل الإيجابي الموثق:* ${engaged} مخدوماً (${engagedPct}%)\n`;
-    t += `🎯 *المستهدفون برادار الافتقاد:* ${unexcused} مخدوماً (${unexcusedPct}%)\n\n`;
+    t += `🟢 *الحضور الفعلي الموثق:* ${actual} دارساً (${actualPct}%)\n`;
+    t += `💌 *الغياب بعذر معتمد مسبقاً:* ${excuses} دارسين (${excusesPct}%)\n`;
+    t += `🌟 *إجمالي التفاعل الإيجابي الموثق:* ${engaged} دارساً (${engagedPct}%)\n`;
+    t += `🔴 *مستهدفو رادار الافتقاد:* ${unexcused} دارساً (${unexcusedPct}%)\n`;
+    t += `👥 *إجمالي القوة المسجلة:* ${total} دارساً\n\n`;
 
     t += `━━━━━━━━━━━━━━━━━━━━\n`;
     t += `🎓 *مقارنة أداء وتنافسية الفرق (Stage Breakdown):*\n\n`;
 
-    t += `🔹 *الفرقة الأولى (${s1Total} مخدوماً):*\n`;
-    t += `  • الحضور الفعلي: ${s1Att} مخدوماً (${s1AttPct}%)\n`;
-    t += `  • الأعذار الرسمية: ${s1Exc} مخدومين (${s1ExcPct}%)\n`;
-    t += `  • إجمالي التفاعل: ${s1Engaged} مخدوماً (${s1EngagedPct}%)\n`;
-    t += `  • مستهدفو الافتقاد: ${s1Unexc} مخدوماً (${s1UnexcPct}%)\n\n`;
+    t += `🔹 *الفرقة الأولى (${s1Total} دارساً):*\n`;
+    t += `  [${renderPulseTextProgressBar(s1AttPct)}] ${s1AttPct}% حضور (${s1Att} دارساً)\n`;
+    t += `  [${renderPulseTextProgressBar(s1EngagedPct)}] ${s1EngagedPct}% تفاعل موثق (${s1Engaged} دارساً)\n`;
+    t += `  • 🕊️ أعذار رسمية: ${s1Exc} دارسين (${s1ExcPct}%)\n`;
+    t += `  • 🚨 مستهدفو افتقاد: ${s1Unexc} دارساً (${s1UnexcPct}%)\n\n`;
 
-    t += `🔸 *الفرقة الثانية (${s2Total} مخدوماً):*\n`;
-    t += `  • الحضور الفعلي: ${s2Att} مخدوماً (${s2AttPct}%)\n`;
-    t += `  • الأعذار الرسمية: ${s2Exc} (${s2ExcPct}%)\n`;
-    t += `  • إجمالي التفاعل: ${s2Engaged} مخدوماً (${s2EngagedPct}%)\n`;
-    t += `  • مستهدفو الافتقاد: ${s2Unexc} مخدوماً (${s2UnexcPct}%)\n\n`;
+    t += `🔸 *الفرقة الثانية (${s2Total} دارساً):*\n`;
+    t += `  [${renderPulseTextProgressBar(s2AttPct)}] ${s2AttPct}% حضور (${s2Att} دارساً)\n`;
+    t += `  [${renderPulseTextProgressBar(s2EngagedPct)}] ${s2EngagedPct}% تفاعل موثق (${s2Engaged} دارساً)\n`;
+    t += `  • 🕊️ أعذار رسمية: ${s2Exc} (${s2ExcPct}%)\n`;
+    t += `  • 🚨 مستهدفو افتقاد: ${s2Unexc} دارساً (${s2UnexcPct}%)\n\n`;
 
     t += `━━━━━━━━━━━━━━━━━━━━\n`;
     t += `🔥 *التوجيه الرعوي ومستهدف الجمعة القادمة 13 نوفمبر:*` + `\n`;
     t += `💡 المستهدف المشترك للفرقتين: كسر حاجز *75% حضور مباشر* (الوصول لـ 70 مخدوماً بإذن ربنا).\n`;
-    t += `🚨 نرجو من أحبائنا الخدام تكثيف الزيارات والمكالمات الهاتفية خلال هذا الأسبوع للمستهدفين بالافتقاد (${unexcused} مخدوماً).\n\n`;
+    t += `🚨 نرجو من أحبائنا الخدام تكثيف الزيارات والمكالمات الهاتفية خلال هذا الأسبوع للمستهدفين بالافتقاد (${unexcused} دارساً).\n\n`;
 
     t += `*«كُلُّ وَاحِدٍ سَيَأْخُذُ أُجْرَتَهُ بِحَسَبِ تَعَبِهِ» (1 كو 3: 8)*\n`;
     t += `🕊️ صلواتكم لبركة الخدمة وسلامة الرعية`;
@@ -3193,6 +3200,47 @@ function closePulseReportPreviewModal() {
     if (modal) modal.style.display = 'none';
 }
 
+// 📸 دالة التقاط بطاقة الإنفوجرافيك الرعوية كصورة عالية الدقة (2X Retina)
+async function capturePulseInfographicCanvas() {
+    if (typeof html2canvas === 'undefined') {
+        try {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        } catch(loadErr) {
+            console.warn('Failed to load html2canvas from CDN:', loadErr);
+            return null;
+        }
+    }
+
+    const cardEl = document.querySelector('#radarSec_pulse .radar-section-box');
+    if (!cardEl) return null;
+
+    // إخفاء أزرار المشاركة مؤقتاً أثناء الالتقاط للحصول على صورة إنفوجرافيك نقية ومثالية
+    const shareBar = document.getElementById('pulseShareActionsBar');
+    const headerBtns = document.getElementById('pulseHeaderActionBtns');
+    if (shareBar) shareBar.style.display = 'none';
+    if (headerBtns) headerBtns.style.display = 'none';
+
+    try {
+        const canvas = await html2canvas(cardEl, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false
+        });
+        return canvas;
+    } finally {
+        if (shareBar) shareBar.style.display = '';
+        if (headerBtns) headerBtns.style.display = '';
+    }
+}
+
 async function shareMeetingPulseToServantsGroup(actionType = 'bot') {
     const reportText = buildMeetingPulseWhatsAppReportText();
 
@@ -3200,7 +3248,7 @@ async function shareMeetingPulseToServantsGroup(actionType = 'bot') {
         try {
             await navigator.clipboard.writeText(reportText);
             if (typeof showToast === 'function') {
-                showToast('📋 تم نسخ تقرير نبض الاجتماع بنجاح! جاهز للصق في جروب الخدام.');
+                showToast('📋 تم نسخ نص تقرير نبض الاجتماع بنجاح! جاهز للصق في جروب الخدام.');
             } else {
                 alert('📋 تم نسخ تقرير نبض الاجتماع بنجاح!');
             }
@@ -3217,29 +3265,91 @@ async function shareMeetingPulseToServantsGroup(actionType = 'bot') {
         return;
     }
 
-    // الإرسال المباشر للبوت
-    const btn = document.getElementById('btnSendPulseWA_bot');
+    if (actionType === 'download_image') {
+        try {
+            if (typeof showToast === 'function') showToast('📸 جاري تجهيز وتحميل بطاقة الإنفوجرافيك كصورة...');
+            const canvas = await capturePulseInfographicCanvas();
+            if (canvas) {
+                const a = document.createElement('a');
+                a.download = `انفوجرافيك_نبض_الاجتماع_${new Date().toISOString().slice(0,10)}.png`;
+                a.href = canvas.toDataURL('image/png');
+                a.click();
+                if (typeof showToast === 'function') showToast('🎉 تم تنزيل صورة إنفوجرافيك نبض الاجتماع بنجاح!');
+            } else {
+                alert('تعذر التقاط الصورة. يمكنك نسخ نص التقرير مباشرة.');
+            }
+        } catch(err) {
+            console.error('Download image error:', err);
+            alert('تعذر حفظ الصورة: ' + err.message);
+        }
+        return;
+    }
+
+    if (actionType === 'copy_image') {
+        try {
+            if (typeof showToast === 'function') showToast('📸 جاري التقاط صورة الإنفوجرافيك للحافظة...');
+            const canvas = await capturePulseInfographicCanvas();
+            if (canvas && navigator.clipboard && window.ClipboardItem) {
+                canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        if (typeof showToast === 'function') {
+                            showToast('📋 تم نسخ صورة الإنفوجرافيك للحافظة! يمكنك الآن لصقها (Ctrl+V) مباشرة في واتساب ويب أو أي محادثة.');
+                        } else {
+                            alert('📋 تم نسخ صورة الإنفوجرافيك للحافظة! الصقها (Ctrl+V) في واتساب الآن.');
+                        }
+                    } catch(clipErr) {
+                        await navigator.clipboard.writeText(reportText);
+                        alert('تعذر نسخ الصورة المباشرة؛ تم نسخ نص التقرير المنسق للحافظة بنجاح.');
+                    }
+                }, 'image/png');
+            } else {
+                await navigator.clipboard.writeText(reportText);
+                alert('تم نسخ نص التقرير المنسق للحافظة.');
+            }
+        } catch(err) {
+            console.error('Copy image error:', err);
+            alert('تعذر نسخ الصورة: ' + err.message);
+        }
+        return;
+    }
+
+    // الإرسال المباشر للبوت (يدعم إرفاق صورة الإنفوجرافيك + الكابشن)
+    const btn = document.getElementById('btnSendPulseWA_bot') || document.getElementById('btnSendPulseWA_main');
     const origHtml = btn ? btn.innerHTML : '';
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الإرسال...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري التقاط الصورة والإرسال...';
     }
 
     try {
+        let imageBase64 = null;
+        try {
+            const canvas = await capturePulseInfographicCanvas();
+            if (canvas) {
+                imageBase64 = canvas.toDataURL('image/png');
+            }
+        } catch(snapErr) {
+            console.warn('[Pulse Snapshot Warning] تعذر التقاط الصورة، سيتم إرسال التقرير كنص:', snapErr);
+        }
+
         const res = await fetch('http://localhost:3000/api/group/send-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 targetJid: '120363430940374327@g.us', // جروب خدام اجتماع القديس بولس
-                text: reportText
+                text: reportText,
+                imageBase64: imageBase64
             })
         });
         const data = await res.json();
         if (data && data.success) {
             if (typeof showToast === 'function') {
-                showToast('🎉 تم إرسال تقرير نبض الاجتماع إلى جروب الخدام بالواتساب بنجاح!');
+                showToast('🎉 تم إرسال بطاقة إنفوجرافيك نبض الاجتماع بالصورة والألوان لجروب الخدام بنجاح!');
             } else {
-                alert('🎉 تم إرسال تقرير نبض الاجتماع إلى جروب الخدام بنجاح! 🚀');
+                alert('🎉 تم إرسال بطاقة الإنفوجرافيك المصورة لجروب الخدام بنجاح! 🚀');
             }
         } else {
             throw new Error((data && data.error) || 'تعذر الإرسال عبر خادم الواتساب المحلي');
