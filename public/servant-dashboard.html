@@ -2208,32 +2208,39 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
             <div id="radarSec_excuses" class="radar-section-panel" style="display:none;">
             <!-- القسم الثاني: رادار الاعتذارات اللحظية ومتابعة الغياب بعذر (Inbound Excuses Radar) -->
             <div class="radar-section-box" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%); border: 1.5px solid #f59e0b; margin-bottom: 22px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 12px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.5rem;">🔔</span>
+                        <span style="font-size: 1.6rem;">🔔</span>
                         <div>
                             <h4 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #92400e;">
                                 رادار الاعتذارات اللحظية ومتابعة الغياب بعذر (Inbound Excuses Radar)
                             </h4>
-                            <div style="font-size: 0.78rem; color: #78350f;">
+                            <div style="font-size: 0.78rem; color: #78350f; margin-top: 2px;">
                                 رصد فوري لاعتذارات المخدومين الواردة عبر واتساب مع إمكانية الاعتماد كعذر مقبول أو الرفض بنقرة واحدة
                             </div>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <span class="badge" id="radar_excusePendingBadge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde047; font-size: 0.8rem; padding: 6px 12px; font-weight: bold;">
-                            ⏳ 0 اعتذار قيد المراجعة
-                        </span>
-                        <button type="button" class="btn-custom" onclick="filterRadarExcuses('pending')" id="btnRadarExcusePending" style="background: #b45309; color: white; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                            المعلقة فقط
+                    <span class="badge" id="radar_excusePendingBadge" style="background: #fef3c7; color: #92400e; border: 1.5px solid #fde047; font-size: 0.85rem; padding: 7px 14px; font-weight: 900; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        ⏳ 0 اعتذار قيد المراجعة
+                    </span>
+                </div>
+
+                <!-- شريط الأدوات المنظم: تبديل العرض + زر التسجيل اليدوي الذكي -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding: 8px 12px; background: rgba(254, 243, 199, 0.45); border-radius: 10px; border: 1px solid #fde68a;">
+                    <!-- الفلاتر كأزرار متلاصقة أنيقة -->
+                    <div style="display: inline-flex; background: #ffffff; padding: 3px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+                        <button type="button" onclick="filterRadarExcuses('pending')" id="btnRadarExcusePending" style="width: auto !important; margin: 0 !important; background: #b45309; color: #ffffff; border: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; font-weight: 800; cursor: pointer; transition: all 0.15s;">
+                            ⏳ المعلقة فقط
                         </button>
-                        <button type="button" class="btn-custom" onclick="filterRadarExcuses('all')" id="btnRadarExcuseAll" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                            عرض السجل بالكامل
-                        </button>
-                        <button type="button" class="btn-custom" onclick="manualRecordStudentExcuse()" style="background: #166534; color: white; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-plus"></i> تسجيل اعتذار يدوي
+                        <button type="button" onclick="filterRadarExcuses('all')" id="btnRadarExcuseAll" style="width: auto !important; margin: 0 !important; background: transparent; color: #475569; border: none; padding: 6px 14px; font-size: 0.8rem; border-radius: 6px; font-weight: 700; cursor: pointer; transition: all 0.15s;">
+                            📜 عرض السجل بالكامل
                         </button>
                     </div>
+
+                    <!-- زر تسجيل اعتذار يدوي الذكي -->
+                    <button type="button" onclick="openManualExcuseModal()" style="width: auto !important; margin: 0 !important; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: none; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(5,150,105,0.25); transition: transform 0.15s;">
+                        <i class="fa-solid fa-user-plus"></i> 🕊️ تسجيل اعتذار يدوي من القائمة
+                    </button>
                 </div>
 
                 <div class="table-responsive-wrapper" style="border-radius: 12px; border: 1.5px solid #cbd5e1; overflow-x: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.04); background: #ffffff;">
@@ -10660,6 +10667,76 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- أزرار الإجراء والقرار الرعوي -->
     <div id="excuseModalActionRow" style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:center;">
       <!-- ديناميكي: قبول / رفض أو حالة الحسم -->
+    </div>
+  </div>
+</div>
+
+<!-- 🕊️ نافذة تسجيل عذر يدوي سريع من قائمة المخدومين (Manual Excuse Modal) -->
+<div id="manualExcuseModal" class="modal" style="display:none; z-index:100000; background:rgba(15,23,42,0.65); backdrop-filter:blur(4px);">
+  <div class="modal-content" style="max-width:680px; width:94%; text-align:right; border-radius:18px; border:2px solid #059669; padding:22px; box-shadow:0 16px 36px rgba(0,0,0,0.35); background:#ffffff;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:40px; height:40px; border-radius:10px; background:#dcfce7; color:#15803d; display:flex; align-items:center; justify-content:center; font-size:22px;">
+          🕊️
+        </div>
+        <div>
+          <h3 style="margin:0; color:#065f46; font-size:1.15rem; font-weight:900;">تسجيل اعتذار يدوي من قائمة المخدومين</h3>
+          <p style="margin:2px 0 0; font-size:0.8rem; color:#64748b;">اختر المخدوم بنقرة واحدة دون الحاجة لحفظ أو كتابة أي أرقام هواتف</p>
+        </div>
+      </div>
+      <span class="close-btn" onclick="closeManualExcuseModal()" style="font-size:26px; cursor:pointer; color:#94a3b8; line-height:1;">&times;</span>
+    </div>
+
+    <!-- شريط التحكم: اختيار جمعة الغياب + سبب الاعتذار + البحث السريع -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:14px; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div>
+        <label style="display:block; font-size:0.82rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🗓️ جمعة الغياب:</label>
+        <input type="date" id="manualExcuseDate" onchange="renderManualExcuseModalList()" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box; background:#fff;">
+      </div>
+      <div>
+        <label style="display:block; font-size:0.82rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🏷️ سبب الاعتذار المصنف:</label>
+        <select id="manualExcuseCategory" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box; background:#fff;">
+          <option value="امتحانات ومذاكرة 📚">امتحانات ومذاكرة 📚</option>
+          <option value="ظروف صحية 🩺">ظروف صحية 🩺</option>
+          <option value="سفر خارج المحافظة ✈️">سفر خارج المحافظة ✈️</option>
+          <option value="ظروف عائلية وقهرية 🏠">ظروف عائلية وقهرية 🏠</option>
+          <option value="اتصال تليفوني بالخادم 📞" selected>اتصال تليفوني بالخادم 📞</option>
+          <option value="اعتذار عام 🕊️">اعتذار عام 🕊️</option>
+        </select>
+      </div>
+      <div style="grid-column: span 2;">
+        <label style="display:block; font-size:0.82rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🔍 بحث سريع في قائمة الأسماء:</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="manualExcuseSearchBox" placeholder="اكتب اسم المخدوم أو الكود للبحث الفوري..." onkeyup="renderManualExcuseModalList()" style="flex:1; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box;">
+          <select id="manualExcuseStageFilter" onchange="renderManualExcuseModalList()" style="width:130px; padding:9px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; background:#fff;">
+            <option value="all">كل الفرق</option>
+            <option value="سنة أولى">سنة أولى</option>
+            <option value="سنة ثانية">سنة ثانية</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- جدول المخدومين التفاعلي السريع -->
+    <div style="max-height:360px; overflow-y:auto; border:1.5px solid #e2e8f0; border-radius:10px; background:#fff;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem; text-align:right;">
+        <thead style="position:sticky; top:0; background:#f1f5f9; color:#1e293b; border-bottom:1.5px solid #cbd5e1; z-index:2;">
+          <tr>
+            <th style="padding:10px 12px; width:45%;">المخدوم</th>
+            <th style="padding:10px 12px; width:30%; text-align:center;">موقفه من جمعة الغياب</th>
+            <th style="padding:10px 12px; width:25%; text-align:center;">الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="manualExcuseModalTbody">
+          <!-- ديناميكي -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-top:14px;">
+      <button type="button" class="btn-custom" onclick="closeManualExcuseModal()" style="width:auto !important; margin:0 !important; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 20px; border-radius:8px; font-weight:bold; cursor:pointer;">
+        إغلاق النافذة
+      </button>
     </div>
   </div>
 </div>

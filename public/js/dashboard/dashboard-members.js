@@ -934,6 +934,7 @@ if (btn) { btn.style.background = 'var(--primary)'; btn.style.color = 'white'; }
 }
 
 function openProfile(id) {
+window.currentProfileMemberId = id;
 
 if (!id) return;
 
@@ -1091,7 +1092,9 @@ dates.forEach(d => {
             stat = '<span style="color:green; font-weight:bold;">حاضر جمعة</span>';
         }
 
-        atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${displayTime}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;">${stat}</td></tr>`;
+        const isExcusedRow = (rec && rec.isExcused) || !!matchedExcuse;
+const cancelBtn = isExcusedRow ? `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(d)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>` : '';
+atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${displayTime}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><span>${stat}</span>${cancelBtn}</div></td></tr>`;
     }
 });
 
@@ -1104,7 +1107,8 @@ mExcusesList.forEach(ex => {
         const stLabel = ex.status === 'accepted' ? '🕊️ غياب بعذر' : (ex.status === 'pending' ? '⏳ عذر قيد المراجعة' : '❌ عذر غير مقبول');
         const stColor = ex.status === 'accepted' ? '#0284c7' : (ex.status === 'pending' ? '#b45309' : '#b91c1c');
         const stat = `<span style="color:${stColor}; font-weight:bold;">${stLabel}: ${escapeHtml(ex.reason_category || 'عذر')}${timeTag}</span>`;
-        atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${escapeHtml(ex.friday_date)}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${(timing && timing.timeStr) || '--:--'}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;">${stat}</td></tr>`;
+        const cancelBtn2 = `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(ex.friday_date)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>`;
+atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${escapeHtml(ex.friday_date)}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${(timing && timing.timeStr) || '--:--'}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><span>${stat}</span>${cancelBtn2}</div></td></tr>`;
     }
 });
 
@@ -1992,3 +1996,40 @@ document.addEventListener('DOMContentLoaded', () => {
         setMembersViewMode(savedMode);
     } catch(e){}
 });
+
+window.cancelExcuseFromProfile = async function(date, memberId) {
+    const list = window.lastRadarExcusesList || [];
+    const studentList = (typeof members !== 'undefined' && Array.isArray(members)) ? members : [];
+    const m = studentList.find(x => String(x.id) === String(memberId));
+    if (!m) return;
+
+    const cleanPhone = String(m.phone || '').replace(/\D/g, '');
+    const matchedExcuse = list.find(ex => {
+        if (ex.friday_date !== date) return false;
+        if (m.code && ex.student_code && String(m.code) === String(ex.student_code)) return true;
+        if (cleanPhone && ex.student_phone) {
+            const ep = String(ex.student_phone).replace(/\D/g, '');
+            if (cleanPhone.slice(-8) === ep.slice(-8)) return true;
+        }
+        return m.name && ex.student_name === m.name;
+    });
+
+    if (matchedExcuse && matchedExcuse.id) {
+        if (typeof cancelStudentExcuse === 'function') {
+            await cancelStudentExcuse(matchedExcuse.id);
+        }
+    } else {
+        if (confirm(`هل تريد بالتأكيد إلغاء عذر المخدوم [${m.name}] لتاريخ [${date}]؟`)) {
+            if (typeof attendanceRecord !== 'undefined' && attendanceRecord[date]) {
+                attendanceRecord[date] = attendanceRecord[date].filter(a => {
+                    if (a.id.toString() === m.id.toString() && a.isExcused) return false;
+                    return true;
+                });
+                try {
+                    localStorage.setItem('attendanceRecord', JSON.stringify(attendanceRecord));
+                } catch(e) {}
+            }
+            openProfile(memberId);
+        }
+    }
+};

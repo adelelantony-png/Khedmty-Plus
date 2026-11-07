@@ -1223,11 +1223,15 @@ function filterRadarExcuses(filterMode = 'pending') {
     const btnAll = document.getElementById('btnRadarExcuseAll');
     if (btnPending && btnAll) {
         if (filterMode === 'pending') {
-            btnPending.style.background = '#b45309'; btnPending.style.color = 'white';
-            btnAll.style.background = '#f1f5f9'; btnAll.style.color = '#334155';
+            btnPending.style.background = '#b45309';
+            btnPending.style.color = '#ffffff';
+            btnAll.style.background = 'transparent';
+            btnAll.style.color = '#475569';
         } else {
-            btnAll.style.background = '#0c2461'; btnAll.style.color = 'white';
-            btnPending.style.background = '#fef3c7'; btnPending.style.color = '#92400e';
+            btnAll.style.background = '#0c2461';
+            btnAll.style.color = '#ffffff';
+            btnPending.style.background = 'transparent';
+            btnPending.style.color = '#475569';
         }
     }
     renderRadarExcusesTable();
@@ -1275,21 +1279,29 @@ function renderRadarExcusesTable() {
         let actionContent = '';
         if (isPending) {
             actionContent = `
-                <div style="display:flex; gap:6px; justify-content:center; align-items:center; flex-wrap:wrap;">
-                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="padding:6px 12px; font-size:0.78rem; background:#10b981; color:white; border:none; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 3px rgba(16,185,129,0.3); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
+                <div style="display:flex; gap:5px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="width:auto !important; margin:0 !important; padding:6px 11px; font-size:0.78rem; background:#10b981; color:white; border:none; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; box-shadow:0 1px 3px rgba(16,185,129,0.3); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
                         <i class="fa-solid fa-check"></i> قبول ✅
                     </button>
-                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="padding:6px 9px; font-size:0.78rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+                    <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="width:auto !important; margin:0 !important; padding:6px 9px; font-size:0.78rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
                         <i class="fa-solid fa-xmark"></i> رفض ❌
+                    </button>
+                    <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:6px 8px; font-size:0.75rem; background:#f8fafc; color:#64748b; border:1px solid #cbd5e1; border-radius:7px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center;" title="إلغاء وحذف هذا الاعتذار نهائياً">
+                        <i class="fa-solid fa-trash-can text-danger"></i>
                     </button>
                 </div>
             `;
         } else if (isAccepted) {
             actionContent = `
                 <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                    <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
-                        ✅ عذر مقبول
-                    </span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
+                            ✅ عذر مقبول
+                        </span>
+                        <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:2px 7px; font-size:0.72rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" title="إلغاء وحذف هذا العذر">
+                            <i class="fa-solid fa-trash-can"></i> إلغاء
+                        </button>
+                    </div>
                     <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
                         ${escapeHtml(e.servant_notes || 'معتمد')}
                     </span>
@@ -1298,9 +1310,14 @@ function renderRadarExcusesTable() {
         } else {
             actionContent = `
                 <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-                    <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
-                        ❌ غير مقبول
-                    </span>
+                    <div style="display:flex; align-items:center; gap:5px;">
+                        <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #f87171; font-size:0.78rem; padding:3px 9px; font-weight:800; border-radius:6px;">
+                            ❌ غير مقبول
+                        </span>
+                        <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:auto !important; margin:0 !important; padding:2px 7px; font-size:0.72rem; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; gap:3px;" title="إلغاء وحذف هذا العذر">
+                            <i class="fa-solid fa-trash-can"></i> إلغاء
+                        </button>
+                    </div>
                     <span style="font-size:0.72rem; color:#64748b; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(e.servant_notes || '')}">
                         ${escapeHtml(e.servant_notes || 'مرفوض')}
                     </span>
@@ -1482,13 +1499,16 @@ function previewFullExcuseModal(excuseId) {
     if (actionRow) {
         if (excuse.status === 'pending') {
             actionRow.innerHTML = `
-                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'accept', this)" style="background:#10b981; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
-                    <i class="fa-solid fa-check"></i> قبول العذر كعذر مقبول ✅
+                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'accept', this)" style="width:auto !important; margin:0 !important; background:#10b981; color:#fff; border:none; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-check"></i> قبول العذر ✅
                 </button>
-                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'reject', this)" style="background:#ef4444; color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                <button type="button" class="btn-custom" onclick="resolveExcuseAction(${excuse.id}, 'reject', this)" style="width:auto !important; margin:0 !important; background:#ef4444; color:#fff; border:none; padding:9px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
                     <i class="fa-solid fa-xmark"></i> رفض العذر ❌
                 </button>
-                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
+                <button type="button" onclick="cancelStudentExcuse(${excuse.id})" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; padding:9px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-trash-can"></i> إلغاء وحذف العذر
+                </button>
+                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="width:auto !important; margin:0 !important; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
                     إغلاق
                 </button>
             `;
@@ -1499,7 +1519,10 @@ function previewFullExcuseModal(excuseId) {
                     <span>${isAcc ? '✅ معتمد كعذر مقبول' : '❌ تم رفض العذر'}:</span>
                     <span style="color:#64748b; font-weight:normal;">${escapeHtml(excuse.servant_notes || '')} (${escapeHtml(excuse.resolved_by || 'الخادم')})</span>
                 </div>
-                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
+                <button type="button" onclick="cancelStudentExcuse(${excuse.id})" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; padding:9px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-trash-can"></i> إلغاء وحذف العذر
+                </button>
+                <button type="button" class="btn-custom" onclick="closeExcuseDetailModal()" style="width:auto !important; margin:0 !important; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 16px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:0.88rem;">
                     إغلاق
                 </button>
             `;
@@ -1651,6 +1674,11 @@ if (typeof window !== 'undefined') {
     window.previewFullExcuseModal = previewFullExcuseModal;
     window.closeExcuseDetailModal = closeExcuseDetailModal;
     window.renderStudentExcuseHistoryInModal = renderStudentExcuseHistoryInModal;
+    window.cancelStudentExcuse = cancelStudentExcuse;
+    window.openManualExcuseModal = openManualExcuseModal;
+    window.closeManualExcuseModal = closeManualExcuseModal;
+    window.renderManualExcuseModalList = renderManualExcuseModalList;
+    window.submitManualExcuseFromModal = submitManualExcuseFromModal;
 }
 
 
