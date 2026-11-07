@@ -595,15 +595,15 @@ if (listDiv) {
         return `
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed #cbd5e1; padding: 7px 4px; flex-wrap: wrap; gap: 6px;">
             <div style="display: flex; align-items: center; gap: 7px; flex-wrap: wrap;">
-                <span style="background: #ffffff; border: 1.5px solid #cbd5e1; color: #0c2461; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.74rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
+                <span style="background: #ffffff !important; border: 1.5px solid #cbd5e1 !important; color: #0c2461 !important; padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.74rem; box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                     📅 ${safeDate}
                 </span>
-                <span style="color: #0c2461; font-weight: 800; font-size: 0.84rem;">
+                <span style="color: #0f172a !important; font-weight: 800; font-size: 0.84rem;">
                     ${safeTitle}
                 </span>
-                ${safeType ? `<span style="background: ${badgeBg}; color: ${typeColor}; font-size: 0.7rem; font-weight: bold; padding: 1px 7px; border-radius: 4px; border: 1px solid ${badgeBorder};">${safeType}</span>` : ''}
+                ${safeType ? `<span style="background: ${badgeBg} !important; color: ${typeColor} !important; font-size: 0.7rem; font-weight: bold; padding: 2px 8px; border-radius: 5px; border: 1px solid ${badgeBorder} !important;">${safeType}</span>` : ''}
             </div>
-            <span style="background: ${badgeBg}; color: ${badgeColor}; border: 1.5px solid ${badgeBorder}; font-size: 0.73rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px;">
+            <span style="background: ${badgeBg} !important; color: ${badgeColor} !important; border: 1.5px solid ${badgeBorder} !important; font-size: 0.73rem; font-weight: 800; padding: 3px 10px; border-radius: 6px; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
                 <i class="fa-solid ${badgeIcon}"></i> المسؤول: ${safeResp}
             </span>
         </div>

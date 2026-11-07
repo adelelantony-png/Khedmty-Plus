@@ -160,6 +160,10 @@ function evaluateExcuseTiming(createdAtTimestamp, fridayDateStr) {
 // ==========================================
 // 🚀 رادار النبض الإحصائي وأعياد الميلاد والغياب الحرج
 // ==========================================
+var activeExportStageTab = 'all';
+if (typeof window !== 'undefined') {
+    window.activeExportStageTab = 'all';
+}
 window.currentRadarAbsenceFilter = 'all';
 window.lastRadarAbsentMems = [];
 window.lastRadarBirthdaysList = [];
@@ -2519,7 +2523,7 @@ function getRadarAvailableFridays() {
     return Array.from(fridays).sort().reverse();
 }
 
-let activeExportStageTab = 'all';
+activeExportStageTab = (typeof activeExportStageTab !== 'undefined' && activeExportStageTab) ? activeExportStageTab : 'all';
 
 function setAttendanceExportStageTab(stageKey, btnElement) {
     activeExportStageTab = stageKey;
@@ -3252,4 +3256,11 @@ async function shareMeetingPulseToServantsGroup(actionType = 'bot') {
             btn.innerHTML = origHtml;
         }
     }
+}
+
+if (typeof window !== 'undefined') {
+    window.shareMeetingPulseToServantsGroup = shareMeetingPulseToServantsGroup;
+    window.openPulseReportPreviewModal = openPulseReportPreviewModal;
+    window.closePulseReportPreviewModal = closePulseReportPreviewModal;
+    window.buildMeetingPulseWhatsAppReportText = buildMeetingPulseWhatsAppReportText;
 }
