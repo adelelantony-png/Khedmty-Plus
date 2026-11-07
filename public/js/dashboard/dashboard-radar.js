@@ -520,19 +520,72 @@ function renderRadarPulseChart(validMeetingDates) {
     }
 }
 
+
+// ==========================================
+// 🕊️ كاشف النوع واللغة الذكي للأسماء المسيحية والرعوية (Smart Pastoral Gender Engine)
+// ==========================================
+function isFemaleMemberOrName(name, explicitGender, stage) {
+    if (explicitGender) {
+        const g = String(explicitGender).trim().toLowerCase();
+        if (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة')) return true;
+        if (g === 'بنين' || g === 'male' || g === 'ذكر' || g.includes('ولد') || g.includes('خادم')) return false;
+    }
+    if (stage) {
+        const st = String(stage).trim().toLowerCase();
+        if (st.includes('بنات') || st.includes('خادمات')) return true;
+        if (st.includes('بنين')) return false;
+    }
+    if (!name) return false;
+
+    const clean = String(name).trim();
+    const first = clean.split(/\s+/)[0];
+
+    const maleNames = new Set([
+        'مينا', 'بيشوي', 'كيرلس', 'بولا', 'أنطون', 'انطون', 'أنطونيوس', 'انطونيوس', 'جورج', 'فادي',
+        'مايكل', 'مارك', 'يوحنا', 'مكاريوس', 'أبانوب', 'ابانوب', 'شنودة', 'شنوده', 'فيلوباتير',
+        'توماس', 'ماتياس', 'اندراوس', 'أندراوس', 'سمعان', 'يوسف', 'داود', 'دانيال', 'إبراهيم',
+        'ابراهيم', 'إسحق', 'اسحق', 'يعقوب', 'بطرس', 'بولس', 'مرقس', 'لوقا', 'متى', 'تيموثاوس',
+        'سلوانس', 'أرسانيوس', 'ارسانيوس', 'أثناسيوس', 'اثناسيوس', 'باسيليوس', 'غريغوريوس',
+        'يوستينوس', 'إيليا', 'ايليا', 'إشعياء', 'اشعياء', 'إرميا', 'ارميا', 'صموئيل', 'جون',
+        'رامي', 'رأفت', 'مجدي', 'عادل', 'نبيل', 'نادر', 'هاني', 'مدحت', 'سامح', 'سامي', 'تامر',
+        'عماد', 'أشرف', 'اشرف', 'إيهاب', 'ايهاب', 'عصام', 'ماجد', 'رفعت', 'ماهر', 'منير', 'نسيم'
+    ]);
+
+    if (maleNames.has(first)) return false;
+
+    const femaleNames = new Set([
+        'ميرا', 'مارينا', 'مريم', 'يوستينا', 'فيرينا', 'كاترين', 'كريستين', 'سارة', 'ساره',
+        'إيرين', 'ايرين', 'إيريني', 'ايريني', 'كلير', 'مونيكا', 'فيبي', 'ناردين', 'ليديا',
+        'دميانة', 'دميانه', 'بربارة', 'برباره', 'رانيا', 'ريم', 'ميرنا', 'جوليا', 'ريتا',
+        'جانيت', 'فيفيان', 'فيولا', 'تيريزا', 'تريزا', 'ليلى', 'نيفين', 'ساندرا', 'ساندي',
+        'مارفي', 'مادونا', 'هيلانة', 'هيلانه', 'لوسي', 'جيرمين', 'جيزيل', 'شيرين', 'جاكلين',
+        'نرمين', 'نانسي', 'هبة', 'هبه', 'إيفون', 'ايفون', 'ماجي', 'مها', 'ميرفت', 'سلفيا',
+        'سيلفيا', 'دينا', 'داليا', 'ديانا', 'ميريل', 'ميريت', 'كارولين', 'كرستين', 'باتريسيا',
+        'سوزان', 'سامية', 'ساميه', 'عايدة', 'عايده', 'منى', 'منال', 'أماني', 'اماني', 'هناء',
+        'وفاء', 'كلوديا', 'سيلين', 'مارتينا', 'ماتيلدا', 'إنجي', 'انجي', 'جيسيكا', 'لورا',
+        'لورين', 'كلودين', 'فلورا', 'سيمون', 'أنا سيمون', 'اناسيمون', 'كرستينا',
+        'ياسمين', 'تريفينا', 'بريسيلا', 'دوريس', 'جوانا', 'سابين', 'ماديلين', 'ميراي', 'دونا',
+        'ماري', 'ماريا', 'بياتريس', 'مارلين', 'تريزة', 'كريستينا', 'شيري', 'أوديت', 'اوديت'
+    ]);
+
+    if (femaleNames.has(first)) return true;
+    if (/.*(ينة|يكا|سيا|يتا|يلا|اندا|يانا|فيا|ثيا)$/.test(first)) return true;
+
+    return false;
+}
+
 function sendWhatsAppAbsenceDirect(name, phone, weeks, btn, gender) {
-    let isF = false;
-    if (gender) {
-        const g = String(gender).trim();
-        isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
-    } else if (typeof members !== 'undefined' && Array.isArray(members)) {
+    let explicitG = gender;
+    let foundStage = '';
+    if (!explicitG && typeof members !== 'undefined' && Array.isArray(members)) {
         const cleanP = String(phone || '').replace(/[^0-9]/g, '');
         const found = members.find(m => m.name === name || (cleanP && String(m.phone || '').replace(/[^0-9]/g, '') === cleanP));
         if (found) {
-            const g = String(found.gender || found.stage || '').trim();
-            isF = (g === 'بنات' || g === 'female' || g === 'أنثى' || g.includes('بنت') || g.includes('خادمة'));
+            explicitG = found.gender;
+            foundStage = found.stage;
         }
     }
+    const isF = isFemaleMemberOrName(name, explicitG, foundStage);
 
     const salutation = isF ? `سلام ونعمة يا أختي الحبيبة ${name} ✝️` : `سلام ونعمة يا أخي الحبيب ${name} ✝️`;
     const meetingTitle = isF ? 'اجتماع القديس بولس لإعداد الخادمات' : 'اجتماع القديس بولس لإعداد الخدام';
@@ -581,7 +634,7 @@ function renderRadarAbsenceTableBody() {
     tbodyAbs.innerHTML = displayList.map(m => {
         let cleanPhone = (m.phone || '').replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
-        const isF = (m.gender === 'بنات' || m.gender === 'female' || m.gender === 'أنثى');
+        const isF = isFemaleMemberOrName(m.name, m.gender, m.stage);
         const salutation = isF ? `سلام ونعمة يا أختي الحبيبة ${m.name} ✝️` : `سلام ونعمة يا أخي الحبيب ${m.name} ✝️`;
         const meetingTitle = isF ? 'اجتماع القديس بولس لإعداد الخادمات' : 'اجتماع القديس بولس لإعداد الخدام';
         const missText = isF
@@ -774,7 +827,7 @@ function renderRadarBirthdays(filterMode = 'week') {
     tbody.innerHTML = list.map(b => {
         let cleanPhone = (b.phone || '').replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
-        const isF = (b.gender === 'بنات' || b.gender === 'female' || b.gender === 'أنثى');
+        const isF = isFemaleMemberOrName(b.name, b.gender, b.role);
         const waMsg = encodeURIComponent(isF
             ? `كل سنة وأنتِ طيبة يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
             : `كل سنة وأنت طيب يا ${b.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
@@ -837,7 +890,7 @@ async function sendBatchWeeklyBirthdays(btn) {
         let cleanPhone = item.phone.replace(/[^0-9]/g, '');
         if (cleanPhone.startsWith('01')) cleanPhone = '2' + cleanPhone;
 
-        const isF = (item.gender === 'بنات' || item.gender === 'female' || item.gender === 'أنثى');
+        const isF = isFemaleMemberOrName(item.name, item.gender);
         const rawMsg = isF
             ? `كل سنة وأنتِ طيبة يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئكِ بعيد ميلادكِ وتصلي لكِ بعام ملئ بالنعمة والبركة والسلام 🕊️✨`
             : `كل سنة وأنت طيب يا ${item.name} وعقبال 100 سنة مع المسيح في خدمته المباركة ❤️🎂\nأسرة خدمة القديس بولس لإعداد الخدام تهنئك بعيد ميلادك وتصلي لك بعام ملئ بالنعمة والبركة والسلام 🕊️✨`;
