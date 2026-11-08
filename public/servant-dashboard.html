@@ -2268,14 +2268,14 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
 
 <div class="table-responsive-wrapper" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px;">
-                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; min-width: 760px; table-layout: fixed; border-collapse: collapse; font-size: 0.84rem; text-align: center;">
+                    <table class="adaptive-card-table radar-adaptive-table" style="width: 100%; min-width: 860px; table-layout: fixed; border-collapse: collapse; font-size: 0.84rem; text-align: center;">
                         <thead>
                             <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0; color: #334155;">
-                                <th style="padding: 10px 8px; text-align: right; width: 22%;">المخدوم</th>
+                                <th style="padding: 10px 8px; text-align: right; width: 21%;">المخدوم</th>
                                 <th style="padding: 10px 4px; width: 8%;">الكود</th>
-                                <th style="padding: 10px 6px; width: 14%;">الفرقة / المرحلة</th>
-                                <th style="padding: 10px 4px; width: 8%;">النوع</th>
-                                <th style="padding: 10px 6px; color: #dc2626; width: 16%;">أسابيع الغياب</th>
+                                <th style="padding: 10px 6px; width: 13%;">الفرقة / المرحلة</th>
+                                <th style="padding: 10px 4px; width: 7%;">النوع</th>
+                                <th style="padding: 10px 6px; color: #dc2626; width: 19%;">أسابيع الغياب</th>
                                 <th style="padding: 10px 6px; width: 14%;">الهاتف</th>
                                 <th style="padding: 10px 6px; width: 18%;">الإجراء الرعوي السريع</th>
                             </tr>
@@ -5065,7 +5065,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <!-- 🛡️ نافذة تخصيص وضبط صلاحيات الخادم بالتفصيل الممل (Granular Servant Permissions Modal) -->
 <div id="servantPermissionsModal" class="modal" style="display:none; z-index:100000; background:rgba(15,23,42,0.7); backdrop-filter:blur(5px);">
-  <div class="modal-content" style="max-width:860px; width:95%; text-align:right; border-radius:20px; border:2px solid #4f46e5; padding:24px; box-shadow:0 20px 48px rgba(0,0,0,0.4); background:#ffffff; max-height:92vh; display:flex; flex-direction:column;">
+  <div class="modal-content" style="max-width:880px; width:95%; height:88vh; max-height:860px; min-height:520px; text-align:right; border-radius:20px; border:2px solid #4f46e5; padding:22px 24px; box-shadow:0 20px 48px rgba(0,0,0,0.4); background:#ffffff; display:flex; flex-direction:column;">
     
     <!-- Header -->
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px; flex-shrink:0;">
@@ -5119,13 +5119,13 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
     </div>
 
     <!-- جدول مصفوفة الصلاحيات مع التمرير -->
-    <div style="flex:1; overflow-y:auto; border:1.5px solid #cbd5e1; border-radius:12px; margin-bottom:14px; background:#ffffff;">
-      <table style="width:100%; border-collapse:collapse; font-size:0.86rem;">
-        <thead style="position:sticky; top:0; background:#1e3a8a; color:#ffffff; z-index:2;">
+    <div style="flex:1 1 auto; min-height:340px; overflow-y:auto; overflow-x:auto; -webkit-overflow-scrolling:touch; border:1.5px solid #cbd5e1; border-radius:12px; margin-bottom:14px; background:#ffffff;">
+      <table style="width:100%; min-width:720px; border-collapse:collapse; font-size:0.86rem;">
+        <thead style="position:sticky; top:0; background:#1e3a8a; color:#ffffff; z-index:10;">
           <tr>
-            <th style="padding:10px 14px; text-align:right; width:45%;">القسم / الخاصية</th>
+            <th style="padding:10px 14px; text-align:right; width:40%;">القسم / الخاصية</th>
             <th style="padding:10px 10px; text-align:center; width:20%;">التصنيف</th>
-            <th style="padding:10px 14px; text-align:center; width:35%;">مستوى الوصول والصلاحية</th>
+            <th style="padding:10px 14px; text-align:center; width:40%;">مستوى الوصول والصلاحية</th>
           </tr>
         </thead>
         <tbody id="permModal_modulesTbody">
@@ -9838,12 +9838,12 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.1"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.1"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.1"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.1"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.2"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.2"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.2"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.2"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.1"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.2"></script>
 <script src="js/dashboard/dashboard-plan.js?v=7.0"></script>
 <script src="js/dashboard/dashboard-curriculum.js?v=7.0"></script>
 

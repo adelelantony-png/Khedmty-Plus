@@ -673,8 +673,12 @@ function renderRadarAbsenceTableBody() {
                 <td data-label="الكود" style="padding: 8px 4px; font-weight: bold; font-family: monospace; white-space: nowrap;">${escapeHtml(m.code)}</td>
                 <td data-label="الفرقة / المرحلة" style="padding: 8px 4px; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="${escapeHtml(m.stage)}">${escapeHtml(m.stage)}</td>
                 <td data-label="النوع" style="padding: 8px 4px; white-space: nowrap;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
-                <td data-label="أسابيع الغياب" style="padding: 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${badgeHtml}</td>
-                <td data-label="الهاتف" style="padding: 8px 4px; font-family: monospace; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 115px;" dir="ltr">${m.phone || '-'}</td>
+                <td data-label="أسابيع الغياب" style="padding: 8px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${badgeHtml}</td>
+                <td data-label="الهاتف" style="padding: 8px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span style="display: inline-block; direction: ltr; unicode-bidi: isolate; font-family: monospace; font-size: 0.82rem; font-weight: 700; color: #334155; padding: 2px 6px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
+                        ${m.phone || '-'}
+                    </span>
+                </td>
                 <td data-label="الإجراء الرعوي" style="padding: 8px 4px; white-space: nowrap;">
                     <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
                         ${m.phone ? `
