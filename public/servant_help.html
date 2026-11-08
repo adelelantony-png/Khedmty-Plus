@@ -120,8 +120,17 @@
 (function () {
     'use strict';
 
+    // ---------- التحقق من بوابة المصادقة والصلاحيات ----------
+    if (typeof AuthClient !== 'undefined' && typeof AuthClient.enforceAuth === 'function') {
+        AuthClient.enforceAuth(['servant', 'admin']);
+    }
+
     // ---------- الهوية والصلاحية ----------
     function getUser() {
+        if (typeof AuthClient !== 'undefined' && typeof AuthClient.getActiveUser === 'function') {
+            const au = AuthClient.getActiveUser();
+            if (au) return au;
+        }
         try { return JSON.parse(localStorage.getItem('my_church_active_user') || sessionStorage.getItem('my_church_active_user')); } catch (e) { return null; }
     }
     let user = getUser();
