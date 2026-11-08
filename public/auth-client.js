@@ -20,12 +20,17 @@
         return null;
     }
 
-    // تفعيل وضع المحاكاة الميدانية التلقائي عند تمرير ?sim_role=admin أو ?sim_role=student
+    // تفعيل وضع المحاكاة الميدانية التلقائي عند تمرير ?sim_role=admin أو ?sim_role=student (مقيد ببيئات التطوير المحلية فقط)
     try {
         if (typeof window !== 'undefined' && window.location && window.location.search) {
             const locParams = new URLSearchParams(window.location.search);
             const sim = locParams.get('sim_role');
-            if (sim === 'admin') {
+            const host = (window.location.hostname || '').toLowerCase();
+            const isLocalDev = host === 'localhost' || host === '127.0.0.1' || host === '';
+
+            if (sim && !isLocalDev) {
+                console.warn('[Security] Simulation parameter (?sim_role) is strictly disallowed in non-local environments.');
+            } else if (sim === 'admin') {
                 const adminU = { id: 'srv_admin', name: 'أمين أسرة إعداد الخدام', role: 'admin', permission: 'admin', phone: '01000000000' };
                 localStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(adminU));
                 sessionStorage.setItem(STORAGE_KEYS.ACTIVE_USER, JSON.stringify(adminU));
