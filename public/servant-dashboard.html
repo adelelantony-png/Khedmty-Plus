@@ -1000,7 +1000,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 .grp-chip.active { background: linear-gradient(135deg, #123d58 0%, #197d80 100%); color: #fff; box-shadow: 0 8px 18px rgba(9,132,227,0.35); transform: translateY(-2px); }
 
-.grp-chip.grp-off { display: none; }
+.grp-chip.grp-off { display: none !important; pointer-events: none !important; }
+.tab-btn.perm-hidden { display: none !important; pointer-events: none !important; }
+.tab-content.perm-forbidden { display: none !important; pointer-events: none !important; }
 
 .tab-btn.grp-hidden { display: none !important; }
 
@@ -9833,16 +9835,16 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.3"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.3"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.3"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.3"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.4"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.4"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.3"></script>
-<script src="js/dashboard/dashboard-plan.js?v=7.0"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.4"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.4"></script>
 
 <script src="js/dashboard/dashboard-area-suggestions.js?v=7.0"></script>
 
@@ -10645,6 +10647,16 @@ window.toggleAddServantForm = toggleAddServantForm;
 
 
 function switchRadarSection(secKey, btnElement) {
+    // 🛡️ صمام الأمان لأقسام الرادار: حجب الأقسام غير المصرح بها
+    if (secKey !== 'all' && typeof window.isRadarSectionForbiddenForCurrentUser === 'function' && window.isRadarSectionForbiddenForCurrentUser(secKey)) {
+        console.warn('⛔ [Radar Security Gate] محاولة دخول محظورة لقسم الرادار:', secKey);
+        if (typeof showToast === 'function') {
+            showToast('⛔ عذراً: هذا القسم محجوب بقرار من أمانة الخدمة', true);
+        }
+        secKey = (typeof window.getFirstAllowedRadarSection === 'function') ? window.getFirstAllowedRadarSection() : 'pulse';
+        btnElement = document.getElementById('radarPill_' + secKey);
+    }
+
     document.querySelectorAll('.radar-pill-btn').forEach(b => b.classList.remove('active'));
     if (btnElement) {
         btnElement.classList.add('active');
@@ -10656,7 +10668,14 @@ function switchRadarSection(secKey, btnElement) {
     const panels = document.querySelectorAll('.radar-section-panel');
     let target = null;
     if (secKey === 'all') {
-        panels.forEach(p => p.style.display = 'block');
+        panels.forEach(p => {
+            const panelSecKey = p.id.replace('radarSec_', '');
+            if (typeof window.isRadarSectionForbiddenForCurrentUser === 'function' && window.isRadarSectionForbiddenForCurrentUser(panelSecKey)) {
+                p.style.setProperty('display', 'none', 'important');
+            } else {
+                p.style.display = 'block';
+            }
+        });
         target = document.getElementById('radarSec_pulse') || panels[0];
         if (typeof renderRadarDashboard === 'function') {
             try { renderRadarDashboard(); } catch(e){}

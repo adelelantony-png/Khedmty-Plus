@@ -1307,12 +1307,19 @@ function renderRadarDashboard() {
     }
 
     function switchTab(tabId, btn) {
+        // 🛡️ صمام الأمان الصارم لمنع الوصول لأي تبويب محجوب بقرار أمانة الخدمة
+        if (typeof window.isTabForbiddenForCurrentUser === 'function' && window.isTabForbiddenForCurrentUser(tabId)) {
+            console.warn('⛔ [Security Gate] محاولة دخول محظورة للتبويب المحجوب:', tabId);
+            if (typeof showToast === 'function') {
+                showToast('⛔ عذراً: هذا القسم محجوب بقرار من أمانة الخدمة', true);
+            }
+            tabId = 'dashTab';
+            btn = document.querySelector(".tab-btn[onclick*='dashTab']");
+        }
 
-if (!tabId || !document.getElementById(tabId)) {
-
-tabId = 'dashTab';
-
-}
+        if (!tabId || !document.getElementById(tabId)) {
+            tabId = 'dashTab';
+        }
 
 document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
 
