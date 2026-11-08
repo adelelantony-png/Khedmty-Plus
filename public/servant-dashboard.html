@@ -7100,9 +7100,16 @@ window.location.replace('index.html');
 
 }
 
-let currentRole = currentUser ? currentUser.role : 'servant';
-
-let currentPermission = currentUser ? (currentUser.permission || 'full') : 'view_only';
+let currentRole = currentUser ? (currentUser.role || 'servant') : 'servant';
+const isInitialAdmin = (currentRole === 'admin' || (currentUser && (currentUser.permission === 'admin' || currentUser.code === 'admin' || currentUser.roleType === 'أمين خدمة' || currentUser.isSuperAdmin || (currentUser.name && currentUser.name.includes('عادل جورج')))) || (typeof localStorage !== 'undefined' && localStorage.getItem('user_role') === 'admin'));
+let currentPermission = isInitialAdmin ? 'admin' : (currentUser ? (currentUser.permission || 'full') : 'view_only');
+if (isInitialAdmin) {
+    currentRole = 'admin';
+    if (currentUser) {
+        currentUser.role = 'admin';
+        currentUser.permission = 'admin';
+    }
+}
 
 let currentProfileId = null;
 
@@ -9412,9 +9419,13 @@ if (mainEl) mainEl.style.display = 'block';
 
 document.getElementById('loggedInUserName').innerText = currentUser.name;
 
-currentRole = currentUser.role || 'servant';
-
-currentPermission = currentUser.permission || (currentRole === 'admin' ? 'admin' : 'full');
+const isSessionAdmin = (currentUser.role === 'admin' || currentUser.permission === 'admin' || currentUser.code === 'admin' || currentUser.roleType === 'أمين خدمة' || currentUser.isSuperAdmin || (currentUser.name && currentUser.name.includes('عادل جورج')) || (typeof localStorage !== 'undefined' && localStorage.getItem('user_role') === 'admin'));
+currentRole = isSessionAdmin ? 'admin' : (currentUser.role || 'servant');
+currentPermission = isSessionAdmin ? 'admin' : (currentUser.permission || 'full');
+if (isSessionAdmin) {
+    currentUser.role = 'admin';
+    currentUser.permission = 'admin';
+}
 
 // تشغيل دوال العرض والرصد فوراً
 updateRoleUI();
@@ -9835,18 +9846,18 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.4"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.4"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.4"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.5"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.5"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.4"></script>
-<script src="js/dashboard/dashboard-plan.js?v=7.4"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.5"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=7.4"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.5"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=7.5"></script>
 
 <script src="js/app-updater.js?v=7.0"></script>
 
@@ -9868,8 +9879,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=7.0"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=7.0"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=7.5"></script>
 
 <script>
 // ==========================================

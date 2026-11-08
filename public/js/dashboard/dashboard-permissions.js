@@ -1,3 +1,33 @@
+// 🛡️ التحقق الصارم والشامل: هل المستخدم الحالي هو أمين الخدمة (أدمن النظام)؟
+function isCurrentUserAdmin(user) {
+    if (typeof window !== 'undefined' && window.__simulatedServant) {
+        return false; // في وضع المعاينة الحية لخادم معين نطبق صلاحيات الخادم المعاين
+    }
+    const u = user || (typeof currentUser !== 'undefined' ? currentUser : null);
+    const p = (typeof currentPermission !== 'undefined' ? currentPermission : '');
+    const r = (typeof currentRole !== 'undefined' ? currentRole : '');
+    const localRole = (typeof localStorage !== 'undefined' ? (localStorage.getItem('user_role') || '') : '');
+    
+    if (p === 'admin' || p === 'developer' || r === 'admin' || r === 'developer' || localRole === 'admin') return true;
+    if (!u) return false;
+    
+    const name = String(u.name || '').trim();
+    const role = String(u.role || '').toLowerCase();
+    const perm = String(u.permission || '').toLowerCase();
+    const code = String(u.code || '').toLowerCase();
+    const roleType = String(u.roleType || '').trim();
+    
+    if (name === 'عادل جورج' || name.includes('عادل جورج') || name.includes('أمين الخدمة') || name.includes('أمين خدمة')) return true;
+    if (role === 'admin' || role === 'developer' || role === 'أمين خدمة' || role === 'أمين الخدمة' || role === 'أدمن') return true;
+    if (perm === 'admin' || perm === 'developer' || perm === 'أمين خدمة' || perm === 'أدمن') return true;
+    if (code === 'admin' || code === 'developer') return true;
+    if (roleType === 'أمين خدمة' || roleType === 'أمين الخدمة') return true;
+    if (u.isSuperAdmin === true) return true;
+    
+    return false;
+}
+window.isCurrentUserAdmin = isCurrentUserAdmin;
+
 /**
  * Khedmty-Plus - Granular Servant Permissions & Live Preview System
  * نظام تفصيل وتخصيص صلاحيات الخدام ومعاينة لوحة التحكم الحية
@@ -179,7 +209,7 @@ const TAB_TO_MODULE_MAP = {
 // القوالب الافتراضية المسبقة للأدوار
 function getDefaultPermissionsForRole(role) {
     const r = String(role || '').toLowerCase();
-    if (r === 'admin' || r === 'developer') {
+    if (r === 'admin' || r === 'developer' || r === 'أمين خدمة' || r === 'أمين الخدمة' || r === 'أدمن' || isCurrentUserAdmin()) {
         return {
             attendance: 'full',
             members: 'full',
@@ -280,6 +310,11 @@ function getServantEffectivePermissions(servant) {
 function isTabForbiddenForCurrentUser(tabId) {
     if (!tabId || tabId === 'dashTab' || tabId === 'reflectionsTab') return false;
 
+    // 🌟 أمين الخدمة (الأدمن) يملك كامل الصلاحيات ولا يُحظر عليه أي تبويب
+    if (isCurrentUserAdmin()) {
+        return false;
+    }
+
     // الحصول على مصفوفة الصلاحيات الفعالة
     const perms = window.__currentActivePermissions || 
         (typeof currentUser !== 'undefined' && currentUser ? getServantEffectivePermissions(currentUser) : 
@@ -317,6 +352,10 @@ function isTabForbiddenForCurrentUser(tabId) {
 
 // 🛡️ صمام الأمان لأقسام رادار أمين الخدمة الداخلية
 function isRadarSectionForbiddenForCurrentUser(secKey) {
+    // 🌟 أمين الخدمة (الأدمن) يملك كامل الصلاحيات لأقسام الرادار
+    if (isCurrentUserAdmin()) {
+        return false;
+    }
     const perms = window.__currentActivePermissions || 
         (typeof currentUser !== 'undefined' && currentUser ? getServantEffectivePermissions(currentUser) : 
         (typeof currentPermission !== 'undefined' ? getDefaultPermissionsForRole(currentPermission) : null));
@@ -355,14 +394,21 @@ function getFirstAllowedRadarSection() {
 
 // 🛡️ تطبيق الصلاحيات التفصيلية الصارمة على واجهة المستخدم بالكامل
 function applyGranularPermissions(perms) {
-    if (!perms) perms = getDefaultPermissionsForRole('full');
+    const isAdminUser = isCurrentUserAdmin();
+    if (isAdminUser) {
+        perms = getDefaultPermissionsForRole('admin');
+        if (typeof currentPermission !== 'undefined') currentPermission = 'admin';
+        if (typeof currentRole !== 'undefined') currentRole = 'admin';
+    } else if (!perms) {
+        perms = getDefaultPermissionsForRole('full');
+    }
     window.__currentActivePermissions = perms;
 
     // أمين الخدمة الصارم: يملك شؤون الخدام + إدارة الخدام + الإعدادات
     const canSeeAffairs = (perms.servants_affairs === 'full');
     const canSeeMgmt = (perms.servants_mgmt === 'full');
     const canSeeSettings = (perms.settings_audit === 'full');
-    const isPureAdmin = canSeeAffairs && canSeeMgmt && canSeeSettings;
+    const isPureAdmin = isAdminUser || (canSeeAffairs && canSeeMgmt && canSeeSettings);
 
     // 1. التحكم الصارم في ظهور التبويبات الرئيسية وحاوياتها بالكامل (Triple-Lock)
     PERMISSION_MODULES.forEach(mod => {

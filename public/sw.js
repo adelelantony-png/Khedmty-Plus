@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v7.4'; // Ironclad Tab & Section Permission Enforcement // No Horizontal Scrollbars: 100% Adaptive Full-Width View
+const CACHE_NAME = 'khedmety-ultra-v7.5'; // Restored Unrestricted Admin Permissions for Service Secretary // Ironclad Tab & Section Permission Enforcement // No Horizontal Scrollbars: 100% Adaptive Full-Width View
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [

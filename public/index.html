@@ -398,7 +398,8 @@ async function startSession(r, remember, customToken) {
 
   if (r.kind === 'staff' || r.role === 'admin' || r.role === 'servant') {
     const role = (r.role === 'admin' || (r.user && r.user.role === 'admin')) ? 'admin' : 'servant';
-    const user = Object.assign({}, r.user || r, { role: role, loginTimestamp: Date.now() });
+    const permission = (role === 'admin') ? 'admin' : ((r.user && r.user.permission) || r.permission || 'full');
+    const user = Object.assign({}, r.user || r, { role: role, permission: permission, loginTimestamp: Date.now() });
     delete user.passwordHash;
     storage.setItem(K.active, JSON.stringify(user));
     localStorage.setItem('user_role', role);

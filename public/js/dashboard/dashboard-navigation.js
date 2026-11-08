@@ -36,7 +36,16 @@ tabs.parentNode.insertBefore(bar, tabs);
 let current = 'home';
 
 function refresh() {
+    const isNavAdmin = (typeof window.isCurrentUserAdmin === 'function' && window.isCurrentUserAdmin()) || 
+                       (typeof currentPermission !== 'undefined' && (currentPermission === 'admin' || currentPermission === 'developer')) ||
+                       (typeof localStorage !== 'undefined' && localStorage.getItem('user_role') === 'admin');
+
     bar.querySelectorAll('.grp-chip').forEach(c => {
+        if (isNavAdmin) {
+            c.classList.remove('grp-off');
+            c.classList.toggle('active', c.dataset.g === current);
+            return;
+        }
         const btns = [...tabs.querySelectorAll('.tab-btn')].filter(b => b.dataset.group === c.dataset.g);
         const allOff = btns.length === 0 || btns.every(b => {
             const d = b.style.display || window.getComputedStyle(b).display;
@@ -111,7 +120,11 @@ new MutationObserver(refresh).observe(tabs, { attributes: true, attributeFilter:
 // ==========================================
 // تخصيص وتبويب الأزرار ديناميكياً لكل الصلاحيات
 // ==========================================
-if (typeof currentPermission !== 'undefined') {
+const isNavAdmin = (typeof window.isCurrentUserAdmin === 'function' && window.isCurrentUserAdmin()) || 
+                   (typeof currentPermission !== 'undefined' && (currentPermission === 'admin' || currentPermission === 'developer')) ||
+                   (typeof localStorage !== 'undefined' && localStorage.getItem('user_role') === 'admin');
+
+if (!isNavAdmin && typeof currentPermission !== 'undefined') {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         let text = (btn.innerText || btn.textContent || '').trim();
 
