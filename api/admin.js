@@ -956,10 +956,7 @@ module.exports = async (req, res) => {
             success: false, 
 
             message: 'حدث خطأ في تنفيذ طلب الأدمن: ' + (error.message || String(error)),
-
-            details: error.stack
-
-        });
+});
 
     }
 
