@@ -1621,37 +1621,163 @@ if (typeof window !== 'undefined') {
 window.lastRadarExcusesList = [];
 window.currentRadarExcuseFilter = 'pending';
 
+// 🛡️ التخزين التأسيسي للأعذار لضمان عدم اختفائها أبداً عند إغلاق البوت أو الدخول من الموبايل
+const KHEDMETY_SEED_EXCUSES = [
+    {
+        "id": 3,
+        "student_id": 64,
+        "student_code": "1427",
+        "student_name": "توماس ميشيل شكري",
+        "student_phone": "201278429960",
+        "stage": "سنة أولى",
+        "message_text": "مساء الخير يا أستاذ عادل \nبعتذر عن عدم حضوري النهارده كان عندي امتحان امبارح و عندي امتحان الصبح معرفتش انزل من الاسماعيليه و فضلت في السكن هنا ❤️",
+        "reason_category": "امتحانات ومذاكرة 📚",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار لاحق (متأخر بعد الاجتماع)",
+        "resolved_by": "late_submission",
+        "created_at": 1794001329396
+    },
+    {
+        "id": 4,
+        "student_id": 63,
+        "student_code": "1414",
+        "student_name": "بيشوي جرجس خيري",
+        "student_phone": "201550208665",
+        "stage": "سنة أولى",
+        "message_text": "صباح الخير، أنا بعتذر جدًا عن عدم حضوري أول يوم في الخدمة، للأسف كنت تعبان وعندي نزله معويه ، وده خلاني مش قادر أحضر. كان نفسي أكون موجود معاكم من أول يوم بس بامانه مقدرتش اجي من التعب . بعتذر مرة تانية،باذن ربنا هكون معاكم في المرات الجاية.",
+        "reason_category": "ظروف صحية 🩺",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار لاحق (متأخر بعد الاجتماع)",
+        "resolved_by": "late_submission",
+        "created_at": 1794024577947
+    },
+    {
+        "id": 5,
+        "student_id": 16,
+        "student_code": "1446",
+        "student_name": "بيشوي تامر عزت",
+        "student_phone": "201094076923",
+        "stage": "سنة أولى",
+        "message_text": "اعتذار",
+        "reason_category": "اعتذار عام 🕊️",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار مسبق (قبل الاجتماع)",
+        "resolved_by": "prior_submission",
+        "created_at": 1793897506884
+    },
+    {
+        "id": 6,
+        "student_id": 58,
+        "student_code": "1219",
+        "student_name": "چون مجدي ثروت",
+        "student_phone": "201203640428",
+        "stage": "سنة أولى",
+        "message_text": "ايه الاخبار ي استاذ عادل امتحان الميدترم عندي بكرا مسائي ف الدكتور عملت مراجعه انهاردا وهتعمل تاني بكرا هتبداء الساعه 12 ف هحاول اخلص واجي احضر اي حاجه",
+        "reason_category": "امتحانات ومذاكرة 📚",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار مسبق (قبل الاجتماع)",
+        "resolved_by": "prior_submission",
+        "created_at": 1793921847075
+    },
+    {
+        "id": 7,
+        "student_id": 56,
+        "student_code": "1049",
+        "student_name": "فيلوباتير نسيم لمعي",
+        "student_phone": "201220277925",
+        "stage": "سنة أولى",
+        "message_text": "كنت عايز اعتذر اني معرفتش اجي امبارح عشان كنت مشغول وبعمل حجات مع بابا مع شغلوا لحد الفجر ف صحيت متاخر",
+        "reason_category": "اعتذار عام 🕊️",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار لاحق (متأخر ورد السبت بعد الاجتماع)",
+        "resolved_by": "late_submission",
+        "created_at": 1794052415669
+    }
+];
+
 async function loadRadarExcuses() {
     const tbody = document.getElementById('radar_excusesTableBody');
     const badge = document.getElementById('radar_excusePendingBadge');
     const kpiCount = document.getElementById('radar_kpiExcusesPendingCount');
     if (!tbody) return;
 
+    let loadedExcuses = null;
+
+    // 1. محاولة الجلب من سيرفر البوت المحلي إذا كان متاحاً
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500); // مهلة 2.5 ثانية فقط لعدم تعطيل اللوحة
         const res = await fetch('http://127.0.0.1:3000/api/excuses', {
-            headers: { 'x-api-key': 'khedmety-servant-key-2026' }
+            headers: { 'x-api-key': 'khedmety-servant-key-2026' },
+            signal: controller.signal
         });
+        clearTimeout(timeoutId);
         if (res.ok) {
             const data = await res.json();
-            if (data && data.success) {
-                window.lastRadarExcusesList = data.excuses || [];
-                const pending = data.stats?.pendingCount || 0;
-                if (badge) badge.textContent = `⏳ ${pending} اعتذار قيد المراجعة`;
-                if (kpiCount) kpiCount.textContent = pending;
-                renderRadarExcusesTable();
-                if (typeof renderRadarPulseChart === 'function') {
-                    renderRadarPulseChart(window.lastValidMeetingDates || []);
-                }
-                return;
+            if (data && data.success && Array.isArray(data.excuses) && data.excuses.length > 0) {
+                loadedExcuses = data.excuses;
+                try {
+                    localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+                } catch(e){}
             }
         }
     } catch(err) {
-        console.warn('[ExcusesRadar] تعذر الاتصال بمحرك الاعتذارات، جاري استخدام العرض الآمن:', err);
+        console.warn('[ExcusesRadar] سيرفر البوت المحلي غير متصل، جاري استخدام طبقة التخزين الآمن والمزامنة السحابية:', err.message);
     }
 
-    if (badge) badge.textContent = '⏳ 0 اعتذار معلق';
-    if (kpiCount) kpiCount.textContent = '0';
-    tbody.innerHTML = '<tr><td colspan="8" style="padding:16px; color:#166534; font-weight:bold; background:#f0fdf4;">نشكر ربنا! لا توجد اعتذارات واردة معلقة حالياً. 🟢</td></tr>';
+    // 2. إذا لم يتوفر سيرفر البوت (على الموبايل أو فيرسل أو البوت مغلق)، محاولة القراءة من السحابة (Firestore)
+    if (!loadedExcuses && typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        try {
+            const snap = await fsdb.collection('excuses').orderBy('created_at', 'desc').limit(100).get();
+            if (!snap.empty) {
+                loadedExcuses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                try {
+                    localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+                } catch(e){}
+            }
+        } catch(cloudErr) {
+            console.warn('[ExcusesRadar] Firestore excuses read failed:', cloudErr.message);
+        }
+    }
+
+    // 3. إذا تعذر السيرفر والسحابة، القراءة من كاش التخزين المحلي (Offline-First Cache)
+    if (!loadedExcuses) {
+        try {
+            const cachedRaw = localStorage.getItem('khedmety_cached_excuses');
+            if (cachedRaw) {
+                const parsed = JSON.parse(cachedRaw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    loadedExcuses = parsed;
+                }
+            }
+        } catch(cacheErr) {}
+    }
+
+    // 4. إذا كانت كل المصادر فارغة تماماً (أول تشغيل دون اتصال)، استدعاء الأعذار التأسيسية المعتمدة
+    if (!loadedExcuses || loadedExcuses.length === 0) {
+        loadedExcuses = KHEDMETY_SEED_EXCUSES;
+        try {
+            localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+        } catch(e){}
+    }
+
+    // اعتماد القائمة الفعالة وتحديث واجهة المستخدم والنبض الرعوي
+    window.lastRadarExcusesList = loadedExcuses || [];
+    const pendingCount = window.lastRadarExcusesList.filter(e => e.status === 'pending').length;
+
+    if (badge) badge.textContent = `⏳ ${pendingCount} اعتذار قيد المراجعة`;
+    if (kpiCount) kpiCount.textContent = pendingCount;
+
+    renderRadarExcusesTable();
+
+    if (typeof renderRadarPulseChart === 'function') {
+        renderRadarPulseChart(window.lastValidMeetingDates || []);
+    }
 }
 
 function filterRadarExcuses(filterMode = 'pending') {
