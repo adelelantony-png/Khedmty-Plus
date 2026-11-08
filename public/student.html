@@ -2520,12 +2520,16 @@ function checkAndCelebrateBirthday() {
         let dob = (user && user.dob) || localStorage.getItem('student_dob') || '';
         let sName = (user && user.name) || localStorage.getItem('student_name') || 'خادم المسيح';
 
-        // محاولة جلب تاريخ الميلاد من كشف الفصل إذا لم يكن مخزناً بالجلسة
+        // محاولة جلب تاريخ الميلاد من كشف الفصل أو السجل الرسمي المعتمد
         if (!dob && code) {
             try {
                 const members = JSON.parse(localStorage.getItem('my_church_class')) || [];
-                const found = members.find(m => String(m.code || m.id || '').trim() === code);
+                let found = members.find(m => String(m.code || m.id || '').trim() === code || (sName && m.name === sName));
                 if (found && found.dob) dob = found.dob;
+                if (!dob && window.KHEDMETY_OFFICIAL_STUDENTS) {
+                    const off = window.KHEDMETY_OFFICIAL_STUDENTS.find(o => String(o.code || o.id || '').trim() === code || (sName && o.name === sName));
+                    if (off && (off.dob || off.birth_date)) dob = off.dob || off.birth_date;
+                }
             } catch(e) {}
         }
 

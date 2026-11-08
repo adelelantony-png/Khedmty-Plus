@@ -1159,6 +1159,35 @@
   }
 ];
 
+    root.restoreMissingBirthdays = function(targetList) {
+        if (!Array.isArray(targetList)) return targetList;
+        const mapByCode = new Map();
+        const mapByName = new Map();
+        const mapById = new Map();
+        OFFICIAL_STUDENTS.forEach(s => {
+            if (s.code) mapByCode.set(String(s.code).trim(), s);
+            if (s.id) mapById.set(String(s.id), s);
+            if (s.name) mapByName.set(s.name.trim(), s);
+        });
+        OFFICIAL_SERVANTS.forEach(sv => {
+            if (sv.code) mapByCode.set(String(sv.code).trim(), sv);
+            if (sv.id) mapById.set(String(sv.id), sv);
+            if (sv.name) mapByName.set(sv.name.trim(), sv);
+        });
+        targetList.forEach(item => {
+            if (!item.dob || item.dob === '' || item.dob === '-' || item.dob === 'غير محدد') {
+                const m = (item.code && mapByCode.get(String(item.code).trim())) ||
+                          (item.id && mapById.get(String(item.id))) ||
+                          (item.name && mapByName.get(String(item.name).trim()));
+                if (m && (m.dob || m.birth_date)) {
+                    item.dob = m.dob || m.birth_date;
+                    item.birth_date = m.birth_date || m.dob;
+                }
+            }
+        });
+        return targetList;
+    };
+
     root.KHEDMETY_OFFICIAL_STUDENTS = OFFICIAL_STUDENTS;
     root.KHEDMETY_OFFICIAL_SERVANTS = OFFICIAL_SERVANTS;
 
@@ -1180,6 +1209,40 @@
         if (shouldSeedMembers && OFFICIAL_STUDENTS.length > 0) {
             localStorage.setItem('my_church_class', JSON.stringify(OFFICIAL_STUDENTS));
             console.log('[Offline Roster] ✅ تم تثبيت (' + OFFICIAL_STUDENTS.length + ') مخدوم في الذاكرة المحلية للعمل بدون نت.');
+        } else if (!shouldSeedMembers && OFFICIAL_STUDENTS.length > 0) {
+            // فحص واستعادة تواريخ الميلاد التلقائي إذا كانت مفقودة أو فارغة
+            try {
+                const parsed = JSON.parse(existingMembersRaw);
+                let restoredCount = 0;
+                const mapByCode = new Map();
+                const mapByName = new Map();
+                const mapById = new Map();
+                OFFICIAL_STUDENTS.forEach(s => {
+                    if (s.code) mapByCode.set(String(s.code).trim(), s);
+                    if (s.id) mapById.set(String(s.id), s);
+                    if (s.name) mapByName.set(s.name.trim(), s);
+                });
+
+                parsed.forEach(m => {
+                    if (!m.dob || m.dob === '' || m.dob === '-' || m.dob === 'غير محدد') {
+                        const match = (m.code && mapByCode.get(String(m.code).trim())) ||
+                                      (m.id && mapById.get(String(m.id))) ||
+                                      (m.name && mapByName.get(String(m.name).trim()));
+                        if (match && (match.dob || match.birth_date)) {
+                            m.dob = match.dob || match.birth_date;
+                            m.birth_date = match.birth_date || match.dob;
+                            restoredCount++;
+                        }
+                    }
+                });
+
+                if (restoredCount > 0) {
+                    localStorage.setItem('my_church_class', JSON.stringify(parsed));
+                    console.log('[Offline Roster] 🎂 تم استعادة وتثبيت تواريخ الميلاد المفقودة لـ (' + restoredCount + ') مخدوم بنجاح.');
+                }
+            } catch(e) {
+                console.warn('[Offline Roster DOB Repair Error]:', e);
+            }
         }
 
         const existingServantsRaw = localStorage.getItem('my_church_servants');

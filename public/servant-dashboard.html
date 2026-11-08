@@ -5127,7 +5127,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
     <!-- جدول مصفوفة الصلاحيات مع التمرير -->
     <div style="flex:1 1 auto; min-height:340px; overflow-y:auto; overflow-x:hidden !important; width:100%; border:1.5px solid #cbd5e1; border-radius:12px; margin-bottom:14px; background:#ffffff;">
-      <table style="width:100%; border-collapse:collapse; border-collapse:collapse; font-size:0.86rem;">
+      <table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:0.86rem;">
         <thead style="position:sticky; top:0; background:#1e3a8a; color:#ffffff; z-index:10;">
           <tr>
             <th style="padding:10px 14px; text-align:right; width:54%;">القسم / الخاصية</th>
@@ -7014,6 +7014,10 @@ alert(`✅ حساب الخادم (${s.name}) معتمد ومفعل على الن
 // ==========================================
 
 let members = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
+if (typeof window.restoreMissingBirthdays === 'function') {
+    members = window.restoreMissingBirthdays(members);
+    try { localStorage.setItem(STORAGE_KEYS.MEMBERS, JSON.stringify(members)); } catch(e){}
+}
 
 let attendanceRecord = JSON.parse(localStorage.getItem(STORAGE_KEYS.ATTENDANCE)) || {};
 
@@ -7802,6 +7806,25 @@ let uniqueKey = (m.code && m.code.toString().trim() !== "")
 
 : (m.id ? m.id.toString().trim() : m.name.trim());
 
+let officialMatch = (window.KHEDMETY_OFFICIAL_STUDENTS || []).find(o => 
+(o.code && String(o.code).trim() === String(m.code || m.exam_code).trim()) ||
+(o.id && String(o.id) === String(m.id)) ||
+(o.name && o.name.trim() === (m.name || '').trim())
+);
+let existingLocal = mapByCodeOrId.get(uniqueKey) || (members || []).find(x => 
+(x.code && String(x.code).trim() === String(m.code || m.exam_code).trim()) ||
+(x.id && String(x.id) === String(m.id)) ||
+(x.name && x.name.trim() === (m.name || '').trim())
+);
+let resolvedDob = (m.dob && m.dob !== '-' && m.dob !== 'غير محدد') ? m.dob :
+                  (m.birth_date && m.birth_date !== '-' && m.birth_date !== 'غير محدد') ? m.birth_date :
+                  (existingLocal && (existingLocal.dob || existingLocal.birth_date)) ? (existingLocal.dob || existingLocal.birth_date) :
+                  (officialMatch && (officialMatch.dob || officialMatch.birth_date)) ? (officialMatch.dob || officialMatch.birth_date) : "";
+
+if (doc && doc.ref && (!m.dob || m.dob === '' || m.dob === '-') && resolvedDob) {
+    try { doc.ref.set({ dob: resolvedDob, birth_date: resolvedDob }, { merge: true }).catch(() => {}); } catch(e){}
+}
+
 let item = {
 
 id: m.id || Date.now(),
@@ -7816,7 +7839,9 @@ stage: m.stage || "سنة أولى",
 
 gender: m.gender || "بنين",
 
-dob: m.dob || m.birth_date || "",
+dob: resolvedDob,
+
+birth_date: resolvedDob,
 
 parent_phone: m.parent_phone || "",
 
@@ -9880,22 +9905,22 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.6"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.6"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.6"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.7"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.7"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.6"></script>
-<script src="js/dashboard/dashboard-plan.js?v=7.6"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.7"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.7"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=7.7"></script>
 
-<script src="js/app-updater.js?v=7.6"></script>
+<script src="js/app-updater.js?v=7.7"></script>
 
-<script src="js/pwa-helper.js?v=7.6"></script>
+<script src="js/pwa-helper.js?v=7.7"></script>
 
 <script>
 
@@ -9913,8 +9938,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=7.6"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=7.7"></script>
 
 <script>
 // ==========================================

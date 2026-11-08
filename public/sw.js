@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v7.6'; // Meeting KPI Date Resolution & Approved Delay & Unified Excuse Counts
+const CACHE_NAME = 'khedmety-ultra-v7.7'; // Meeting KPI Date Resolution & Approved Delay & Unified Excuse Counts
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
