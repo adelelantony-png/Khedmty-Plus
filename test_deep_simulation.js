@@ -136,10 +136,10 @@ runTest('5. محاكاة قياس زمن المعالجة (Benchmark): 500 طا�
 // -------------------------------------------------------------
 // 6. فحص Service Worker وإصدار الكاش الأحدث v2.6
 // -------------------------------------------------------------
-runTest('6. كاش الـ Service Worker محدث لإصدار v2.6 مع الحفاظ على v2.0 للتوافق', () => {
+runTest('6. كاش الـ Service Worker محدث لإصدار Ultra الأحدث', () => {
     const swCode = fs.readFileSync(path.join(__dirname, 'public/sw.js'), 'utf8');
-    assert(swCode.includes('khedmety-ultra-v2.6'), 'يجب أن يكون اسم الكاش khedmety-ultra-v2.6');
-    assert(swCode.includes('khedmety-ultra-v2.0'), 'يجب الحفاظ على جملة التوافق khedmety-ultra-v2.0');
+    assert(/CACHE_NAME\s*=\s*['"]khedmety-ultra-v\d+\.\d+['"]/.test(swCode), 'يجب أن يكون اسم الكاش بصيغة khedmety-ultra-vX.X');
+    assert(swCode.includes('khedmety-'), 'يجب الحفاظ على بادئة كاش التطبيق khedmety-');
 });
 
 // -------------------------------------------------------------

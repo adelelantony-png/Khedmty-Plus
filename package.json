@@ -6,6 +6,9 @@
   "engines": {
     "node": "24.x"
   },
+  "scripts": {
+    "test": "node run_all_suites.js"
+  },
   "dependencies": {
     "firebase-admin": "^12.6.0"
   }

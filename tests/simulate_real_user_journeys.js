@@ -81,7 +81,8 @@ function extractDefinedFunctionsAndDomIds(htmlFilePath) {
     while ((srcMatch = scriptSrcRegex.exec(html)) !== null) {
         const src = srcMatch[1].trim();
         if (src.startsWith('http') || src.startsWith('//')) continue;
-        const jsPath = path.join(publicDir, src.replace(/^\.\//, ''));
+        const cleanSrc = src.split('?')[0].replace(/^\.\//, '');
+        const jsPath = path.join(publicDir, cleanSrc);
         if (fs.existsSync(jsPath)) {
             const jsCode = fs.readFileSync(jsPath, 'utf8');
             extractFunctionsFromCode(jsCode, definedFunctions);

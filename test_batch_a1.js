@@ -71,11 +71,11 @@ async function runTests() {
     // 2.1 حاوية زر التحديث في لوحة الخادم
     assert(dashHtml.includes('id="appUpdateContainer"'), 'وجود حاوية زر التحديث id="appUpdateContainer" في لوحة الخادم', 'A');
 
-    // 2.2 تضمين سكربت app-updater في لوحة الخادم
-    assert(dashHtml.includes('src="js/app-updater.js"'), 'تضمين مكتبة app-updater.js داخل servant-dashboard.html', 'A');
+    // 2.2 تضمين سكربت app-updater في لوحة الخادم (مع دعم بارامترات التحديث مثل ?v=...)
+    assert(/src=["']js\/app-updater\.js(?:\?[^"']*)?["']/.test(dashHtml), 'تضمين مكتبة app-updater.js داخل servant-dashboard.html', 'A');
 
-    // 2.3 تضمين سكربت pwa-helper في لوحة الخادم
-    assert(dashHtml.includes('src="js/pwa-helper.js"'), 'تضمين مكتبة pwa-helper.js داخل servant-dashboard.html', 'A');
+    // 2.3 تضمين سكربت pwa-helper في لوحة الخادم (مع دعم بارامترات التحديث مثل ?v=...)
+    assert(/src=["']js\/pwa-helper\.js(?:\?[^"']*)?["']/.test(dashHtml), 'تضمين مكتبة pwa-helper.js داخل servant-dashboard.html', 'A');
 
     // 2.4 زر الرجوع في النوتة الروحية يحمل fallback مع معلمة tab
     assert(noteHtml.includes('data-fallback="servant-dashboard.html?tab=dashTab"'), 'زر الرجوع في النوتة الروحية يحمل وجهة افتراضية مع معلمة تبويب آمنة', 'A');

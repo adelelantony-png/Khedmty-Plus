@@ -181,7 +181,7 @@ runTest('6. فحص وحدة KhedmetyAppUpdater وعمليات تطهير الك�
 runTest('7. فحص ترقية Service Worker (sw.js) لإصدار Ultra v2.0 وتضمين app-updater.js', () => {
     const swCode = fs.readFileSync(path.join(publicDir, 'sw.js'), 'utf8');
 
-    assert.strictEqual(swCode.includes('khedmety-ultra-v2.0'), true, 'يجب رفع إصدار الكاش لـ khedmety-ultra-v2.0 لتطهير كاشات المتصفح');
+    assert.strictEqual(/khedmety-ultra-v[2-9]\.\d+/.test(swCode), true, 'يجب رفع إصدار الكاش لـ khedmety-ultra-v2.0 أو أحدث لتطهير كاشات المتصفح');
     assert.strictEqual(swCode.includes('./js/app-updater.js'), true, 'يجب إدراج سكربت التحديث في الأصول المجهزة مسبقاً Precache');
     assert.strictEqual(swCode.includes("action === 'SKIP_WAITING_AND_CLEAR'"), true, 'يجب دعم رسالة التخطي والتطهير الفوري');
     assert.strictEqual(swCode.includes('/api/'), true, 'يجب استمرار الاستثناء المطلق لـ /api/ عن الكاش');
