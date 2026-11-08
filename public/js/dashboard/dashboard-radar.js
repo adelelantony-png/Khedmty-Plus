@@ -944,13 +944,77 @@ async function sendBatchWeeklyBirthdays(btn) {
     setTimeout(() => { btn.innerHTML = origHtml; }, 5000);
 }
 
+// 📅 تحديد التاريخ المعتمد لحساب مؤشر حضور الاجتماع (الجمعة الأسبق أو اليوم الإضافي بعد ذلك)
+function getResolvedMeetingKpiDate(attRecord = attendanceRecord, explicitDate = null) {
+    const todayStr = (typeof today !== "undefined" && today) ? today : new Date().toISOString().split("T")[0];
+    const recs = (typeof attRecord === "object" && attRecord) ? attRecord : {};
+
+    if (explicitDate && recs[explicitDate] && recs[explicitDate].length > 0) {
+        return explicitDate;
+    }
+
+    const todayObj = new Date(todayStr + "T12:00:00");
+    const dayOfWeek = todayObj.getDay();
+
+    const diffToFriday = (dayOfWeek - 5 + 7) % 7;
+    const pastFriObj = new Date(todayObj);
+    pastFriObj.setDate(todayObj.getDate() - diffToFriday);
+    const pastFridayStr = pastFriObj.getFullYear() + "-" + String(pastFriObj.getMonth() + 1).padStart(2, "0") + "-" + String(pastFriObj.getDate()).padStart(2, "0");
+
+    const datesWithAtt = Object.keys(recs).filter(d => {
+        const list = recs[d];
+        return Array.isArray(list) ? list.length > 0 : (list && typeof list === "object" && Object.keys(list).length > 0);
+    }).sort().reverse();
+
+    const extraDayAfterFriday = datesWithAtt.find(d => d > pastFridayStr && d <= todayStr);
+    if (extraDayAfterFriday) {
+        return extraDayAfterFriday;
+    }
+
+    if (recs[pastFridayStr] && recs[pastFridayStr].length > 0) {
+        return pastFridayStr;
+    }
+
+    const latestFriday = datesWithAtt.find(d => {
+        try {
+            return new Date(d + "T12:00:00").getDay() === 5 && d <= todayStr;
+        } catch(e) { return false; }
+    });
+    if (latestFriday) {
+        return latestFriday;
+    }
+
+    if (datesWithAtt.length > 0) {
+        return datesWithAtt[0];
+    }
+
+    return pastFridayStr;
+}
+window.getResolvedMeetingKpiDate = getResolvedMeetingKpiDate;
+
+function formatMeetingDateArabicLabel(dateStr) {
+    if (!dateStr) return "";
+    try {
+        const dt = new Date(dateStr + "T12:00:00");
+        const dayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+        const dayName = dayNames[dt.getDay()];
+        const dayNum = dt.getDate();
+        const monthName = monthNames[dt.getMonth()];
+        const isFri = dt.getDay() === 5;
+        return dayName + " " + dayNum + " " + monthName + (!isFri ? " (لقاء إضافي)" : "");
+    } catch(e) {
+        return dateStr;
+    }
+}
+window.formatMeetingDateArabicLabel = formatMeetingDateArabicLabel;
+
 function renderRadarDashboard() {
         if (!members || members.length === 0) return;
         renderRadarCopticFasting();
 
-        // 1. تحديد التواريخ الخاصة بالاجتماعات
-        const allDates = Object.keys(attendanceRecord || {}).sort().reverse();
-        const activeDate = activeSelectedDate || allDates[0] || new Date().toISOString().split('T')[0];
+        // 1. تحديد التواريخ الخاصة بالاجتماعات (الجمعة الأسبق أو اليوم الإضافي بعد ذلك)
+        const activeDate = getResolvedMeetingKpiDate(attendanceRecord, activeSelectedDate);
         const currentList = attendanceRecord[activeDate] || [];
 
         const totalMems = members.length;
@@ -962,7 +1026,10 @@ function renderRadarDashboard() {
         const elMeetingAtt = document.getElementById('radar_kpiMeetingAttended');
         if (elMeetingAtt) elMeetingAtt.textContent = attendedCount;
         const elTotalMems = document.getElementById('radar_kpiTotalMembers');
-        if (elTotalMems) elTotalMems.textContent = `من إجمالي ${totalMems} مخدوم (${totalMems > 0 ? Math.round((attendedCount/totalMems)*100) : 0}%)`;
+        if (elTotalMems) {
+            const dateLabel = formatMeetingDateArabicLabel(activeDate);
+            elTotalMems.textContent = "من إجمالي " + totalMems + " مخدوم (" + (totalMems > 0 ? Math.round((attendedCount/totalMems)*100) : 0) + "%) • " + dateLabel;
+        }
 
         const elLiturgyPct = document.getElementById('radar_kpiLiturgyPct');
         if (elLiturgyPct) elLiturgyPct.textContent = `${liturgyPct}%`;
@@ -2608,6 +2675,22 @@ function classifyAttendanceStatus(attRecord, studentExcuse) {
     const baseMinutes = 780;
     const diff = (totalM !== null && totalM > baseMinutes) ? (totalM - baseMinutes) : 0;
 
+        // فحص هل المخدوم لديه إذن / عذر تأخير مسبق معتمد ⏰
+    const hasApprovedDelay = !!(attRecord.hasApprovedDelay || (studentExcuse && /تأخير|تاخير|استئذان|استأذان|انصراف|بدري/i.test((studentExcuse.reason_category || '') + ' ' + (studentExcuse.message_text || ''))));
+
+    if (hasApprovedDelay) {
+        return {
+            status: 'approved_delay',
+            label: 'حاضر بإذن تأخير ⏰',
+            badgeClass: 'badge-att-approved-delay',
+            icon: '⏰',
+            color: '#b45309',
+            bgColor: '#fffbeb',
+            note: "⏰ تأخير مأذون به مسبقاً (" + (diff > 0 ? "+" + diff + " دقيقة" : "بإذن") + ")",
+            delayMinutes: diff
+        };
+    }
+
     // تأخير شديد (≥ 1:15 م = 795 دقيقة أو تم تعليمه كغياب بسبب التأخير)
     if (attRecord.isAbsentDueToDelay || (totalM !== null && totalM >= 795)) {
         return {
@@ -2735,7 +2818,10 @@ function renderAttendanceExportReport() {
     let countOnTime = 0;
     let countMinor = 0;
     let countSevere = 0;
+    let countApprovedDelay = 0;
     let countExcused = 0;
+    let countExcusedPrior = 0;
+    let countExcusedLate = 0;
     let countAbsent = 0;
 
     const allMembers = Array.isArray(members) ? members : [];
@@ -2776,8 +2862,16 @@ function renderAttendanceExportReport() {
 
         if (classification.status === 'on_time') countOnTime++;
         else if (classification.status === 'minor_delay') countMinor++;
+        else if (classification.status === 'approved_delay') countApprovedDelay++;
         else if (classification.status === 'severe_delay') countSevere++;
-        else if (classification.status === 'excused') countExcused++;
+        else if (classification.status === 'excused') {
+            countExcused++;
+            countExcusedPrior++;
+        }
+        else if (classification.status === 'excused_late') {
+            countExcused++;
+            countExcusedLate++;
+        }
         else countAbsent++;
 
         const studentItem = {
@@ -2804,7 +2898,7 @@ function renderAttendanceExportReport() {
     });
 
     const totalStudents = stage1List.length + stage2List.length;
-    const totalAttended = countOnTime + countMinor + countSevere;
+    const totalAttended = countOnTime + countMinor + countApprovedDelay + countSevere;
     const attPct = totalStudents > 0 ? Math.round((totalAttended / totalStudents) * 100) : 0;
 
     // تحديث بطاقات النبض الإحصائية العلوية
@@ -2819,28 +2913,38 @@ function renderAttendanceExportReport() {
     if (elTotal) elTotal.innerText = totalStudents;
     if (elOnTime) elOnTime.innerText = countOnTime;
     if (elMinor) elMinor.innerText = countMinor;
+    const elApprovedDelay = document.getElementById('kpiExp_approvedDelay');
+    if (elApprovedDelay) elApprovedDelay.innerText = countApprovedDelay;
     if (elSevere) elSevere.innerText = countSevere;
     if (elExcused) elExcused.innerText = countExcused;
+    const elExcusedSub = document.getElementById('kpiExp_excused_sub');
+    if (elExcusedSub) {
+        elExcusedSub.textContent = countExcused > 0 ? ("(" + countExcusedPrior + " مسبق + " + countExcusedLate + " لاحق)") : "";
+    }
     if (elAbsent) elAbsent.innerText = countAbsent;
     if (elPct) elPct.innerText = attPct + '%';
 
     // تحديث أعداد الفلاتر (البادجات)
     const cntOnTimeBadge = document.getElementById('cntBadge_onTime');
     const cntMinorBadge = document.getElementById('cntBadge_minor');
+    const cntApprovedDelayBadge = document.getElementById('cntBadge_approvedDelay');
     const cntSevereBadge = document.getElementById('cntBadge_severe');
     const cntExcusedBadge = document.getElementById('cntBadge_excused');
     const cntAbsentBadge = document.getElementById('cntBadge_absent');
 
     if (cntOnTimeBadge) cntOnTimeBadge.innerText = `(${countOnTime})`;
-    if (cntMinorBadge) cntMinorBadge.innerText = `(${countMinor})`;
+    if (cntMinorBadge) cntMinorBadge.innerText = "(" + countMinor + ")";
+    if (cntApprovedDelayBadge) cntApprovedDelayBadge.innerText = "(" + countApprovedDelay + ")";
     if (cntSevereBadge) cntSevereBadge.innerText = `(${countSevere})`;
     if (cntExcusedBadge) cntExcusedBadge.innerText = `(${countExcused})`;
     if (cntAbsentBadge) cntAbsentBadge.innerText = `(${countAbsent})`;
 
     // دالة فلترة الصفوف بحسب مربعات الاختيار
+    const showApprovedDelay = document.getElementById('chkExportApprovedDelay')?.checked ?? true;
     const matchesFilter = (item) => {
         if (item.status === 'on_time' && !showOnTime) return false;
         if (item.status === 'minor_delay' && !showMinor) return false;
+        if (item.status === 'approved_delay' && !showApprovedDelay) return false;
         if (item.status === 'severe_delay' && !showSevere) return false;
         if ((item.status === 'excused' || item.status === 'excused_late') && !showExcused) return false;
         if (item.status === 'absent' && !showAbsent) return false;
@@ -2936,6 +3040,7 @@ function renderAttendanceExportReport() {
         totalStudents,
         countOnTime,
         countMinor,
+        countApprovedDelay,
         countSevere,
         countExcused,
         countAbsent,
@@ -3009,6 +3114,7 @@ function buildOnePagePrintableA4(serviceDate, stage1List, stage2List, stats) {
                 <span>👥 المقيدين: <strong>${stats.totalStudents}</strong></span>
                 <span style="color:#15803d;">🟢 في الموعد: <strong>${stats.countOnTime}</strong></span>
                 <span style="color:#b45309;">🟡 تأخير بسيط: <strong>${stats.countMinor}</strong></span>
+                ${stats.countApprovedDelay > 0 ? `<span style="color:#d97706;">⏰ بإذن: <strong>${stats.countApprovedDelay}</strong></span>` : ''}
                 <span style="color:#b91c1c;">🔴 تأخير شديد: <strong>${stats.countSevere}</strong></span>
                 <span style="color:#0284c7;">🕊️ بعذر: <strong>${stats.countExcused}</strong></span>
                 <span style="color:#dc2626;">❌ غياب: <strong>${stats.countAbsent}</strong></span>

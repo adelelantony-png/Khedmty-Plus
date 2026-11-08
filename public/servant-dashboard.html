@@ -2031,6 +2031,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                             <div style="font-size: 0.76rem; color: #854d0e; font-weight: bold;">🟡 تأخير بسيط (1:01-1:14)</div>
                             <div style="font-size: 1.4rem; font-weight: 900; color: #ca8a04;" id="kpiExp_minor">0</div>
                         </div>
+                        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 10px; padding: 10px; text-align: center;">
+                            <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">⏰ تأخير بإذن مسبق</div>
+                            <div style="font-size: 1.4rem; font-weight: 900; color: #d97706;" id="kpiExp_approvedDelay">0</div>
+                        </div>
                         <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 10px; padding: 10px; text-align: center;">
                             <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">🔴 تأخير شديد (≥ 1:15)</div>
                             <div style="font-size: 1.4rem; font-weight: 900; color: #dc2626;" id="kpiExp_severe">0</div>
@@ -2038,6 +2042,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                         <div style="background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 10px; text-align: center;">
                             <div style="font-size: 0.76rem; color: #0369a1; font-weight: bold;">🕊️ غياب بعذر</div>
                             <div style="font-size: 1.4rem; font-weight: 900; color: #0284c7;" id="kpiExp_excused">0</div>
+                            <div style="font-size: 0.7rem; color: #0369a1; font-weight: bold; margin-top: 2px;" id="kpiExp_excused_sub"></div>
                         </div>
                         <div style="background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 10px; padding: 10px; text-align: center;">
                             <div style="font-size: 0.76rem; color: #be123c; font-weight: bold;">❌ غياب بدون عذر</div>
@@ -2057,6 +2062,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                             <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #166534;">
                                 <input type="checkbox" id="chkExportOnTime" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #16a34a; cursor: pointer;">
                                 <span>🟢 في الموعد <span id="cntBadge_onTime" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #d97706;">
+                                <input type="checkbox" id="chkExportApprovedDelay" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #f59e0b; cursor: pointer;">
+                                <span>⏰ تأخير بإذن مسبق <span id="cntBadge_approvedDelay" style="font-size: 0.75rem; color: #64748b;">(0)</span></span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: bold; cursor: pointer; color: #b45309;">
                                 <input type="checkbox" id="chkExportMinor" checked onchange="renderAttendanceExportReport()" style="width: 17px; height: 17px; accent-color: #d97706; cursor: pointer;">
@@ -7115,7 +7124,32 @@ let currentProfileId = null;
 
 let today = new Date().toLocaleDateString('en-CA');
 
-let activeSelectedDate = today;
+let activeSelectedDate = (function() {
+    try {
+        const todayObj = new Date(today + 'T12:00:00');
+        const dayOfWeek = todayObj.getDay();
+        if (dayOfWeek === 5) return today;
+        const diffToFriday = (dayOfWeek - 5 + 7) % 7;
+        const pastFriObj = new Date(todayObj);
+        pastFriObj.setDate(todayObj.getDate() - diffToFriday);
+        const pastFridayStr = `${pastFriObj.getFullYear()}-${String(pastFriObj.getMonth() + 1).padStart(2, '0')}-${String(pastFriObj.getDate()).padStart(2, '0')}`;
+
+        const datesWithAtt = Object.keys(attendanceRecord || {}).filter(d => {
+            const list = attendanceRecord[d];
+            return Array.isArray(list) ? list.length > 0 : (list && typeof list === 'object' && Object.keys(list).length > 0);
+        }).sort().reverse();
+
+        const extraDay = datesWithAtt.find(d => d > pastFridayStr && d <= today);
+        if (extraDay) return extraDay;
+
+        if (attendanceRecord && attendanceRecord[pastFridayStr] && attendanceRecord[pastFridayStr].length > 0) {
+            return pastFridayStr;
+        }
+        return (datesWithAtt.length > 0) ? datesWithAtt[0] : pastFridayStr;
+    } catch(e) {
+        return today;
+    }
+})();
 
 let calendarDisplayDate = new Date();
 
@@ -9846,22 +9880,22 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.5"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.5"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.5"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.6"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.6"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.5"></script>
-<script src="js/dashboard/dashboard-plan.js?v=7.5"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.6"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.6"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=7.6"></script>
 
-<script src="js/app-updater.js?v=7.0"></script>
+<script src="js/app-updater.js?v=7.6"></script>
 
-<script src="js/pwa-helper.js?v=7.0"></script>
+<script src="js/pwa-helper.js?v=7.6"></script>
 
 <script>
 
@@ -9879,8 +9913,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=7.5"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=7.5"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=7.6"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=7.6"></script>
 
 <script>
 // ==========================================
@@ -11061,6 +11095,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <div>
         <label style="display:block; font-size:0.82rem; font-weight:bold; color:#1e293b; margin-bottom:4px;">🏷️ سبب الاعتذار المصنف:</label>
         <select id="manualExcuseCategory" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-weight:bold; box-sizing:border-box; background:#fff;">
+          <option value="طلب تأخير مسبق بعذر ⏰" selected>طلب تأخير مسبق بعذر ⏰</option>
+          <option value="طلب انصراف مبكر بإذن 🏃‍♂️">طلب انصراف مبكر بإذن 🏃‍♂️</option>
           <option value="امتحانات ومذاكرة 📚">امتحانات ومذاكرة 📚</option>
           <option value="ظروف صحية 🩺">ظروف صحية 🩺</option>
           <option value="سفر خارج المحافظة ✈️">سفر خارج المحافظة ✈️</option>

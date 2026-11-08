@@ -167,6 +167,47 @@ function showScannerHUD(status, title, studentName, studentMeta, durationMs = 18
     }
 }
 
+// ⏰ فحص هل المخدوم لديه إذن / عذر تأخير مسبق معتمد لهذا اليوم؟
+function getStudentApprovedDelayExcuse(student, targetDate) {
+    if (!student) return null;
+    const sId = String(student.id || '').trim();
+    const sCode = String(student.code || student.exam_code || '').trim();
+    const sPhone = String(student.phone || '').trim().replace(/\D/g, '');
+    const sName = String(student.name || '').trim();
+    const dateStr = targetDate || (typeof activeSelectedDate !== 'undefined' ? activeSelectedDate : (typeof today !== 'undefined' ? today : ''));
+
+    let excuses = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList)) ? window.lastRadarExcusesList : [];
+    if ((!excuses || excuses.length === 0) && typeof localStorage !== 'undefined') {
+        try {
+            excuses = JSON.parse(localStorage.getItem('khedmety_cached_excuses') || '[]');
+        } catch(e) {}
+    }
+    if (!Array.isArray(excuses)) return null;
+
+    return excuses.find(e => {
+        if (!e) return false;
+        if (e.status === 'rejected') return false;
+        if (e.friday_date && dateStr && e.friday_date !== dateStr) return false;
+
+        const cat = ((e.reason_category || '') + ' ' + (e.message_text || '') + ' ' + (e.servant_notes || '')).toLowerCase();
+        const isDelayOrPermission = /تأخير|تاخير|استئذان|استأذان|انصراف|بدري|بلاك فرايدي|black friday|شغل|نبطشية|نبطشيه/i.test(cat);
+        if (!isDelayOrPermission) return false;
+
+        const eId = String(e.student_id || '').trim();
+        const eCode = String(e.student_code || '').trim();
+        const ePhone = String(e.student_phone || '').trim().replace(/\D/g, '');
+        const eName = String(e.student_name || '').trim();
+
+        if (sCode && eCode && sCode === eCode) return true;
+        if (sId && eId && sId === eId) return true;
+        if (sPhone && ePhone && (sPhone.endsWith(ePhone.slice(-9)) || ePhone.endsWith(sPhone.slice(-9)))) return true;
+        if (sName && eName && (sName === eName || sName.includes(eName) || eName.includes(sName))) return true;
+
+        return false;
+    });
+}
+window.getStudentApprovedDelayExcuse = getStudentApprovedDelayExcuse;
+
 // 10. تسجيل الحضور الذري
 
 // ==========================================
@@ -181,10 +222,16 @@ let isFri = isFridaySession(activeSelectedDate);
 
 let isSummerDay = settings.summerActive && (new Date(activeSelectedDate).getDay().toString() === settings.summerDay);
 
+let approvedDelayExcuse = getStudentApprovedDelayExcuse(member, activeSelectedDate);
+
 let isAbsent = false;
 
 if (!isFri || (isSummerDay && settings.ignoreSummerDelay)) {
 
+isAbsent = false;
+
+} else if (approvedDelayExcuse) {
+// ⏰ استئذان / تأخير مأذون به مسبقاً: لا يُعتبر غياباً!
 isAbsent = false;
 
 } else {
@@ -218,6 +265,10 @@ gender: member.gender || 'بنين',
 time: now.toLocaleTimeString('ar-EG'),
 
 isAbsentDueToDelay: isAbsent,
+
+hasApprovedDelay: !!approvedDelayExcuse,
+
+delayExcuseReason: approvedDelayExcuse ? (approvedDelayExcuse.reason_category || 'طلب تأخير مسبق بعذر ⏰') : '',
 
 attended: true,
 
@@ -272,7 +323,13 @@ if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function
     });
 }
 
-if (isAbsent) {
+if (approvedDelayExcuse) {
+    playBeepSound('success');
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate([40, 30, 40]); } catch(e){}
+    }
+    showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير معتمد: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+} else if (isAbsent) {
     playBeepSound('error');
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try { navigator.vibrate([80, 50, 80]); } catch(e){}
@@ -318,9 +375,15 @@ if (result.conflict) {
 } else {
     playBeepSound('success');
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        try { navigator.vibrate(70); } catch(e){}
+        try { navigator.vibrate(approvedDelayExcuse ? [40, 30, 40] : 70); } catch(e){}
     }
-    showScannerHUD('success', 'تم التسجيل بنجاح ✔️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
+    if (approvedDelayExcuse) {
+        showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير معتمد: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+    } else if (isAbsent) {
+        showScannerHUD('warning', 'تم التسجيل (تأخير شديد) ⚠️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
+    } else {
+        showScannerHUD('success', 'تم التسجيل بنجاح ✔️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
+    }
     logActivity("تسجيل حضور", member.name, `تاريخ: ${activeSelectedDate}`);
 }
 
@@ -515,7 +578,9 @@ count++;
 
 let tr = document.createElement('tr');
 
-let status = a.isAbsentDueToDelay ? '<span style="color:red">تأخير شديد</span>' : (a.isBonusEvent ? '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>' : '<span style="color:green">حاضر</span>');
+let status = a.hasApprovedDelay
+    ? '<span style="color:#d97706; font-weight:bold;">⏰ حاضر (بإذن تأخير)</span>'
+    : (a.isAbsentDueToDelay ? '<span style="color:red">تأخير شديد</span>' : (a.isBonusEvent ? '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>' : '<span style="color:green">حاضر</span>'));
 
 let editTimeBtn = (currentPermission === 'admin')
 
@@ -840,7 +905,7 @@ let isFri = isFridaySession(activeSelectedDate);
 
 let isSummerDay = settings.summerActive && (new Date(activeSelectedDate).getDay().toString() === settings.summerDay);
 
-if (!isFri || (isSummerDay && settings.ignoreSummerDelay)) {
+if (!isFri || (isSummerDay && settings.ignoreSummerDelay) || rec.hasApprovedDelay) {
 
 rec.isAbsentDueToDelay = false;
 
@@ -1691,16 +1756,25 @@ function renderLiveCardsFeed() {
     const totalCount = todayList.length;
 
     todayList.forEach((item, index) => {
+        let tagHtml = '';
+        if (item.hasApprovedDelay) {
+            tagHtml = '<span style="font-size:0.7rem; background:#fffbeb; color:#b45309; border:1px solid #fde68a; padding:1px 6px; border-radius:4px; font-weight:800; margin-right:6px;">⏰ بإذن تأخير</span>';
+        } else if (item.isAbsentDueToDelay) {
+            tagHtml = '<span style="font-size:0.7rem; background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:1px 6px; border-radius:4px; font-weight:800; margin-right:6px;">🔴 تأخير شديد</span>';
+        }
         let card = document.createElement('div');
         card.className = 'fast-scan-card';
         card.innerHTML = `
             <div class="fast-scan-left">
                 <div class="fast-scan-check-circle">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${item.isAbsentDueToDelay ? '#ef4444' : '#16a34a'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                 </div>
-                <div class="fast-scan-name">${escapeHtml(item.name || 'مخدوم')}</div>
+                <div class="fast-scan-name" style="display:flex; align-items:center; gap:4px;">
+                    <span>${escapeHtml(item.name || 'مخدوم')}</span>
+                    ${tagHtml}
+                </div>
             </div>
             <div class="fast-scan-index">#${totalCount - index}</div>
         `;
