@@ -205,18 +205,18 @@ function getDefaultPermissionsForRole(role) {
             settings_audit: 'none'
         };
     }
-    // خادم عادي افتراضي (full)
+    // خادم عادي افتراضي (servant / full)
     return {
-        attendance: 'full',
-        members: 'full',
-        excuses: 'full',
-        followup: 'full',
-        pulse: 'full',
-        servants_affairs: 'none',
-        servants_mgmt: 'none',
-        plan: 'view',
-        broadcast: 'none',
-        settings_audit: 'none'
+        attendance: 'full',       // يسجل حضور مخدومي مرحلته ويمسح الباركود
+        members: 'view',          // تصفح بيانات وأرقام هواتف مخدوميه
+        excuses: 'view',          // مشاهدة أعذار مرحلته فقط دون أزرار القبول والرفض والإلغاء
+        followup: 'view',         // متابعة غيابات مرحلته دون إرسال حملات شاملة
+        pulse: 'view',            // مشاهدة مؤشرات النبض دون أزرار إرسال التقرير لجروب الخدام بالبوت
+        servants_affairs: 'none', // محجوب تماماً (حضور وتحضيرات الخدام سرية لأمين الخدمة وأبونا)
+        servants_mgmt: 'none',    // محجوب تماماً (إدارة الخدام وحساباتهم لأمين الخدمة فقط)
+        plan: 'view',             // تصفح خطة الخدمة والمناهج
+        broadcast: 'none',        // محجوب (بوت الواتساب لأمين الخدمة)
+        settings_audit: 'none'    // محجوب (إعدادات النظام والأمان لأمين الخدمة)
     };
 }
 
@@ -287,11 +287,18 @@ function applyGranularPermissions(perms) {
         btn.style.display = (excusesLevel === 'full') ? '' : 'none';
     });
 
-    // أزرار نبض الاجتماع (إرسال للجروب بالبوت والمشاركة)
+    // أزرار نبض الاجتماع (إرسال للجروب بالبوت والمشاركة الرسمية حكر على أمين الخدمة)
     const pulseLevel = perms.pulse || 'none';
     const pulseActionEls = document.querySelectorAll('#btnSendPulseWA_bot, #pulseShareActionsBar');
     pulseActionEls.forEach(btn => {
-        btn.style.display = (pulseLevel !== 'none') ? '' : 'none';
+        btn.style.display = (pulseLevel === 'full') ? '' : 'none';
+    });
+
+    // أزرار رادار الافتقاد ومتابعة الغائبين (الإرسال الجماعي وطباعة الكشوف)
+    const followupLevel = perms.followup || 'none';
+    const followupActionEls = document.querySelectorAll('#btnSendWhatsAppAbsenceGroup, #btnPrintAbsenceReport, #btnExportAbsenceExcel');
+    followupActionEls.forEach(btn => {
+        btn.style.display = (followupLevel === 'full') ? '' : 'none';
     });
 
     // أزرار حضور الدارسين (مسح الكاميرا ومسح اليوم)
