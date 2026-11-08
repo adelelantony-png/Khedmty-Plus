@@ -357,35 +357,33 @@ function openServantPermissionsModal(servantId) {
 
             return `
                 <tr style="border-bottom:1.5px solid #f1f5f9; background:${idx % 2 === 0 ? '#ffffff' : '#fafafa'};">
-                    <td style="padding:12px 14px; text-align:right;">
+                    <td style="padding:10px 12px; text-align:right;">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <div style="width:36px; height:36px; border-radius:10px; background:#eff6ff; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:16px;">
+                            <div style="width:34px; height:34px; border-radius:10px; background:#eff6ff; color:#1d4ed8; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0;">
                                 <i class="fa-solid ${mod.icon}"></i>
                             </div>
-                            <div>
-                                <strong style="color:#0f172a; font-size:0.9rem;">${mod.title}</strong>
-                                <span style="font-size:0.72rem; color:#64748b; display:block; margin-top:2px;">${mod.desc}</span>
+                            <div style="min-width:0;">
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    <strong style="color:#0f172a; font-size:0.88rem;">${mod.title}</strong>
+                                    <span style="font-size:0.68rem; background:#f1f5f9; color:#475569; padding:1px 6px; border-radius:4px; font-weight:700;">${mod.category}</span>
+                                </div>
+                                <span style="font-size:0.72rem; color:#64748b; display:block; margin-top:2px; line-height:1.3;">${mod.desc}</span>
                             </div>
                         </div>
                     </td>
-                    <td style="padding:12px 10px; text-align:center;">
-                        <span style="font-size:0.75rem; background:#f1f5f9; color:#475569; padding:2px 8px; border-radius:6px; font-weight:600;">
-                            ${mod.category}
-                        </span>
-                    </td>
-                    <td style="padding:12px 14px; text-align:center;">
-                        <div style="display:inline-flex; background:#f1f5f9; padding:3px; border-radius:8px; border:1px solid #cbd5e1; gap:2px;">
-                            <label style="margin:0; padding:5px 12px; border-radius:6px; font-size:0.78rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s; background:${isFull ? '#10b981' : 'transparent'}; color:${isFull ? '#ffffff' : '#475569'};">
+                    <td style="padding:10px 8px; text-align:center;">
+                        <div style="display:inline-flex; background:#f1f5f9; padding:2px; border-radius:8px; border:1px solid #cbd5e1; gap:2px; max-width:100%;">
+                            <label style="margin:0; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all 0.15s; background:${isFull ? '#10b981' : 'transparent'}; color:${isFull ? '#ffffff' : '#475569'}; white-space:nowrap;">
                                 <input type="radio" name="perm_opt_${mod.id}" value="full" ${isFull ? 'checked' : ''} onchange="onPermRadioChange(this)" style="display:none;">
-                                🟢 إدارة كاملة
+                                🟢 كاملة
                             </label>
-                            <label style="margin:0; padding:5px 12px; border-radius:6px; font-size:0.78rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s; background:${isView ? '#f59e0b' : 'transparent'}; color:${isView ? '#ffffff' : '#475569'};">
+                            <label style="margin:0; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all 0.15s; background:${isView ? '#f59e0b' : 'transparent'}; color:${isView ? '#ffffff' : '#475569'}; white-space:nowrap;">
                                 <input type="radio" name="perm_opt_${mod.id}" value="view" ${isView ? 'checked' : ''} onchange="onPermRadioChange(this)" style="display:none;">
-                                🟡 مشاهدة فقط
+                                🟡 مشاهدة
                             </label>
-                            <label style="margin:0; padding:5px 12px; border-radius:6px; font-size:0.78rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s; background:${isNone ? '#ef4444' : 'transparent'}; color:${isNone ? '#ffffff' : '#475569'};">
+                            <label style="margin:0; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:3px; transition:all 0.15s; background:${isNone ? '#ef4444' : 'transparent'}; color:${isNone ? '#ffffff' : '#475569'}; white-space:nowrap;">
                                 <input type="radio" name="perm_opt_${mod.id}" value="none" ${isNone ? 'checked' : ''} onchange="onPermRadioChange(this)" style="display:none;">
-                                🔴 إخفاء تام
+                                🔴 إخفاء
                             </label>
                         </div>
                     </td>

@@ -668,29 +668,40 @@ function renderRadarAbsenceTableBody() {
         }
 
         return `
-            <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : 'transparent'};">
-                <td data-label="المخدوم" style="padding: 8px 6px; text-align: right; font-weight: bold; color: #0c2461; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;" title="${escapeHtml(m.name)}">${escapeHtml(m.name)}</td>
-                <td data-label="الكود" style="padding: 8px 4px; font-weight: bold; font-family: monospace; white-space: nowrap;">${escapeHtml(m.code)}</td>
-                <td data-label="الفرقة / المرحلة" style="padding: 8px 4px; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px;" title="${escapeHtml(m.stage)}">${escapeHtml(m.stage)}</td>
-                <td data-label="النوع" style="padding: 8px 4px; white-space: nowrap;"><span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size:0.75rem;">${escapeHtml(m.gender)}</span></td>
-                <td data-label="أسابيع الغياب" style="padding: 8px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${badgeHtml}</td>
-                <td data-label="الهاتف" style="padding: 8px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    <span style="display: inline-block; direction: ltr; unicode-bidi: isolate; font-family: monospace; font-size: 0.82rem; font-weight: 700; color: #334155; padding: 2px 6px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
-                        ${m.phone || '-'}
-                    </span>
-                </td>
-                <td data-label="الإجراء الرعوي" style="padding: 8px 4px; white-space: nowrap;">
-                    <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
-                        ${m.phone ? `
-                            <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this, '${escapeHtml(m.gender || '')}')" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                                <i class="fa-brands fa-whatsapp"></i> افتقاد واتساب 🚀
-                            </button>
-                            <a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn-custom" style="padding: 4px 6px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;" title="فتح يدوي">📲</a>
-                            <a href="tel:${m.phone}" class="btn-custom" style="padding: 4px 8px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;">
-                                <i class="fa-solid fa-phone"></i>
-                            </a>
-                        ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
+            <tr style="border-bottom: 1px solid #f1f5f9; background: ${isCritical ? '#fff5f5' : '#ffffff'}; transition: background 0.15s ease;">
+                <td style="padding: 10px 12px; text-align: right; vertical-align: middle;">
+                    <div style="font-weight: 900; color: #0c2461; font-size: 0.92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(m.name)}">
+                        ${escapeHtml(m.name)}
                     </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px;">
+                        <span style="font-size: 0.72rem; color: #475569; font-family: monospace; font-weight: 800; background: #f1f5f9; padding: 1px 6px; border-radius: 4px;">كود: ${escapeHtml(m.code)}</span>
+                        <span class="badge ${m.gender === 'بنات' ? 'bg-danger' : 'bg-primary'}" style="font-size: 0.68rem; padding: 1px 6px;">${escapeHtml(m.gender)}</span>
+                    </div>
+                </td>
+                <td style="padding: 10px 8px; text-align: center; vertical-align: middle;">
+                    <div style="font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${escapeHtml(m.stage)}
+                    </div>
+                    <div style="display: inline-block; max-width: 100%;">
+                        ${badgeHtml}
+                    </div>
+                </td>
+                <td style="padding: 10px 8px; text-align: center; vertical-align: middle;">
+                    ${m.phone ? `
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <div style="display: flex; gap: 4px; align-items: center; justify-content: center;">
+                                <button type="button" class="btn-custom" onclick="sendWhatsAppAbsenceDirect('${escapeHtml(m.name)}', '${cleanPhone}', ${m.consecutiveWeeks}, this, '${escapeHtml(m.gender || '')}')" style="padding: 4px 10px; font-size: 0.75rem; background: #25d366; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                    <i class="fa-brands fa-whatsapp"></i> افتقاد واتساب 🚀
+                                </button>
+                                <a href="tel:${m.phone}" class="btn-custom" style="padding: 4px 7px; font-size: 0.75rem; background: #f1f5f9; color: #334155; text-decoration: none; border-radius: 6px;" title="اتصال هاتفي">
+                                    <i class="fa-solid fa-phone"></i>
+                                </a>
+                            </div>
+                            <span style="font-family: monospace; font-size: 0.76rem; font-weight: 800; color: #64748b; direction: ltr; unicode-bidi: isolate;" dir="ltr">
+                                ${m.phone}
+                            </span>
+                        </div>
+                    ` : '<span style="color:#94a3b8; font-size:0.75rem;">لا يوجد هاتف</span>'}
                 </td>
             </tr>
         `;

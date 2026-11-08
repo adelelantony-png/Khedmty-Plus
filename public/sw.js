@@ -9,7 +9,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v7.2'; // Fix Modal Height Collapse & BiDi Phone Cell Isolation
+const CACHE_NAME = 'khedmety-ultra-v7.3'; // No Horizontal Scrollbars: 100% Adaptive Full-Width View
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
