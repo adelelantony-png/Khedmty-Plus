@@ -10,7 +10,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'idad-khoddam-v8.0'; // Official Idad Khoddam Rebranding & Premium Liturgical Assets
+const CACHE_NAME = 'khedmety-ultra-v8.0'; // Official Idad Khoddam Rebranding & Premium Liturgical Assets (Ultra v8.0)
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
