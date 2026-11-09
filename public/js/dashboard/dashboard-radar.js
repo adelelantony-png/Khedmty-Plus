@@ -1866,25 +1866,46 @@ async function loadRadarExcuses() {
     }
 
     // 3. إذا تعذر السيرفر والسحابة، القراءة من كاش التخزين المحلي (Offline-First Cache)
-    if (!loadedExcuses) {
-        try {
-            const cachedRaw = localStorage.getItem('khedmety_cached_excuses');
-            if (cachedRaw) {
-                const parsed = JSON.parse(cachedRaw);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    loadedExcuses = parsed;
-                }
+    let cachedList = [];
+    try {
+        const cachedRaw = localStorage.getItem('khedmety_cached_excuses');
+        if (cachedRaw) {
+            const parsed = JSON.parse(cachedRaw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                cachedList = parsed;
             }
-        } catch(cacheErr) {}
+        }
+    } catch(cacheErr) {}
+
+    // 4. محرك الدمج الذكي الشامل (Smart Merge Engine v8.2):
+    // يضمن دمج كافة الأعذار والاستئذانات التأسيسية المعتمدة (مثل استئذان سانتي عوني 802 لجمعة 13 و20 نوفمبر)
+    // مع أي كاش سابق موجود في متصفح الخادم دون الحاجة لمسح يدوي للكاش
+    const candidateList = (loadedExcuses && loadedExcuses.length > 0) ? loadedExcuses : cachedList;
+    const excuseMap = new Map();
+
+    // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً
+    KHEDMETY_SEED_EXCUSES.forEach(seed => {
+        const key = String(seed.id || (seed.student_code + '_' + seed.friday_date));
+        excuseMap.set(key, { ...seed });
+    });
+
+    // ثانياً: دمج أي بيانات محملة من السيرفر أو الكاش المحلي مع الحفاظ التام على القرارات الرعوية (مقبول / مرفوض)
+    if (Array.isArray(candidateList) && candidateList.length > 0) {
+        candidateList.forEach(item => {
+            const key = String(item.id || (item.student_code + '_' + item.friday_date));
+            if (excuseMap.has(key)) {
+                excuseMap.set(key, { ...excuseMap.get(key), ...item });
+            } else {
+                excuseMap.set(key, item);
+            }
+        });
     }
 
-    // 4. إذا كانت كل المصادر فارغة تماماً (أول تشغيل دون اتصال)، استدعاء الأعذار التأسيسية المعتمدة
-    if (!loadedExcuses || loadedExcuses.length === 0) {
-        loadedExcuses = KHEDMETY_SEED_EXCUSES;
-        try {
-            localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
-        } catch(e){}
-    }
+    loadedExcuses = Array.from(excuseMap.values());
+    try {
+        localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+        localStorage.setItem('khedmety_excuses_version', 'v8.2');
+    } catch(e){}
 
     // اعتماد القائمة الفعالة وتحديث واجهة المستخدم والنبض الرعوي
     window.lastRadarExcusesList = loadedExcuses || [];
@@ -2067,6 +2088,13 @@ function renderRadarExcusesTable() {
                     <div style="font-weight: 800; font-size: 0.88rem; color: #0c2461; line-height: 1.25; margin-bottom: 3px;">
                         ${escapeHtml(e.friday_date)}
                     </div>
+                    ${(() => {
+                        const curDate = (typeof today !== 'undefined' && today) ? today : new Date().toISOString().slice(0, 10);
+                        if (e.friday_date && String(e.friday_date) > curDate) {
+                            return '<div style="margin-bottom:3px;"><span style="display:inline-block; font-size:0.68rem; font-weight:800; color:#4338ca; background:#e0e7ff; border:1px solid #c7d2fe; border-radius:4px; padding:1px 6px;">📅 جمعة قادمة مسبقة</span></div>';
+                        }
+                        return '';
+                    })()}
                     <div style="font-size: 0.78rem; color: #334155; font-weight: 600; line-height: 1.25; margin-bottom: 4px;">
                         ${timing.weekdayName} ${timing.timeStr}
                     </div>

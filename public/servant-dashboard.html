@@ -7883,6 +7883,12 @@ return !pending[path];
 
 const safeTrackListener = (unsub) => (window.KhedmtyAuth && window.KhedmtyAuth.registerListener ? window.KhedmtyAuth.registerListener(unsub) : unsub);
 
+safeTrackListener(fsdb.collection('excuses').onSnapshot(snap => {
+    if (typeof loadRadarExcuses === 'function') {
+        loadRadarExcuses();
+    }
+}, err => console.warn('تعذر الاستماع لتحديثات الأعذار السحابية:', err.code || err.message)));
+
 safeTrackListener(fsdb.collection('config').doc('settings').onSnapshot(snap => {
 
 if (shouldAcceptCloudData('settings')) {

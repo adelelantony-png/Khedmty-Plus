@@ -1079,9 +1079,28 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
             }
 
         } else {
+            let upcomingExcuse = null;
+            try {
+                const rawExc = localStorage.getItem('khedmety_cached_excuses');
+                if (rawExc) {
+                    const parsed = JSON.parse(rawExc);
+                    if (Array.isArray(parsed)) {
+                        upcomingExcuse = parsed.find(e => {
+                            const matchCode = (String(e.student_code || '').trim() === studentCode) || (String(e.student_id || '').trim() === studentCode);
+                            return matchCode && (e.status === 'pending' || e.status === 'accepted');
+                        });
+                    }
+                }
+            } catch(e){}
 
-            statusBox.innerHTML = '<span class="text-light opacity-75">⭕ لم يتم تسجيل حضورك بعد اليوم</span>';
-
+            if (upcomingExcuse) {
+                const isDelay = /تأخير|تاخير|استئذان|انصراف/i.test((upcomingExcuse.reason_category || '') + ' ' + (upcomingExcuse.message_text || ''));
+                const icon = isDelay ? '⏰' : '🕊️';
+                const label = isDelay ? 'استئذان تأخير مسجل' : 'اعتذار غياب مسجل';
+                statusBox.innerHTML = `<span style="color:#fde047; font-weight:800;">${icon} ${label} لجمعة (${upcomingExcuse.friday_date})</span>`;
+            } else {
+                statusBox.innerHTML = '<span class="text-light opacity-75">⭕ لم يتم تسجيل حضورك بعد اليوم</span>';
+            }
         }
 
 
