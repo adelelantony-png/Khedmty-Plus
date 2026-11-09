@@ -1766,6 +1766,36 @@ const KHEDMETY_SEED_EXCUSES = [
         "servant_notes": "اعتذار لاحق (متأخر ورد السبت بعد الاجتماع)",
         "resolved_by": "late_submission",
         "created_at": 1794052415669
+    },
+    {
+        "id": 9,
+        "student_id": 93,
+        "student_code": "802",
+        "student_name": "سانتي عوني عطالله",
+        "student_phone": "201289505575",
+        "stage": "سنة أولى",
+        "message_text": "الشهر دي البلاك فرايدي و عندي كل جمعه حاجه في الشغل الجمعه الجايه هيكون عندي حاجه الصبح و مش عارفه هخلص الساعه كام فب ممكن بس اتاخر شويه ... ف ممكن اجي الخدمه الساعه ١.٣٠",
+        "reason_category": "طلب تأخير مسبق بعذر (استئذان تأخير) ⏰",
+        "friday_date": "2026-11-13",
+        "status": "pending",
+        "servant_notes": "استئذان تأخير مسبق - شفت عمل (بلاك فرايدي) - الحضور المتوقع 1:30 م",
+        "resolved_by": "prior_submission",
+        "created_at": 1794064022000
+    },
+    {
+        "id": 10,
+        "student_id": 93,
+        "student_code": "802",
+        "student_name": "سانتي عوني عطالله",
+        "student_phone": "201289505575",
+        "stage": "سنة أولى",
+        "message_text": "و للأسف الجمعه الي بعدها عندي ايڤنت في لو هقدار امشي بدري من الخدمه ... اعتقد ممكن امشي من الخدمه ٢.٣٠",
+        "reason_category": "طلب انصراف مبكر بإذن 🏃‍♂️",
+        "friday_date": "2026-11-20",
+        "status": "pending",
+        "servant_notes": "طلب انصراف مبكر مسبق - ارتباط عمل (إيفنت) - الانصراف المتوقع 2:30 م",
+        "resolved_by": "prior_submission",
+        "created_at": 1794064047000
     }
 ];
 
