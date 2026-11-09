@@ -664,11 +664,17 @@ updateRoleUI();
 
 function renderAttendanceCalendar() {
 
-const grid = document.getElementById('attendanceCalendarGrid');
+const grids = [
+    document.getElementById('attendanceCalendarGrid'),
+    document.getElementById('attendanceCalendarGridModal')
+].filter(Boolean);
 
-const monthLabel = document.getElementById('calendarCurrentMonthLabel');
+const monthLabels = [
+    document.getElementById('calendarCurrentMonthLabel'),
+    document.getElementById('calendarCurrentMonthLabelModal')
+].filter(Boolean);
 
-if (!grid) return;
+if (grids.length === 0) return;
 
 grid.innerHTML = '';
 
@@ -678,7 +684,8 @@ const month = calendarDisplayDate.getMonth();
 
 const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
 
-if (monthLabel) monthLabel.innerText = `${monthNames[month]} ${year}`;
+const monthText = `${monthNames[month]} ${year}`;
+monthLabels.forEach(ml => { if (ml) ml.innerText = monthText; });
 
 const curStudentDate = activeSelectedDate || (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
 const sPicker = document.getElementById('studentAttendanceDatePicker');
@@ -689,71 +696,74 @@ if (sLabel && (!sLabel.innerText || sLabel.innerText === '...')) {
 }
 
 const dayHeaders = ["سبت", "أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة"];
-
-dayHeaders.forEach(dh => {
-
-let th = document.createElement('div');
-
-th.style.cssText = "font-weight:bold; font-size:11px; color:#636e72; padding:4px 0;";
-
-th.innerText = dh;
-
-grid.appendChild(th);
-
-});
-
 const firstDayIndex = (new Date(year, month, 1).getDay() + 1) % 7;
-
 const totalDays = new Date(year, month + 1, 0).getDate();
 
-for (let i = 0; i < firstDayIndex; i++) {
+grids.forEach(grid => {
+    grid.innerHTML = '';
 
-grid.appendChild(document.createElement('div'));
+    dayHeaders.forEach(dh => {
+        let th = document.createElement('div');
+        th.style.cssText = "font-weight:bold; font-size:11px; color:#636e72; padding:4px 0;";
+        th.innerText = dh;
+        grid.appendChild(th);
+    });
 
-}
+    for (let i = 0; i < firstDayIndex; i++) {
+        grid.appendChild(document.createElement('div'));
+    }
 
-for (let d = 1; d <= totalDays; d++) {
+    for (let d = 1; d <= totalDays; d++) {
+        let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        let isToday = (dateStr === today);
+        let isSelected = (dateStr === activeSelectedDate);
+        let records = attendanceRecord[dateStr] || [];
+        let isFri = isFridaySession(dateStr);
 
-let dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        // حساب الحضور الفعلي بدقة واستبعاد مجرد وجود طلب إذن مستقبلي
+        let attendedCount = records.filter(r => r && (r.attended || (!r.isAbsent && !r.isAbsentDueToDelay && !r.isExcused))).length;
+        let excusedCount = records.filter(r => r && (r.isExcused || r.hasApprovedDelay)).length;
+        let hasActualAttendance = attendedCount > 0;
+        let isFuture = (today && dateStr > today);
 
-let isToday = (dateStr === today);
+        let cell = document.createElement('div');
+        cell.style.cssText = "padding: 8px 4px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; position: relative; background: #f8f9fa; border: 1px solid #dfe6e9;";
 
-let isSelected = (dateStr === activeSelectedDate);
+        if (hasActualAttendance) {
+            if (isFri) { cell.style.background = "var(--success)"; cell.style.color = "#fff"; }
+            else { cell.style.background = "var(--purple)"; cell.style.color = "#fff"; }
+        } else if (isFri) {
+            if (isFuture && excusedCount > 0) {
+                // جمعة قادمة بها إذن مسبق دون اعتبارها جمعة مسجلة
+                cell.style.background = "#eff6ff";
+                cell.style.color = "#1e40af";
+                cell.style.border = "1.5px dashed #3b82f6";
+            } else {
+                cell.style.background = "#fff3cd";
+                cell.style.color = "#856404";
+            }
+        }
 
-let hasRecords = (attendanceRecord[dateStr] && attendanceRecord[dateStr].length > 0);
+        if (isToday) cell.style.boxShadow = "0 0 0 2px var(--accent)";
+        if (isSelected) cell.style.outline = "2px solid #2d3436";
 
-let isFri = isFridaySession(dateStr);
+        let subLabel = '';
+        if (hasActualAttendance) {
+            subLabel = `<div style="font-size:10px; opacity:0.9;">(${attendedCount})</div>`;
+        } else if (isFuture && isFri && excusedCount > 0) {
+            subLabel = `<div style="font-size:9px; font-weight:700;">(إذن مسبق)</div>`;
+        }
 
-let cell = document.createElement('div');
+        cell.innerHTML = `<div>${d}</div>${subLabel}`;
+        cell.onclick = () => {
+            selectAttendanceDate(dateStr);
+            if (typeof switchTab === 'function') switchTab('attendanceTab');
+            closeAttendanceCalendarModal();
+        };
 
-cell.style.cssText = `padding: 8px 4px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; position: relative; background: #f8f9fa; border: 1px solid #dfe6e9;`;
-
-if (hasRecords) {
-
-if (isFri) { cell.style.background = "var(--success)"; cell.style.color = "#fff"; }
-
-else { cell.style.background = "var(--purple)"; cell.style.color = "#fff"; }
-
-} else if (isFri) {
-
-cell.style.background = "#fff3cd"; cell.style.color = "#856404";
-
-}
-
-if (isToday) cell.style.boxShadow = "0 0 0 2px var(--accent)";
-
-if (isSelected) cell.style.outline = "2px solid #2d3436";
-
-let attCount = hasRecords ? attendanceRecord[dateStr].length : 0;
-
-cell.innerHTML = `<div>${d}</div>${hasRecords ? `<div style="font-size:10px; opacity:0.9;">(${attCount})</div>` : ''}`;
-
-cell.onclick = () => selectAttendanceDate(dateStr);
-
-grid.appendChild(cell);
-
-}
-
+        grid.appendChild(cell);
+    }
+});
 }
 
 function changeCalendarMonth(offset) {
@@ -2472,3 +2482,18 @@ if (typeof window !== 'undefined') {
   window.closeQuickWalkinModal = closeQuickWalkinModal;
   window.submitQuickWalkinMember = submitQuickWalkinMember;
 }
+
+
+function openAttendanceCalendarModal() {
+    const modal = document.getElementById('modalAttendanceCalendar');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    renderAttendanceCalendar();
+}
+
+function closeAttendanceCalendarModal() {
+    const modal = document.getElementById('modalAttendanceCalendar');
+    if (modal) modal.style.display = 'none';
+}
+window.openAttendanceCalendarModal = openAttendanceCalendarModal;
+window.closeAttendanceCalendarModal = closeAttendanceCalendarModal;

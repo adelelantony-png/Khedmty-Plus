@@ -3130,51 +3130,15 @@ window.switchTab = window.switchTab || function(tabId, btn) {
         <button type="button" class="btn-mini" onclick="syncWithServantAttendanceDate()" style="background: rgba(12, 36, 97, 0.08); color: #0C2461; border: 1px solid rgba(12, 36, 97, 0.25); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(12,36,97,0.15)'" onmouseout="this.style.background='rgba(12, 36, 97, 0.08)'" title="مزامنة نفس اليوم المحدد في كشف حضور الخدام">
             <i class="fa-solid fa-arrows-rotate"></i> نفس يوم الخدام
         </button>
+
+        <button type="button" class="btn-mini" onclick="openAttendanceCalendarModal()" style="background: linear-gradient(135deg, #FAF7F2 0%, #fffdfa 100%); color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(212, 175, 55, 0.15); transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'" title="عرض بانوراما الشهر وتقويم لقاءات الحضور والأرشيف الكامل">
+            <i class="fa-solid fa-calendar-days" style="color: #D4AF37;"></i> بانوراما الشهر والأرشيف 📊
+        </button>
     </div>
 
 </div>
 
-<div class="admin-only" style="background:#fff; border:1px solid #dfe6e9; border-radius:12px; padding:15px; margin-bottom:15px; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-
-<h3 style="margin:0; border:none; color:var(--primary); font-size:16px;">📅 تقويم وأرشيف اجتماعات الحضور</h3>
-
-<div style="display:flex; align-items:center; gap:6px;">
-
-<button type="button" class="btn-mini" onclick="changeCalendarMonth(-1)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">◀ السابق</button>
-
-<span id="calendarCurrentMonthLabel" style="font-weight: 900; font-size: 0.92rem; color: #0C2461; min-width: 110px; text-align: center;">سبتمبر 2026</span>
-
-<button type="button" class="btn-mini" onclick="changeCalendarMonth(1)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">التالي ▶</button>
-
-<button type="button" class="btn-mini" onclick="selectAttendanceDate(today)" style="background: #FAF7F2; color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 5px 12px; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'">اليوم الحالي</button>
-
-<button type="button" class="btn-mini" onclick="openAttendanceExportModal()" style="background: #0C2461; color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; padding: 5px 14px; font-weight: 800; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 6px rgba(12, 36, 97, 0.15); transition: all 0.2s;" onmouseover="this.style.background='#153A7A'" onmouseout="this.style.background='#0C2461'" title="تصدير كشف الحضور لفترة أو لليوم الحالي إلى شيت إكسل">
-    <i class="fa-solid fa-file-excel"></i> تصدير الكشوفات
-</button>
-
-<button type="button" class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="background: #F8FAFC; color: #334155; border: 1px solid #CBD5E1; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F8FAFC'" title="جلب كافة سجلات السنة الخدمية من السحابة وتخزينها محلياً">
-    <i class="fa-solid fa-cloud-arrow-down"></i> جلب السجل الكامل
-</button>
-
-</div>
-
-</div>
-
-<div style="display:flex; gap:12px; font-size:11px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
-
-<span><strong style="display:inline-block; width:12px; height:12px; background:var(--success); border-radius:3px; vertical-align:middle;"></strong> جمعة أساسي مسجل</span>
-
-<span><strong style="display:inline-block; width:12px; height:12px; background:var(--purple); border-radius:3px; vertical-align:middle;"></strong> نشاط / بونص صيفي ⭐</span>
-
-<span><strong style="display:inline-block; width:12px; height:12px; border:2px solid var(--accent); border-radius:3px; vertical-align:middle;"></strong> اليوم الحالي</span>
-
-</div>
-
-<div id="attendanceCalendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center;"></div>
-
-</div>
 
 <div class="can-attend">
 
@@ -4722,6 +4686,35 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <div id="dataTab" class="tab-content">
 
 <h2>التقارير واستيراد البيانات</h2>
+<div class="admin-only" style="background:#fff; border:1.5px solid rgba(212,175,55,0.35); border-radius:16px; padding:18px 20px; margin-bottom:22px; box-shadow:0 4px 16px rgba(12,36,97,0.05);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <h3 style="margin:0; border:none; color:#0C2461; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:1.3rem;">📅</span>
+            <span>بانوراما وأرشيف اجتماعات الحضور الشهرية</span>
+        </h3>
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <button type="button" class="btn-mini" onclick="changeCalendarMonth(-1)" style="background:#0C2461; color:#ffffff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">◀ السابق</button>
+            <span id="calendarCurrentMonthLabel" style="font-weight:900; font-size:0.95rem; color:#0C2461; min-width:115px; text-align:center;">...</span>
+            <button type="button" class="btn-mini" onclick="changeCalendarMonth(1)" style="background:#0C2461; color:#ffffff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">التالي ▶</button>
+            <button type="button" class="btn-mini" onclick="selectAttendanceDate(today); switchTab('attendanceTab');" style="background:#FAF7F2; color:#874F19; border:1.5px solid #D4AF37; border-radius:8px; padding:6px 14px; font-weight:800; font-size:0.8rem; cursor:pointer;">اليوم الحالي ⏱️</button>
+            <button type="button" class="btn-mini" onclick="openAttendanceExportModal()" style="background:#0C2461; color:#F3C64F; border:1px solid #D4AF37; border-radius:8px; padding:6px 14px; font-weight:800; font-size:0.8rem; cursor:pointer; box-shadow:0 2px 6px rgba(12,36,97,0.15);" title="تصدير كشف الحضور لفترة أو لليوم الحالي إلى شيت إكسل">
+                <i class="fa-solid fa-file-excel"></i> تصدير الكشوفات
+            </button>
+            <button type="button" class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="background:#F8FAFC; color:#334155; border:1px solid #CBD5E1; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.8rem; cursor:pointer;" title="جلب كافة سجلات السنة الخدمية من السحابة وتخزينها محلياً">
+                <i class="fa-solid fa-cloud-arrow-down"></i> جلب السجل الكامل
+            </button>
+        </div>
+    </div>
+    <div style="display:flex; gap:14px; font-size:12px; margin-bottom:14px; flex-wrap:wrap; align-items:center; background:#f8fafc; padding:8px 12px; border-radius:10px;">
+        <span><strong style="display:inline-block; width:12px; height:12px; background:var(--success); border-radius:3px; vertical-align:middle;"></strong> جمعة أساسي مسجل</span>
+        <span><strong style="display:inline-block; width:12px; height:12px; background:var(--purple); border-radius:3px; vertical-align:middle;"></strong> نشاط / بونص صيفي ⭐</span>
+        <span><strong style="display:inline-block; width:12px; height:12px; border:2px solid var(--accent); border-radius:3px; vertical-align:middle;"></strong> اليوم الحالي</span>
+        <span><strong style="display:inline-block; width:12px; height:12px; background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:3px; vertical-align:middle;"></strong> جمعة قادمة (إذن مسبق)</span>
+    </div>
+    <div id="attendanceCalendarGrid" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center;"></div>
+</div>
+
+
 
 <button class="btn-success" onclick="exportAttendance(false)" style="font-size:16px; padding:15px; margin-bottom:20px;">📥 تحميل التقرير الشامل للحضور والبونص (Excel)</button>
 
@@ -11672,6 +11665,56 @@ document.addEventListener('DOMContentLoaded', () => {
       <button type="button" id="btnSaveAttendanceTimeModal" onclick="submitAttendanceTimeFromModal()" style="background:#0C2461; color:#ffffff; border:1px solid #0C2461; padding:9px 24px; border-radius:8px; font-weight:900; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 12px rgba(12, 36, 97, 0.2);">
         حفظ الوقت الجديد ✅
       </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ============================================================== -->
+<!-- نافذة بانوراما وأرشيف اجتماعات الحضور المنبثقة (Calendar Modal) -->
+<!-- ============================================================== -->
+<div id="modalAttendanceCalendar" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(12,36,97,0.65); backdrop-filter:blur(5px); justify-content:center; align-items:center; padding:15px; box-sizing:border-box;" onclick="if(event.target===this) closeAttendanceCalendarModal()">
+  <div style="background:#ffffff; border-radius:18px; width:100%; max-width:680px; box-shadow:0 20px 50px rgba(0,0,0,0.3); border:1.5px solid rgba(212,175,55,0.4); overflow:hidden; animation:modalPopIn 0.25s ease-out; display:flex; flex-direction:column; max-height:92vh;">
+    
+    <!-- Modal Header -->
+    <div style="background:linear-gradient(135deg, #0C2461 0%, #1e3a8a 100%); color:#ffffff; padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">📅</span>
+        <h3 style="margin:0; font-size:1.05rem; font-weight:800; color:#F3C64F;">بانوراما وأرشيف اجتماعات الحضور</h3>
+      </div>
+      <button type="button" onclick="closeAttendanceCalendarModal()" style="background:rgba(255,255,255,0.15); border:none; color:#ffffff; width:32px; height:32px; border-radius:50%; font-size:16px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+    </div>
+
+    <!-- Modal Controls -->
+    <div style="padding:12px 18px 8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-bottom:1px solid #f1f5f9; background:#FAF7F2;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button type="button" class="btn-mini" onclick="changeCalendarMonth(-1)" style="background:#0C2461; color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.8rem; cursor:pointer;">◀ السابق</button>
+        <span id="calendarCurrentMonthLabelModal" style="font-weight:900; font-size:0.95rem; color:#0C2461; min-width:115px; text-align:center;">...</span>
+        <button type="button" class="btn-mini" onclick="changeCalendarMonth(1)" style="background:#0C2461; color:#fff; border:none; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.8rem; cursor:pointer;">التالي ▶</button>
+        <button type="button" class="btn-mini" onclick="selectAttendanceDate(today); closeAttendanceCalendarModal();" style="background:#ffffff; color:#874F19; border:1.5px solid #D4AF37; border-radius:8px; padding:6px 12px; font-weight:800; font-size:0.8rem; cursor:pointer;">اليوم الحالي ⏱️</button>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="btn-mini" onclick="openAttendanceExportModal()" style="background:#0C2461; color:#F3C64F; border:1px solid #D4AF37; border-radius:8px; padding:6px 12px; font-weight:800; font-size:0.78rem; cursor:pointer;">
+          <i class="fa-solid fa-file-excel"></i> تصدير الكشوفات
+        </button>
+        <button type="button" class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="background:#F8FAFC; color:#334155; border:1px solid #CBD5E1; border-radius:8px; padding:6px 12px; font-weight:700; font-size:0.78rem; cursor:pointer;">
+          <i class="fa-solid fa-cloud-arrow-down"></i> جلب السجل
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Legend -->
+    <div style="padding:8px 18px 4px; display:flex; gap:12px; font-size:11px; flex-wrap:wrap; align-items:center;">
+      <span><strong style="display:inline-block; width:12px; height:12px; background:var(--success); border-radius:3px; vertical-align:middle;"></strong> جمعة أساسي مسجل</span>
+      <span><strong style="display:inline-block; width:12px; height:12px; background:var(--purple); border-radius:3px; vertical-align:middle;"></strong> نشاط / بونص صيفي ⭐</span>
+      <span><strong style="display:inline-block; width:12px; height:12px; border:2px solid var(--accent); border-radius:3px; vertical-align:middle;"></strong> اليوم الحالي</span>
+      <span><strong style="display:inline-block; width:12px; height:12px; background:#eff6ff; border:1.5px dashed #3b82f6; border-radius:3px; vertical-align:middle;"></strong> جمعة قادمة (إذن مسبق)</span>
+    </div>
+
+    <!-- Modal Grid Container -->
+    <div style="padding:10px 18px 18px; overflow-y:auto; flex:1;">
+      <div id="attendanceCalendarGridModal" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center;"></div>
     </div>
 
   </div>

@@ -1471,7 +1471,7 @@ if (tabId === 'reflectionsTab') renderReflectionsTable();
 
 if (tabId === 'broadcastTab') renderBroadcastList('parents');
 
-if (tabId === 'dataTab') checkLocalStorageUsage();
+if (tabId === 'dataTab') { checkLocalStorageUsage(); if (typeof renderAttendanceCalendar === 'function') renderAttendanceCalendar(); }
 
 if (tabId === 'cloudUsageTab') updateCloudUsageMetrics();
 
