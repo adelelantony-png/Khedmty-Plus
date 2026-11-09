@@ -69,44 +69,36 @@ return vBy === sName || (s.role === 'admin' && (vBy.includes('أمين الخد�
 
 let todayEvent = masterPlan.find(l => (l.responsible || '').trim().toLowerCase() === s.name.trim().toLowerCase() && l.date === today);
 
-let planInfo = todayEvent ? `<strong style="color:red;">📍 ${todayEvent.type}: ${todayEvent.title}</strong>` : '<span style="color:#7f8c8d;">لا توجد تكليفات اليوم</span>';
+let planInfo = todayEvent ? `<span style="color:#b45309; font-weight:800; font-size:0.8rem;">📌 ${todayEvent.type}: ${todayEvent.title}</span>` : '<span style="color:#94a3b8; font-size:0.8rem;">لا توجد تكليفات اليوم</span>';
 
 let actionBtn = present
-
-? `<button class="btn-mini btn-danger" onclick="cancelServantAttendance(${s.id})">إلغاء الحضور ❌</button>`
-
-: `<button class="btn-mini btn-success" onclick="manualMarkServant(${s.id})">تسجيل حضور ✔️</button>`;
+? `<button type="button" class="btn-mini" onclick="cancelServantAttendance(${s.id})" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">إلغاء الحضور</button>`
+: `<button type="button" class="btn-mini" onclick="manualMarkServant(${s.id})" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">تسجيل حضور</button>`;
 
 let commit = calculateServantCommitment(s.id);
 
 let commitBadge = `
-
-<div style="font-weight:bold; font-size:11px;">${commit.percent}% (${commit.attended}/${commit.total})</div>
-
-<div class="progress-bar-container"><div class="progress-bar" style="width:${commit.percent}%; background:${commit.isCommitted ? 'var(--success)' : 'var(--warning)'}"></div></div>
-
+<div style="font-weight:800; font-size:11px; color:#0C2461;">${commit.percent}% (${commit.attended}/${commit.total})</div>
+<div class="progress-bar-container" style="background:#e2e8f0; border-radius:999px; height:6px; overflow:hidden; margin-top:3px;"><div class="progress-bar" style="width:${commit.percent}%; height:100%; border-radius:999px; background:${commit.isCommitted ? '#059669' : '#d97706'}"></div></div>
 `;
+
+let statusBadge = present 
+? `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 4px;"><i class="fa-solid fa-check"></i> حاضر (${present.time})</span>`
+: '<span style="background: rgba(100, 116, 139, 0.1); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.2); padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 0.8rem;">لم يسجل</span>';
+
+let visitsBadge = `<span style="background: rgba(12, 36, 97, 0.08); color: #0C2461; border: 1px solid rgba(12, 36, 97, 0.18); padding: 3px 9px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">${visits} افتقاد</span>`;
 
 let tr = document.createElement('tr');
 
 tr.innerHTML = `
-
 <td data-label="كود الخادم">${s.code || s.id}</td>
-
 <td data-label="الاسم"><strong>${s.name}</strong></td>
-
 <td data-label="الهاتف">${s.phone}</td>
-
-<td data-label="حالة اليوم">${present ? `<span style="color:green; font-weight:bold;">حاضر (${present.time})</span>` : '<span style="color:red;">لم يحضر</span>'}</td>
-
+<td data-label="حالة اليوم">${statusBadge}</td>
 <td data-label="النسبة السنوية">${commitBadge}</td>
-
 <td data-label="تكليف اليوم">${planInfo}</td>
-
-<td data-label="الافتقادات"><span class="role-badge" style="background:#00b894;">${visits} افتقاد</span></td>
-
+<td data-label="الافتقادات">${visitsBadge}</td>
 <td data-label="إجراء" class="can-edit">${actionBtn}</td>
-
 `;
 
 tbody.appendChild(tr);

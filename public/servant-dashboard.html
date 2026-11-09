@@ -1128,29 +1128,31 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
         /* إعداد خدام — DECLUTTER & ZEN MODE STYLES                                */
         /* ========================================================================= */
         .btn-zen-mode {
-            border: 1.5px solid #10b981;
-            background: #ecfdf5;
-            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.12);
+            color: #6ee7b7;
             padding: 4px 12px;
             border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 800;
+            font-size: 0.78rem;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            margin: 0 6px;
+            margin: 0 4px;
+            white-space: nowrap;
         }
         .btn-zen-mode:hover {
-            background: #d1fae5;
+            background: rgba(16, 185, 129, 0.22);
+            color: #a7f3d0;
             transform: translateY(-1px);
         }
         body.zen-mode-active .btn-zen-mode {
-            background: #059669;
-            color: #ffffff;
-            border-color: #047857;
-            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.35);
+            background: rgba(16, 185, 129, 0.28);
+            color: #a7f3d0;
+            border-color: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
         }
         body.zen-mode-active .zen-hide {
             display: none !important;
@@ -1734,49 +1736,42 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px; z-index: 1;">
-        <button type="button" class="btn-mini" onclick="openPresentationMode()" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #ffffff; border: 1px solid rgba(255,255,255,0.25); padding: 8px 14px; font-size: 12px; border-radius: 10px; font-weight: 800; box-shadow: 0 3px 10px rgba(0,0,0,0.2); display: inline-flex; align-items: center; gap: 6px;" title="وضع الإلقاء والخطابة للمحاضرين">
-            <i class="fa-solid fa-chalkboard-user"></i> وضع الإلقاء 🎙️
+        <button type="button" class="btn-royal-presentation" onclick="openPresentationMode()" style="background: rgba(12, 36, 97, 0.55); color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.45); padding: 7px 15px; font-size: 12px; border-radius: 10px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: inline-flex; align-items: center; gap: 7px; backdrop-filter: blur(8px); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(212,175,55,0.2)'; this.style.borderColor='#F3C64F'" onmouseout="this.style.background='rgba(12, 36, 97, 0.55)'; this.style.borderColor='rgba(212, 175, 55, 0.45)'" title="وضع الإلقاء والخطابة للمحاضرين">
+            <i class="fa-solid fa-chalkboard-user"></i> وضع الإلقاء
         </button>
     </div>
 </div>
-<div class="role-bar">
+<div class="role-bar" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #071A38 0%, #0C2461 100%); border-radius: 14px; padding: 10px 16px; margin-bottom: 14px; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 6px 18px rgba(7, 26, 56, 0.25); flex-wrap: wrap; gap: 10px;">
 
-<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <span style="color: #cbd5e1; font-size: 0.84rem;">المستخدم:</span>
+    <strong id="loggedInUserName" style="color: #ffffff; font-weight: 900; font-size: 0.88rem;">...</strong>
+    <span id="currentRoleBadge" class="role-badge" style="background: rgba(212, 175, 55, 0.2); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); padding: 2px 10px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">خادم</span>
 
-<div>
+    <button type="button" class="btn-mini" onclick="openMyServantProfileModal()" style="background: rgba(255, 255, 255, 0.08); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.16)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'" title="تعديل بيانات ملفي الشخصي">
+        <i class="fa-solid fa-user-pen" style="color: #F3C64F;"></i> ملفي الشخصي
+    </button>
 
-<span id="cloudIndicator" class="cloud-status"></span>
-
-<span id="cloudStatusText">جاري الاتصال...</span>
-
+    <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
+        <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
+    </button>
 </div>
 
-<div id="cloudLastSyncBadge" class="cloud-health-badge" style="display:none;">
+<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8;">
+        <span id="cloudIndicator" class="cloud-status"></span>
+        <span id="cloudStatusText">جاري الاتصال...</span>
+    </div>
 
-⏱️ <span id="cloudLastSyncTime">لم يتم الرفع بعد</span>
+    <div id="cloudLastSyncBadge" class="cloud-health-badge" style="display:none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 2px 8px; font-size: 0.76rem; color: #cbd5e1;">
+        ⏱️ <span id="cloudLastSyncTime">لم يتم الرفع بعد</span>
+    </div>
 
-</div>
+    <div id="appUpdateContainer" style="display:inline-flex; align-items:center;"></div>
 
-<div id="appUpdateContainer" style="display:inline-flex; align-items:center;"></div>
-
-</div>
-
-<div>
-
-المستخدم: <strong id="loggedInUserName">...</strong> 
-
-(<span id="currentRoleBadge" class="role-badge">خادم</span>)
-
-<button type="button" class="btn-mini" onclick="openMyServantProfileModal()" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1d4ed8; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 4px 10px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; box-shadow: 0 1px 3px rgba(29, 78, 216, 0.1); margin: 0 6px;" title="تعديل بيانات ملفي الشخصي">
-  <i class="fa-solid fa-user-pen"></i> ملفي الشخصي 👤
-</button>
-
-<button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
-<span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
-</button>
-
-<a href="#" onclick="logout()" style="color:#ff7675; margin-right:8px; text-decoration:none; font-weight:bold;">[خروج آمن 🚪]</a>
-
+    <button type="button" onclick="logout()" style="background: rgba(239, 68, 68, 0.12); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.color='#ffffff'" onmouseout="this.style.background='rgba(239,68,68,0.12)'; this.style.color='#fca5a5'" title="تسجيل الخروج الآمن">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> خروج آمن
+    </button>
 </div>
 
 </div>
@@ -1829,13 +1824,13 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
 
 <a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مزامنة الحضور بالسحابة ☁️</a>
-<div class="tab-btn admin-only" data-group="admin" onclick="openTripartiteSyncModal()" style="background: linear-gradient(135deg, #047857 0%, #065f46 100%); color:#ffffff; font-weight:800; border: 1.5px solid #10b981; box-shadow: 0 2px 8px rgba(16,185,129,0.3); display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;">
-    <i class="fa-solid fa-arrows-rotate"></i> ⚡ المزامنة الثلاثية (Excel + CRM + Cloud)
+<div class="tab-btn admin-only" data-group="admin" onclick="openTripartiteSyncModal()" style="border: 1.5px solid rgba(212, 175, 55, 0.45); color: #0C2461; font-weight: 800; background: #fffdf5; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;" title="المزامنة الثلاثية المعتمدة بين إكسل وقاعدة البيانات والسحابة">
+    <i class="fa-solid fa-arrows-rotate" style="color: #D4AF37;"></i> المزامنة الثلاثية (Excel + CRM + Cloud)
 </div>
 
 <div class="tab-btn" onclick="switchTab('dataTab', this)">التقارير والنسخ الاحتياطي 📁</div>
 
-<div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin" style="border:1px solid #0984e3; color:#0984e3; font-weight:bold;">مؤشرات المزامنة وحالة السحابة ☁️</div>
+<div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin">مؤشرات المزامنة وحالة السحابة ☁️</div>
 
 <a href="servant_followup.html?fromTab=membersTab&group=people" onclick="this.href='servant_followup.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
 
@@ -3000,17 +2995,21 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div style="display:flex; align-items:center; gap:6px;">
 
-<button class="btn-mini btn-primary" onclick="changeCalendarMonth(-1)" style="padding:4px 8px; margin:0;">◀ السابق</button>
+<button type="button" class="btn-mini" onclick="changeCalendarMonth(-1)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">◀ السابق</button>
 
-<span id="calendarCurrentMonthLabel" style="font-weight:bold; font-size:13px; color:var(--dark); min-width:110px; text-align:center;">سبتمبر 2026</span>
+<span id="calendarCurrentMonthLabel" style="font-weight: 900; font-size: 0.92rem; color: #0C2461; min-width: 110px; text-align: center;">سبتمبر 2026</span>
 
-<button class="btn-mini btn-primary" onclick="changeCalendarMonth(1)" style="padding:4px 8px; margin:0;">التالي ▶</button>
+<button type="button" class="btn-mini" onclick="changeCalendarMonth(1)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'">التالي ▶</button>
 
-<button class="btn-mini btn-success" onclick="selectAttendanceDate(today)" style="padding:4px 8px; margin:0;">اليوم الحالي ⏱️</button>
+<button type="button" class="btn-mini" onclick="selectAttendanceDate(today)" style="background: #FAF7F2; color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 5px 12px; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'">اليوم الحالي</button>
 
-<button class="btn-mini btn-purple" onclick="openAttendanceExportModal()" style="padding:4px 10px; margin:0;" title="تصدير كشف الحضور لفترة أو لليوم الحالي إلى شيت إكسل">📊 تصدير الكشوفات</button>
+<button type="button" class="btn-mini" onclick="openAttendanceExportModal()" style="background: #0C2461; color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; padding: 5px 14px; font-weight: 800; font-size: 0.8rem; cursor: pointer; box-shadow: 0 2px 6px rgba(12, 36, 97, 0.15); transition: all 0.2s;" onmouseover="this.style.background='#153A7A'" onmouseout="this.style.background='#0C2461'" title="تصدير كشف الحضور لفترة أو لليوم الحالي إلى شيت إكسل">
+    <i class="fa-solid fa-file-excel"></i> تصدير الكشوفات
+</button>
 
-<button class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="padding:4px 8px; margin:0; background:#f1f2f6; border:1px solid #ced6e0; color:#2f3542; font-weight:bold;" title="جلب كافة سجلات السنة الخدمية من السحابة وتخزينها محلياً">🔄 جلب السجل الكامل</button>
+<button type="button" class="btn-mini" onclick="loadFullAttendanceHistory(this)" style="background: #F8FAFC; color: #334155; border: 1px solid #CBD5E1; border-radius: 8px; padding: 5px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F8FAFC'" title="جلب كافة سجلات السنة الخدمية من السحابة وتخزينها محلياً">
+    <i class="fa-solid fa-cloud-arrow-down"></i> جلب السجل الكامل
+</button>
 
 </div>
 
@@ -3216,19 +3215,32 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div class="stat-grid">
 
-<div class="stat-card"><div>إجمالي الخدام</div><div class="num" id="statServantsCount">0</div></div>
+<div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
+    <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; margin-bottom: 6px;">👥 إجمالي الخدام المقيدين</div>
+    <div class="num" id="statServantsCount" style="color: #0C2461; font-weight: 900; font-size: 1.6rem;">0</div>
+</div>
 
-<div class="stat-card"><div>حضور الخدام اليوم</div><div class="num" id="statServantsToday">0</div></div>
+<div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
+    <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; margin-bottom: 6px;">✨ حضور الخدام اليوم</div>
+    <div class="num" id="statServantsToday" style="color: #0C2461; font-weight: 900; font-size: 1.6rem;">0</div>
+</div>
 
-<div class="stat-card"><div>إجمالي الافتقادات المسجلة</div><div class="num" id="statTotalVisitations">0</div></div>
+<div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
+    <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; margin-bottom: 6px;">🤝 إجمالي الافتقادات الميدانية</div>
+    <div class="num" id="statTotalVisitations" style="color: #0C2461; font-weight: 900; font-size: 1.6rem;">0</div>
+</div>
 
 </div>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
 
-<h3>جدول التزام الخدام السنوي واليومي</h3>
+<h3 style="margin: 0; color: #0C2461; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+    <span>📋</span> جدول التزام الخدام السنوي واليومي
+</h3>
 
-<button class="btn-danger admin-only" onclick="clearTodayServantsAttendance()" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">مسح حضور اليوم للخدام 🗑️</button>
+<button type="button" class="admin-only" onclick="clearTodayServantsAttendance()" style="background: #FEF2F2; color: #991B1B; border: 1px solid #FECDD3; border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'" title="مسح الحضور المسجل لليوم الحالي للخدام فقط">
+    <i class="fa-solid fa-trash-can"></i> مسح حضور اليوم للخدام
+</button>
 
 </div>
 
