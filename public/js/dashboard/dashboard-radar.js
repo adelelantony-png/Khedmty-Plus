@@ -1769,6 +1769,12 @@ const KHEDMETY_SEED_EXCUSES = [
     }
 ];
 
+function isDelayExcuse(e) {
+    if (!e) return false;
+    const text = ((e.reason_category || '') + ' ' + (e.message_text || '') + ' ' + (e.servant_notes || '')).toLowerCase();
+    return /تأخير|تاخير|استئذان|استأذان|استاذان|انصراف|بدري|حضور متأخر|delay/i.test(text);
+}
+
 async function loadRadarExcuses() {
     const tbody = document.getElementById('radar_excusesTableBody');
     const badge = document.getElementById('radar_excusePendingBadge');
@@ -1837,10 +1843,35 @@ async function loadRadarExcuses() {
 
     // اعتماد القائمة الفعالة وتحديث واجهة المستخدم والنبض الرعوي
     window.lastRadarExcusesList = loadedExcuses || [];
-    const pendingCount = window.lastRadarExcusesList.filter(e => e.status === 'pending').length;
+    const allPending = window.lastRadarExcusesList.filter(e => e.status === 'pending');
+    const delaysPending = allPending.filter(e => isDelayExcuse(e));
+    const absencePending = allPending.filter(e => !isDelayExcuse(e));
 
-    if (badge) badge.textContent = `⏳ ${pendingCount} اعتذار قيد المراجعة`;
-    if (kpiCount) kpiCount.textContent = pendingCount;
+    const allDelays = window.lastRadarExcusesList.filter(e => isDelayExcuse(e));
+    const allAbsence = window.lastRadarExcusesList.filter(e => !isDelayExcuse(e));
+
+    // تحديث بطاقة استئذانات التأخير وبطاقة الاعتذارات العلوية
+    const delaysKpiCount = document.getElementById('radar_kpiDelaysPendingCount');
+    const delaysKpiSub = document.getElementById('radar_kpiDelaysPendingSub');
+    if (delaysKpiCount) delaysKpiCount.textContent = delaysPending.length;
+    if (delaysKpiSub) delaysKpiSub.textContent = delaysPending.length === 1 ? 'طلب استئذان تأخير معلق' : `${delaysPending.length} طلبات حضور متأخر بإذن`;
+
+    if (kpiCount) kpiCount.textContent = absencePending.length;
+
+    if (badge) {
+        badge.innerHTML = `⏳ <b>${allPending.length}</b> طلب قيد المراجعة (<span style="color:#7c3aed; font-weight:800;">⏰ ${delaysPending.length} تأخير بإذن</span> + <span style="color:#b45309; font-weight:800;">🕊️ ${absencePending.length} غياب</span>)`;
+    }
+
+    // تحديث أعداد أزرار الفلترة
+    const tabPendingCount = document.getElementById('radar_tabPendingCount');
+    const tabDelaysCount = document.getElementById('radar_tabDelaysCount');
+    const tabAbsenceCount = document.getElementById('radar_tabAbsenceCount');
+    const tabAllCount = document.getElementById('radar_tabAllCount');
+
+    if (tabPendingCount) tabPendingCount.textContent = allPending.length;
+    if (tabDelaysCount) tabDelaysCount.textContent = delaysPending.length;
+    if (tabAbsenceCount) tabAbsenceCount.textContent = absencePending.length;
+    if (tabAllCount) tabAllCount.textContent = window.lastRadarExcusesList.length;
 
     renderRadarExcusesTable();
 
@@ -1852,20 +1883,30 @@ async function loadRadarExcuses() {
 function filterRadarExcuses(filterMode = 'pending') {
     window.currentRadarExcuseFilter = filterMode;
     const btnPending = document.getElementById('btnRadarExcusePending');
+    const btnDelays = document.getElementById('btnRadarExcuseDelays');
+    const btnAbsence = document.getElementById('btnRadarExcuseAbsence');
     const btnAll = document.getElementById('btnRadarExcuseAll');
-    if (btnPending && btnAll) {
-        if (filterMode === 'pending') {
-            btnPending.style.background = '#b45309';
-            btnPending.style.color = '#ffffff';
-            btnAll.style.background = 'transparent';
-            btnAll.style.color = '#475569';
-        } else {
-            btnAll.style.background = '#0c2461';
-            btnAll.style.color = '#ffffff';
-            btnPending.style.background = 'transparent';
-            btnPending.style.color = '#475569';
-        }
+
+    const btns = [btnPending, btnDelays, btnAbsence, btnAll].filter(Boolean);
+    btns.forEach(b => {
+        b.style.background = 'transparent';
+        b.style.color = '#475569';
+    });
+
+    if (filterMode === 'pending' && btnPending) {
+        btnPending.style.background = '#b45309';
+        btnPending.style.color = '#ffffff';
+    } else if (filterMode === 'delays' && btnDelays) {
+        btnDelays.style.background = '#7c3aed';
+        btnDelays.style.color = '#ffffff';
+    } else if (filterMode === 'absence' && btnAbsence) {
+        btnAbsence.style.background = '#0284c7';
+        btnAbsence.style.color = '#ffffff';
+    } else if (filterMode === 'all' && btnAll) {
+        btnAll.style.background = '#0c2461';
+        btnAll.style.color = '#ffffff';
     }
+
     renderRadarExcusesTable();
 }
 
@@ -1874,18 +1915,28 @@ function renderRadarExcusesTable() {
     if (!tbody) return;
 
     let list = window.lastRadarExcusesList || [];
-    if (window.currentRadarExcuseFilter === 'pending') {
+    const filter = window.currentRadarExcuseFilter || 'pending';
+
+    if (filter === 'pending') {
         list = list.filter(e => e.status === 'pending');
+    } else if (filter === 'delays') {
+        list = list.filter(e => isDelayExcuse(e)).sort((a,b) => (a.status === 'pending' ? -1 : (b.status === 'pending' ? 1 : 0)));
+    } else if (filter === 'absence') {
+        list = list.filter(e => !isDelayExcuse(e));
     }
 
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; color: #166534; font-weight: bold; background: #f0fdf4; border-radius: 8px;">نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢</td></tr>';
+        const filterMsg = filter === 'delays' ? 'لا توجد طلبات استئذان تأخير مطابقة حالياً. 🟢' :
+                          filter === 'absence' ? 'لا توجد اعتذارات غياب مطابقة حالياً. 🟢' :
+                          'نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢';
+        tbody.innerHTML = `<tr><td colspan="5" style="padding: 24px; color: #166534; font-weight: bold; background: #f0fdf4; border-radius: 8px;">${filterMsg}</td></tr>`;
         return;
     }
 
     const allExcusesSource = window.lastRadarExcusesList || [];
 
     tbody.innerHTML = list.map(e => {
+        const isDelay = isDelayExcuse(e);
         const isPending = e.status === 'pending';
         const isAccepted = e.status === 'accepted';
         const timing = evaluateExcuseTiming(e.created_at, e.friday_date);
@@ -1914,8 +1965,8 @@ function renderRadarExcusesTable() {
                 <div style="display:flex; flex-direction:column; gap:4px; align-items:center; justify-content:center; width:100%; max-width:130px; margin:0 auto;">
                     <!-- الصف الأول: قبول ورفض جنباً إلى جنب بتماثل تام -->
                     <div style="display:flex; gap:4px; width:100%;">
-                        <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="flex:1; width:auto !important; margin:0 !important; padding:6px 4px; font-size:0.75rem; background:#10b981; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:3px; box-shadow:0 1px 2px rgba(16,185,129,0.25); transition:all 0.15s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'" title="اعتماد العذر كرسمي مقبول">
-                            <i class="fa-solid fa-check"></i> قبول
+                        <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'accept', this)" style="flex:1; width:auto !important; margin:0 !important; padding:6px 4px; font-size:0.75rem; background:${isDelay ? '#7c3aed' : '#10b981'}; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:3px; box-shadow:0 1px 2px rgba(0,0,0,0.15); transition:all 0.15s;" onmouseover="this.style.background='${isDelay ? '#6d28d9' : '#059669'}'" onmouseout="this.style.background='${isDelay ? '#7c3aed' : '#10b981'}'" title="${isDelay ? 'اعتماد استئذان التأخير كحضور مأذون به عند وصوله' : 'اعتماد العذر كرسمي مقبول'}">
+                            <i class="fa-solid fa-check"></i> ${isDelay ? 'قبول الإذن' : 'قبول'}
                         </button>
                         <button type="button" class="btn-custom" onclick="resolveExcuseAction(${e.id}, 'reject', this)" style="flex:1; width:auto !important; margin:0 !important; padding:6px 4px; font-size:0.75rem; background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-radius:6px; font-weight:bold; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:3px; transition:all 0.15s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fff1f2'" title="رفض العذر">
                             <i class="fa-solid fa-xmark"></i> رفض
@@ -1930,8 +1981,8 @@ function renderRadarExcusesTable() {
         } else if (isAccepted) {
             actionContent = `
                 <div style="display:flex; flex-direction:column; align-items:center; gap:4px; width:100%; max-width:130px; margin:0 auto;">
-                    <span class="badge" style="width:100%; text-align:center; background:#dcfce7; color:#15803d; border:1px solid #86efac; font-size:0.75rem; padding:4px 6px; font-weight:800; border-radius:6px; box-shadow:0 1px 2px rgba(16,185,129,0.15);">
-                        ✅ عذر مقبول
+                    <span class="badge" style="width:100%; text-align:center; background:${isDelay ? '#f5f3ff' : '#dcfce7'}; color:${isDelay ? '#6d28d9' : '#15803d'}; border:1px solid ${isDelay ? '#c4b5fd' : '#86efac'}; font-size:0.75rem; padding:4px 6px; font-weight:800; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                        ${isDelay ? '⏰ إذن تأخير مقبول' : '✅ عذر مقبول'}
                     </span>
                     <button type="button" onclick="cancelStudentExcuse(${e.id})" style="width:100% !important; margin:0 !important; padding:3px 6px; font-size:0.68rem; background:#f8fafc; color:#64748b; border:1px solid #e2e8f0; border-radius:5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.color='#dc2626'; this.style.borderColor='#fca5a5'; this.style.background='#fef2f2';" onmouseout="this.style.color='#64748b'; this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';" title="إلغاء وحذف هذا العذر">
                         <i class="fa-solid fa-trash-can text-danger" style="font-size:10px;"></i> تراجع / إلغاء
@@ -1983,9 +2034,18 @@ function renderRadarExcusesTable() {
 
                 <!-- 3. السبب المصنف -->
                 <td data-label="السبب" style="padding: 10px 8px; text-align: center; vertical-align: middle;">
-                    <span style="display: inline-block; font-size: 0.78rem; font-weight: 700; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 9px;">
-                        ${escapeHtml(e.reason_category || 'اعتذار عام 🕊️')}
-                    </span>
+                    ${isDelay ? `
+                        <div style="display:inline-flex; flex-direction:column; align-items:center; gap:2px;">
+                            <span style="display:inline-flex; align-items:center; gap:4px; font-size:0.78rem; font-weight:800; color:#6d28d9; background:#f5f3ff; border:1.5px solid #c4b5fd; border-radius:6px; padding:3px 8px;">
+                                ⏰ استئذان تأخير
+                            </span>
+                            <span style="font-size:0.7rem; color:#7c3aed; font-weight:700;">(حضور متأخر بإذن)</span>
+                        </div>
+                    ` : `
+                        <span style="display: inline-block; font-size: 0.78rem; font-weight: 700; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 9px;">
+                            ${escapeHtml(e.reason_category || 'اعتذار غياب 🕊️')}
+                        </span>
+                    `}
                 </td>
 
                 <!-- 4. بطاقة رسالة الواتساب المتماسكة مع زر المعاينة -->
@@ -2228,6 +2288,7 @@ function markStudentExcusedInAttendance(excuse) {
 
         const studentCode = String(excuse.student_code || '');
         const studentPhone = String(excuse.student_phone || '');
+        const isDelay = isDelayExcuse(excuse);
 
         let item = record[friday].find(r => (studentCode && String(r.code) === studentCode) || (studentPhone && String(r.phone).includes(studentPhone.slice(-9))));
         if (!item) {
@@ -2240,14 +2301,20 @@ function markStudentExcusedInAttendance(excuse) {
                 attended: false,
                 isAbsentDueToDelay: false,
                 isExcused: true,
-                excuseReason: excuse.reason_category
+                hasApprovedDelay: isDelay,
+                excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (excuse.reason_category || 'عذر غياب مقبول')
             };
             record[friday].push(item);
         } else {
-            item.attended = false;
-            item.isAbsentDueToDelay = false;
-            item.isExcused = true;
-            item.excuseReason = excuse.reason_category;
+            if (isDelay) {
+                item.hasApprovedDelay = true;
+                item.excuseReason = 'استئذان تأخير مسبق ⏰';
+            } else {
+                item.attended = false;
+                item.isAbsentDueToDelay = false;
+                item.isExcused = true;
+                item.excuseReason = excuse.reason_category || 'عذر غياب مقبول';
+            }
         }
 
         if (typeof saveAttendanceRecord === 'function') {
@@ -2255,7 +2322,7 @@ function markStudentExcusedInAttendance(excuse) {
         } else {
             localStorage.setItem('my_church_attendance', JSON.stringify(record));
         }
-        console.log(`✅ [Attendance Sync] تم تسجيل غياب بعذر مقبول للمخدوم [${excuse.student_name}] في جلسة [${friday}]`);
+        console.log(`✅ [Attendance Sync] تم تسجيل ${isDelay ? 'استئذان تأخير مسبق' : 'غياب بعذر مقبول'} للمخدوم [${excuse.student_name}] في جلسة [${friday}]`);
     } catch(err) {
         console.warn('[Attendance Sync] تعذر تحديث كشف الحضور تلقائياً:', err);
     }
@@ -2576,6 +2643,7 @@ function manualRecordStudentExcuse() {
 }
 
 if (typeof window !== 'undefined') {
+    window.isDelayExcuse = isDelayExcuse;
     window.loadRadarExcuses = loadRadarExcuses;
     window.filterRadarExcuses = filterRadarExcuses;
     window.resolveExcuseAction = resolveExcuseAction;
