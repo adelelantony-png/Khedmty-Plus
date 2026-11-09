@@ -1474,6 +1474,69 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 grid-template-columns: 1fr !important;
             }
         }
+        /* ===== تحسينات الهيدر الملكي لرادار أمين الخدمة الشامل (Meeting Pulse) ===== */
+        .radar-hero-banner {
+            background: linear-gradient(135deg, #071A38 0%, #0C2461 55%, #153A7A 100%);
+            border-radius: 18px;
+            padding: 22px 26px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            border: 1.5px solid rgba(212, 175, 55, 0.45);
+            box-shadow: 0 10px 28px rgba(7, 26, 56, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .radar-hero-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+            position: relative;
+            z-index: 1;
+        }
+        .radar-hero-text {
+            flex: 1 1 360px;
+            min-width: 280px;
+        }
+        .radar-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            margin-inline-start: auto;
+        }
+        .radar-header-actions button,
+        .radar-header-actions .btn-custom {
+            width: auto !important;
+            margin: 0 !important;
+            white-space: nowrap;
+        }
+        @media (max-width: 880px) {
+            .radar-header-actions {
+                width: 100% !important;
+                justify-content: stretch !important;
+                gap: 8px !important;
+                margin-top: 12px;
+            }
+            .radar-header-actions button,
+            .radar-header-actions .btn-custom {
+                flex: 1 1 calc(50% - 8px) !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+        }
+        @media (max-width: 520px) {
+            .radar-hero-banner {
+                padding: 16px 14px !important;
+            }
+            .radar-header-actions button,
+            .radar-header-actions .btn-custom {
+                flex: 1 1 100% !important;
+            }
+        }
 
     </style>
 
@@ -1994,27 +2057,38 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
         <!-- ========================================== -->
         <div id="radarTab" class="tab-content admin-or-servant">
             
-            <!-- الشريط العلوي للرادار -->
-            <div style="background: linear-gradient(135deg, #091a44 0%, #0c2461 60%, #1e3799 100%); border-radius: 18px; padding: 20px; color: #ffffff; margin-bottom: 20px; border: 1.5px solid #d4af37; box-shadow: 0 8px 24px rgba(12, 36, 97, 0.25);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                    <div>
-                        <div style="font-size: 0.85rem; color: #fde047; font-weight: 800;">مركز المتابعة الرعوية والإنذار المبكر</div>
-                        <h2 style="margin: 4px 0 0; font-size: 1.5rem; font-weight: 900; color: #ffffff;">
-                            <i class="fa-solid fa-radar text-warning me-2"></i> رادار أمين الخدمة الشامل (Meeting Pulse)
+            <!-- الشريط العلوي للرادار: التصميم الملكي المتوازن (Royal Balanced Header) -->
+            <div class="radar-hero-banner">
+                <!-- زخرفة طقسية خفيفة خلفية -->
+                <div style="position: absolute; left: -25px; top: -25px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 70%); pointer-events: none; border-radius: 50%;"></div>
+                
+                <div class="radar-hero-content">
+                    <!-- الجانب الأيمن: الهوية والعنوان والوصف -->
+                    <div class="radar-hero-text">
+                        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(212, 175, 55, 0.16); border: 1px solid rgba(212, 175, 55, 0.35); padding: 3px 12px; border-radius: 999px; margin-bottom: 8px;">
+                            <span style="color: #F3C64F; font-size: 0.8rem; font-weight: 800;">✨ مركز المتابعة الرعوية والإنذار المبكر</span>
+                            <span style="color: rgba(255,255,255,0.35); font-size: 0.75rem;">•</span>
+                            <span style="color: #cbd5e1; font-size: 0.76rem; font-weight: 700;">اجتماع القديس بولس الرسول</span>
+                        </div>
+                        <h2 style="margin: 0; font-size: 1.55rem; font-weight: 900; color: #ffffff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="background: linear-gradient(135deg, #ffffff 0%, #fef08a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📡 رادار أمين الخدمة الشامل</span>
+                            <span style="font-size: 0.82rem; font-weight: 800; color: #93c5fd; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(147, 197, 253, 0.3); border-radius: 6px; padding: 2px 8px; letter-spacing: 0.5px;">Meeting Pulse</span>
                         </h2>
-                        <div style="font-size: 0.82rem; color: #cbd5e1; margin-top: 4px;">
-                            كشف فوري لحالات الغياب المتتالي، مهلة الاعتراف، مقارنة القداس، وشيت الإكسيل الأسبوعي
+                        <div style="font-size: 0.83rem; color: #cbd5e1; margin-top: 6px; line-height: 1.5;">
+                            كشف فوري لحالات الغياب المتتالي، استئذانات التأخير، مهلة الاعتراف، ومقارنة القداس مع التصدير الأسبوعي
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" class="btn-custom" onclick="switchRadarSection('attExport')" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color:#ffffff; font-weight:800; padding:8px 14px; border-radius:10px; border:1px solid #f59e0b; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(217,119,6,0.3);">
-                            <i class="fa-solid fa-file-pdf"></i> كشف الغياب والتأخيرات (A4 PDF وواتساب) 📑
+
+                    <!-- الجانب الأيسر: شريط الإجراءات السريعة المتوازن أفقياً (Horizontal Action Toolbar) -->
+                    <div class="radar-header-actions">
+                        <button type="button" class="btn-custom" onclick="switchRadarSection('attExport')" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; font-weight: 800; padding: 9px 15px; border-radius: 10px; border: 1px solid #f59e0b; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.28); font-size: 0.85rem; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+                            <i class="fa-solid fa-file-pdf"></i> كشف الغياب والتأخيرات (PDF) 📑
                         </button>
-                        <button type="button" class="btn-custom" onclick="exportWeeklyExcelSheet()" style="background: #10b981; color: #ffffff; border: 1px solid #059669; font-weight: 800; padding: 8px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                            <i class="fa-solid fa-file-excel"></i> تصدير كشف الحضور والقداس الأسبوعي (.xlsx)
+                        <button type="button" class="btn-custom" onclick="exportWeeklyExcelSheet()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #ffffff; border: 1px solid #10b981; font-weight: 800; padding: 9px 15px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25); font-size: 0.85rem; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+                            <i class="fa-solid fa-file-excel"></i> تصدير الإكسيل (.xlsx)
                         </button>
-                        <button type="button" class="btn-custom" onclick="renderRadarDashboard()" style="background: rgba(255,255,255,0.15); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); font-weight: bold; padding: 8px 12px; border-radius: 10px; cursor: pointer;">
-                            <i class="fa-solid fa-rotate me-1"></i> تحديث الرادار
+                        <button type="button" class="btn-custom" onclick="renderRadarDashboard()" style="background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.28); font-weight: 700; padding: 9px 13px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(8px); font-size: 0.85rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.22)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+                            <i class="fa-solid fa-rotate"></i> تحديث
                         </button>
                     </div>
                 </div>
