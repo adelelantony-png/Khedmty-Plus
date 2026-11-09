@@ -1013,6 +1013,8 @@ function renderRadarDashboard() {
         if (!members || members.length === 0) return;
         renderRadarCopticFasting();
 
+        const allDates = Object.keys(attendanceRecord || {}).sort().reverse();
+
         // 1. تحديد التواريخ الخاصة بالاجتماعات (الجمعة الأسبق أو اليوم الإضافي بعد ذلك)
         const activeDate = getResolvedMeetingKpiDate(attendanceRecord, activeSelectedDate);
         const currentList = attendanceRecord[activeDate] || [];
