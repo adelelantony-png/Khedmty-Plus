@@ -7821,10 +7821,6 @@ let resolvedDob = (m.dob && m.dob !== '-' && m.dob !== 'غير محدد') ? m.do
                   (existingLocal && (existingLocal.dob || existingLocal.birth_date)) ? (existingLocal.dob || existingLocal.birth_date) :
                   (officialMatch && (officialMatch.dob || officialMatch.birth_date)) ? (officialMatch.dob || officialMatch.birth_date) : "";
 
-if (doc && doc.ref && (!m.dob || m.dob === '' || m.dob === '-') && resolvedDob) {
-    try { doc.ref.set({ dob: resolvedDob, birth_date: resolvedDob }, { merge: true }).catch(() => {}); } catch(e){}
-}
-
 let item = {
 
 id: m.id || Date.now(),
@@ -9905,22 +9901,22 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=7.7"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=7.7"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=7.7"></script>
-<script src="js/dashboard/dashboard-members.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-servants.js?v=7.8"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=7.8"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=7.8"></script>
+<script src="js/dashboard/dashboard-members.js?v=7.8"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=7.7"></script>
-<script src="js/dashboard/dashboard-plan.js?v=7.7"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-radar.js?v=7.8"></script>
+<script src="js/dashboard/dashboard-plan.js?v=7.8"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=7.8"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=7.8"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=7.8"></script>
 
-<script src="js/app-updater.js?v=7.7"></script>
+<script src="js/app-updater.js?v=7.8"></script>
 
-<script src="js/pwa-helper.js?v=7.7"></script>
+<script src="js/pwa-helper.js?v=7.8"></script>
 
 <script>
 
@@ -9938,8 +9934,8 @@ KhedmetyAppUpdater.renderUpdateButton('#appUpdateContainer');
 
 </script>
 
-<script src="js/dashboard/dashboard-feedback.js?v=7.7"></script>
-<script src="js/dashboard/dashboard-incentives.js?v=7.7"></script>
+<script src="js/dashboard/dashboard-feedback.js?v=7.8"></script>
+<script src="js/dashboard/dashboard-incentives.js?v=7.8"></script>
 
 <script>
 // ==========================================
