@@ -760,6 +760,13 @@ async function selectAttendanceDate(dateStr) {
 
 activeSelectedDate = dateStr;
 
+if (typeof changeServantAttendanceDate === 'function') {
+    try { changeServantAttendanceDate(dateStr); } catch(e) {}
+} else if (typeof activeServantAttendanceDate !== 'undefined') {
+    activeServantAttendanceDate = dateStr;
+    if (typeof renderServantsAttendanceTable === 'function') renderServantsAttendanceTable();
+}
+
 if (!attendanceRecord[activeSelectedDate]) attendanceRecord[activeSelectedDate] = [];
 
 renderAttendanceTable();

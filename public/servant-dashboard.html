@@ -3213,6 +3213,49 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <h2>متابعة التزام ونشاط خدام الاجتماع</h2>
 
+<!-- شريط التاريخ المفتوح والتحكم الزمني لحضور الخدام -->
+<div style="background: #ffffff; border: 1.5px solid rgba(212, 175, 55, 0.4); border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; box-shadow: 0 4px 16px rgba(12, 36, 97, 0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    
+    <!-- الجانب الأيمن: عنوان التاريخ النشط مع إمكانية التحديد الحر -->
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.25rem;">📅</span>
+            <div>
+                <div style="font-size: 0.76rem; color: #64748b; font-weight: 700;">تاريخ كشف حضور الخدام:</div>
+                <strong id="servantAttendanceSelectedDateLabel" style="font-size: 1rem; color: #0C2461; font-weight: 900;">...</strong>
+            </div>
+        </div>
+
+        <!-- حقل اختيار التاريخ المفتوح -->
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: #FAF7F2; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 4px 10px;">
+            <label for="servantAttendanceDatePicker" style="font-size: 0.8rem; font-weight: 800; color: #874F19; margin: 0; cursor: pointer;">
+                <i class="fa-regular fa-calendar-days"></i> اختيار تاريخ:
+            </label>
+            <input type="date" id="servantAttendanceDatePicker" onchange="changeServantAttendanceDate(this.value)" style="border: none; background: transparent; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 800; color: #0C2461; outline: none; cursor: pointer;">
+        </div>
+    </div>
+
+    <!-- الجانب الأيسر: أزرار القفز السريع للأيام والجمعات ومزامنة المخدومين -->
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="btn-mini" onclick="shiftServantAttendanceDate(-7)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'" title="الانتقال للجمعة السابقة (7 أيام قبل)">
+            ◀ الجمعة السابقة
+        </button>
+
+        <button type="button" class="btn-mini" onclick="setServantAttendanceToday()" style="background: #FAF7F2; color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'" title="العودة لتاريخ اليوم">
+            اليوم الحالي ⏱️
+        </button>
+
+        <button type="button" class="btn-mini" onclick="shiftServantAttendanceDate(7)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'" title="الانتقال للجمعة التالية (7 أيام بعد)">
+            الجمعة التالية ▶
+        </button>
+
+        <button type="button" class="btn-mini" onclick="syncWithStudentAttendanceDate()" style="background: rgba(12, 36, 97, 0.08); color: #0C2461; border: 1px solid rgba(12, 36, 97, 0.25); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(12,36,97,0.15)'" onmouseout="this.style.background='rgba(12, 36, 97, 0.08)'" title="مزامنة نفس اليوم المحدد في شاشة حضور المخدومين">
+            <i class="fa-solid fa-arrows-rotate"></i> نفس يوم المخدومين
+        </button>
+    </div>
+
+</div>
+
 <div class="stat-grid">
 
 <div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
@@ -3221,8 +3264,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 </div>
 
 <div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
-    <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; margin-bottom: 6px;">✨ حضور الخدام اليوم</div>
+    <div style="font-size: 0.82rem; color: #64748b; font-weight: 700; margin-bottom: 4px;">✨ حضور الخدام بالتاريخ المحدد</div>
     <div class="num" id="statServantsToday" style="color: #0C2461; font-weight: 900; font-size: 1.6rem;">0</div>
+    <div id="statServantsDateSubtitle" style="font-size: 0.72rem; color: #94a3b8; font-weight: 700; margin-top: 4px;">...</div>
 </div>
 
 <div class="stat-card" style="border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 14px; padding: 14px; background: #ffffff; box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05); text-align: center;">
@@ -3235,11 +3279,11 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:18px; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
 
 <h3 style="margin: 0; color: #0C2461; font-weight: 900; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
-    <span>📋</span> جدول التزام الخدام السنوي واليومي
+    <span>📋</span> جدول التزام الخدام السنوي والكشف اليومي
 </h3>
 
-<button type="button" class="admin-only" onclick="clearTodayServantsAttendance()" style="background: #FEF2F2; color: #991B1B; border: 1px solid #FECDD3; border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'" title="مسح الحضور المسجل لليوم الحالي للخدام فقط">
-    <i class="fa-solid fa-trash-can"></i> مسح حضور اليوم للخدام
+<button type="button" class="admin-only" onclick="clearTodayServantsAttendance()" style="background: #FEF2F2; color: #991B1B; border: 1px solid #FECDD3; border-radius: 8px; padding: 6px 14px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#FEE2E2'" onmouseout="this.style.background='#FEF2F2'" title="مسح الحضور المسجل لليوم المحدد فقط">
+    <i class="fa-solid fa-trash-can"></i> <span id="btnClearServantAttendanceLabel">مسح حضور التاريخ المحدد</span>
 </button>
 
 </div>
@@ -3252,9 +3296,9 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <tr>
 
-<th>كود الخادم</th><th>الاسم</th><th>الهاتف</th><th>حالة اليوم</th>
+<th>كود الخادم</th><th>الاسم</th><th>الهاتف</th><th><span id="servantTableDateHeader">حالة اليوم المحدد</span></th>
 
-<th>نسبة الالتزام السنوية</th><th>تكليف اليوم بالخطة</th>
+<th>نسبة الالتزام السنوية</th><th><span id="servantTablePlanHeader">تكليف الخطة</span></th>
 
 <th>إجمالي الافتقادات</th><th class="can-edit">تسجيل / إلغاء حضور</th>
 

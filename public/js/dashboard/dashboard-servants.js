@@ -5,9 +5,91 @@
 
 // ==========================================
 
-// 16. عرض جدول التزام الخدام
+// 16. نظام التاريخ المفتوح والتحكم الزمني لحضور الخدام
 
 // ==========================================
+
+let activeServantAttendanceDate = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+
+function getActiveServantDate() {
+    if (typeof activeServantAttendanceDate !== 'undefined' && activeServantAttendanceDate) {
+        return activeServantAttendanceDate;
+    }
+    if (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) {
+        return activeSelectedDate;
+    }
+    return (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+}
+
+function formatServantArabicDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            return d.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    } catch(e) {}
+    return dateStr;
+}
+
+function changeServantAttendanceDate(newDate) {
+    if (!newDate) return;
+    activeServantAttendanceDate = newDate;
+    if (typeof servantsAttendance !== 'undefined' && !servantsAttendance[newDate]) {
+        servantsAttendance[newDate] = [];
+    }
+
+    // استحضار سحابي مباشر إذا كانت السحابة مفعلة وغير موجود محلياً
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        if (!servantsAttendance[newDate] || servantsAttendance[newDate].length === 0) {
+            fsdb.collection('servants_attendance').doc(newDate).get().then(doc => {
+                if (doc.exists) {
+                    const list = (doc.data() || {}).list || [];
+                    if (list.length > 0) {
+                        servantsAttendance[newDate] = list;
+                        localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
+                        renderServantsAttendanceTable();
+                        if (typeof showToast === 'function') showToast(`☁️ تم جلب حضور الخدام ليوم (${newDate}) من السحابة`);
+                    }
+                }
+            }).catch(e => console.warn('Could not fetch cloud servant attendance:', e));
+        }
+    }
+
+    renderServantsAttendanceTable();
+    if (typeof showToast === 'function') {
+        showToast(`📅 تم فتح كشف حضور الخدام لتاريخ: ${newDate}`);
+    }
+}
+
+function shiftServantAttendanceDate(days) {
+    const cur = getActiveServantDate();
+    try {
+        const parts = cur.split('-');
+        const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        dt.setDate(dt.getDate() + days);
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const d = String(dt.getDate()).padStart(2, '0');
+        changeServantAttendanceDate(`${y}-${m}-${d}`);
+    } catch(e) {
+        console.error('shiftServantAttendanceDate error:', e);
+    }
+}
+
+function setServantAttendanceToday() {
+    const t = (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+    changeServantAttendanceDate(t);
+}
+
+function syncWithStudentAttendanceDate() {
+    if (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) {
+        changeServantAttendanceDate(activeSelectedDate);
+    } else {
+        setServantAttendanceToday();
+    }
+}
 
 function renderServantsAttendanceTable() {
 
@@ -17,13 +99,38 @@ if (!tbody) return;
 
 tbody.innerHTML = '';
 
+const curDate = getActiveServantDate();
+
+// مزامنة عناصر واجهة التاريخ النشط
+const dateInput = document.getElementById('servantAttendanceDatePicker');
+if (dateInput && dateInput.value !== curDate) {
+    dateInput.value = curDate;
+}
+const dateLabel = document.getElementById('servantAttendanceSelectedDateLabel');
+if (dateLabel) {
+    dateLabel.textContent = formatServantArabicDate(curDate);
+}
+const tableDateHeader = document.getElementById('servantTableDateHeader');
+if (tableDateHeader) {
+    tableDateHeader.textContent = `حالة يوم (${curDate})`;
+}
+const clearBtnDate = document.getElementById('btnClearServantAttendanceLabel');
+if (clearBtnDate) {
+    clearBtnDate.textContent = `مسح حضور يوم (${curDate})`;
+}
+
 const elStatCount = document.getElementById('statServantsCount');
 
 if (elStatCount) elStatCount.innerText = servants.length;
 
 const elTodayCount = document.getElementById('statServantsToday');
 
-if (elTodayCount) elTodayCount.innerText = (servantsAttendance[today] || []).length;
+if (elTodayCount) elTodayCount.innerText = (servantsAttendance[curDate] || []).length;
+
+const elDateSubtitle = document.getElementById('statServantsDateSubtitle');
+if (elDateSubtitle) {
+    elDateSubtitle.innerText = `بتاريخ: ${curDate}`;
+}
 
 let allVisitationsList = [];
 
@@ -55,7 +162,7 @@ tbody.innerHTML = '<tr><td colspan="9" class="empty-state">لا يوجد خدا�
 
 servants.forEach(s => {
 
-let present = (servantsAttendance[today] || []).find(x => x.id.toString() === s.id.toString());
+let present = (servantsAttendance[curDate] || []).find(x => x.id.toString() === s.id.toString());
 
 let visits = allVisitationsList.filter(v => {
 
@@ -67,13 +174,13 @@ return vBy === sName || (s.role === 'admin' && (vBy.includes('أمين الخد�
 
 }).length;
 
-let todayEvent = masterPlan.find(l => (l.responsible || '').trim().toLowerCase() === s.name.trim().toLowerCase() && l.date === today);
+let todayEvent = masterPlan.find(l => (l.responsible || '').trim().toLowerCase() === s.name.trim().toLowerCase() && l.date === curDate);
 
 let planInfo = todayEvent ? `<span style="color:#b45309; font-weight:800; font-size:0.8rem;">📌 ${todayEvent.type}: ${todayEvent.title}</span>` : '<span style="color:#94a3b8; font-size:0.8rem;">لا توجد تكليفات اليوم</span>';
 
 let actionBtn = present
-? `<button type="button" class="btn-mini" onclick="cancelServantAttendance(${s.id})" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">إلغاء الحضور</button>`
-: `<button type="button" class="btn-mini" onclick="manualMarkServant(${s.id})" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">تسجيل حضور</button>`;
+? `<button type="button" class="btn-mini" onclick="cancelServantAttendance(${s.id}, '${curDate}')" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">إلغاء الحضور</button>`
+: `<button type="button" class="btn-mini" onclick="manualMarkServant(${s.id}, '${curDate}')" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">تسجيل حضور</button>`;
 
 let commit = calculateServantCommitment(s.id);
 
@@ -889,7 +996,7 @@ async function clearAllServants() {
 }
 
 async function clearTodayServantsAttendance() {
-    let dateToClear = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : today;
+    let dateToClear = getActiveServantDate();
     let pwd = prompt(`⚠️ تنبيه: أنت على وشك مسح سجل حضور الخدام ليوم (${dateToClear}) بالكامل!\nأدخل كلمة مرور أمين الخدمة للتأكيد:`);
     if (!pwd) return;
 
@@ -938,9 +1045,12 @@ select.appendChild(opt);
 
 // ==========================================
 
-function recordServantAttendance(servant) {
+function recordServantAttendance(servant, targetDate) {
 
-if (!servantsAttendance[today].some(s => s.id.toString() === servant.id.toString())) {
+let d = targetDate || getActiveServantDate();
+if (!servantsAttendance[d]) servantsAttendance[d] = [];
+
+if (!servantsAttendance[d].some(s => s.id.toString() === servant.id.toString())) {
 
 let newServRec = {
 
@@ -954,13 +1064,13 @@ time: new Date().toLocaleTimeString('ar-EG')
 
 };
 
-servantsAttendance[today].push(newServRec);
+servantsAttendance[d].push(newServRec);
 
 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
 
 syncToCloud('servants_attendance', servantsAttendance);
 
-logActivity("حضور خادم", servant.name, `وقت: ${newServRec.time}`);
+logActivity("حضور خادم", servant.name, `تاريخ: ${d} - وقت: ${newServRec.time}`);
 
 renderServantsAttendanceTable();
 
@@ -972,35 +1082,39 @@ checkLocalStorageUsage();
 
 }
 
-function manualMarkServant(servantId) {
+function manualMarkServant(servantId, targetDate) {
 
 let s = servants.find(x => x.id === servantId);
 
 if (!s) return;
 
-recordServantAttendance(s);
+let d = targetDate || getActiveServantDate();
+
+recordServantAttendance(s, d);
 
 playBeepSound('success');
 
-showToast(`✅ تم تسجيل حضور الخادم: ${s.name}`);
+showToast(`✅ تم تسجيل حضور (${s.name}) لتاريخ ${d}`);
 
 }
 
-function cancelServantAttendance(servantId) {
+function cancelServantAttendance(servantId, targetDate) {
 
 let s = servants.find(x => x.id === servantId);
 
 let sName = s ? s.name : "الخادم";
 
-if (confirm(`إلغاء حضور الخادم (${sName}) لليوم؟`)) {
+let d = targetDate || getActiveServantDate();
 
-servantsAttendance[today] = (servantsAttendance[today] || []).filter(item => item.id.toString() !== servantId.toString());
+if (confirm(`إلغاء حضور الخادم (${sName}) ليوم (${d})؟`)) {
+
+servantsAttendance[d] = (servantsAttendance[d] || []).filter(item => item.id.toString() !== servantId.toString());
 
 localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
 
 syncToCloud('servants_attendance', servantsAttendance);
 
-logActivity("إلغاء حضور خادم", sName, "إلغاء يدوي");
+logActivity("إلغاء حضور خادم", sName, `إلغاء يدوي ليوم ${d}`);
 
 renderServantsAttendanceTable();
 
@@ -1201,6 +1315,12 @@ if (typeof window !== 'undefined') {
   window.deleteServant = deleteServant;
   window.clearAllServants = clearAllServants;
   window.clearTodayServantsAttendance = clearTodayServantsAttendance;
+window.activeServantAttendanceDate = activeServantAttendanceDate;
+window.getActiveServantDate = getActiveServantDate;
+window.changeServantAttendanceDate = changeServantAttendanceDate;
+window.shiftServantAttendanceDate = shiftServantAttendanceDate;
+window.setServantAttendanceToday = setServantAttendanceToday;
+window.syncWithStudentAttendanceDate = syncWithStudentAttendanceDate;
   window.renderServantsTable = renderServantsTable;
   window.renderServantsAttendanceTable = renderServantsAttendanceTable;
   window.registerActiveSession = registerActiveSession;
