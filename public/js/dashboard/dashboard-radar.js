@@ -1483,6 +1483,7 @@ if (tabId === 'followupTab') renderFollowupTab();
 
 if (typeof window !== 'undefined') {
 
+window.switchTab = switchTab;
 window.addEventListener('popstate', function (e) {
 
 const urlTab = new URLSearchParams(window.location.search).get('tab');
@@ -2723,7 +2724,7 @@ async function submitManualExcuseFromModal(memberId, studentCode, studentName, s
                     stage: studentStage,
                     reason: reasonCategory,
                     friday_date: targetFriday
-                },
+                }),
                 signal: controller.signal
             });
             clearTimeout(timeoutId);

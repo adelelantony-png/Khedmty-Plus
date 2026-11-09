@@ -1869,6 +1869,25 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
+<!-- 🛡️ Early Safety Shield for Tabs Navigation -->
+<script>
+window.switchTab = window.switchTab || function(tabId, btn) {
+    if (!tabId || !document.getElementById(tabId)) tabId = 'dashTab';
+    document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    var targetTab = document.getElementById(tabId);
+    if (targetTab) targetTab.classList.add('active');
+    var targetBtn = btn || document.querySelector(".tab-btn[onclick*='" + tabId + "']");
+    if (targetBtn) targetBtn.classList.add('active');
+    try {
+        var u = new URL(window.location.href);
+        if (u.searchParams.get('tab') !== tabId) {
+            u.searchParams.set('tab', tabId);
+            window.history.replaceState({ tab: tabId }, '', u.toString());
+        }
+    } catch(e){}
+};
+</script>
 <div class="tabs">
 
 <div class="tab-btn active" onclick="switchTab('dashTab', this)">الرئيسية 📊</div>
@@ -10319,20 +10338,20 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=8.6"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=8.6"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=8.6"></script>
-<script src="js/dashboard/dashboard-members.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-servants.js?v=8.8"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=8.8"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=8.8"></script>
+<script src="js/dashboard/dashboard-members.js?v=8.8"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=8.6"></script>
-<script src="js/dashboard/dashboard-plan.js?v=8.6"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-radar.js?v=8.8"></script>
+<script src="js/dashboard/dashboard-plan.js?v=8.8"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=8.8"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=8.8"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=8.8"></script>
 
-<script src="js/app-updater.js?v=8.6"></script>
+<script src="js/app-updater.js?v=8.8"></script>
 
 <script src="js/pwa-helper.js?v=8.0"></script>
 
