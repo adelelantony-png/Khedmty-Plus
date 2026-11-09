@@ -190,7 +190,7 @@ function getStudentApprovedDelayExcuse(student, targetDate) {
         if (e.friday_date && dateStr && e.friday_date !== dateStr) return false;
 
         const cat = ((e.reason_category || '') + ' ' + (e.message_text || '') + ' ' + (e.servant_notes || '')).toLowerCase();
-        const isDelayOrPermission = /تأخير|تاخير|استئذان|استأذان|انصراف|بدري|بلاك فرايدي|black friday|شغل|نبطشية|نبطشيه/i.test(cat);
+        const isDelayOrPermission = /تأخير|تاخير|استئذان|استأذان|استاذان|انصراف|بدري|بلاك فرايدي|black friday|شغل|نبطشية|نبطشيه|ايفنت|ايڤنت|event/i.test(cat);
         if (!isDelayOrPermission) return false;
 
         const eId = String(e.student_id || '').trim();
@@ -328,7 +328,10 @@ if (approvedDelayExcuse) {
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try { navigator.vibrate([40, 30, 40]); } catch(e){}
     }
-    showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير معتمد: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+    showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير مسجل: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+    if (typeof showToast === 'function') {
+        showToast(`⏰ تنبيه: [${member.name}] لديه طلب استئذان تأخير مسجل مسبقاً (${approvedDelayExcuse.reason_category || 'استئذان تأخير'})`);
+    }
 } else if (isAbsent) {
     playBeepSound('error');
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
@@ -378,7 +381,10 @@ if (result.conflict) {
         try { navigator.vibrate(approvedDelayExcuse ? [40, 30, 40] : 70); } catch(e){}
     }
     if (approvedDelayExcuse) {
-        showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير معتمد: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+        showScannerHUD('success', '🟢 حاضر (بإذن تأخير مسبق ⏰)', member.name, `عذر تأخير مسجل: ${approvedDelayExcuse.reason_category || 'استئذان مسبق'}`);
+        if (typeof showToast === 'function') {
+            showToast(`⏰ تنبيه: [${member.name}] لديه طلب استئذان تأخير مسجل مسبقاً (${approvedDelayExcuse.reason_category || 'استئذان تأخير'})`);
+        }
     } else if (isAbsent) {
         showScannerHUD('warning', 'تم التسجيل (تأخير شديد) ⚠️', member.name, `${member.stage || 'سنة أولى'} • ${newRecord.time}`);
     } else {
@@ -1824,6 +1830,11 @@ if (!member && input) {
 
 if (member) {
 
+const delayExcuse = getStudentApprovedDelayExcuse(member, activeSelectedDate);
+if (delayExcuse && typeof showToast === 'function') {
+    showToast(`⏰ تنبيه: الدارس [${member.name}] مسجل لديه استئذان تأخير مسبق! (${delayExcuse.reason_category || 'استئذان مسبق'})`);
+}
+
 atomicRegisterAttendance(member);
 
 document.getElementById('manualAttendInput').value = '';
@@ -2077,6 +2088,10 @@ tr.innerHTML = `
             <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:bold; font-size:11px;">كود: ${escapeHtml(m.code) || '-'}</span>
             <span class="badge" style="background:#f1f5f9; color:#475569; font-size:11px; margin-right:4px;">${escapeHtml(normalizeStageText(m.stage) || '')}</span>
         </div>
+        ${(() => {
+            const de = getStudentApprovedDelayExcuse(m, activeSelectedDate);
+            return de ? `<div style="width:100%; margin-top:4px;"><span class="badge" style="background:#f5f3ff; color:#6d28d9; border:1px solid #c4b5fd; font-size:11px; padding:3px 8px; font-weight:800; border-radius:6px; display:inline-flex; align-items:center; gap:4px;">⏰ تنبيه: قدم طلب استئذان تأخير (${escapeHtml(de.reason_category || 'استئذان مسبق')})</span></div>` : '';
+        })()}
     </div>
 </td>
 <td data-label="حضور اليوم" class="modal-col-check">

@@ -1796,6 +1796,21 @@ const KHEDMETY_SEED_EXCUSES = [
         "servant_notes": "طلب انصراف مبكر مسبق - ارتباط عمل (إيفنت) - الانصراف المتوقع 2:30 م",
         "resolved_by": "prior_submission",
         "created_at": 1794064047000
+    },
+    {
+        "id": 11,
+        "student_id": 0,
+        "student_code": "",
+        "student_name": "مارسيل باسم جميل منصور",
+        "student_phone": "201278054759",
+        "stage": "سنة أولى",
+        "message_text": "بعتذر عن الحضور بسبب الامتحان",
+        "reason_category": "امتحانات ومذاكرة 📚",
+        "friday_date": "2026-11-06",
+        "status": "pending",
+        "servant_notes": "اعتذار مسبق وارد عبر واتساب (امتحانات)",
+        "resolved_by": "prior_submission",
+        "created_at": 1793877550000
     }
 ];
 
