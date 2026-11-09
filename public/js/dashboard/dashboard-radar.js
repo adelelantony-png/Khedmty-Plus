@@ -1,3 +1,15 @@
+// دالة التحقق من توفر بيئة Node المحلية (localhost فقط وغير آمنة للطلب من HTTPS/Vercel)
+function isLocalNodeAvailable() {
+    try {
+        if (typeof window === 'undefined') return false;
+        const host = window.location.hostname;
+        const proto = window.location.protocol;
+        return (proto !== 'https:' && (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0'));
+    } catch(e) {
+        return false;
+    }
+}
+
 
 function evaluateExcuseTiming(createdAtTimestamp, fridayDateStr) {
     if (!createdAtTimestamp) return { 
@@ -1828,26 +1840,28 @@ async function loadRadarExcuses() {
 
     let loadedExcuses = null;
 
-    // 1. محاولة الجلب من سيرفر البوت المحلي إذا كان متاحاً
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2500); // مهلة 2.5 ثانية فقط لعدم تعطيل اللوحة
-        const res = await fetch('http://127.0.0.1:3000/api/excuses', {
-            headers: { 'x-api-key': 'khedmety-servant-key-2026' },
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-            const data = await res.json();
-            if (data && data.success && Array.isArray(data.excuses) && data.excuses.length > 0) {
-                loadedExcuses = data.excuses;
-                try {
-                    localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
-                } catch(e){}
+    // 1. محاولة الجلب من سيرفر البوت المحلي فقط إذا كنا في بيئة محلية حقيقية
+    if (isLocalNodeAvailable()) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 1800);
+            const res = await fetch('http://127.0.0.1:3000/api/excuses', {
+                headers: { 'x-api-key': 'khedmety-servant-key-2026' },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success && Array.isArray(data.excuses) && data.excuses.length > 0) {
+                    loadedExcuses = data.excuses;
+                    try {
+                        localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+                    } catch(e){}
+                }
             }
+        } catch(err) {
+            console.warn('[ExcusesRadar] سيرفر البوت المحلي غير متصل، جاري استخدام طبقة التخزين الآمن والمزامنة السحابية:', err.message);
         }
-    } catch(err) {
-        console.warn('[ExcusesRadar] سيرفر البوت المحلي غير متصل، جاري استخدام طبقة التخزين الآمن والمزامنة السحابية:', err.message);
     }
 
     // 2. إذا لم يتوفر سيرفر البوت (على الموبايل أو فيرسل أو البوت مغلق)، محاولة القراءة من السحابة (Firestore)
@@ -2154,91 +2168,97 @@ async function resolveExcuseAction(id, action, btn) {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحسم...';
     }
 
-    let targetExcuse = null;
-    if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
-        targetExcuse = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
-    }
-
-    const newStatus = isAccept ? 'accepted' : 'rejected';
-    const resolverName = (typeof currentUser !== 'undefined' && currentUser?.name) || 'خادم الفصل';
-    let savedSuccessfully = false;
-
-    // 1. محاولة الإرسال لسيرفر Node المحلي إن كان متاحاً مع مهلة زمنية قصيرة (لتفادي توقف الموقع على Vercel)
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 2000);
-        const res = await fetch(`http://127.0.0.1:3000/api/excuses/${id}/action`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': 'khedmety-servant-key-2026'
-            },
-            body: JSON.stringify({
-                action,
-                servant_notes: servantNote,
-                resolved_by: resolverName
-            }),
-            signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (res.ok) {
-            savedSuccessfully = true;
+        let targetExcuse = null;
+        if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+            targetExcuse = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
         }
-    } catch(netErr) {
-        console.warn('[Resolve Excuse] السيرفر المحلي غير متاح، جاري الحفظ عبر السحابة والتخزين المحلي:', netErr.message);
-    }
 
-    // 2. المزامنة السحابية مع Cloud Firestore إن كانت السحابة مفعلة
-    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
-        try {
-            await fsdb.collection('excuses').doc(String(id)).set({
-                status: newStatus,
-                servant_notes: servantNote,
-                resolved_by: resolverName,
-                resolved_at: Date.now()
-            }, { merge: true });
-            savedSuccessfully = true;
-        } catch(cloudErr) {
-            console.warn('[Resolve Excuse Firestore Sync Error]', cloudErr);
+        const newStatus = isAccept ? 'accepted' : 'rejected';
+        const resolverName = (typeof currentUser !== 'undefined' && currentUser?.name) || 'خادم الفصل';
+
+        // 1. مزامنة مع سيرفر Node المحلي فقط إذا كنا في بيئة محلية
+        if (isLocalNodeAvailable()) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1800);
+                await fetch(`http://127.0.0.1:3000/api/excuses/${id}/action`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': 'khedmety-servant-key-2026'
+                    },
+                    body: JSON.stringify({
+                        action,
+                        servant_notes: servantNote,
+                        resolved_by: resolverName
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+            } catch(netErr) {
+                console.warn('[Resolve Excuse] السيرفر المحلي غير متاح:', netErr.message);
+            }
+        }
+
+        // 2. المزامنة السحابية المباشرة مع Firestore
+        if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+            try {
+                await fsdb.collection('excuses').doc(String(id)).set({
+                    status: newStatus,
+                    servant_notes: servantNote,
+                    resolved_by: resolverName,
+                    resolved_at: Date.now()
+                }, { merge: true });
+            } catch(cloudErr) {
+                console.warn('[Resolve Excuse Firestore Sync Error]', cloudErr);
+            }
+        }
+
+        // 3. التحديث الفوري في الذاكرة وكاش التخزين المحلي
+        if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+            const item = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
+            if (item) {
+                item.status = newStatus;
+                item.servant_notes = servantNote;
+                item.resolved_by = resolverName;
+            }
+            try {
+                localStorage.setItem('khedmety_cached_excuses', JSON.stringify(window.lastRadarExcusesList));
+            } catch(e) {}
+        }
+
+        // 4. تسجيل العذر أو الإذن في كشف الحضور تلقائياً إذا تم القبول
+        if (isAccept && targetExcuse) {
+            targetExcuse.status = newStatus;
+            targetExcuse.servant_notes = servantNote;
+            markStudentExcusedInAttendance(targetExcuse);
+        }
+
+        // إعادة رسم جدول الأعذار وتحديث العدادات لحظياً
+        renderRadarExcusesTable();
+
+        // تحديث نافذة المعاينة إذا كانت مفتوحة
+        const modal = document.getElementById('modalExcuseDetail');
+        if (modal && modal.style.display !== 'none') {
+            previewFullExcuseModal(id);
+        }
+
+        if (typeof showToast === 'function') {
+            showToast(isAccept ? '✅ تم اعتماد الاستئذان/العذر وحفظه بنجاح!' : '❌ تم تسجيل رفض العذر وحفظه بنجاح!');
+        } else {
+            alert(isAccept ? 'تم اعتماد الاستئذان كعذر مقبول وحفظه بنجاح! ✅' : 'تم تسجيل رفض العذر وحفظه بنجاح! ❌');
+        }
+
+    } catch (unexpectedErr) {
+        console.error('[Resolve Excuse Error]', unexpectedErr);
+        alert('حدث خطأ أثناء معالجة العذر: ' + unexpectedErr.message);
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
     }
-
-    // 3. التحديث الفوري في الذاكرة المحلية وكاش المتصفح لضمان عدم توقف العمل أونلاين وأوفلاين
-    if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
-        const item = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
-        if (item) {
-            item.status = newStatus;
-            item.servant_notes = servantNote;
-            item.resolved_by = resolverName;
-            savedSuccessfully = true;
-        }
-        try {
-            localStorage.setItem('khedmety_cached_excuses', JSON.stringify(window.lastRadarExcusesList));
-        } catch(e) {}
-    }
-
-    // 4. تسجيل العذر أو الإذن في كشف الحضور تلقائياً إذا تم القبول
-    if (isAccept && targetExcuse) {
-        targetExcuse.status = newStatus;
-        targetExcuse.servant_notes = servantNote;
-        markStudentExcusedInAttendance(targetExcuse);
-    }
-
-    // إعادة رسم جدول الأعذار وتحديث العدادات لحظياً
-    renderRadarExcusesTable();
-
-    // تحديث نافذة المعاينة إذا كانت مفتوحة
-    const modal = document.getElementById('modalExcuseDetail');
-    if (modal && modal.style.display !== 'none') {
-        previewFullExcuseModal(id);
-    }
-
-    if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-
-    alert(isAccept ? 'تم اعتماد الاستئذان كعذر مقبول وحفظه بنجاح! ✅' : 'تم تسجيل رفض العذر وحفظه بنجاح! ❌');
 }
 
 // 💬 دوال معاينة رسالة الاعتذار كاملة وسجل اعتذارات المخدوم
@@ -2470,13 +2490,27 @@ async function cancelStudentExcuse(excuseId) {
             deletedExcuse = window.lastRadarExcusesList.find(e => String(e.id) === String(excuseId));
         }
 
-        try {
-            await fetch(`http://localhost:3000/api/excuses/${excuseId}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch(netErr) {
-            console.warn('[Cancel Excuse] تعذر الاتصال بالسيرفر، جاري الإلغاء محلياً:', netErr);
+        if (isLocalNodeAvailable()) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1800);
+                await fetch(`http://127.0.0.1:3000/api/excuses/${excuseId}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+            } catch(netErr) {
+                console.warn('[Cancel Excuse] تعذر الاتصال بالسيرفر المحلي:', netErr.message);
+            }
+        }
+
+        if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+            try {
+                await fsdb.collection('excuses').doc(String(excuseId)).delete();
+            } catch(cloudErr) {
+                console.warn('[Cancel Excuse Firestore Error]', cloudErr.message);
+            }
         }
 
         // إزالة العذر من القائمة المعروضة
