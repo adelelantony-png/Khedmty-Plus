@@ -46,6 +46,91 @@
 // ==========================================
 window.renderServantsTable = window.renderServantsTable || function() {};
 window.renderServantsAttendanceTable = window.renderServantsAttendanceTable || function() {};
+
+// ==========================================
+// 📅 نظام التاريخ المفتوح والتحكم الزمني الفوري لسجل الخدام (Top-Level Shield)
+// ==========================================
+window.activeServantAttendanceDate = window.activeServantAttendanceDate || (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+
+window.getActiveServantDate = window.getActiveServantDate || function() {
+    if (window.activeServantAttendanceDate) return window.activeServantAttendanceDate;
+    if (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) return activeSelectedDate;
+    if (typeof today !== 'undefined') return today;
+    return new Date().toLocaleDateString('en-CA');
+};
+
+window.formatServantArabicDate = window.formatServantArabicDate || function(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            return d.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    } catch(e) {}
+    return dateStr;
+};
+
+window.changeServantAttendanceDate = function(newDate) {
+    if (!newDate) return;
+    window.activeServantAttendanceDate = newDate;
+    if (typeof servantsAttendance !== 'undefined' && !servantsAttendance[newDate]) {
+        servantsAttendance[newDate] = [];
+    }
+
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        if (typeof servantsAttendance !== 'undefined' && (!servantsAttendance[newDate] || servantsAttendance[newDate].length === 0)) {
+            fsdb.collection('servants_attendance').doc(newDate).get().then(doc => {
+                if (doc.exists) {
+                    const list = (doc.data() || {}).list || [];
+                    if (list.length > 0) {
+                        servantsAttendance[newDate] = list;
+                        if (typeof STORAGE_KEYS !== 'undefined') {
+                            localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
+                        }
+                        if (typeof renderServantsAttendanceTable === 'function') renderServantsAttendanceTable();
+                        if (typeof showToast === 'function') showToast(`☁️ تم جلب حضور الخدام ليوم (${newDate}) من السحابة`);
+                    }
+                }
+            }).catch(e => console.warn('Cloud servant attendance fetch error:', e));
+        }
+    }
+
+    if (typeof renderServantsAttendanceTable === 'function') {
+        renderServantsAttendanceTable();
+    }
+    if (typeof showToast === 'function') {
+        showToast(`📅 تم فتح كشف حضور الخدام لتاريخ: ${newDate}`);
+    }
+};
+
+window.shiftServantAttendanceDate = function(days) {
+    const cur = window.getActiveServantDate();
+    try {
+        const parts = cur.split('-');
+        const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        dt.setDate(dt.getDate() + days);
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const d = String(dt.getDate()).padStart(2, '0');
+        window.changeServantAttendanceDate(`${y}-${m}-${d}`);
+    } catch(e) {
+        console.error('shiftServantAttendanceDate error:', e);
+    }
+};
+
+window.setServantAttendanceToday = function() {
+    const t = (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+    window.changeServantAttendanceDate(t);
+};
+
+window.syncWithStudentAttendanceDate = function() {
+    if (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) {
+        window.changeServantAttendanceDate(activeSelectedDate);
+    } else {
+        window.setServantAttendanceToday();
+    }
+};
 window.renderMembersList = window.renderMembersList || function() {};
 window.renderAttendanceTable = window.renderAttendanceTable || function() {};
 window.renderLiveCardsFeed = window.renderLiveCardsFeed || function() {};
@@ -10191,20 +10276,20 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=8.3.5"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=8.3.5"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=8.3.5"></script>
-<script src="js/dashboard/dashboard-members.js?v=8.3.5"></script>
+<script src="js/dashboard/dashboard-servants.js?v=8.4"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=8.4"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=8.4"></script>
+<script src="js/dashboard/dashboard-members.js?v=8.4"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=8.3.5"></script>
-<script src="js/dashboard/dashboard-plan.js?v=8.3.5"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=8.3.5"></script>
+<script src="js/dashboard/dashboard-radar.js?v=8.4"></script>
+<script src="js/dashboard/dashboard-plan.js?v=8.4"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=8.4"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=8.3.5"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=8.4"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=8.3.5"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=8.4"></script>
 
-<script src="js/app-updater.js?v=8.3.5"></script>
+<script src="js/app-updater.js?v=8.4"></script>
 
 <script src="js/pwa-helper.js?v=8.0"></script>
 
