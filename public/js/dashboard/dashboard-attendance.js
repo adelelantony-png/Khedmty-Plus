@@ -676,8 +676,6 @@ const monthLabels = [
 
 if (grids.length === 0) return;
 
-grid.innerHTML = '';
-
 const year = calendarDisplayDate.getFullYear();
 
 const month = calendarDisplayDate.getMonth();
