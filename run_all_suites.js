@@ -31,7 +31,8 @@ const tests = [
   'tests/test_offline_login_and_attendance.js',
   'tests/test_suite28_qa_audit_and_hardening.js',
   'test_servant_open_date_attendance.js',
-  'test_attendance_time_editor.js'
+  'test_attendance_time_editor.js',
+  'test_student_bible_plan.js'
 ];
 
 console.log('================================================================');

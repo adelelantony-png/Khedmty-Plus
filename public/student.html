@@ -278,6 +278,14 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
     </style>
 
+
+    <!-- 🛡️ Student Portal Global Stubs Shield -->
+    <script>
+      window.renderConferenceDiscountCard = window.renderConferenceDiscountCard || function() {};
+      window.renderLocalPoints = window.renderLocalPoints || function() {};
+      window.loadTodayBiblePlan = window.loadTodayBiblePlan || function() {};
+      window.renderSpiritualHabitsDashboard = window.renderSpiritualHabitsDashboard || function() {};
+    </script>
 </head>
 
 <body>
@@ -976,7 +984,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 <script src="js/khedmty-offline-roster.js"></script>
 <script src="js/khedmty-db.js"></script>
 
-<script src="bible_plan.js"></script>
+<script src="bible_plan.js?v=8.7"></script>
 
 <script>
 
@@ -1138,7 +1146,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         const localAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
 
         renderTodayStatus(localAtt);
-        renderConferenceDiscountCard();
+        if (typeof renderConferenceDiscountCard === 'function') { try { renderConferenceDiscountCard(); } catch(e){} }
 
         // تحديث كارت حضور الجمعة الشخصي للدارس
         try {
@@ -1170,6 +1178,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
         // 1. الاستماع اللحظي ليوم الخدمة الحالي فقط (وثيقة واحدة) بدلاً من قراءة كامل السنة
 
+        if (typeof fsdb !== 'undefined' && fsdb && typeof fsdb.collection === 'function') {
         fsdb.collection('attendance').doc(today).onSnapshot(docSnap => {
 
             if (docSnap.exists) {
@@ -1211,7 +1220,7 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
             renderTodayStatus(localAtt);
 
         }).catch(err => console.warn("Recent attendance sync error:", err));
-
+        }
     }
 
 
@@ -1255,45 +1264,55 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
 
     async function loadTodayBiblePlan() {
-        const today = new Date();
-        const month = today.getMonth() + 1;
-        const day = today.getDate();
-        document.getElementById('ui-today-date-text').textContent = `تاريخ اليوم: ${day}/${month}`;
+        try {
+            const titleEl = document.getElementById('ui-today-reading-title');
+            const dateEl = document.getElementById('ui-today-date-text');
+            const btnEl = document.getElementById('btn-go-reading');
+            if (!titleEl) return;
 
-        let planData = window.BIBLE_PLAN_DATA || null;
-        if (!planData) {
-            try {
-                const res = await fetch('bible_plan.json');
-                if (res.ok) planData = await res.json();
-            } catch (e) {}
-        }
+            const today = new Date();
+            const month = today.getMonth() + 1;
+            const day = today.getDate();
+            if (dateEl) dateEl.textContent = `تاريخ اليوم: ${day}/${month}`;
 
-        const todayItem = getPlanItemForDate(planData, month, day);
-        if (todayItem) {
-            const startChap = todayItem.chapter || 1;
-            const endChap = todayItem.chapter_end || startChap;
-            let displayTitle = todayItem.reading;
-            if (!displayTitle) {
-                const cleanBook = (todayItem.book || '').replace(/^سفر\s+/, '').trim();
-                if (startChap && endChap && endChap > startChap) {
-                    displayTitle = `${cleanBook} (الإصحاحات ${startChap} إلى ${endChap})`;
-                } else if (startChap) {
-                    displayTitle = `${cleanBook} (الإصحاح ${startChap})`;
-                }
+            let planData = (typeof window !== 'undefined' && window.BIBLE_PLAN_DATA) ? window.BIBLE_PLAN_DATA : null;
+            if (!planData && typeof fetch === 'function') {
+                try {
+                    const res = await fetch('bible_plan.json?v=8.7');
+                    if (res.ok) planData = await res.json();
+                } catch (e) {}
             }
-            const dayPrefix = todayItem.dayNumber ? `اليوم (${todayItem.dayNumber}): ` : '';
-            document.getElementById('ui-today-reading-title').textContent = `${dayPrefix}${displayTitle}`;
-            document.getElementById('btn-go-reading').href = `bible.html?book=${encodeURIComponent(todayItem.book)}&chapter=${startChap}&chapter_end=${endChap}`;
-            
-            // رسم كبسولات الإصحاحات الفردية
-            renderTodayChaptersUI(todayItem, month, day);
-        } else {
-            document.getElementById('ui-today-reading-title').textContent = "قراءة حرة وتأمل يومي";
-            document.getElementById('btn-go-reading').href = "bible.html";
-            const grid = document.getElementById('ui-today-chapters-grid');
-            if (grid) grid.innerHTML = '<span class="text-muted small">يمكنك قراءة وتأمل أي سفر وإصحاح ترغب به اليوم في قارئ الإنجيل.</span>';
+
+            const todayItem = getPlanItemForDate(planData, month, day);
+            if (todayItem) {
+                const startChap = todayItem.chapter || 1;
+                const endChap = todayItem.chapter_end || startChap;
+                let displayTitle = todayItem.reading;
+                if (!displayTitle) {
+                    const cleanBook = (todayItem.book || '').replace(/^سفر\s+/, '').trim();
+                    if (startChap && endChap && endChap > startChap) {
+                        displayTitle = `${cleanBook} (الإصحاحات ${startChap} إلى ${endChap})`;
+                    } else if (startChap) {
+                        displayTitle = `${cleanBook} (الإصحاح ${startChap})`;
+                    }
+                }
+                const dayPrefix = todayItem.dayNumber ? `اليوم (${todayItem.dayNumber}): ` : '';
+                titleEl.textContent = `${dayPrefix}${displayTitle}`;
+                if (btnEl) btnEl.href = `bible.html?book=${encodeURIComponent(todayItem.book)}&chapter=${startChap}&chapter_end=${endChap}`;
+                
+                // رسم كبسولات الإصحاحات الفردية
+                renderTodayChaptersUI(todayItem, month, day);
+            } else {
+                titleEl.textContent = "قراءة حرة وتأمل يومي";
+                if (btnEl) btnEl.href = "bible.html";
+                const grid = document.getElementById('ui-today-chapters-grid');
+                if (grid) grid.innerHTML = '<span class="text-muted small">يمكنك قراءة وتأمل أي سفر وإصحاح ترغب به اليوم في قارئ الإنجيل.</span>';
+            }
+        } catch(err) {
+            console.error('Error in loadTodayBiblePlan:', err);
         }
     }
+    window.loadTodayBiblePlan = loadTodayBiblePlan;
 
     function renderTodayChaptersUI(item, month, day) {
         const grid = document.getElementById('ui-today-chapters-grid');
@@ -1434,9 +1453,9 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
     }
 
     
-    syncCloudAttendance();
+    try { syncCloudAttendance(); } catch(e){ console.warn("syncCloudAttendance error:", e); }
 
-    loadTodayBiblePlan();
+    try { loadTodayBiblePlan(); } catch(e){ console.warn("loadTodayBiblePlan error:", e); }
 
 
 
@@ -2211,6 +2230,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         renderSpiritualHabitsDashboard();
         try { renderSpiritualJourney(); } catch(e){}
+        try { if (typeof window.loadTodayBiblePlan === "function") window.loadTodayBiblePlan(); } catch(e){}
         initFeedbackSection();
     }, 400);
 
@@ -2725,6 +2745,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // استعادة التبويب المفتوح من الرابط (Hash)
     window.addEventListener('DOMContentLoaded', () => {
+        try { if (typeof window.loadTodayBiblePlan === 'function') window.loadTodayBiblePlan(); } catch(e){}
         const hash = (window.location.hash || '').replace('#', '').trim();
         if (['home', 'spiritual', 'grades', 'badges'].includes(hash)) {
             switchStudentTab(hash);
