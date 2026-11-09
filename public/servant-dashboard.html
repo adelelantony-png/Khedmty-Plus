@@ -1053,6 +1053,31 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 @media print { .help-fab { display: none; } }
 
 /* أنماط رادار أمين الخدمة الملكي */
+        /* بطاقات النبض المتناسقة الملكية (Royal Harmonized Card System) */
+        .radar-kpi-card.harmonized-kpi {
+            background: #FFFFFF !important;
+            border: 1.5px solid #E8DAC6 !important;
+            border-radius: 16px !important;
+            padding: 16px 18px !important;
+            box-shadow: 0 4px 14px rgba(12, 36, 97, 0.05) !important;
+            transition: all 0.2s ease !important;
+            position: relative;
+            overflow: hidden;
+        }
+        .radar-kpi-card.harmonized-kpi::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3.5px;
+            background: linear-gradient(90deg, #D4AF37 0%, #0C2461 100%);
+            opacity: 0.85;
+        }
+        .radar-kpi-card.harmonized-kpi:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 22px rgba(12, 36, 97, 0.1) !important;
+            border-color: #D4AF37 !important;
+        }
+        
         .radar-kpi-card {
             background: #ffffff;
             border-radius: 16px;
@@ -2108,41 +2133,56 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
                 </div>
             </div>
 
-            <!-- بطاقات النبض الخماسية (Radar Pulse KPIs) -->
-            <div class="radar-pulse-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px;">
+            <!-- بطاقات النبض الخماسية الملكية المتناسقة (Royal Harmonized Radar Pulse KPIs) -->
+            <div class="radar-pulse-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 14px; margin-bottom: 22px;">
                 <!-- 1. غياب متتالي -->
-                <div class="radar-kpi-card" onclick="switchRadarSection('absence')" style="border-right: 5px solid #ef4444 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم الغياب والافتقاد">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⚠️ غياب 2+ أسبوع متتالي</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #dc2626; margin: 4px 0;" id="radar_kpiAbsenceCount">0</div>
-                    <div style="font-size: 0.76rem; color: #991b1b; font-weight: bold;">يحتاجون افتقاداً ورعاية عاجلة</div>
+                <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('absence')" style="cursor: pointer;" title="انقر للانتقال الفوري لقسم الغياب والافتقاد">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">غياب 2+ أسبوع</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #be123c; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 999px; padding: 1.5px 8px;">عاجل ⚠️</span>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiAbsenceCount">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">يحتاجون افتقاداً ورعاية</div>
                 </div>
 
                 <!-- 2. اعتذارات غياب معلقة -->
-                <div class="radar-kpi-card" onclick="switchRadarSection('excuses'); filterRadarExcuses('absence');" style="border-right: 5px solid #f59e0b !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم اعتذارات الغياب">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🔔 اعتذارات قيد المراجعة</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #d97706; margin: 4px 0;" id="radar_kpiExcusesPendingCount">0</div>
-                    <div style="font-size: 0.76rem; color: #b45309; font-weight: bold;">اعتذارات غياب كامل</div>
+                <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('excuses'); filterRadarExcuses('absence');" style="cursor: pointer;" title="انقر للانتقال الفوري لقسم اعتذارات الغياب">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">اعتذارات الغياب</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #92400e; background: #fef3c7; border: 1px solid #fde68a; border-radius: 999px; padding: 1.5px 8px;">مراجعة 🔔</span>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiExcusesPendingCount">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;">واردة لحظياً عبر واتساب</div>
                 </div>
 
                 <!-- 3. استئذانات التأخير المسبقة -->
-                <div class="radar-kpi-card" onclick="switchRadarSection('excuses'); filterRadarExcuses('delays');" style="border-right: 5px solid #8b5cf6 !important; cursor: pointer;" title="انقر للانتقال الفوري لطلبات استئذان التأخير المسبقة">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">⏰ استئذانات التأخير</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #7c3aed; margin: 4px 0;" id="radar_kpiDelaysPendingCount">0</div>
-                    <div style="font-size: 0.76rem; color: #6d28d9; font-weight: bold;" id="radar_kpiDelaysPendingSub">طلبات حضور متأخر بإذن</div>
+                <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('excuses'); filterRadarExcuses('delays');" style="cursor: pointer;" title="انقر للانتقال الفوري لطلبات استئذان التأخير المسبقة">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">استئذانات التأخير</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #6d28d9; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 999px; padding: 1.5px 8px;">حضور مأذون ⏰</span>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiDelaysPendingCount">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;" id="radar_kpiDelaysPendingSub">طلبات حضور متأخر بإذن</div>
                 </div>
 
                 <!-- 4. نسبة حضور القداس -->
-                <div class="radar-kpi-card" onclick="switchRadarSection('pulse')" style="border-right: 5px solid #10b981 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض القداس">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">🍞 نسبة حضور القداس والتناول</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #059669; margin: 4px 0;" id="radar_kpiLiturgyPct">0%</div>
-                    <div style="font-size: 0.76rem; color: #065f46; font-weight: bold;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
+                <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('pulse')" style="cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض القداس">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">القداس والتناول</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 1.5px 8px;">بركة 🍞</span>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiLiturgyPct">0%</div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
                 </div>
 
                 <!-- 5. إجمالي المسجلين وقوة الحضور -->
-                <div class="radar-kpi-card" onclick="switchRadarSection('pulse')" style="border-right: 5px solid #3b82f6 !important; cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض الحضور">
-                    <div style="font-size: 0.82rem; color: #64748b; font-weight: bold;">👥 حضور الاجتماع هذا الأسبوع</div>
-                    <div style="font-size: 1.8rem; font-weight: 900; color: #1d4ed8; margin: 4px 0;" id="radar_kpiMeetingAttended">0</div>
-                    <div style="font-size: 0.76rem; color: #1e40af; font-weight: bold;" id="radar_kpiTotalMembers">من إجمالي 0 مخدوم</div>
+                <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('pulse')" style="cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض الحضور">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">حضور الاجتماع</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 999px; padding: 1.5px 8px;">الجمعة 👥</span>
+                    </div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiMeetingAttended">0</div>
+                    <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;" id="radar_kpiTotalMembers">من إجمالي المخدومين</div>
                 </div>
             </div>
 
