@@ -943,80 +943,159 @@ btnEl.innerHTML = '🔄 جلب السجل الكامل';
 
 // ==========================================
 
-async function editAttendanceTime(memberId) {
+let currentEditingAttendanceMemberId = null;
 
-if (currentPermission !== 'admin') return alert("عفواً، تعديل وقت الحضور متاح لأمين الخدمة العام فقط!");
-
-let rec = (attendanceRecord[activeSelectedDate] || []).find(a => a.id.toString() === memberId.toString());
-
-if (!rec) return;
-
-let newTimeInput = prompt(`تعديل وقت حضور (${rec.name}) لتاريخ (${activeSelectedDate}):\nاكتب الوقت بصيغة (HH:MM) مثل 01:15 أو 13:30`, rec.time || "13:00");
-
-if (!newTimeInput) return;
-
-let timeParts = newTimeInput.trim().split(':');
-
-if (timeParts.length < 2) return alert("❌ صيغة الوقت غير صحيحة!");
-
-let h = parseInt(timeParts[0]);
-
-let m = parseInt(timeParts[1]);
-
-if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return alert("❌ أرقام الساعة أو الدقائق غير منطقية!");
-
-let formattedDisplayTime = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`;
-
-let oldTime = rec.time;
-
-rec.time = formattedDisplayTime;
-
-let isFri = isFridaySession(activeSelectedDate);
-
-let isSummerDay = settings.summerActive && (new Date(activeSelectedDate).getDay().toString() === settings.summerDay);
-
-if (!isFri || (isSummerDay && settings.ignoreSummerDelay) || rec.hasApprovedDelay) {
-
-rec.isAbsentDueToDelay = false;
-
-} else {
-
-let startTimeStr = settings.startTime || "13:00";
-
-let [startH, startM] = startTimeStr.split(':').map(Number);
-
-let diffMinutes = (h * 60 + m) - (startH * 60 + startM);
-
-rec.isAbsentDueToDelay = diffMinutes >= (settings.absentAfter || 75);
-
+function parseAnyTimeTo24h(str) {
+    if (!str) return '13:00';
+    const arabicNums = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    let clean = String(str).trim();
+    arabicNums.forEach((c, i) => { clean = clean.split(c).join(i.toString()); });
+    
+    const isPM = clean.includes('م') || clean.toLowerCase().includes('pm');
+    const isAM = clean.includes('ص') || clean.toLowerCase().includes('am');
+    
+    clean = clean.replace(/[^\d:]/g, '');
+    const parts = clean.split(':').map(Number);
+    if (parts.length === 0 || isNaN(parts[0])) return '13:00';
+    
+    let h = parts[0];
+    let m = parts.length > 1 && !isNaN(parts[1]) ? parts[1] : 0;
+    
+    if (isPM && h < 12) h += 12;
+    if (isAM && h === 12) h = 0;
+    
+    if (h > 23) h = 23;
+    if (m > 59) m = 59;
+    
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
 }
 
-localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+function openEditAttendanceTimeModal(memberId) {
+    if (currentPermission !== 'admin') {
+        alert("عفواً، تعديل وقت الحضور متاح لأمين الخدمة العام فقط!");
+        return;
+    }
 
-let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
+    const dayList = attendanceRecord[activeSelectedDate] || [];
+    const rec = dayList.find(a => String(a.id) === String(memberId) || String(a.code || '') === String(memberId));
+    if (!rec) {
+        showToast("⚠️ لم يتم العثور على سجل الحضور لهذا المخدوم");
+        return;
+    }
 
-if (isFirebaseActive && fsdb) {
+    currentEditingAttendanceMemberId = memberId;
 
-fsdb.collection('attendance').doc(activeSelectedDate).update({
+    const modal = document.getElementById('modalEditAttendanceTime');
+    if (!modal) {
+        // Fallback
+        const newTime = prompt(`تعديل وقت حضور (${rec.name}) لتاريخ (${activeSelectedDate}):\nيرجى كتابة الوقت مثل 01:15 أو 13:30`, "13:00");
+        if (newTime) {
+            const time24 = parseAnyTimeTo24h(newTime);
+            const [h, m] = time24.split(':').map(Number);
+            const d = new Date(); d.setHours(h, m, 0, 0);
+            applyAttendanceTimeChange(memberId, h, m, d.toLocaleTimeString('ar-EG'));
+        }
+        return;
+    }
 
-[`${pKey}.time`]: formattedDisplayTime,
+    const nameEl = document.getElementById('modalTimeStudentName');
+    if (nameEl) nameEl.innerText = `المخدوم: ${rec.name || 'مجهول'}`;
+    const codeEl = document.getElementById('modalTimeStudentCode');
+    if (codeEl) codeEl.innerText = `الكود: ${rec.code || rec.id || '-'}`;
+    const dateEl = document.getElementById('modalTimeTargetDate');
+    if (dateEl) dateEl.innerText = `تاريخ: ${activeSelectedDate}`;
+    const curEl = document.getElementById('modalTimeCurrentRecorded');
+    if (curEl) curEl.innerText = `الوقت الحالي بالسجل: ${rec.time || 'غير محدد'}`;
 
-[`${pKey}.isAbsentDueToDelay`]: rec.isAbsentDueToDelay
+    const time24 = parseAnyTimeTo24h(rec.time);
+    const input = document.getElementById('modalTimePickerInput');
+    if (input) input.value = time24;
 
-}).catch(() => {});
-
+    modal.style.display = 'flex';
 }
 
-logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
+function closeEditAttendanceTimeModal() {
+    const modal = document.getElementById('modalEditAttendanceTime');
+    if (modal) modal.style.display = 'none';
+    currentEditingAttendanceMemberId = null;
+}
 
-renderAttendanceTable();
+function setModalTimePreset(val) {
+    const input = document.getElementById('modalTimePickerInput');
+    if (input) input.value = val;
+}
 
-renderLiveCardsFeed();
+function setModalTimeToNow() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const input = document.getElementById('modalTimePickerInput');
+    if (input) input.value = `${h}:${m}`;
+}
 
-renderDashboard();
+async function submitAttendanceTimeFromModal() {
+    if (!currentEditingAttendanceMemberId) return;
+    const input = document.getElementById('modalTimePickerInput');
+    if (!input || !input.value) {
+        alert('يرجى تحديد وقت صالح!');
+        return;
+    }
 
-showToast(`✅ تم تعديل وقت الحضور إلى (${formattedDisplayTime})`);
+    const timeVal = input.value.trim();
+    const [h, m] = timeVal.split(':').map(Number);
+    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) {
+        alert('صيغة الوقت غير صحيحة!');
+        return;
+    }
 
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    const formattedDisplayTime = d.toLocaleTimeString('ar-EG');
+
+    await applyAttendanceTimeChange(currentEditingAttendanceMemberId, h, m, formattedDisplayTime);
+    closeEditAttendanceTimeModal();
+}
+
+async function applyAttendanceTimeChange(memberId, h, m, formattedDisplayTime) {
+    let rec = (attendanceRecord[activeSelectedDate] || []).find(a => String(a.id) === String(memberId) || String(a.code || '') === String(memberId));
+    if (!rec) return;
+
+    let oldTime = rec.time;
+    rec.time = formattedDisplayTime;
+
+    let isFri = isFridaySession(activeSelectedDate);
+    let isSummerDay = settings.summerActive && (new Date(activeSelectedDate).getDay().toString() === settings.summerDay);
+
+    if (!isFri || (isSummerDay && settings.ignoreSummerDelay) || rec.hasApprovedDelay) {
+        rec.isAbsentDueToDelay = false;
+    } else {
+        let startTimeStr = settings.startTime || "13:00";
+        let [startH, startM] = startTimeStr.split(':').map(Number);
+        let diffMinutes = (h * 60 + m) - (startH * 60 + startM);
+        rec.isAbsentDueToDelay = diffMinutes >= (settings.absentAfter || 75);
+    }
+
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+
+    let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
+    if (isFirebaseActive && fsdb && pKey) {
+        fsdb.collection('attendance').doc(activeSelectedDate).update({
+            [`${pKey}.time`]: formattedDisplayTime,
+            [`${pKey}.isAbsentDueToDelay`]: rec.isAbsentDueToDelay
+        }).catch(() => {});
+    }
+
+    logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
+
+    renderAttendanceTable();
+    renderLiveCardsFeed();
+    if (typeof renderDashboard === 'function') renderDashboard();
+
+    showToast(`✅ تم تعديل وقت الحضور إلى (${formattedDisplayTime})`);
+}
+
+function editAttendanceTime(memberId) {
+    openEditAttendanceTimeModal(memberId);
 }
 
 
@@ -2280,6 +2359,13 @@ if (typeof window !== 'undefined') {
   window.invertSelectionManualAttendance = invertSelectionManualAttendance;
   window.changeCalendarMonth = changeCalendarMonth;
   window.selectAttendanceDate = selectAttendanceDate;
+  window.openEditAttendanceTimeModal = openEditAttendanceTimeModal;
+  window.closeEditAttendanceTimeModal = closeEditAttendanceTimeModal;
+  window.setModalTimePreset = setModalTimePreset;
+  window.setModalTimeToNow = setModalTimeToNow;
+  window.submitAttendanceTimeFromModal = submitAttendanceTimeFromModal;
+  window.editAttendanceTime = editAttendanceTime;
+  window.parseAnyTimeTo24h = parseAnyTimeTo24h;
   window.shiftStudentAttendanceDate = shiftStudentAttendanceDate;
   window.syncWithServantAttendanceDate = syncWithServantAttendanceDate;
   window.formatStudentArabicDate = formatStudentArabicDate;

@@ -30,7 +30,8 @@ const tests = [
   'tests/test_official_certificates_and_signatures.js',
   'tests/test_offline_login_and_attendance.js',
   'tests/test_suite28_qa_audit_and_hardening.js',
-  'test_servant_open_date_attendance.js'
+  'test_servant_open_date_attendance.js',
+  'test_attendance_time_editor.js'
 ];
 
 console.log('================================================================');

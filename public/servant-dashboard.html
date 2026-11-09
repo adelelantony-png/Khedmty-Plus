@@ -10319,20 +10319,20 @@ window.runDisasterRecoveryCheck = runDisasterRecoveryCheck;
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="js/dashboard/dashboard-servants.js?v=8.5"></script>
-    <script src="js/dashboard/dashboard-permissions.js?v=8.5"></script>
-<script src="js/dashboard/dashboard-attendance.js?v=8.5"></script>
-<script src="js/dashboard/dashboard-members.js?v=8.5"></script>
+<script src="js/dashboard/dashboard-servants.js?v=8.6"></script>
+    <script src="js/dashboard/dashboard-permissions.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-attendance.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-members.js?v=8.6"></script>
 
-<script src="js/dashboard/dashboard-radar.js?v=8.5"></script>
-<script src="js/dashboard/dashboard-plan.js?v=8.5"></script>
-<script src="js/dashboard/dashboard-curriculum.js?v=8.5"></script>
+<script src="js/dashboard/dashboard-radar.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-plan.js?v=8.6"></script>
+<script src="js/dashboard/dashboard-curriculum.js?v=8.6"></script>
 
-<script src="js/dashboard/dashboard-navigation.js?v=8.5"></script>
+<script src="js/dashboard/dashboard-navigation.js?v=8.6"></script>
 
-<script src="js/dashboard/dashboard-area-suggestions.js?v=8.5"></script>
+<script src="js/dashboard/dashboard-area-suggestions.js?v=8.6"></script>
 
-<script src="js/app-updater.js?v=8.5"></script>
+<script src="js/app-updater.js?v=8.6"></script>
 
 <script src="js/pwa-helper.js?v=8.0"></script>
 
@@ -11578,6 +11578,83 @@ document.addEventListener('DOMContentLoaded', () => {
         إغلاق النافذة
       </button>
     </div>
+  </div>
+</div>
+
+
+<!-- ⏱️ نافذة تعديل وقت مسح الحضور الذكية (Smart Attendance Time Editor Modal) -->
+<div id="modalEditAttendanceTime" class="modal" style="display:none; z-index:100000; background:rgba(12, 36, 97, 0.65); backdrop-filter:blur(4px);">
+  <div class="modal-content" style="max-width:480px; width:92%; text-align:right; border-radius:18px; border:2px solid #D4AF37; padding:22px; box-shadow:0 18px 40px rgba(12, 36, 97, 0.35); background:#ffffff;">
+    
+    <!-- Modal Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; border-bottom:1.5px solid #e2e8f0; padding-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.4rem;">⏱️</span>
+        <div>
+          <h3 style="margin:0; color:#0C2461; font-size:1.15rem; font-weight:900;">تعديل وقت مسح الحضور</h3>
+          <p style="margin:2px 0 0; font-size:0.78rem; color:#64748b;">تحديد توقيت دقيق بسهولة مع أزرار سريعة</p>
+        </div>
+      </div>
+      <span class="close-btn" onclick="closeEditAttendanceTimeModal()" style="font-size:26px; cursor:pointer; color:#94a3b8; line-height:1;">&times;</span>
+    </div>
+
+    <!-- بطاقة معلومات المخدوم والتاريخ -->
+    <div style="background:#FAF7F2; border:1px solid #D4AF37; border-radius:12px; padding:12px 14px; margin-bottom:16px;">
+      <div style="font-weight:900; color:#0C2461; font-size:1rem; margin-bottom:4px;" id="modalTimeStudentName">...</div>
+      <div style="font-size:0.8rem; color:#64748b; font-weight:700; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
+        <span id="modalTimeStudentCode">الكود: -</span>
+        <span id="modalTimeTargetDate">تاريخ: -</span>
+      </div>
+      <div style="margin-top:6px; font-size:0.82rem; color:#874F19; font-weight:800;" id="modalTimeCurrentRecorded">
+        الوقت الحالي بالسجل: -
+      </div>
+    </div>
+
+    <!-- حقل اختيار الوقت النظيف -->
+    <div style="margin-bottom:14px;">
+      <label for="modalTimePickerInput" style="display:block; font-size:0.86rem; font-weight:800; color:#0C2461; margin-bottom:6px;">
+        ⏰ اختر التوقيت الجديد:
+      </label>
+      <input type="time" id="modalTimePickerInput" style="width:100%; font-size:1.35rem; font-weight:900; padding:10px 14px; border:2px solid #0C2461; border-radius:10px; text-align:center; color:#0C2461; background:#ffffff; box-sizing:border-box; outline:none; font-family:'Cairo', sans-serif;">
+    </div>
+
+    <!-- أزرار الاختيار السريع للنماذج الشائعة -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:0.78rem; font-weight:800; color:#64748b; margin-bottom:6px;">
+        ⚡ خيارات سريعة بنقرة واحدة:
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('12:30')" style="background:#f0fdf4; color:#166534; border:1px solid #86efac; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="حضور في الموعد المبكر">
+          🟢 12:30 م (في الميعاد)
+        </button>
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:00')" style="background:#eff6ff; color:#1e40af; border:1px solid #93c5fd; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="موعد بداية اللقاء">
+          🔵 01:00 م (بداية اللقاء)
+        </button>
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:15')" style="background:#fefce8; color:#854d0e; border:1px solid #fde047; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير خفيف مقبول">
+          🟡 01:15 م (تأخير خفيف)
+        </button>
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:30')" style="background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير نصف ساعة">
+          🟠 01:30 م (تأخير 30 د)
+        </button>
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('14:15')" style="background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير شديد">
+          🔴 02:15 م (تأخير شديد)
+        </button>
+        <button type="button" class="btn-mini" onclick="setModalTimeToNow()" style="background:#FAF7F2; color:#874F19; border:1.5px solid #D4AF37; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="ضبط على توقيت الساعة الآن">
+          ⏱️ الوقت الحالي الآن
+        </button>
+      </div>
+    </div>
+
+    <!-- أزرار الحفظ والإلغاء -->
+    <div style="display:flex; justify-content:flex-end; gap:8px; border-top:1.5px solid #e2e8f0; padding-top:14px;">
+      <button type="button" onclick="closeEditAttendanceTimeModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 18px; border-radius:8px; font-weight:800; font-size:0.85rem; cursor:pointer;">
+        إلغاء ✕
+      </button>
+      <button type="button" id="btnSaveAttendanceTimeModal" onclick="submitAttendanceTimeFromModal()" style="background:#0C2461; color:#ffffff; border:1px solid #0C2461; padding:9px 24px; border-radius:8px; font-weight:900; font-size:0.88rem; cursor:pointer; box-shadow:0 4px 12px rgba(12, 36, 97, 0.2);">
+        حفظ الوقت الجديد ✅
+      </button>
+    </div>
+
   </div>
 </div>
 
