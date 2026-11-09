@@ -9,7 +9,7 @@
 
 // ==========================================
 
-let activeServantAttendanceDate = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+let activeServantAttendanceDate = (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
 
 function getActiveServantDate() {
     if (typeof activeServantAttendanceDate !== 'undefined' && activeServantAttendanceDate) {

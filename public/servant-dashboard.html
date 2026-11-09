@@ -7552,32 +7552,7 @@ let currentProfileId = null;
 
 let today = new Date().toLocaleDateString('en-CA');
 
-let activeSelectedDate = (function() {
-    try {
-        const todayObj = new Date(today + 'T12:00:00');
-        const dayOfWeek = todayObj.getDay();
-        if (dayOfWeek === 5) return today;
-        const diffToFriday = (dayOfWeek - 5 + 7) % 7;
-        const pastFriObj = new Date(todayObj);
-        pastFriObj.setDate(todayObj.getDate() - diffToFriday);
-        const pastFridayStr = `${pastFriObj.getFullYear()}-${String(pastFriObj.getMonth() + 1).padStart(2, '0')}-${String(pastFriObj.getDate()).padStart(2, '0')}`;
-
-        const datesWithAtt = Object.keys(attendanceRecord || {}).filter(d => {
-            const list = attendanceRecord[d];
-            return Array.isArray(list) ? list.length > 0 : (list && typeof list === 'object' && Object.keys(list).length > 0);
-        }).sort().reverse();
-
-        const extraDay = datesWithAtt.find(d => d > pastFridayStr && d <= today);
-        if (extraDay) return extraDay;
-
-        if (attendanceRecord && attendanceRecord[pastFridayStr] && attendanceRecord[pastFridayStr].length > 0) {
-            return pastFridayStr;
-        }
-        return (datesWithAtt.length > 0) ? datesWithAtt[0] : pastFridayStr;
-    } catch(e) {
-        return today;
-    }
-})();
+let activeSelectedDate = today;
 
 let calendarDisplayDate = new Date();
 
