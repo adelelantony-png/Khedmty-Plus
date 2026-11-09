@@ -1,16 +1,16 @@
 {
-  "name": "خدمتي برو | KHIDMETY PRO",
-  "short_name": "خدمتي+",
-  "description": "المنظومة الرعوية والروحية المتكاملة - تدعم العمل الكامل أون لاين وأوف لاين دون اتصال",
+  "name": "إعداد خدام",
+  "short_name": "إعداد خدام",
+  "description": "منصة رقمية متكاملة لإعداد الخدام وتنظيم الخدمة الكنسية والتعليم والمتابعة - اجتماع القديس بولس الرسول لإعداد الخدام",
   "lang": "ar",
   "dir": "rtl",
-  "id": "khedmety-plus-pwa",
+  "id": "idad-khoddam-pwa",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0f2744",
-  "theme_color": "#0f2744",
+  "background_color": "#071A38",
+  "theme_color": "#071A38",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -25,7 +25,7 @@
       "purpose": "any"
     },
     {
-      "src": "icons/icon-maskable-512.png",
+      "src": "icons/icon-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

@@ -5,17 +5,16 @@
 <head>
 
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>بوابة المخدوم - خدمة إعداد الخدام</title>
-
-    <meta name="theme-color" content="#1e3799">
-
-    <link rel="icon" type="image/png" href="icons/favicon-48.png">
-
+    <title>إعداد خدام | بوابة الدارس والمخدوم</title>
+    <meta name="theme-color" content="#071A38">
+    <meta name="apple-mobile-web-app-title" content="إعداد خدام">
+    <meta name="application-name" content="إعداد خدام">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-
     <link rel="manifest" href="manifest.json">
 
     <link rel="stylesheet" href="css/app-theme.css">
@@ -287,56 +286,48 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
 <div class="main-container main-card">
 
-    <!-- الشريط العلوي مع زر التحديث ورتبة الطالب والخروج -->
-
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
+    <!-- الشريط العلوي مع شعار إعداد خدام ورتبة الطالب والتحديث والخروج -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 px-1">
         <div class="d-flex align-items-center gap-2">
-
-            <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
-
-            <div id="appUpdateContainer"></div>
-
+            <img src="icons/icon-192.png" alt="إعداد خدام" style="width:38px; height:38px; border-radius:11px; border:1.5px solid #D4AF37; box-shadow:0 2px 8px rgba(7,26,56,0.25); object-fit:cover;">
+            <div>
+                <span class="fw-bold" style="color: #0C2461; font-size: 1.1rem; display:block; line-height:1.2;">إعداد خدام</span>
+                <small style="color: #64748B; font-size: 0.72rem; font-weight:600;">اجتماع القديس بولس الرسول</small>
+            </div>
         </div>
-
-        <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold"><i class="fa-solid fa-power-off me-1"></i> خروج آمن 🚪</a>
-
+        <div class="d-flex align-items-center gap-2">
+            <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
+            <div id="appUpdateContainer"></div>
+            <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold rounded-pill px-3" title="تسجيل الخروج"><i class="fa-solid fa-power-off me-1"></i> خروج 🚪</a>
+        </div>
     </div>
 
-
-
-    <!-- الترحيب وسحب حالة الحضور سحابياً -->
-
-    <div class="welcome-header text-center">
-
-        <h4 class="fw-bold mb-1" id="ui-student-name">أهلاً بك</h4>
-
-        <small class="opacity-90 d-block mb-3">كودك: <strong id="ui-student-code"></strong></small>
-
-        
-
-        <div class="bg-white bg-opacity-25 rounded-4 p-3 text-white mb-3">
-
-            <div class="small fw-bold mb-1">حالة حضورك اليوم في كشف الكنيسة:</div>
-
-            <div id="ui-attendance-status" class="fs-5 fw-bold"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الفحص...</div>
-
+    <!-- الترحيب وسحب حالة الحضور سحابياً بهوية إعداد خدام الفاخرة -->
+    <div class="welcome-header text-center" style="background: radial-gradient(circle at 50% 20%, #15376E 0%, #0C2461 50%, #071A38 100%) !important; border: 1.5px solid rgba(212,175,55,0.4) !important; border-bottom: 4px solid #D4AF37 !important; box-shadow: 0 12px 32px rgba(7,26,56,0.3) !important;">
+        <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+            <img src="icons/icon-192.png" alt="شعار إعداد خدام" style="width: 48px; height: 48px; border-radius: 14px; border: 2px solid #D4AF37; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <div class="text-end text-sm-center">
+                <h3 class="fw-bold mb-0 text-white" style="font-size: 1.35rem; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">مرحباً بك في منصة إعداد الخدام</h3>
+                <small style="color: #FDE047; font-weight: 700; font-size: 0.82rem;">«أَعِدُّوا لِخِدْمَةِ الرَّبِّ بِكُلِّ قَلْبِكُمْ»</small>
+            </div>
         </div>
 
+        <div class="p-2 mb-3 d-inline-block rounded-pill px-4" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25);">
+            <h5 class="fw-bold mb-0 text-white" id="ui-student-name">أهلاً بك يا خادم المسيح</h5>
+            <small class="opacity-90 d-block" style="color: #E2E8F0;">كود الدارس: <strong id="ui-student-code" style="color: #FDE047;"></strong></small>
+        </div>
 
+        <div class="bg-white bg-opacity-25 rounded-4 p-3 text-white mb-3" style="border: 1px solid rgba(255,255,255,0.25);">
+            <div class="small fw-bold mb-1">حالة حضورك اليوم في كشف الكنيسة:</div>
+            <div id="ui-attendance-status" class="fs-5 fw-bold"><i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الفحص...</div>
+        </div>
 
         <!-- زر الوصول المباشر لكارنيه الـ QR المعتمد للكاميرا -->
-
         <div>
-
-            <a href="barcode.html" class="quick-barcode-badge">
-
+            <a href="barcode.html" class="quick-barcode-badge" style="background: rgba(212,175,55,0.25); border-color: #D4AF37; color: #FFF; font-weight: 800;">
                 <i class="fa-solid fa-qrcode text-warning"></i> إبراز كارنيه حضور الكورس (QR Code) 🪪
-
             </a>
-
         </div>
-
     </div>
 
 
@@ -404,6 +395,71 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
 
 
+
+    <!-- ======================================================== -->
+    <!-- 🌟 شبكة إحصائيات وأقسام البرنامج (Matching Image 2 Reference) -->
+    <!-- ======================================================== -->
+
+    <!-- 1. كروت الإحصائيات الثلاثية (Stats Pills) -->
+    <div class="row g-2 mb-3 text-center">
+        <div class="col-4">
+            <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
+                <div style="font-size: 1.35rem; color: #2563EB;"><i class="fa-solid fa-users"></i></div>
+                <div class="fw-bold mt-1" id="ui-stat-members" style="font-size: 1.25rem; color: #0C2461;">89</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">خادم ودارس</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
+                <div style="font-size: 1.35rem; color: #D97706;"><i class="fa-solid fa-book-bookmark"></i></div>
+                <div class="fw-bold mt-1" id="ui-stat-courses" style="font-size: 1.25rem; color: #0C2461;">12</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">دورة ومحاضرة</small>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
+                <div style="font-size: 1.35rem; color: #0284C7;"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="fw-bold mt-1" id="ui-stat-events" style="font-size: 1.25rem; color: #0C2461;">5</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">فعاليات وتكليفات</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. شبكة أقسام البرنامج الرسمية (Program Section Grid) -->
+    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+        <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.98rem;"><i class="fa-solid fa-layer-group text-warning me-1"></i> أقسام البرنامج</h6>
+        <a href="javascript:void(0)" onclick="switchStudentTab('grades')" class="text-decoration-none fw-bold small" style="color: #0C2461;">عرض الكل ◀</a>
+    </div>
+    <div class="program-section-grid mb-3">
+        <a href="javascript:void(0)" onclick="switchStudentTab('grades')" class="program-card-btn">
+            <div class="icon-wrap"><i class="fa-solid fa-book-open"></i></div>
+            <span class="card-title">الدورات التدريبية</span>
+        </a>
+        <a href="student_attendance.html" class="program-card-btn">
+            <div class="icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
+            <span class="card-title">الفعاليات والاجتماعات</span>
+        </a>
+        <a href="bible.html" class="program-card-btn">
+            <div class="icon-wrap"><i class="fa-solid fa-book-bible"></i></div>
+            <span class="card-title">المواد التعليمية</span>
+        </a>
+        <a href="javascript:void(0)" onclick="switchStudentTab('badges')" class="program-card-btn">
+            <div class="icon-wrap"><i class="fa-solid fa-chart-line"></i></div>
+            <span class="card-title">متابعة التقدم</span>
+        </a>
+    </div>
+
+    <!-- 3. شريط الآية المبارك (Scripture Verse Banner) -->
+    <div class="scripture-banner-card mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <span style="font-size: 1.35rem;">🕊️</span>
+            <span class="badge" style="background: rgba(212,175,55,0.25); color: #FDE047; border: 1px solid rgba(212,175,55,0.4); font-size: 0.72rem;">شعار الدورة</span>
+        </div>
+        <p class="verse-text">«وَكُلَّ مَا فَعَلْتُمُوهُ فَافْعَلُوهُ مِنَ الْقَلْبِ كَمَا لِلرَّبِّ لاَ لِلنَّاسِ»</p>
+        <div class="verse-ref">
+            <span>(كولوسي 3: 23)</span>
+        </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- 🌟 وحدة رحلتك الروحية الملكية (Spiritual Journey) -->

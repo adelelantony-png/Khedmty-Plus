@@ -1,5 +1,6 @@
 /**
- * public/sw.js - Service Worker الفائق لمنظومة Khedmty-Plus (Ultra Offline Engine v3.0)
+ * public/sw.js - Service Worker الفائق لمنظومة إعداد خدام (Ultra Offline Engine v8.0)
+ * اجتماع القديس بولس الرسول لإعداد الخدام
  * 
  * الميزات المتقدمة:
  * 1. العمل الكامل دون إنترنت (Offline-First) لجميع شاشات الخدام والمخدومين.
@@ -9,7 +10,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v7.8'; // Meeting KPI Date Resolution & Approved Delay & Unified Excuse Counts
+const CACHE_NAME = 'idad-khoddam-v8.0'; // Official Idad Khoddam Rebranding & Premium Liturgical Assets
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
@@ -63,8 +64,14 @@ const PRECACHE_ASSETS = [
     './js/dashboard/dashboard-servants.js',
     './js/dashboard/dashboard-attendance.js',
     './js/dashboard/dashboard-members.js',
+    './favicon.ico',
     './icons/icon-192.png',
     './icons/icon-512.png',
+    './icons/icon-512-maskable.png',
+    './icons/icon-maskable-512.png',
+    './icons/idad-khoddam-icon-1024.png',
+    './icons/favicon-16.png',
+    './icons/favicon-32.png',
     './icons/favicon-48.png',
     './icons/apple-touch-icon.png'
 ];
