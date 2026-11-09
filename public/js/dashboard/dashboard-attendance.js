@@ -680,6 +680,14 @@ const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "م�
 
 if (monthLabel) monthLabel.innerText = `${monthNames[month]} ${year}`;
 
+const curStudentDate = activeSelectedDate || (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+const sPicker = document.getElementById('studentAttendanceDatePicker');
+if (sPicker && !sPicker.value) sPicker.value = curStudentDate;
+const sLabel = document.getElementById('studentAttendanceSelectedDateLabel');
+if (sLabel && (!sLabel.innerText || sLabel.innerText === '...')) {
+    sLabel.innerText = formatStudentArabicDate(curStudentDate);
+}
+
 const dayHeaders = ["سبت", "أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة"];
 
 dayHeaders.forEach(dh => {
@@ -756,9 +764,58 @@ renderAttendanceCalendar();
 
 }
 
-async function selectAttendanceDate(dateStr) {
+function formatStudentArabicDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            return d.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+    } catch(e) {}
+    return dateStr;
+}
 
+function shiftStudentAttendanceDate(days) {
+    const cur = (typeof activeSelectedDate !== 'undefined' && activeSelectedDate) ? activeSelectedDate : (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+    try {
+        const parts = cur.split('-');
+        const dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        dt.setDate(dt.getDate() + days);
+        const y = dt.getFullYear();
+        const m = String(dt.getMonth() + 1).padStart(2, '0');
+        const d = String(dt.getDate()).padStart(2, '0');
+        selectAttendanceDate(`${y}-${m}-${d}`);
+    } catch(e) {
+        console.error('shiftStudentAttendanceDate error:', e);
+    }
+}
+
+function syncWithServantAttendanceDate() {
+    let sDate = (typeof activeServantAttendanceDate !== 'undefined' && activeServantAttendanceDate) ? activeServantAttendanceDate : (typeof today !== 'undefined' ? today : new Date().toLocaleDateString('en-CA'));
+    selectAttendanceDate(sDate);
+}
+
+async function selectAttendanceDate(dateStr) {
 activeSelectedDate = dateStr;
+
+// مزامنة شريط التاريخ العلوي للمخدومين
+const studentPicker = document.getElementById('studentAttendanceDatePicker');
+if (studentPicker) studentPicker.value = dateStr;
+const studentLabel = document.getElementById('studentAttendanceSelectedDateLabel');
+if (studentLabel) studentLabel.innerText = formatStudentArabicDate(dateStr);
+
+// تعديل شهر التقويم تلقائياً إذا كان التاريخ في شهر مختلف
+if (dateStr) {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        if (typeof calendarDisplayDate !== 'undefined' && calendarDisplayDate && (calendarDisplayDate.getFullYear() !== y || calendarDisplayDate.getMonth() !== m)) {
+            calendarDisplayDate = new Date(y, m, 1);
+        }
+    }
+}
 
 if (typeof changeServantAttendanceDate === 'function') {
     try { changeServantAttendanceDate(dateStr); } catch(e) {}
@@ -2223,6 +2280,9 @@ if (typeof window !== 'undefined') {
   window.invertSelectionManualAttendance = invertSelectionManualAttendance;
   window.changeCalendarMonth = changeCalendarMonth;
   window.selectAttendanceDate = selectAttendanceDate;
+  window.shiftStudentAttendanceDate = shiftStudentAttendanceDate;
+  window.syncWithServantAttendanceDate = syncWithServantAttendanceDate;
+  window.formatStudentArabicDate = formatStudentArabicDate;
 
 }
 

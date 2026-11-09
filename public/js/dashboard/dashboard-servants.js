@@ -179,8 +179,8 @@ let todayEvent = masterPlan.find(l => (l.responsible || '').trim().toLowerCase()
 let planInfo = todayEvent ? `<span style="color:#b45309; font-weight:800; font-size:0.8rem;">📌 ${todayEvent.type}: ${todayEvent.title}</span>` : '<span style="color:#94a3b8; font-size:0.8rem;">لا توجد تكليفات اليوم</span>';
 
 let actionBtn = present
-? `<button type="button" class="btn-mini" onclick="cancelServantAttendance(${s.id}, '${curDate}')" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">إلغاء الحضور</button>`
-: `<button type="button" class="btn-mini" onclick="manualMarkServant(${s.id}, '${curDate}')" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">تسجيل حضور</button>`;
+? `<button type="button" class="btn-mini" onclick="cancelServantAttendance('${s.id}', '${curDate}')" style="background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 6px; padding: 4px 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">إلغاء الحضور</button>`
+: `<button type="button" class="btn-mini" onclick="manualMarkServant('${s.id}', '${curDate}')" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 6px; padding: 4px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">تسجيل حضور</button>`;
 
 let commit = calculateServantCommitment(s.id);
 
@@ -523,7 +523,7 @@ tr.innerHTML = `
 
 ? '<span style="color:var(--success); font-weight:bold; font-size:11px;">مربوط ✅</span>'
 
-: `<button class="btn-mini btn-purple" onclick="linkServantToCloudAuth(${s.id})">ربط سحابي 🔐</button>`}</td>
+: `<button class="btn-mini btn-purple" onclick="linkServantToCloudAuth('${s.id}')">ربط سحابي 🔐</button>`}</td>
 
 <td data-label="تعديل" class="admin-only" style="white-space:nowrap;">
     <button class="btn-mini btn-warning" onclick="openEditServantModal('${escapeHtml(s.code || s.id)}')" title="تعديل البيانات الأساسية">تعديل</button>
@@ -531,7 +531,7 @@ tr.innerHTML = `
     <button class="btn-mini" style="background:#0284c7; color:#ffffff; margin-right:3px;" onclick="previewDashboardAsServant('${escapeHtml(s.code || s.id)}')" title="معاينة لوحة التحكم الحية كما يراها هذا الخادم بالضبط">👁️ معاينة</button>
 </td>
 
-<td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', ${s.id}, '${escapeHtml(s.name)}')">🕘</button></td>
+<td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', '${s.id}', '${escapeHtml(s.name)}')">🕘</button></td>
 
 <td data-label="حذف" class="admin-only"><button class="btn-mini btn-danger" onclick="deleteServant('${escapeHtml(s.code || s.id)}')">حذف 🗑️</button></td>
 
@@ -1050,7 +1050,9 @@ function recordServantAttendance(servant, targetDate) {
 let d = targetDate || getActiveServantDate();
 if (!servantsAttendance[d]) servantsAttendance[d] = [];
 
-if (!servantsAttendance[d].some(s => s.id.toString() === servant.id.toString())) {
+const isAlreadyPresent = servantsAttendance[d].some(s => String(s.id) === String(servant.id) || (s.code && servant.code && String(s.code) === String(servant.code)));
+
+if (!isAlreadyPresent) {
 
 let newServRec = {
 
@@ -1083,47 +1085,37 @@ checkLocalStorageUsage();
 }
 
 function manualMarkServant(servantId, targetDate) {
-
-let s = servants.find(x => x.id === servantId);
-
-if (!s) return;
-
-let d = targetDate || getActiveServantDate();
-
-recordServantAttendance(s, d);
-
-playBeepSound('success');
-
-showToast(`✅ تم تسجيل حضور (${s.name}) لتاريخ ${d}`);
-
+    if (typeof servants === 'undefined' || !Array.isArray(servants)) return;
+    let s = servants.find(x => String(x.id) === String(servantId) || String(x.code) === String(servantId));
+    if (!s) {
+        console.warn('[manualMarkServant] Servant not found for id/code:', servantId);
+        return;
+    }
+    let d = targetDate || getActiveServantDate();
+    recordServantAttendance(s, d);
+    if (typeof playBeepSound === 'function') playBeepSound('success');
+    if (typeof showToast === 'function') {
+        showToast(`✅ تم تسجيل حضور (${s.name}) لتاريخ ${d}`);
+    }
 }
 
 function cancelServantAttendance(servantId, targetDate) {
-
-let s = servants.find(x => x.id === servantId);
-
-let sName = s ? s.name : "الخادم";
-
-let d = targetDate || getActiveServantDate();
-
-if (confirm(`إلغاء حضور الخادم (${sName}) ليوم (${d})؟`)) {
-
-servantsAttendance[d] = (servantsAttendance[d] || []).filter(item => item.id.toString() !== servantId.toString());
-
-localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
-
-syncToCloud('servants_attendance', servantsAttendance);
-
-logActivity("إلغاء حضور خادم", sName, `إلغاء يدوي ليوم ${d}`);
-
-renderServantsAttendanceTable();
-
-renderDashboard();
-
-checkLocalStorageUsage();
-
-}
-
+    if (typeof servants === 'undefined' || !Array.isArray(servants)) return;
+    let s = servants.find(x => String(x.id) === String(servantId) || String(x.code) === String(servantId));
+    let sName = s ? s.name : "الخادم";
+    let d = targetDate || getActiveServantDate();
+    if (confirm(`إلغاء حضور الخادم (${sName}) ليوم (${d})؟`)) {
+        servantsAttendance[d] = (servantsAttendance[d] || []).filter(item => String(item.id) !== String(servantId) && String(item.code || '') !== String(servantId));
+        localStorage.setItem(STORAGE_KEYS.SERVANTS_ATTENDANCE, JSON.stringify(servantsAttendance));
+        if (typeof syncToCloud === 'function') syncToCloud('servants_attendance', servantsAttendance);
+        logActivity("إلغاء حضور خادم", sName, `إلغاء يدوي ليوم ${d}`);
+        renderServantsAttendanceTable();
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof checkLocalStorageUsage === 'function') checkLocalStorageUsage();
+        if (typeof showToast === 'function') {
+            showToast(`🗑️ تم إلغاء حضور (${sName}) ليوم ${d}`);
+        }
+    }
 }
 
 
@@ -1330,4 +1322,6 @@ window.syncWithStudentAttendanceDate = syncWithStudentAttendanceDate;
   window.populatePlanServantsDropdown = populatePlanServantsDropdown;
   window.shareAutoSetupWhatsAppLink = shareAutoSetupWhatsAppLink;
   window.recordServantAttendance = recordServantAttendance;
+  window.manualMarkServant = manualMarkServant;
+  window.cancelServantAttendance = cancelServantAttendance;
 }

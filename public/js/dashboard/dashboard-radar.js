@@ -2705,8 +2705,11 @@ async function submitManualExcuseFromModal(memberId, studentCode, studentName, s
     try {
         let newExcuseObj = null;
 
-        try {
-            const res = await fetch('http://localhost:3000/api/excuses/manual', {
+        if (isLocalNodeAvailable()) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 1800);
+                const res = await fetch('http://localhost:3000/api/excuses/manual', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2720,8 +2723,10 @@ async function submitManualExcuseFromModal(memberId, studentCode, studentName, s
                     stage: studentStage,
                     reason: reasonCategory,
                     friday_date: targetFriday
-                })
+                },
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
             const data = await res.json();
             if (data && data.success) {
                 newExcuseObj = data.excuse || {
@@ -2738,7 +2743,8 @@ async function submitManualExcuseFromModal(memberId, studentCode, studentName, s
                 };
             }
         } catch(netErr) {
-            console.warn('[Manual Excuse] خادم الواتساب المحلي غير متصل، جاري الحفظ محلياً:', netErr);
+                console.warn('[Manual Excuse] خادم الواتساب المحلي غير متصل، جاري الحفظ محلياً:', netErr);
+            }
         }
 
         if (!newExcuseObj) {
