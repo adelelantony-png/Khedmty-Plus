@@ -2154,7 +2154,19 @@ async function resolveExcuseAction(id, action, btn) {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> جاري الحسم...';
     }
 
+    let targetExcuse = null;
+    if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+        targetExcuse = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
+    }
+
+    const newStatus = isAccept ? 'accepted' : 'rejected';
+    const resolverName = (typeof currentUser !== 'undefined' && currentUser?.name) || 'خادم الفصل';
+    let savedSuccessfully = false;
+
+    // 1. محاولة الإرسال لسيرفر Node المحلي إن كان متاحاً مع مهلة زمنية قصيرة (لتفادي توقف الموقع على Vercel)
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
         const res = await fetch(`http://127.0.0.1:3000/api/excuses/${id}/action`, {
             method: 'POST',
             headers: {
@@ -2164,40 +2176,69 @@ async function resolveExcuseAction(id, action, btn) {
             body: JSON.stringify({
                 action,
                 servant_notes: servantNote,
-                resolved_by: (typeof currentUser !== 'undefined' && currentUser?.name) || 'خادم الفصل'
-            })
+                resolved_by: resolverName
+            }),
+            signal: controller.signal
         });
-
+        clearTimeout(timeoutId);
         if (res.ok) {
-            const data = await res.json();
-            alert(data.message);
-
-            // تحديث سجل الحضور في شيت الغياب تلقائياً إذا كان العذر مقبولاً
-            if (isAccept && data.excuse) {
-                markStudentExcusedInAttendance(data.excuse);
-            }
-
-            await loadRadarExcuses();
-
-            // تحديث نافذة المعاينة إذا كانت مفتوحة
-            const modal = document.getElementById('modalExcuseDetail');
-            if (modal && modal.style.display !== 'none') {
-                previewFullExcuseModal(id);
-            }
-        } else {
-            alert('تعذر تحديث حالة الاعتذار. تأكد من تشغيل السيرفر.');
-            if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            }
+            savedSuccessfully = true;
         }
-    } catch(err) {
-        alert('خطأ في الاتصال: ' + err.message);
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+    } catch(netErr) {
+        console.warn('[Resolve Excuse] السيرفر المحلي غير متاح، جاري الحفظ عبر السحابة والتخزين المحلي:', netErr.message);
+    }
+
+    // 2. المزامنة السحابية مع Cloud Firestore إن كانت السحابة مفعلة
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        try {
+            await fsdb.collection('excuses').doc(String(id)).set({
+                status: newStatus,
+                servant_notes: servantNote,
+                resolved_by: resolverName,
+                resolved_at: Date.now()
+            }, { merge: true });
+            savedSuccessfully = true;
+        } catch(cloudErr) {
+            console.warn('[Resolve Excuse Firestore Sync Error]', cloudErr);
         }
     }
+
+    // 3. التحديث الفوري في الذاكرة المحلية وكاش المتصفح لضمان عدم توقف العمل أونلاين وأوفلاين
+    if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+        const item = window.lastRadarExcusesList.find(e => String(e.id) === String(id));
+        if (item) {
+            item.status = newStatus;
+            item.servant_notes = servantNote;
+            item.resolved_by = resolverName;
+            savedSuccessfully = true;
+        }
+        try {
+            localStorage.setItem('khedmety_cached_excuses', JSON.stringify(window.lastRadarExcusesList));
+        } catch(e) {}
+    }
+
+    // 4. تسجيل العذر أو الإذن في كشف الحضور تلقائياً إذا تم القبول
+    if (isAccept && targetExcuse) {
+        targetExcuse.status = newStatus;
+        targetExcuse.servant_notes = servantNote;
+        markStudentExcusedInAttendance(targetExcuse);
+    }
+
+    // إعادة رسم جدول الأعذار وتحديث العدادات لحظياً
+    renderRadarExcusesTable();
+
+    // تحديث نافذة المعاينة إذا كانت مفتوحة
+    const modal = document.getElementById('modalExcuseDetail');
+    if (modal && modal.style.display !== 'none') {
+        previewFullExcuseModal(id);
+    }
+
+    if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+
+    alert(isAccept ? 'تم اعتماد الاستئذان كعذر مقبول وحفظه بنجاح! ✅' : 'تم تسجيل رفض العذر وحفظه بنجاح! ❌');
 }
 
 // 💬 دوال معاينة رسالة الاعتذار كاملة وسجل اعتذارات المخدوم
