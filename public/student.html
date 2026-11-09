@@ -400,27 +400,27 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
     <!-- 🌟 شبكة إحصائيات وأقسام البرنامج (Matching Image 2 Reference) -->
     <!-- ======================================================== -->
 
-    <!-- 1. كروت الإحصائيات الثلاثية (Stats Pills) -->
+    <!-- 1. كروت المؤشرات الشخصية للدارس (Personal Student Stats) -->
     <div class="row g-2 mb-3 text-center">
         <div class="col-4">
             <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
-                <div style="font-size: 1.35rem; color: #2563EB;"><i class="fa-solid fa-users"></i></div>
-                <div class="fw-bold mt-1" id="ui-stat-members" style="font-size: 1.25rem; color: #0C2461;">89</div>
-                <small class="text-muted fw-bold" style="font-size: 0.72rem;">خادم ودارس</small>
+                <div style="font-size: 1.35rem; color: #2563EB;"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="fw-bold mt-1" id="ui-stat-attendance-count" style="font-size: 1.25rem; color: #0C2461;">0 لقاء</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">حضور الجمعة</small>
             </div>
         </div>
         <div class="col-4">
             <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
                 <div style="font-size: 1.35rem; color: #D97706;"><i class="fa-solid fa-book-bookmark"></i></div>
-                <div class="fw-bold mt-1" id="ui-stat-courses" style="font-size: 1.25rem; color: #0C2461;">12</div>
-                <small class="text-muted fw-bold" style="font-size: 0.72rem;">دورة ومحاضرة</small>
+                <div class="fw-bold mt-1" id="ui-stat-courses" style="font-size: 1.25rem; color: #0C2461;">7</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">مواد مقررة</small>
             </div>
         </div>
         <div class="col-4">
             <div class="card p-2 border-0 shadow-sm rounded-4 h-100" style="background: #FFFFFF; border: 1.5px solid #E2E8F0 !important;">
-                <div style="font-size: 1.35rem; color: #0284C7;"><i class="fa-solid fa-calendar-check"></i></div>
-                <div class="fw-bold mt-1" id="ui-stat-events" style="font-size: 1.25rem; color: #0C2461;">5</div>
-                <small class="text-muted fw-bold" style="font-size: 0.72rem;">فعاليات وتكليفات</small>
+                <div style="font-size: 1.35rem; color: #EA580C;"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                <div class="fw-bold mt-1" id="ui-stat-streak" style="font-size: 1.25rem; color: #0C2461;">0 يوم</div>
+                <small class="text-muted fw-bold" style="font-size: 0.72rem;">تتابع روحي 🔥</small>
             </div>
         </div>
     </div>
@@ -1120,6 +1120,24 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
         renderTodayStatus(localAtt);
         renderConferenceDiscountCard();
+
+        // تحديث كارت حضور الجمعة الشخصي للدارس
+        try {
+            const myCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
+            if (myCode) {
+                let friAttendedCount = 0;
+                Object.keys(localAtt).forEach(dKey => {
+                    const list = localAtt[dKey] || [];
+                    const rec = list.find(a => String(a.code || a.id || '').trim() === myCode);
+                    if (rec && !rec.isAbsentDueToDelay && !rec.isAbsent) {
+                        const dt = new Date(dKey);
+                        if (dt.getDay() === 5) friAttendedCount++;
+                    }
+                });
+                const attPill = document.getElementById('ui-stat-attendance-count');
+                if (attPill) attPill.textContent = `${friAttendedCount} لقاء`;
+            }
+        } catch(e) {}
 
 
 
@@ -1940,7 +1958,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const code = (window.AuthClient && AuthClient.getUserCode()) || localStorage.getItem('student_code') || '';
         const streak = calculateSpiritualStreak(code);
 
-        // 1. تحديث الـ Streak والشعلة
+        // 1. تحديث الـ Streak والشعلة والكارت الرئيسي
+        const streakStatPill = document.getElementById('ui-stat-streak');
+        if (streakStatPill) {
+            streakStatPill.textContent = streak > 0 ? `${streak} يوم` : '0 يوم';
+        }
         const streakCountEl = document.getElementById('ui-streak-count');
         const streakSubtitleEl = document.getElementById('ui-streak-subtitle');
 
