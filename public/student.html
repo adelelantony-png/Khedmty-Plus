@@ -18,6 +18,8 @@
     <link rel="manifest" href="manifest.json">
 
     <link rel="stylesheet" href="css/app-theme.css">
+    <script src="js/theme-manager.js"></script>
+<script src="js/gentle-reminders.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
@@ -306,6 +308,9 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         <div class="d-flex align-items-center gap-2">
             <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
             <div id="appUpdateContainer"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" data-k-action="open-theme-picker" title="اختيار المظهر والثيم" style="color: var(--k-text); border-color: var(--k-border-gold); background: var(--k-surface-2); font-size: 0.8rem;">
+                <i class="fa-solid fa-palette text-warning me-1"></i> المظهر
+            </button>
             <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold rounded-pill px-3" title="تسجيل الخروج"><i class="fa-solid fa-power-off me-1"></i> خروج 🚪</a>
         </div>
     </div>
@@ -996,23 +1001,14 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
 
 
 
-    const FB_CONFIG = {
-
-        "apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
-
-        "authDomain": "khedmety-plus.firebaseapp.com",
-
-        "databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
-
-        "projectId": "khedmety-plus",
-
-        "storageBucket": "khedmety-plus.firebasestorage.app",
-
-        "messagingSenderId": "3510220845",
-
-        "appId": "1:3510220845:web:1b6482d1c656g1f20538"
-
-    };
+    const FB_CONFIG = (window.FIREBASE_CONFIG || {
+        apiKey: "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c",
+        authDomain: "khedmety-plus.firebaseapp.com",
+        projectId: "khedmety-plus",
+        storageBucket: "khedmety-plus.firebasestorage.app",
+        messagingSenderId: "25101228841",
+        appId: "1:25101228841:web:3164821d165014a1e2b538"
+    });
 
     if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
 
@@ -1057,6 +1053,62 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
     document.getElementById('ui-student-code').textContent = studentCode;
 
     document.getElementById('ui-level').textContent = studentLevel || 'الفرقة الأولى';
+
+    // 📡 تسجيل الجلسة الحية للمخدوم/الدارس في رادار قاعدة البيانات مع نبض دوري
+    function registerStudentActiveSession(code, name, stage) {
+        if (!fsdb || !code) return;
+        try {
+            const studentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+            const docKey = 'std_' + String(code).trim();
+            const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? "هاتف محمول 📱" : "كمبيوتر / لابتوب 💻";
+            const sessRef = fsdb.collection('active_sessions').doc(docKey);
+
+            const sessionData = {
+                sessionId: studentSessionId,
+                servantName: name || 'طالب إعداد خدام',
+                userCode: String(code).trim(),
+                role: 'student',
+                stage: stage || 'الفرقة الأولى',
+                loginTime: new Date().toLocaleTimeString('ar-EG'),
+                loginDate: new Date().toISOString().split('T')[0],
+                lastActiveAt: Date.now(),
+                device: deviceType,
+                status: 'active'
+            };
+
+            sessRef.set(sessionData, { merge: true }).catch(err => console.warn('Student session register warning:', err));
+
+            const heartbeat = setInterval(() => {
+                sessRef.update({ lastActiveAt: Date.now(), status: 'active' }).catch(() => {});
+            }, 60000);
+
+            window.addEventListener('beforeunload', () => {
+                sessRef.delete().catch(() => {});
+            });
+            window.addEventListener('pagehide', () => {
+                sessRef.delete().catch(() => {});
+            });
+
+            sessRef.onSnapshot(snap => {
+                if (snap.exists && snap.data().status === 'terminated') {
+                    clearInterval(heartbeat);
+                    sessRef.delete().catch(() => {});
+                    alert('⚠️ تم إنهاء جلستك وتسجيل خروجك من قِبل أمين الخدمة العام');
+                    if (window.AuthClient && typeof AuthClient.logout === 'function') {
+                        AuthClient.logout();
+                    } else {
+                        window.location.replace('index.html');
+                    }
+                }
+            }, () => {});
+        } catch(e) {
+            console.warn('Error in registerStudentActiveSession:', e);
+        }
+    }
+
+    if (studentCode) {
+        registerStudentActiveSession(studentCode, studentName, studentLevel);
+    }
 
 
 

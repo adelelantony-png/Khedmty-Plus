@@ -32,7 +32,9 @@ const tests = [
   'tests/test_suite28_qa_audit_and_hardening.js',
   'test_servant_open_date_attendance.js',
   'test_attendance_time_editor.js',
-  'test_student_bible_plan.js'
+  'test_student_bible_plan.js',
+  'tests/test_phase_a_design_system.js',
+  'tests/test_sessions_themes_reminders.js'
 ];
 
 console.log('================================================================');

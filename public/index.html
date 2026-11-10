@@ -14,6 +14,8 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/app-theme.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="js/theme-manager.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -21,51 +23,430 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/khedmty-offline-roster.js"></script>
 <style>
-:root{--primary:#0C2461;--primary-dark:#071A38;--accent:#15376E;--gold:#D4AF37;--gold-light:#F5CE66;--success:#10B981;--danger:#EF4444;--dark:#0F172A}
-*{box-sizing:border-box}
-html,body{min-height:100%;width:100%;max-width:100vw;overflow-x:hidden!important}
-body{margin:0;font-family:'Cairo','Tajawal','Segoe UI',Tahoma,sans-serif;color:var(--dark);min-height:100vh;display:grid;place-items:center;padding:24px 16px;box-sizing:border-box;
-  background:radial-gradient(circle at 50% 20%, #15376E 0%, #0C2461 45%, #071A38 100%);position:relative}
-.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.45;pointer-events:none;animation:drift 18s ease-in-out infinite alternate}
-.b1{width:340px;height:340px;background:#74b9ff;top:-90px;left:-80px}
-.b2{width:300px;height:300px;background:var(--gold);bottom:-110px;right:-60px;opacity:.3;animation-duration:22s}
-.b3{width:220px;height:220px;background:#6c5ce7;top:55%;left:55%;opacity:.3;animation-duration:26s}
-@keyframes drift{to{transform:translate(40px,-30px) scale(1.15)}}
-.wrap{width:100%;max-width:380px;margin:0 auto;box-sizing:border-box;position:relative;z-index:1;animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
-@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-.card{width:100%;box-sizing:border-box;background:rgba(255,255,255,.97);border-radius:28px;padding:30px 22px 22px;box-shadow:0 25px 60px rgba(7,20,70,.45);position:relative}
-.logo{width:84px;height:84px;margin:-76px auto 14px;border-radius:50%;display:grid;place-items:center;color:#fff;
-  background:linear-gradient(135deg,var(--primary),var(--accent));border:5px solid #fff;box-shadow:0 10px 26px rgba(30,55,153,.5),0 0 0 8px rgba(253,203,110,.35)}
-.logo svg{width:40px;height:40px}
-h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary)}
-.sub{margin:4px 0 22px;text-align:center;font-size:13px;color:#636e72;font-weight:500}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#2f3b52}
-.input{display:flex;align-items:center;gap:8px;background:#f4f6fb;border:2px solid transparent;border-radius:14px;padding:0 14px;transition:.2s}
-.input:focus-within{border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px rgba(9,132,227,.12)}
-.input svg{width:18px;height:18px;flex:none;color:#8a96ab}
-.input input{flex:1;min-width:0;border:0;background:transparent;outline:0;padding:14px 0;font:inherit;font-size:15px;font-weight:500;color:var(--dark)}
-.eye{border:0;background:none;cursor:pointer;padding:6px;color:#8a96ab;display:grid;place-items:center}
-.eye:hover{color:var(--primary)}
-.row{display:flex;align-items:center;justify-content:space-between;margin:2px 0 18px;font-size:13px}
-.row label{display:flex;align-items:center;gap:7px;cursor:pointer;color:#4b5870;font-weight:500}
-.row input{accent-color:var(--primary);width:16px;height:16px}
-.btn{width:100%;border:1px solid rgba(212,175,55,0.4);border-radius:14px;padding:15px;font:inherit;font-size:16px;font-weight:800;color:#fff;cursor:pointer;
-  background:linear-gradient(135deg,#0C2461 0%,#15376E 100%);box-shadow:0 10px 24px rgba(7,26,56,.4);transition:.2s}
-.btn:hover:not(:disabled){transform:translateY(-2px);border-color:#D4AF37;box-shadow:0 14px 30px rgba(7,26,56,.55);color:#FDE047}
-.btn:disabled{opacity:.7;cursor:wait}
-.err{display:none;margin-bottom:14px;padding:11px 14px;border-radius:12px;background:#ffeaea;border-right:4px solid var(--danger);color:#a82224;font-size:13px;font-weight:700}
-.err.show{display:block;animation:shake .4s}
-@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.hint{margin:16px 0 0;text-align:center;font-size:12px;color:#8a96ab;line-height:1.7}
-.verse{margin-top:18px;text-align:center;color:rgba(255,255,255,.92);font-size:15px;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.25)}
-.verse small{display:block;font-weight:500;font-size:12px;opacity:.8;margin-top:2px}
-@media (max-width: 480px) {
-  body { padding: 12px 10px; }
-  .card { padding: 28px 16px 20px; border-radius: 20px; }
-  .wrap { max-width: 100%; }
+:root {
+  --primary: #0B2A6B;
+  --primary-dark: #071A38;
+  --accent: #15376E;
+  --gold: #D4AF37;
+  --gold-light: #F2C75C;
+  --cream: #FFF6DC;
+  --success: #10B981;
+  --danger: #EF4444;
+  --dark: #0F172A;
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+* { box-sizing: border-box; }
+
+html, body {
+  min-height: 100%;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+}
+
+body {
+  margin: 0;
+  font-family: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--k-text, #071A38);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: radial-gradient(circle at 50% 15%, #15376E 0%, #0C2461 40%, #071A38 100%);
+  position: relative;
+}
+
+/* خلفية متوهجة وشعاع كنسي هادئ */
+.bg-glow-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-light-beam {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.18) 0%, rgba(11, 42, 107, 0) 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.b1 { width: 340px; height: 340px; background: #2563eb; top: -60px; left: -80px; }
+.b2 { width: 320px; height: 320px; background: #d4af37; bottom: -80px; right: -60px; opacity: 0.25; }
+
+/* بطاقة الدخول الرئيسية */
+.wrap {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  animation: kRiseUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes kRiseUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
+  border-radius: 28px;
+  padding: 34px 24px 26px;
+  box-shadow: 0 25px 60px rgba(7, 26, 56, 0.4), 0 0 35px rgba(212, 165, 55, 0.15);
+  position: relative;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* الشعار الكنسي الملكي */
+.logo-container {
+  width: 86px;
+  height: 86px;
+  margin: -78px auto 14px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #071A38 0%, #0B2A6B 100%);
+  border: 3.5px solid #FFFFFF;
+  box-shadow: 0 12px 28px rgba(7, 26, 56, 0.45), 0 0 0 6px rgba(212, 165, 55, 0.3);
+  overflow: hidden;
+  padding: 4px;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05) rotate(1deg);
+}
+
+.logo-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 18px;
+}
+
+.app-title {
+  margin: 0;
+  text-align: center;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--k-primary, #0B2A6B);
+  letter-spacing: -0.5px;
+}
+
+.app-subtitle {
+  margin: 4px 0 18px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* محدد الصفة (Role Chips) */
+.role-chips-bar {
+  display: flex;
+  gap: 6px;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #E2E8F0;
+}
+
+.role-chip-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #64748B;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.role-chip-btn.active {
+  background: #FFFFFF;
+  color: var(--k-primary, #0B2A6B);
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(212, 165, 55, 0.3);
+}
+
+.role-chip-btn:hover:not(.active) {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* حقول الإدخال */
+.field {
+  margin-bottom: 15px;
+}
+
+.field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #334155;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #F8FAFC;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 0 14px;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.input-box:focus-within {
+  border-color: #D4AF37;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.18);
+}
+
+.input-box svg,
+.input-box i {
+  color: #94A3B8;
+  font-size: 1.05rem;
+  flex: none;
+}
+
+.input-box:focus-within svg,
+.input-box:focus-within i {
+  color: var(--k-primary, #0B2A6B);
+}
+
+.input-box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: 0;
+  padding: 12px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.eye-btn {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 6px;
+  color: #94A3B8;
+  display: grid;
+  place-items: center;
+  transition: color 0.15s;
+}
+
+.eye-btn:hover {
+  color: var(--k-primary, #0B2A6B);
+}
+
+.options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 18px;
+  font-size: 13px;
+}
+
+.options-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #475569;
+  font-weight: 600;
+}
+
+.options-row input {
+  accent-color: var(--k-primary, #0B2A6B);
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+
+/* زر تسجيل الدخول الذهبي */
+.btn-submit {
+  width: 100%;
+  border: 1px solid rgba(212, 165, 55, 0.5);
+  border-radius: 14px;
+  padding: 14px;
+  min-height: 48px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  color: #071A38;
+  cursor: pointer;
+  background: linear-gradient(135deg, #D4AF37 0%, #F5CE66 100%);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(212, 175, 55, 0.5);
+  filter: brightness(1.04);
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* التنبيهات والأخطاء */
+.err-box {
+  display: none;
+  margin-bottom: 15px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #FEF2F2;
+  border-inline-start: 4px solid var(--danger);
+  color: #991B1B;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.err-box.show {
+  display: block;
+  animation: kShake 0.4s;
+}
+
+@keyframes kShake {
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.hint-box {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: #64748B;
+  line-height: 1.6;
+  background: #F8FAFC;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px dashed #CBD5E1;
+}
+
+/* روابط الدليل السريع */
+.quick-guides-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.quick-guide-pill {
+  flex: 1 1 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.quick-guide-servant {
+  color: #1E3A8A;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+}
+
+.quick-guide-servant:hover {
+  background: #DBEAFE;
+  transform: translateY(-1px);
+}
+
+.quick-guide-student {
+  color: #065F46;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+}
+
+.quick-guide-student:hover {
+  background: #D1FAE5;
+  transform: translateY(-1px);
+}
+
+/* الآية الكنسية في الأسفل */
+.verse-container {
+  margin-top: 22px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'Amiri', serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  line-height: 1.5;
+}
+
+.verse-container small {
+  display: block;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: #F2C75C;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 480px) {
+  body { padding: 16px 12px; }
+  .card { padding: 28px 18px 20px; border-radius: 24px; }
+  .app-title { font-size: 24px; }
+  .logo-container { width: 76px; height: 76px; margin-top: -68px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
@@ -80,52 +461,85 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
   <p class="idad-splash-motto">معاً.. ننمو في الخدمة</p>
 </div>
 
-<div style="position:fixed;top:0;left:0;width:100vw;height:100vh;overflow:hidden;pointer-events:none;z-index:0;"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="bg-glow-layer">
+  <div class="bg-light-beam"></div>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+</div>
 
 <main class="wrap">
-  <div class="card" style="margin-top:42px">
-    <div class="logo" aria-hidden="true" style="background:#071A38; border:3px solid #D4AF37; box-shadow:0 10px 26px rgba(7,26,56,.5),0 0 0 6px rgba(212,175,55,.3); overflow:hidden; padding:2px;">
-      <img src="icons/icon-192.png" alt="شعار إعداد خدام" style="width:100%; height:100%; object-fit:contain; border-radius:50%;">
+  <div class="card" style="margin-top:48px">
+    <div class="logo-container" aria-hidden="true">
+      <img src="icons/icon-192.png" alt="شعار إعداد خدام">
     </div>
-    <h1 style="color:#0C2461; font-weight:900;">إعداد خدام</h1>
-    <p class="sub" style="color:#475569; font-weight:600;">اجتماع القديس بولس الرسول لإعداد الخدام &middot; بوابة الدخول الموحدة</p>
+    
+    <h1 class="app-title">إعداد خدام</h1>
+    <p class="app-subtitle">اجتماع القديس بولس الرسول لإعداد الخدام &middot; بوابة الدخول الموحدة</p>
 
-    <div id="err" class="err" role="alert"></div>
+    <!-- محدد الدور التفاعلي السريع -->
+    <div class="role-chips-bar" role="tablist" aria-label="اختيار الصفة">
+      <button type="button" id="chipRoleStudent" class="role-chip-btn active" onclick="setLoginRole('student')" role="tab" aria-selected="true">
+        <span>🎓</span> طالب / دارس
+      </button>
+      <button type="button" id="chipRoleServant" class="role-chip-btn" onclick="setLoginRole('servant')" role="tab" aria-selected="false">
+        <span>✝️</span> خادم
+      </button>
+      <button type="button" id="chipRoleAdmin" class="role-chip-btn" onclick="setLoginRole('admin')" role="tab" aria-selected="false">
+        <span>🛡️</span> أمين الخدمة
+      </button>
+    </div>
+
+    <div id="err" class="err-box" role="alert"></div>
 
     <form id="form" autocomplete="off" novalidate>
       <div class="field">
-        <label for="u">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</label>
-        <div class="input">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-          <input id="u" type="text" placeholder="اكتب كود الامتحان (مثلاً: 1446) أو اسم الخادم" autofocus>
+        <label for="u" id="labelU">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</label>
+        <div class="input-box">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+          <input id="u" type="text" placeholder="اكتب كود الامتحان (مثلاً: 1446 أو 1042)" autofocus>
         </div>
       </div>
+
       <div class="field">
-        <label for="p">رقم الهاتف المسجل بالكشف (للطلبة) / كلمة المرور (للخدام)</label>
-        <div class="input">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <input id="p" type="password" placeholder="أدخل رقم الهاتف المسجل بالكشف (01xxxxxxxxx)" autocomplete="current-password">
-          <button type="button" class="eye" id="eye" aria-label="إظهار كلمة المرور">
+        <label for="p" id="labelP">رقم الهاتف المسجل بالكشف (01xxxxxxxxx)</label>
+        <div class="input-box">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <input id="p" type="password" placeholder="أدخل رقم الهاتف المسجل بالكشف" autocomplete="current-password">
+          <button type="button" class="eye-btn" id="eye" aria-label="إظهار كلمة المرور">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
       </div>
-      <div class="row">
+
+      <div class="options-row">
         <label><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
       </div>
-      <button type="submit" id="btn" class="btn">عرض النتيجة والملف 🎓</button>
+
+      <button type="submit" id="btn" class="btn-submit">عرض النتيجة والملف الشخصي 🎓</button>
     </form>
-    <div style="display: flex; gap: 8px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
-      <a href="servant_quick_guide.html" target="_blank" style="flex: 1 1 130px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.8rem; color: #1e3799; text-decoration: none; padding: 8px 10px; background: #eef2ff; border-radius: 8px; font-weight: bold; border: 1px solid #c7d2fe; box-sizing: border-box; text-align: center;">
+
+    <div class="quick-guides-row">
+      <a href="servant_quick_guide.html" target="_blank" class="quick-guide-pill quick-guide-servant">
         📋 دليل الخادم السريع
       </a>
-      <a href="student_quick_guide.html" target="_blank" style="flex: 1 1 130px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: 0.8rem; color: #065f46; text-decoration: none; padding: 8px 10px; background: #ecfdf5; border-radius: 8px; font-weight: bold; border: 1px solid #a7f3d0; box-sizing: border-box; text-align: center;">
+      <a href="student_quick_guide.html" target="_blank" class="quick-guide-pill quick-guide-student">
         📱 دليل المخدوم والدارس
       </a>
     </div>
-    <p class="hint" id="hint">💡 للطلبة: اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض نتيجتك وملفك بأمان.</p>
+
+    <div style="text-align: center; margin-top: 14px;">
+      <button type="button" data-k-action="open-theme-picker" style="background: rgba(212,175,55,0.12); border: 1.5px solid rgba(212,175,55,0.45); color: #B8860B; border-radius: 999px; padding: 6px 16px; font-size: 0.8rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+        <i class="fa-solid fa-palette"></i> مظهر وثيم التطبيق (7 ثيمات كنسية)
+      </button>
+    </div>
+
+    <p class="hint-box" id="hint">💡 <strong>للطلبة والدارسين:</strong> اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض ملفك ودرجاتك فوراً.</p>
   </div>
-  <div class="verse">اعبدوا الرب بفرح<small>مزمور ١٠٠: ٢</small></div>
+
+  <div class="verse-container">
+    «اعْبُدُوا الرَّبَّ بِفَرَحٍ. ادْخُلُوا إِلَى حَضْرَتِهِ بِتَرَنُّمٍ»
+    <small>مزمور ١٠٠: ٢</small>
+  </div>
 </main>
 
 <script>
@@ -155,6 +569,48 @@ h1{margin:0;text-align:center;font-size:24px;font-weight:800;color:var(--primary
 const K = { servants:'my_church_servants', members:'my_church_class', adminPwd:'my_church_admin_pwd',
             active:'my_church_active_user', fail:'khedmety_login_fail_count', lock:'khedmety_login_lock_until' };
 const $ = id => document.getElementById(id);
+
+function setLoginRole(role) {
+  const chipStudent = $('chipRoleStudent');
+  const chipServant = $('chipRoleServant');
+  const chipAdmin = $('chipRoleAdmin');
+  const labelU = $('labelU');
+  const labelP = $('labelP');
+  const inputU = $('u');
+  const inputP = $('p');
+  const btn = $('btn');
+  const hint = $('hint');
+
+  [chipStudent, chipServant, chipAdmin].forEach(c => c && c.classList.remove('active'));
+
+  if (role === 'student') {
+    if (chipStudent) chipStudent.classList.add('active');
+    if (labelU) labelU.textContent = 'كود الامتحان / رقم الجلوس (للطلبة)';
+    if (labelP) labelP.textContent = 'رقم الهاتف المسجل بالكشف (01xxxxxxxxx)';
+    if (inputU) inputU.placeholder = 'مثال: 1446 أو 1042';
+    if (inputP) inputP.placeholder = 'أدخل رقم الهاتف المسجل بالكشف';
+    if (btn) btn.innerHTML = 'عرض النتيجة والملف الشخصي 🎓';
+    if (hint) hint.innerHTML = '💡 <strong>للطلبة والدارسين:</strong> اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض ملفك ودرجاتك فوراً.';
+  } else if (role === 'servant') {
+    if (chipServant) chipServant.classList.add('active');
+    if (labelU) labelU.textContent = 'اسم الخادم أو كود الخدمة';
+    if (labelP) labelP.textContent = 'كلمة المرور أو رقم الهاتف';
+    if (inputU) inputU.placeholder = 'اكتب اسمك أو كود الخادم';
+    if (inputP) inputP.placeholder = 'أدخل كلمة المرور';
+    if (btn) btn.innerHTML = 'دخول لوحة تحكم الخادم ✝️';
+    if (hint) hint.innerHTML = '💡 <strong>للخدام:</strong> ادخل باسمك أو كودك وكلمة المرور المسجلة للوصول لتحضيراتك ورصد الغياب والافتقاد.';
+  } else if (role === 'admin') {
+    if (chipAdmin) chipAdmin.classList.add('active');
+    if (labelU) labelU.textContent = 'اسم أمين الخدمة العام (أدمن)';
+    if (labelP) labelP.textContent = 'كلمة مرور المشرف العام';
+    if (inputU) inputU.placeholder = 'عادل جورج أو admin';
+    if (inputP) inputP.placeholder = 'أدخل كلمة مرور الأدمن';
+    if (btn) btn.innerHTML = 'دخول لوحة الإشراف العام 🛡️';
+    if (hint) hint.innerHTML = '💡 <strong>لأمين الخدمة:</strong> إدارة كاملة للرادار والتقارير وسجل الحركات وتخصيص الصلاحيات.';
+  }
+}
+window.setLoginRole = setLoginRole;
+
 
 // الإعدادات المدمجة لمشروع khedmety-plus
 const PUBLIC_FIREBASE_CONFIG = {

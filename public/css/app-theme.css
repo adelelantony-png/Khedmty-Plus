@@ -17,107 +17,317 @@
 @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&display=swap');
 
 /* ========================================================
-   1. متغيرات النظام والهوية البصرية (Design Tokens)
+   1. متغيرات النظام والهوية البصرية والثيمات السبعة (Design Tokens & 7 Themes)
+   ======================================================== */
+
+/* 1.1 الثيم الملكي الذهبي (Royal Gold) — الثيم الافتراضي الرسمي */
+:root,
+[data-theme="royal-gold"] {
+    /* الخلفيات والأسطح */
+    --k-bg: linear-gradient(180deg, #EEF3FB 0%, #FFF9EA 100%);
+    --k-bg-body: #EEF3FB;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #FFF6DC;
+    --k-surface-3: #FBEFC9;
+    --k-surface-card: rgba(255, 255, 255, 0.96);
+    --k-surface-hover: #F9FAFC;
+
+    /* النصوص والتباين المريح للعين (WCAG AAA >= 7:1) */
+    --k-text: #071A38;
+    --k-text-muted: #4B5563;
+    --k-text-light: #6B7280;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #B8860B;
+
+    /* الكحلي الملكي */
+    --k-primary: #0B2A6B;
+    --k-primary-dark: #071A38;
+    --k-primary-light: #EEF2FF;
+    --k-primary-gradient: linear-gradient(135deg, #0B2A6B 0%, #071A38 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #0B2A6B 0%, #071A38 100%);
+
+    /* الذهبي الدافئ الموقر */
+    --k-accent: #D4A537;
+    --k-accent-gold: #F2C75C;
+    --k-accent-hover: #B8860B;
+    --k-accent-gradient: linear-gradient(135deg, #D4A537 0%, #F2C75C 100%);
+    --k-accent-glow: rgba(212, 165, 55, 0.35);
+
+    /* الحدود والظلال الثلاثية الطبقات */
+    --k-border: #E5E7EB;
+    --k-border-subtle: rgba(11, 42, 107, 0.08);
+    --k-border-gold: rgba(212, 165, 55, 0.45);
+    --k-focus-ring: rgba(212, 165, 55, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(11, 42, 107, 0.04);
+    --k-shadow-soft: 0 1px 2px rgba(11, 42, 107, 0.04), 0 8px 24px rgba(11, 42, 107, 0.06);
+    --k-shadow-elevated: 0 8px 24px rgba(11, 42, 107, 0.08), 0 20px 48px rgba(11, 42, 107, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(212, 165, 55, 0.32);
+}
+
+/* 1.2 ثيم الزمرد الهادئ (Emerald Calm) */
+[data-theme="emerald-calm"] {
+    --k-bg: linear-gradient(180deg, #F2F7F4 0%, #E8F1EC 100%);
+    --k-bg-body: #F2F7F4;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #E5EFEA;
+    --k-surface-3: #D5E5DE;
+    --k-surface-card: rgba(255, 255, 255, 0.96);
+    --k-surface-hover: #F0F6F3;
+
+    --k-text: #14352F;
+    --k-text-muted: #4A6B64;
+    --k-text-light: #6A8B84;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #A07833;
+
+    --k-primary: #1F4D45;
+    --k-primary-dark: #13342E;
+    --k-primary-light: #E7F0ED;
+    --k-primary-gradient: linear-gradient(135deg, #1F4D45 0%, #13342E 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #1F4D45 0%, #13342E 100%);
+
+    --k-accent: #C5A059;
+    --k-accent-gold: #D8B775;
+    --k-accent-hover: #A07833;
+    --k-accent-gradient: linear-gradient(135deg, #B88E44 0%, #D8B775 100%);
+    --k-accent-glow: rgba(197, 160, 89, 0.32);
+
+    --k-border: #D1E0D9;
+    --k-border-subtle: rgba(31, 77, 69, 0.08);
+    --k-border-gold: rgba(197, 160, 89, 0.4);
+    --k-focus-ring: rgba(197, 160, 89, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(31, 77, 69, 0.04);
+    --k-shadow-soft: 0 1px 2px rgba(31, 77, 69, 0.04), 0 8px 24px rgba(31, 77, 69, 0.06);
+    --k-shadow-elevated: 0 8px 24px rgba(31, 77, 69, 0.08), 0 20px 48px rgba(31, 77, 69, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(197, 160, 89, 0.28);
+}
+
+/* 1.3 ثيم الرمال الدافئة (Warm Sand) */
+[data-theme="warm-sand"] {
+    --k-bg: linear-gradient(180deg, #F6EFE4 0%, #EDE1CE 100%);
+    --k-bg-body: #F6EFE4;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #EFE5D5;
+    --k-surface-3: #E2D3BE;
+    --k-surface-card: rgba(255, 255, 255, 0.96);
+    --k-surface-hover: #FAF5ED;
+
+    --k-text: #3D2C1E;
+    --k-text-muted: #6B5847;
+    --k-text-light: #8C7764;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #AC4D32;
+
+    --k-primary: #6B4F3A;
+    --k-primary-dark: #4E3727;
+    --k-primary-light: #F3ECE2;
+    --k-primary-gradient: linear-gradient(135deg, #6B4F3A 0%, #4E3727 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #6B4F3A 0%, #4E3727 100%);
+
+    --k-accent: #C86446;
+    --k-accent-gold: #E08264;
+    --k-accent-hover: #AC4D32;
+    --k-accent-gradient: linear-gradient(135deg, #C86446 0%, #E08264 100%);
+    --k-accent-glow: rgba(200, 100, 70, 0.32);
+
+    --k-border: #DFD3C1;
+    --k-border-subtle: rgba(107, 79, 58, 0.08);
+    --k-border-gold: rgba(200, 100, 70, 0.4);
+    --k-focus-ring: rgba(200, 100, 70, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(107, 79, 58, 0.04);
+    --k-shadow-soft: 0 1px 2px rgba(107, 79, 58, 0.04), 0 8px 24px rgba(107, 79, 58, 0.06);
+    --k-shadow-elevated: 0 8px 24px rgba(107, 79, 58, 0.08), 0 20px 48px rgba(107, 79, 58, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(200, 100, 70, 0.28);
+}
+
+/* 1.4 ثيم السحاب السماوي (Sky Mist) */
+[data-theme="sky-mist"] {
+    --k-bg: linear-gradient(180deg, #EAF3FA 0%, #DFECF7 100%);
+    --k-bg-body: #EAF3FA;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #DCECF7;
+    --k-surface-3: #C9DFEF;
+    --k-surface-card: rgba(255, 255, 255, 0.96);
+    --k-surface-hover: #F2F8FD;
+
+    --k-text: #1E3547;
+    --k-text-muted: #4F677A;
+    --k-text-light: #6F889B;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #2E7D7A;
+
+    --k-primary: #35546E;
+    --k-primary-dark: #203649;
+    --k-primary-light: #E4EFF7;
+    --k-primary-gradient: linear-gradient(135deg, #35546E 0%, #203649 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #35546E 0%, #203649 100%);
+
+    --k-accent: #48A9A6;
+    --k-accent-gold: #5EC2BF;
+    --k-accent-hover: #2E7D7A;
+    --k-accent-gradient: linear-gradient(135deg, #3B9693 0%, #5EC2BF 100%);
+    --k-accent-glow: rgba(72, 169, 166, 0.32);
+
+    --k-border: #CBDCE9;
+    --k-border-subtle: rgba(53, 84, 110, 0.08);
+    --k-border-gold: rgba(72, 169, 166, 0.4);
+    --k-focus-ring: rgba(72, 169, 166, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(53, 84, 110, 0.04);
+    --k-shadow-soft: 0 1px 2px rgba(53, 84, 110, 0.04), 0 8px 24px rgba(53, 84, 110, 0.06);
+    --k-shadow-elevated: 0 8px 24px rgba(53, 84, 110, 0.08), 0 20px 48px rgba(53, 84, 110, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(72, 169, 166, 0.28);
+}
+
+/* 1.5 ثيم اللافندر الرقيق (Lavender Soft) */
+[data-theme="lavender-soft"] {
+    --k-bg: linear-gradient(180deg, #F5F2FA 0%, #ECE6F5 100%);
+    --k-bg-body: #F5F2FA;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #EAE3F5;
+    --k-surface-3: #DDCFF0;
+    --k-surface-card: rgba(255, 255, 255, 0.96);
+    --k-surface-hover: #F8F5FC;
+
+    --k-text: #2D2342;
+    --k-text-muted: #605278;
+    --k-text-light: #81729A;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #564879;
+
+    --k-primary: #6B5B95;
+    --k-primary-dark: #4D3F70;
+    --k-primary-light: #EEE9F7;
+    --k-primary-gradient: linear-gradient(135deg, #6B5B95 0%, #4D3F70 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #6B5B95 0%, #4D3F70 100%);
+
+    --k-accent: #D4A537;
+    --k-accent-gold: #E5BF65;
+    --k-accent-hover: #564879;
+    --k-accent-gradient: linear-gradient(135deg, #9C89B8 0%, #BAA6D4 100%);
+    --k-accent-glow: rgba(156, 137, 184, 0.32);
+
+    --k-border: #DCD2E8;
+    --k-border-subtle: rgba(107, 91, 149, 0.08);
+    --k-border-gold: rgba(156, 137, 184, 0.4);
+    --k-focus-ring: rgba(156, 137, 184, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(107, 91, 149, 0.04);
+    --k-shadow-soft: 0 1px 2px rgba(107, 91, 149, 0.04), 0 8px 24px rgba(107, 91, 149, 0.06);
+    --k-shadow-elevated: 0 8px 24px rgba(107, 91, 149, 0.08), 0 20px 48px rgba(107, 91, 149, 0.12);
+    --k-shadow-gold: 0 6px 20px rgba(156, 137, 184, 0.28);
+}
+
+/* 1.6 ثيم الليلي الدافئ المريح للعين (Night Warm) */
+[data-theme="night-warm"] {
+    --k-bg: linear-gradient(180deg, #0E1420 0%, #070B12 100%);
+    --k-bg-body: #0E1420;
+    --k-surface: #172033;
+    --k-surface-2: #1F2C46;
+    --k-surface-3: #273859;
+    --k-surface-card: rgba(23, 32, 51, 0.96);
+    --k-surface-hover: #1D2A42;
+
+    --k-text: #E8E2D0;
+    --k-text-muted: #A3AEC4;
+    --k-text-light: #7A87A0;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #F2C75C;
+
+    --k-primary: #2A4374;
+    --k-primary-dark: #1C2E52;
+    --k-primary-light: #1E2E4E;
+    --k-primary-gradient: linear-gradient(135deg, #1C2E52 0%, #0E172B 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #172033 0%, #0E1420 100%);
+
+    --k-accent: #D4A537;
+    --k-accent-gold: #E8BC52;
+    --k-accent-hover: #B8860B;
+    --k-accent-gradient: linear-gradient(135deg, #D4A537 0%, #E8BC52 100%);
+    --k-accent-glow: rgba(212, 165, 55, 0.35);
+
+    --k-border: #23334F;
+    --k-border-subtle: rgba(255, 255, 255, 0.08);
+    --k-border-gold: rgba(212, 165, 55, 0.35);
+    --k-focus-ring: rgba(212, 165, 55, 0.35);
+
+    --k-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --k-shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --k-shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.45), 0 20px 48px rgba(0, 0, 0, 0.6);
+    --k-shadow-gold: 0 6px 20px rgba(212, 165, 55, 0.25);
+}
+
+/* 1.7 ثيم وضع التركيز (Zen Mode) */
+[data-theme="zen"] {
+    --k-bg: #FAF8F5;
+    --k-bg-body: #FAF8F5;
+    --k-surface: #FFFFFF;
+    --k-surface-2: #F0EDE6;
+    --k-surface-3: #E5E0D5;
+    --k-surface-card: #FFFFFF;
+    --k-surface-hover: #F7F5F0;
+
+    --k-text: #1A1A1A;
+    --k-text-muted: #555555;
+    --k-text-light: #777777;
+    --k-text-contrast: #FFFFFF;
+    --k-text-gold: #2C3E50;
+
+    --k-primary: #2C3E50;
+    --k-primary-dark: #1A252F;
+    --k-primary-light: #EAEDED;
+    --k-primary-gradient: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);
+    --k-primary-contrast: #FFFFFF;
+    --k-header-gradient: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);
+
+    --k-accent: #7F8C8D;
+    --k-accent-gold: #95A5A6;
+    --k-accent-hover: #4B5866;
+    --k-accent-gradient: linear-gradient(135deg, #5A6B7C 0%, #7F8C8D 100%);
+    --k-accent-glow: rgba(127, 140, 141, 0.25);
+
+    --k-border: #E0DCD3;
+    --k-border-subtle: rgba(0, 0, 0, 0.05);
+    --k-border-gold: rgba(127, 140, 141, 0.3);
+    --k-focus-ring: rgba(44, 62, 80, 0.25);
+
+    --k-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --k-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --k-shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.07);
+    --k-shadow-gold: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ========================================================
+   1.8 المتغيرات المعمارية المشتركة وجسر التوافق القديم (Backwards Compatibility)
    ======================================================== */
 :root {
-    /* ========================================================
-       الهوية الملكية الرسمية: إعداد خدام (Official Brand Tokens)
-       ======================================================== */
-    --primary: #0C2461;
-    --primary-hover: #071A38;
-    --primary-light: #EEF2FF;
-    --secondary: #D4AF37;
-    --secondary-hover: #B8860B;
-    --accent: #F59E0B;
-    --accent-glow: rgba(212, 175, 55, 0.35);
-    --bg-app: #F8FAFC;
-    --surface: #FFFFFF;
-    --surface-hover: #F8FAFC;
-    --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --border: #E2E8F0;
-    --border-gold: rgba(212, 175, 55, 0.45);
-    --success: #10B981;
-    --warning: #F59E0B;
-    --danger: #EF4444;
-    --info: #0284C7;
+    /* الألوان الوظيفية العامة */
+    --k-success: #10B981;
+    --k-success-bg: #ECFDF5;
+    --k-warning: #F59E0B;
+    --k-warning-bg: #FFFBEB;
+    --k-danger: #EF4444;
+    --k-danger-bg: #FEF2F2;
+    --k-info: #0284C7;
+    --k-info-bg: #F0F9FF;
 
-    /* تدرجات الهوية البصرية الرسمية */
-    --brand-navy-950: #071A38;
-    --brand-navy-900: #0A1E42;
-    --brand-navy-800: #0C2461;
-    --brand-navy-700: #15376E;
-    --brand-gold-500: #D4AF37;
-    --brand-gold-400: #F3C64F;
-    --brand-gold-gradient: linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #F5CE66 100%);
-    --brand-navy-gradient: linear-gradient(135deg, #071A38 0%, #0C2461 50%, #15376E 100%);
-    --brand-hero-gradient: linear-gradient(135deg, #071A38 0%, #0C2461 65%, #234E94 100%);
+    /* أنصاف الأقطار المعيارية الفاخرة */
+    --k-radius-sm: 8px;
+    --k-radius-md: 14px;
+    --k-radius-lg: 22px;
+    --k-radius-xl: 28px;
+    --k-radius-full: 9999px;
 
-    /* لوحة الكحلي العميق */
-    --k-primary-900: #081a42;
-    --k-primary-800: #0c2461;
-    --k-primary-700: #1e3799;
-    --k-primary-600: #2749be;
-    --k-primary-500: #3867d6;
-    --k-primary-gradient: linear-gradient(135deg, #0a1c28 0%, #123d58 45%, #197d80 100%);
-    --k-header-gradient: linear-gradient(135deg, #123d58 0%, #197d80 60%, #22506d 100%);
-
-    /* درجات التيل والسيان الكنسي المعاصر (مستوحى من الخادم الذكي AI) */
-    --k-teal-900: #09141d;
-    --k-teal-800: #123d58;
-    --k-teal-700: #197d80;
-    --k-teal-600: #22506d;
-    --k-teal-500: #2a6f8f;
-    --k-teal-accent: #75d5c5;
-    --k-teal-light: #cce8e3;
-    --k-teal-glow: rgba(117, 213, 197, 0.22);
-    --k-gold-amber: #d5a947;
-    --k-border-teal: rgba(25, 125, 128, 0.35);
-    --k-header-gradient: linear-gradient(135deg, #0c2461 0%, #1e3799 60%, #0984e3 100%);
-
-    /* لوحة الذهبي الهادئ الموقر */
-    --k-gold-700: #9e782f;
-    --k-gold-600: #b88b32;
-    --k-gold-500: #d4af37;
-    --k-gold-400: #e5c07b;
-    --k-gold-100: #fcf8ee;
-    --k-gold-gradient: linear-gradient(135deg, #b88b32 0%, #d4af37 50%, #f1c40f 100%);
-
-    /* الألوان الوظيفية */
-    --k-accent: #0984e3;
-    --k-accent-hover: #0770c2;
-    --k-success: #00b894;
-    --k-success-bg: #ecfdf5;
-    --k-warning: #f59e0b;
-    --k-warning-bg: #fffbeb;
-    --k-danger: #d63031;
-    --k-danger-bg: #fef2f2;
-    --k-info: #0284c7;
-
-    /* الخلفيات والأسطح */
-    --k-bg-body: #fbfaf6;
-    --k-bg-card: #ffffff;
-    --k-bg-muted: #f4f1ea;
-    --k-bg-glass: rgba(255, 255, 255, 0.85);
-
-    /* النصوص */
-    --k-text-main: #193244;
-    --k-text-muted: #64748b;
-    --k-text-light: #94a3b8;
-    --k-text-white: #ffffff;
-
-    /* الحدود والظلال الفائقة الدقة */
-    --k-border-subtle: #e8e4dc;
-    --k-border-strong: #cbd5e1;
-    --k-border-gold: rgba(212, 175, 55, 0.45);
-
-    --k-shadow-xs: 0 1px 3px rgba(12, 36, 97, 0.04);
-    --k-shadow-sm: 0 3px 8px rgba(12, 36, 97, 0.05);
-    --k-shadow-md: 0 8px 24px rgba(12, 36, 97, 0.08);
-    --k-shadow-lg: 0 16px 38px rgba(12, 36, 97, 0.12);
-    --k-shadow-gold: 0 6px 20px rgba(212, 175, 55, 0.22);
-
-    /* الأبعاد وهندسة الواجهة */
+    /* المقاييس وأبعاد اللمس المعيارية للموبايل */
     --touch-target-min: 44px;
     --touch-target-optimal: 48px;
     --sidebar-width: 270px;
@@ -125,18 +335,64 @@
     --topbar-height: 64px;
     --bottom-nav-height: 64px;
 
-    /* أنصاف الأقطار */
-    --radius-sm: 8px;
-    --radius-md: 14px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
-    --radius-full: 9999px;
+    /* أنصاف الأقطار القديمة */
+    --radius-sm: var(--k-radius-sm);
+    --radius-md: var(--k-radius-md);
+    --radius-lg: var(--k-radius-lg);
+    --radius-xl: var(--k-radius-xl);
+    --radius-full: var(--k-radius-full);
 
-    /* الخطوط والانتقالات */
+    /* الخطوط العربية الرسمية الموحدة */
     --font-arabic: 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Tahoma, sans-serif;
+    --font-amiri: 'Amiri', 'Cairo', serif;
     --transition-fast: 0.16s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-base: 0.26s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-base: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 🛡️ جسر التوافق: ربط المتغيرات القديمة بالثيم الحي المختار */
+    --primary: var(--k-primary);
+    --primary-hover: var(--k-primary-dark);
+    --primary-light: var(--k-primary-light);
+    --secondary: var(--k-accent);
+    --secondary-hover: var(--k-accent-hover);
+    --accent: var(--k-accent);
+    --accent-glow: var(--k-accent-glow);
+    --bg-app: var(--k-bg-body);
+    --surface: var(--k-surface);
+    --surface-hover: var(--k-surface-hover);
+    --text-primary: var(--k-text);
+    --text-secondary: var(--k-text-muted);
+    --border: var(--k-border);
+    --border-gold: var(--k-border-gold);
+    --success: var(--k-success);
+    --warning: var(--k-warning);
+    --danger: var(--k-danger);
+    --info: var(--k-info);
+
+    --brand-navy-950: var(--k-primary-dark);
+    --brand-navy-900: var(--k-primary-dark);
+    --brand-navy-800: var(--k-primary);
+    --brand-navy-700: var(--k-primary);
+    --brand-gold-500: var(--k-accent);
+    --brand-gold-400: var(--k-accent-gold);
+    --brand-gold-gradient: var(--k-accent-gradient);
+    --brand-navy-gradient: var(--k-primary-gradient);
+    --brand-hero-gradient: var(--k-primary-gradient);
+
+    --k-primary-900: var(--k-primary-dark);
+    --k-primary-800: var(--k-primary);
+    --k-primary-700: var(--k-primary);
+    --k-gold-500: var(--k-accent);
+    --k-gold-gradient: var(--k-accent-gradient);
+    --k-bg-card: var(--k-surface);
+    --k-bg-muted: var(--k-surface-2);
+    --k-bg-glass: var(--k-surface-card);
+    --k-text-main: var(--k-text);
+    --k-border-subtle: var(--k-border);
+    --k-border-strong: var(--k-border);
+    --k-shadow-sm: var(--k-shadow-xs);
+    --k-shadow-md: var(--k-shadow-soft);
+    --k-shadow-lg: var(--k-shadow-elevated);
 }
 
 /* ========================================================
@@ -1586,4 +1842,871 @@ html, body {
     background: #071A38 !important;
     box-shadow: 0 8px 22px rgba(12, 36, 97, 0.45) !important;
     color: #FDE047 !important;
+}
+
+
+/* ========================================================
+   22. نظام المكونات الأساسية الموحد (Base Component System)
+   ======================================================== */
+
+/* 22.1 الأزرار (Buttons) */
+.k-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: var(--touch-target-min, 44px);
+    padding: 10px 20px;
+    border-radius: var(--k-radius-md, 14px);
+    font-family: var(--font-arabic);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.k-btn:active {
+    transform: scale(0.97);
+}
+
+.k-btn:focus-visible {
+    box-shadow: 0 0 0 3px var(--k-focus-ring);
+}
+
+/* الزر الأساسي الذهبي الموقر */
+.k-btn-primary {
+    background: var(--k-accent-gradient);
+    color: #071A38 !important;
+    font-weight: 800;
+    box-shadow: var(--k-shadow-gold);
+}
+
+.k-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(212, 165, 55, 0.45);
+}
+
+/* الزر الثانوي الكحلي الملكي */
+.k-btn-secondary {
+    background: var(--k-primary-gradient);
+    color: var(--k-primary-contrast) !important;
+    border: 1px solid var(--k-border-gold);
+    box-shadow: var(--k-shadow-soft);
+}
+
+.k-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-elevated);
+    color: #FFFFFF !important;
+}
+
+/* زر الشفاف (Ghost) */
+.k-btn-ghost {
+    background: transparent;
+    color: var(--k-text);
+    border: 1.5px solid var(--k-border);
+}
+
+.k-btn-ghost:hover {
+    background: var(--k-surface-2);
+    border-color: var(--k-accent);
+}
+
+/* زر الخطر الهادئ (Danger) */
+.k-btn-danger {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.k-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(220, 38, 38, 0.4);
+}
+
+/* زر الأيقونة الدائري */
+.k-btn-icon {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0;
+    border-radius: var(--k-radius-full);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--k-surface);
+    border: 1px solid var(--k-border);
+    color: var(--k-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.k-btn-icon:hover {
+    background: var(--k-surface-2);
+    border-color: var(--k-border-gold);
+    transform: translateY(-1px);
+}
+
+/* 22.2 البطاقات (Cards) */
+.k-card {
+    background: var(--k-surface);
+    border: 1px solid var(--k-border);
+    border-radius: var(--k-radius-lg, 22px);
+    padding: 20px;
+    box-shadow: var(--k-shadow-soft);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.k-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--k-shadow-elevated);
+}
+
+/* كارت الأقسام الكريمي/الذهبي الفاخر */
+.k-card-cream {
+    background: var(--k-surface-2);
+    border: 1px solid var(--k-border-gold);
+}
+
+.k-card-cream:hover {
+    background: var(--k-surface-3);
+    border-color: var(--k-accent);
+}
+
+/* كارت مرتفع بظل عميق */
+.k-card-elevated {
+    box-shadow: var(--k-shadow-elevated);
+    border-color: var(--k-border-gold);
+}
+
+/* كارت الهيرو الكنسي الملكي (Hero Card) */
+.k-hero-card {
+    background: var(--k-primary-gradient);
+    border: 1.5px solid var(--k-border-gold);
+    border-radius: var(--k-radius-xl, 28px);
+    padding: 24px;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--k-shadow-elevated);
+}
+
+.k-hero-card::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, rgba(212, 165, 55, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* 22.3 القوائم وأشرطة التقدم (Lists & Progress Bars) */
+.k-progress-bar {
+    width: 100%;
+    height: 9px;
+    background: var(--k-surface-3);
+    border-radius: var(--k-radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.k-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1D4ED8 0%, #3B82F6 100%);
+    border-radius: var(--k-radius-full);
+    transition: width 0.4s ease;
+}
+
+/* كارت القائمة مع صورة مصغرة وسهم */
+.k-list-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--k-surface);
+    border: 1px solid var(--k-border);
+    border-radius: 18px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    text-decoration: none;
+    color: var(--k-text);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.k-list-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--k-border-gold);
+    box-shadow: var(--k-shadow-soft);
+}
+
+.k-list-thumb {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.k-list-thumb-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: var(--k-surface-2);
+    border: 1px solid var(--k-border-gold);
+    color: var(--k-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.k-list-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.k-list-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--k-text);
+    margin: 0 0 6px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.k-list-chevron {
+    color: var(--k-text-light);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+
+.k-list-card:hover .k-list-chevron {
+    transform: translateX(-4px);
+    color: var(--k-accent);
+}
+
+/* 22.4 الفلاتر (Chips) */
+.k-chips-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 6px 2px;
+    margin-bottom: 16px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.k-chips-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.k-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: var(--k-radius-full);
+    background: var(--k-surface);
+    border: 1px solid var(--k-border);
+    color: var(--k-text-muted);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.k-chip:hover {
+    color: var(--k-text);
+    border-color: var(--k-border-gold);
+    background: var(--k-surface-2);
+}
+
+.k-chip.active {
+    background: var(--k-accent-gradient);
+    color: #071A38;
+    font-weight: 800;
+    border-color: transparent;
+    box-shadow: var(--k-shadow-gold);
+}
+
+/* 22.5 عناصر النماذج ومفاتيح الـ Toggle */
+.k-form-group {
+    margin-bottom: 16px;
+}
+
+.k-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--k-text);
+    margin-bottom: 6px;
+}
+
+.k-input,
+.k-select,
+.k-textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 16px;
+    border-radius: var(--k-radius-md, 14px);
+    border: 1.5px solid var(--k-border);
+    background: var(--k-surface);
+    color: var(--k-text);
+    font-family: inherit;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.k-input:focus,
+.k-select:focus,
+.k-textarea:focus {
+    outline: none;
+    border-color: var(--k-accent);
+    box-shadow: 0 0 0 3px var(--k-focus-ring);
+}
+
+/* مفتاح التبديل الحديث (Toggle Switch) المطابق للمرجع البصري */
+.k-toggle {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.k-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.k-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--k-border);
+    transition: background-color var(--transition-base);
+    border-radius: var(--k-radius-full);
+}
+
+.k-toggle-slider::before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    right: 3px;
+    bottom: 3px;
+    background-color: #FFFFFF;
+    transition: transform var(--transition-base);
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+.k-toggle input:checked + .k-toggle-slider {
+    background: var(--k-primary-gradient);
+}
+
+.k-toggle input:checked + .k-toggle-slider::before {
+    transform: translateX(-22px);
+}
+
+/* 22.6 الجداول المتجاوبة (Responsive Data Tables) */
+.k-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--k-radius-lg, 22px);
+    border: 1px solid var(--k-border);
+    background: var(--k-surface);
+    box-shadow: var(--k-shadow-soft);
+    margin: 16px 0;
+}
+
+.k-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: right;
+    font-size: 0.92rem;
+}
+
+.k-table th {
+    background: var(--k-primary-gradient);
+    color: #FFFFFF;
+    padding: 14px 16px;
+    font-weight: 800;
+    border-bottom: 2px solid var(--k-border-gold);
+    white-space: nowrap;
+}
+
+.k-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--k-border);
+    color: var(--k-text);
+}
+
+.k-table tr:nth-child(even) td {
+    background: var(--k-surface-2);
+}
+
+.k-table tr:hover td {
+    background: var(--k-surface-hover);
+}
+
+/* 22.7 النوافذ المنبثقة والإشعارات (Modals & Toast) */
+.k-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 26, 56, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: kFadeIn 0.2s ease;
+}
+
+.k-modal {
+    background: var(--k-surface);
+    border: 1.5px solid var(--k-border-gold);
+    border-radius: var(--k-radius-xl, 28px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+    position: relative;
+    animation: kSlideUp 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes kFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes kSlideUp {
+    from { opacity: 0; transform: translateY(18px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.k-toast {
+    position: fixed;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--k-surface);
+    color: var(--k-text);
+    padding: 12px 24px;
+    border-radius: var(--k-radius-full);
+    border: 1px solid var(--k-border-gold);
+    box-shadow: var(--k-shadow-elevated);
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    animation: kToastIn 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes kToastIn {
+    from { opacity: 0; transform: translate(-50%, 20px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* 22.8 نافذة اختيار الثيمات السبعة (Theme Picker Dialog) */
+.k-theme-picker-dialog {
+    max-width: 580px;
+}
+
+.k-theme-picker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--k-border);
+    margin-bottom: 18px;
+}
+
+.k-theme-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--k-surface-2);
+    border: 1px solid var(--k-border-gold);
+    color: var(--k-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.k-theme-picker-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--k-text);
+}
+
+.k-theme-picker-subtitle {
+    margin: 2px 0 0 0;
+    font-size: 0.85rem;
+    color: var(--k-text-muted);
+}
+
+.k-btn-close-theme {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--k-text-muted);
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+}
+
+.k-theme-swatches-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-height: 52vh;
+    overflow-y: auto;
+    padding-inline-end: 4px;
+}
+
+@media (min-width: 480px) {
+    .k-theme-swatches-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.k-theme-swatch-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--k-radius-md, 14px);
+    background: var(--k-surface);
+    border: 1.5px solid var(--k-border);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.k-theme-swatch-card:hover {
+    border-color: var(--k-border-gold);
+    background: var(--k-surface-2);
+    transform: translateY(-1px);
+}
+
+.k-theme-swatch-card.active {
+    border-color: var(--k-accent);
+    background: var(--k-surface-2);
+    box-shadow: 0 0 0 2px var(--k-accent);
+}
+
+.k-swatch-preview {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.k-swatch-circle {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+}
+
+.k-swatch-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.k-swatch-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.k-swatch-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--k-text);
+}
+
+.k-swatch-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: var(--k-radius-full);
+    background: var(--k-accent-gradient);
+    color: #071A38;
+}
+
+.k-swatch-desc {
+    margin: 2px 0 0 0;
+    font-size: 0.76rem;
+    color: var(--k-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.k-swatch-check {
+    display: none;
+    color: var(--k-accent);
+    font-size: 1.1rem;
+}
+
+.k-theme-swatch-card.active .k-swatch-check {
+    display: block;
+}
+
+.k-theme-picker-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--k-border);
+}
+
+/* ==========================================================================
+   Universal Theme Floating Pill & Header Controls
+   ========================================================================== */
+.k-universal-theme-pill {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    z-index: 9990;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--k-surface);
+    color: var(--k-text);
+    border: 1.5px solid var(--k-border-gold);
+    border-radius: var(--k-radius-full);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(212, 165, 55, 0.25);
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+    user-select: none;
+}
+
+.k-universal-theme-pill:hover {
+    transform: translateY(-3px) scale(1.03);
+    border-color: var(--k-accent);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22), 0 4px 14px rgba(212, 165, 55, 0.35);
+}
+
+.k-universal-theme-pill:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.k-universal-theme-pill .k-pill-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--k-accent-gradient);
+    display: inline-block;
+    box-shadow: 0 0 8px var(--k-accent);
+}
+
+@media (max-width: 600px) {
+    .k-universal-theme-pill {
+        bottom: 74px; /* فوق شريط التنقل السفلي في الموبايل */
+        right: 14px;
+        padding: 8px 14px;
+        font-size: 0.82rem;
+    }
+}
+
+/* ==========================================================================
+   Gentle Church Reminders Banner
+   ========================================================================== */
+.k-gentle-reminder-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 12px auto 16px auto;
+    padding: 14px 18px;
+    max-width: 1200px;
+    background: var(--k-surface-2);
+    border: 1px solid var(--k-border-gold);
+    border-inline-start: 4px solid var(--k-accent);
+    border-radius: var(--k-radius-lg);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    animation: kFadeInDown 0.35s ease-out;
+    z-index: 20;
+}
+
+@keyframes kFadeInDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.k-gentle-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.k-gentle-icon-box {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: var(--k-radius-md);
+    background: var(--k-surface);
+    border: 1px solid var(--k-border-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.k-gentle-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.k-gentle-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.k-gentle-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--k-text);
+}
+
+.k-gentle-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: var(--k-radius-full);
+    background: var(--k-surface);
+    color: var(--k-accent);
+    border: 1px solid var(--k-border-gold);
+}
+
+.k-gentle-desc {
+    margin: 2px 0 4px 0;
+    font-size: 0.85rem;
+    color: var(--k-text-muted);
+    line-height: 1.4;
+}
+
+.k-gentle-verse {
+    font-family: var(--k-font-verse);
+    font-size: 0.82rem;
+    color: var(--k-primary);
+    font-weight: 600;
+    font-style: italic;
+}
+
+.k-gentle-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.k-gentle-btn {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: var(--k-radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.k-gentle-btn-accept {
+    background: var(--k-accent-gradient);
+    color: #071A38;
+    box-shadow: 0 2px 8px rgba(212, 165, 55, 0.3);
+}
+
+.k-gentle-btn-accept:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 165, 55, 0.45);
+}
+
+.k-gentle-btn-prefs,
+.k-gentle-btn-close {
+    background: var(--k-surface);
+    color: var(--k-text-muted);
+    border: 1px solid var(--k-border);
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+
+.k-gentle-btn-prefs:hover,
+.k-gentle-btn-close:hover {
+    color: var(--k-text);
+    background: var(--k-surface-2);
+}
+
+@media (max-width: 768px) {
+    .k-gentle-reminder-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+        gap: 12px;
+    }
+    .k-gentle-actions {
+        justify-content: flex-end;
+    }
+}
+
+/* ==========================================================================
+   Ironclad Permission Hiding
+   ========================================================================== */
+.perm-hidden,
+.perm-forbidden,
+[data-perm-denied="true"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }

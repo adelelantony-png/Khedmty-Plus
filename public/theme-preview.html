@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معاينة نظام التصميم والمكونات | إعداد خدام</title>
+    <link rel="stylesheet" href="css/app-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="js/theme-manager.js"></script>
+    <style>
+        body {
+            padding: 24px 16px 80px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .demo-section {
+            margin-bottom: 32px;
+        }
+        .demo-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--k-text);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.6rem; font-weight: 900; color: var(--k-text);">نظام التصميم الموحد والثيمات السبعة</h1>
+            <p style="margin: 4px 0 0; color: var(--k-text-muted); font-size: 0.9rem;">اجتماع القديس بولس الرسول لإعداد الخدام &middot; المرحلة أ</p>
+        </div>
+        <button type="button" class="k-btn k-btn-primary" data-k-action="open-theme-picker">
+            <i class="fa-solid fa-palette"></i> اختيار المظهر (7 ثيمات)
+        </button>
+    </div>
+
+    <!-- 1. Hero Card -->
+    <div class="demo-section">
+        <div class="k-hero-card">
+            <div style="display: flex; align-items: center; gap: 14px; position: relative; z-index: 1;">
+                <div style="width: 52px; height: 52px; border-radius: 14px; background: var(--k-accent-gradient); display: flex; align-items: center; justify-content: center; color: #071A38; font-size: 1.6rem;">
+                    <i class="fa-solid fa-cross"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #FFFFFF;">مرحباً بك في منصة إعداد الخدام</h3>
+                    <div style="font-family: var(--font-amiri); font-size: 1.05rem; color: #F2C75C; margin-top: 4px;">
+                        «أَعِدُّوا لِخِدْمَةِ الرَّبِّ بِكُلِّ قَلْبِكُمْ» (كولوسي 3: 23)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Buttons Demo -->
+    <div class="demo-section">
+        <div class="demo-title"><i class="fa-solid fa-hand-pointer text-warning"></i> 1. الأزرار المعيارية (Buttons System)</div>
+        <div class="k-card" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <button class="k-btn k-btn-primary"><i class="fa-solid fa-crown"></i> زر رئيسي ذهبي</button>
+            <button class="k-btn k-btn-secondary"><i class="fa-solid fa-shield"></i> زر ثانوي كحلي ملكي</button>
+            <button class="k-btn k-btn-ghost"><i class="fa-solid fa-ghost"></i> زر شفاف Ghost</button>
+            <button class="k-btn k-btn-danger"><i class="fa-solid fa-trash"></i> زر خطر Danger</button>
+            <button class="k-btn-icon" title="أيقونة مفضلة"><i class="fa-solid fa-heart" style="color: #E11D48;"></i></button>
+        </div>
+    </div>
+
+    <!-- 3. Cards Demo -->
+    <div class="demo-section">
+        <div class="demo-title"><i class="fa-solid fa-layer-group text-primary"></i> 2. درجات البطاقات والأقسام (Cards System)</div>
+        <div class="demo-grid">
+            <div class="k-card">
+                <h4 style="margin: 0 0 8px; font-weight: 800; color: var(--k-text);">بطاقة قياسية (Standard Card)</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--k-text-muted);">سطح نقي بزوايا 22px وظلال ناعمة متعددة الطبقات متناغمة مع الثيم المختار.</p>
+            </div>
+            <div class="k-card k-card-cream">
+                <h4 style="margin: 0 0 8px; font-weight: 800; color: var(--k-text);">بطاقة أقسام كريمية (Cream Card)</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--k-text-muted);">مستوحاة من شبكة أقسام المرجع البصري بإطار ذهبي وخلفية دافئة مريحة للعين.</p>
+            </div>
+            <div class="k-card k-card-elevated">
+                <h4 style="margin: 0 0 8px; font-weight: 800; color: var(--k-text);">بطاقة مرتفعة (Elevated Card)</h4>
+                <p style="margin: 0; font-size: 0.88rem; color: var(--k-text-muted);">تطفو بظل عميق ناعم يمنح العناصر البارزة أولوية بصرية جذابة.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Chips Filters & Lists Demo -->
+    <div class="demo-section">
+        <div class="demo-title"><i class="fa-solid fa-sliders text-success"></i> 3. فلاتر التبويبات وقوائم الدورات (Chips & Lists)</div>
+        <div class="k-chips-bar">
+            <div class="k-chip active">الكل (12)</div>
+            <div class="k-chip">مفتوحة (5)</div>
+            <div class="k-chip">قيد الدراسة (4)</div>
+            <div class="k-chip">مكتملة (3)</div>
+        </div>
+
+        <div class="k-list-card">
+            <div class="k-list-thumb-icon"><i class="fa-solid fa-church"></i></div>
+            <div class="k-list-content">
+                <div class="k-list-title">أساسيات الخدمة الكنسية</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="k-progress-bar" style="max-width: 200px;">
+                        <div class="k-progress-fill" style="width: 60%;"></div>
+                    </div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #2563EB;">60%</span>
+                </div>
+            </div>
+            <div class="k-list-chevron"><i class="fa-solid fa-chevron-left"></i></div>
+        </div>
+
+        <div class="k-list-card">
+            <div class="k-list-thumb-icon"><i class="fa-solid fa-book-bible"></i></div>
+            <div class="k-list-content">
+                <div class="k-list-title">القيادة المسيحية الفعالة</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="k-progress-bar" style="max-width: 200px;">
+                        <div class="k-progress-fill" style="width: 30%;"></div>
+                    </div>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: #2563EB;">30%</span>
+                </div>
+            </div>
+            <div class="k-list-chevron"><i class="fa-solid fa-chevron-left"></i></div>
+        </div>
+    </div>
+
+    <!-- 5. Forms & Toggles Demo -->
+    <div class="demo-section">
+        <div class="demo-title"><i class="fa-solid fa-toggle-on text-info"></i> 4. مفاتيح التبديل والحقول (Toggles & Inputs)</div>
+        <div class="k-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--k-border);">
+                <div>
+                    <strong style="color: var(--k-text);">الوضع الليلي الدافئ (Night Mode)</strong>
+                    <div style="font-size: 0.82rem; color: var(--k-text-muted);">تفعيل ثيم Night Warm لراحة العين في الظلام</div>
+                </div>
+                <label class="k-toggle">
+                    <input type="checkbox" data-k-action="toggle-night">
+                    <span class="k-toggle-slider"></span>
+                </label>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0;">
+                <div>
+                    <strong style="color: var(--k-text);">إشعارات الخدمة والغياب</strong>
+                    <div style="font-size: 0.82rem; color: var(--k-text-muted);">استقبال تنبيهات التقييم والافتقاد الفوري</div>
+                </div>
+                <label class="k-toggle">
+                    <input type="checkbox" checked>
+                    <span class="k-toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

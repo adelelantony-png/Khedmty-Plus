@@ -544,40 +544,135 @@ function applyGranularPermissions(perms) {
         }
     });
 
-    // 4. التحكم في أزرار الإجراءات والكتابة داخل كل قسم في حال كان "مشاهدة فقط" (view)
-    // أزرار إضافة أو تعديل أو حذف المخدومين
+    // 4. التحكم الصارم في أزرار الإجراءات والكتابة (Ironclad Hiding): لا يظهر أي زر محظور أو يترك رمادياً
+    // أ) أزرار إضافة أو تعديل أو حذف أو استيراد المخدومين والدارسين
     const membersLevel = perms.members || 'none';
-    const memberActionEls = document.querySelectorAll('#btnAddNewMember, #btnImportExcel, #btnExportExcel, .member-edit-btn, .member-del-btn');
+    const memberActionEls = document.querySelectorAll('#btnAddNewMember, #btnImportExcel, #btnExportExcel, .member-edit-btn, .member-del-btn, #btnQuickAddStudent, .btn-student-action');
     memberActionEls.forEach(btn => {
-        btn.style.display = (membersLevel === 'full') ? '' : 'none';
+        if (membersLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
     });
 
-    // أزرار رادار الأعذار (قبول / رفض / حذف / تسجيل يدوي)
+    // ب) أزرار رادار الأعذار (قبول / رفض / إلغاء / تسجيل يدوي)
     const excusesLevel = perms.excuses || 'none';
-    const excuseActionEls = document.querySelectorAll('#btnOpenManualExcuse, .btn-radar-accept, .btn-radar-reject, .btn-radar-cancel');
+    const excuseActionEls = document.querySelectorAll('#btnOpenManualExcuse, .btn-radar-accept, .btn-radar-reject, .btn-radar-cancel, .btn-excuse-action');
     excuseActionEls.forEach(btn => {
-        btn.style.display = (excusesLevel === 'full') ? '' : 'none';
+        if (excusesLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
     });
 
-    // أزرار نبض الاجتماع (إرسال للجروب بالبوت والمشاركة الرسمية حكر على أمين الخدمة)
+    // ج) أزرار نبض الاجتماع والتقارير الرسمية
     const pulseLevel = perms.pulse || 'none';
-    const pulseActionEls = document.querySelectorAll('#btnSendPulseWA_bot, #pulseShareActionsBar');
+    const pulseActionEls = document.querySelectorAll('#btnSendPulseWA_bot, #pulseShareActionsBar, .btn-pulse-action');
     pulseActionEls.forEach(btn => {
-        btn.style.display = (pulseLevel === 'full') ? '' : 'none';
+        if (pulseLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
     });
 
-    // أزرار رادار الافتقاد ومتابعة الغائبين (الإرسال الجماعي وطباعة الكشوف)
+    // د) أزرار رادار الافتقاد ومتابعة الغائبين (الإرسال الجماعي وطباعة الكشوف)
     const followupLevel = perms.followup || 'none';
-    const followupActionEls = document.querySelectorAll('#btnSendWhatsAppAbsenceGroup, #btnPrintAbsenceReport, #btnExportAbsenceExcel');
+    const followupActionEls = document.querySelectorAll('#btnSendWhatsAppAbsenceGroup, #btnPrintAbsenceReport, #btnExportAbsenceExcel, .btn-log-visit, .btn-followup-action');
     followupActionEls.forEach(btn => {
-        btn.style.display = (followupLevel === 'full') ? '' : 'none';
+        if (followupLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
     });
 
-    // أزرار حضور الدارسين (مسح الكاميرا ومسح اليوم)
+    // هـ) أزرار حضور الدارسين والماسح (كاميرا، مسح اليوم، تعديل يدوي)
     const attLevel = perms.attendance || 'none';
-    const attActionEls = document.querySelectorAll('#scannerControls, #btnStartScanner, #btnClearAttendance');
+    const attActionEls = document.querySelectorAll('#scannerControls, #btnStartScanner, #btnClearAttendance, #btnTakeAttendanceManual, #btnOverrideAttendance, .btn-att-action');
     attActionEls.forEach(btn => {
-        btn.style.display = (attLevel === 'full') ? '' : 'none';
+        if (attLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
+    });
+
+    // و) بوت الواتساب والرسائل الجماعية
+    const broadcastLevel = perms.broadcast || 'none';
+    const broadcastActionEls = document.querySelectorAll('#btnBroadcastSend, #btnStartWaBot, #btnStopWaBot, .broadcast-action-btn, #btnSendBulkWhatsApp');
+    broadcastActionEls.forEach(btn => {
+        if (broadcastLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
+    });
+
+    // ز) خطة السنة والمنهج والتربية الكنسية
+    const planLevel = perms.plan || 'none';
+    const planActionEls = document.querySelectorAll('#btnAddNewPlanEvent, #btnUploadMaterial, #btnEditCurriculum, .plan-edit-btn, .plan-del-btn');
+    planActionEls.forEach(btn => {
+        if (planLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
+    });
+
+    // ح) شؤون الخدام وحضورهم وتحضيراتهم (سري ومحمي)
+    const affairsLevel = perms.servants_affairs || 'none';
+    const affairsActionEls = document.querySelectorAll('#btnSaveServantPrep, .servant-prep-edit-btn, #btnServantsBulkAttendance, .btn-affairs-action');
+    affairsActionEls.forEach(btn => {
+        if (affairsLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
+    });
+
+    // ط) إدارة حسابات الخدام وتعديل الصلاحيات
+    const mgmtLevel = perms.servants_mgmt || 'none';
+    const mgmtActionEls = document.querySelectorAll('#btnAddNewServant, .btn-servant-action, .btn-servant-edit, .btn-servant-delete, .btn-servant-perms');
+    mgmtActionEls.forEach(btn => {
+        if (mgmtLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
+    });
+
+    // ي) الإعدادات وسجل الرقابة ودرع الأمان
+    const settingsLevel = perms.settings_audit || 'none';
+    const settingsActionEls = document.querySelectorAll('#btnSaveSettings, #btnCloudSync, #btnResetDatabase, #btnManageBackups, #btnSecurityShield, #btnPurgeCache, .settings-danger-action');
+    settingsActionEls.forEach(btn => {
+        if (settingsLevel === 'full') {
+            btn.style.removeProperty('display');
+            btn.classList.remove('perm-hidden');
+        } else {
+            btn.style.setProperty('display', 'none', 'important');
+            btn.classList.add('perm-hidden');
+        }
     });
 
     // 5. إذا كان المستخدم الحالي واقفاً على تبويب محجوب، تحويله فوراً للرئيسية وتطهير عنوان URL

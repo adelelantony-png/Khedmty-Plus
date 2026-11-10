@@ -32,6 +32,8 @@
 <link rel="manifest" href="manifest.json">
 
 <link rel="stylesheet" href="css/app-theme.css">
+<script src="js/theme-manager.js"></script>
+    <script src="js/gentle-reminders.js"></script>
 
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1839,6 +1841,10 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
     <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
         <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
+    </button>
+
+    <button type="button" class="btn-mini" data-k-action="open-theme-picker" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="اختيار المظهر والثيم (7 ثيمات مريحة للعين)">
+        <i class="fa-solid fa-palette"></i> المظهر
     </button>
 </div>
 
@@ -4555,21 +4561,35 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
 
-<h3 style="margin:0; border:none; color:var(--primary); font-size:16px;">📱 الأجهزة المتصلة حالياً</h3>
+<h3 style="margin:0; border:none; color:var(--primary); font-size:16px; font-weight:800;">📱 رادار الأجهزة والمتصلين بقاعدة البيانات</h3>
 
-<button class="btn-mini btn-danger" onclick="terminateAllSessions()" style="width:auto; padding:6px 12px; margin:0;">🚨 طرد جميع الخدام المتصلين</button>
+<button class="btn-mini btn-danger" onclick="terminateAllSessions()" style="width:auto; padding:6px 12px; margin:0;">🚨 طرد جميع المتصلين</button>
 
+</div>
+
+<div id="activeSessionsHeaderSummary" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; background:var(--k-surface-2, #FFF6DC); border:1px solid var(--k-border-gold, #D4AF37); border-radius:12px; padding:10px 14px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.3rem;">📡</span>
+        <div>
+            <strong id="activeSessionsCountBadge" style="color:var(--k-text, #071A38); font-size:0.95rem;">المتصلون الآن: جاري الفحص...</strong>
+            <div id="activeSessionsSubCount" style="font-size:0.78rem; color:var(--k-text-muted, #64748B);">مزامنة حية مع سحابة Firebase</div>
+        </div>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <button type="button" id="btnViewLiveSessions" class="k-chip active" onclick="switchActiveSessionsView('live')" style="font-size:0.8rem; padding:6px 14px; font-weight:800;">🟢 المتصلون لحظياً</button>
+        <button type="button" id="btnViewAllRoster" class="k-chip" onclick="switchActiveSessionsView('all')" style="font-size:0.8rem; padding:6px 14px; font-weight:800;">📋 حصر جميع مستخدمي القاعدة (96)</button>
+    </div>
 </div>
 
 <div class="table-responsive">
 
 <table id="activeSessionsTable" class="adaptive-card-table">
 
-<thead>
+<thead id="activeSessionsThead">
 
 <tr>
 
-<th>اسم الخادم</th><th>نوع الجهاز</th><th>وقت الدخول</th>
+<th>المستخدم</th><th>الصفة / الدور</th><th>نوع الجهاز</th><th>وقت الدخول / النشاط</th>
 
 <th>الحالة</th><th>إجراء الأدمن</th>
 
@@ -8086,19 +8106,17 @@ try {
 
 const configObj = {
 
-"apiKey": "AIzaSyBeS6IpIiUbiYOO4YlagtPsu4B9bL4c",
+"apiKey": (window.FIREBASE_CONFIG ? window.FIREBASE_CONFIG.apiKey : "AIzaSyBm6ScIpi6LUzcfDOAYELae1Paz4Xh9L4c"),
 
 "authDomain": "khedmety-plus.firebaseapp.com",
-
-"databaseURL": "https://khedmety-plus-default-rtdb.europe-west1.firebasedatabase.app",
 
 "projectId": "khedmety-plus",
 
 "storageBucket": "khedmety-plus.firebasestorage.app",
 
-"messagingSenderId": "3510220845",
+"messagingSenderId": "25101228841",
 
-"appId": "1:3510220845:web:1b6482d1c656g1f20538"
+"appId": "1:25101228841:web:3164821d165014a1e2b538"
 
 };
 

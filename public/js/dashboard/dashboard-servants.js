@@ -266,62 +266,63 @@ return { percent, attended: attendedSessions, total: totalSessions, isCommitted:
 
 // ==========================================
 
-// 17. الجلسات الحية
-
+// 17. الجلسات الحية ورادار المتصلين بقاعدة البيانات (حصر شامل لجميع المستخدمين)
 // ==========================================
 
+window.__liveActiveSessionsMap = new Map();
+window.__activeSessionsCurrentView = 'live'; // 'live' or 'all'
+let activeSessionHeartbeatTimer = null;
+
 function registerActiveSession() {
+    if (!currentUser || !isFirebaseActive || !fsdb) return;
 
-if (!currentUser || !isFirebaseActive || !fsdb) return;
+    let deviceType = /Mobi|Android/i.test(navigator.userAgent) ? "هاتف محمول 📱" : "كمبيوتر / لابتوب 💻";
+    let servantKey = (currentUser.id || currentUser.phone || currentUser.code || '').toString().replace(/\D/g, '') || '1001';
+    let docKey = 'srv_' + servantKey;
 
-let deviceType = /Mobi|Android/i.test(navigator.userAgent) ? "هاتف محمول 📱" : "كمبيوتر / لابتوب 💻";
+    let sessionData = {
+        sessionId: myCurrentSessionId,
+        servantName: currentUser.name || 'خادم',
+        role: currentUser.role || 'servant',
+        roleType: currentUser.roleType || 'خادم',
+        loginTime: new Date().toLocaleTimeString('ar-EG'),
+        loginDate: (typeof today === 'string' ? today : new Date().toISOString().split('T')[0]),
+        lastActiveAt: Date.now(),
+        device: deviceType,
+        status: "active"
+    };
 
-let servantKey = (currentUser.id || currentUser.phone || '').toString().replace(/\D/g, '') || '1001';
+    let sessRef = fsdb.collection('active_sessions').doc(docKey);
 
-let sessionData = {
+    sessRef.set(sessionData, { merge: true }).catch(err => console.warn('تعذر تسجيل الجلسة:', err));
 
-sessionId: myCurrentSessionId,
+    // نبض دوري كل 60 ثانية لتأكيد الاتصال الحي
+    if (activeSessionHeartbeatTimer) clearInterval(activeSessionHeartbeatTimer);
+    activeSessionHeartbeatTimer = setInterval(() => {
+        sessRef.update({ lastActiveAt: Date.now(), status: "active" }).catch(() => {});
+    }, 60000);
 
-servantName: currentUser.name,
+    // تنظيف الجلسة فور إغلاق النافذة
+    window.addEventListener('beforeunload', () => {
+        sessRef.delete().catch(() => {});
+    });
+    window.addEventListener('pagehide', () => {
+        sessRef.delete().catch(() => {});
+    });
 
-role: currentUser.role || 'servant',
-
-loginTime: new Date().toLocaleTimeString('ar-EG'),
-
-loginDate: today,
-
-device: deviceType,
-
-status: "active"
-
-};
-
-let sessRef = fsdb.collection('active_sessions').doc(servantKey);
-
-sessRef.set(sessionData).catch(() => {});
-
-sessRef.onSnapshot(snap => {
-
-let val = snap.exists ? snap.data() : null;
-
-if (val && val.status === "terminated") {
-
-sessRef.delete().catch(() => {});
-
-localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
-
-sessionStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
-
-currentUser = null;
-
-alert("⚠️ تم إنهاء جلستك وتسجيل خروجك من قِبل أمين الخدمة العام!");
-
-location.reload();
-
-}
-
-}, err => console.warn('تعذر متابعة حالة الجلسة:', err.code || err.message));
-
+    // الاستماع لأمر الطرد الفوري من الأدمن
+    sessRef.onSnapshot(snap => {
+        let val = snap.exists ? snap.data() : null;
+        if (val && val.status === "terminated") {
+            if (activeSessionHeartbeatTimer) clearInterval(activeSessionHeartbeatTimer);
+            sessRef.delete().catch(() => {});
+            localStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
+            sessionStorage.removeItem(STORAGE_KEYS.ACTIVE_USER);
+            currentUser = null;
+            alert("⚠️ تم إنهاء جلستك وتسجيل خروجك من قِبل أمين الخدمة العام!");
+            location.reload();
+        }
+    }, err => console.warn('تعذر متابعة حالة الجلسة:', err.code || err.message));
 }
 
 function renderCurrentDeviceFallback(tbody) {
@@ -329,13 +330,16 @@ function renderCurrentDeviceFallback(tbody) {
     const curName = (typeof currentUser === 'object' && currentUser && currentUser.name) ? currentUser.name : 'أمين الخدمة (أدمن)';
     tbody.innerHTML = `
         <tr>
-            <td data-label="اسم الخادم"><strong>${escapeHtml(curName)}</strong> <span style="color:green; font-size:11px;">(أنت - هذا الجهاز)</span></td>
+            <td data-label="المستخدم"><strong>${escapeHtml(curName)}</strong> <span style="color:var(--k-accent, #D4AF37); font-size:11px; font-weight:bold;">(أنت - هذا الجهاز)</span></td>
+            <td data-label="الصفة / الدور"><span class="k-chip" style="font-size:0.75rem;">أمين خدمة (أدمن)</span></td>
             <td data-label="نوع الجهاز">${escapeHtml(navigator.userAgent.includes('Mobile') ? 'هاتف محمول 📱' : 'كمبيوتر 💻')}</td>
-            <td data-label="وقت الدخول" dir="ltr">${typeof today === 'string' ? today : ''} ${new Date().toLocaleTimeString('ar-EG')}</td>
-            <td data-label="الحالة"><span class="role-badge" style="background:var(--success);">متصل الآن 🟢</span></td>
+            <td data-label="وقت الدخول / النشاط" dir="ltr">${typeof today === 'string' ? today : ''} ${new Date().toLocaleTimeString('ar-EG')}</td>
+            <td data-label="الحالة"><span class="k-badge" style="background:var(--success, #16A34A); color:#fff;">متصل الآن 🟢</span></td>
             <td data-label="إجراء الأدمن"><span style="color:#888; font-size:11px;">جلستك الحالية</span></td>
         </tr>
     `;
+    const countBadge = document.getElementById('activeSessionsCountBadge');
+    if (countBadge) countBadge.textContent = 'المتصلون الآن: 1 جهاز نشط (جلسة محلية)';
 }
 
 function listenToActiveSessions() {
@@ -349,90 +353,268 @@ function listenToActiveSessions() {
 
     try {
         fsdb.collection('active_sessions').onSnapshot(snap => {
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            const now = Date.now();
+            window.__liveActiveSessionsMap.clear();
 
-            if (snap.empty) {
-                renderCurrentDeviceFallback(tbody);
-                return;
-            }
+            let activeServantsCount = 0;
+            let activeStudentsCount = 0;
 
             snap.forEach(doc => {
-                let key = doc.id, sess = doc.data() || {};
-                let isMe = (sess.sessionId === myCurrentSessionId);
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td data-label="اسم الخادم"><strong>${escapeHtml(sess.servantName || 'خادم')}</strong> ${isMe ? '<span style="color:green; font-size:11px;">(أنت)</span>' : ''}</td>
-                    <td data-label="نوع الجهاز">${escapeHtml(sess.device || 'جهاز متصل')}</td>
-                    <td data-label="وقت الدخول" dir="ltr">${escapeHtml(sess.loginDate || '')} ${escapeHtml(sess.loginTime || '')}</td>
-                    <td data-label="الحالة"><span class="role-badge" style="background:var(--success);">متصل الآن 🟢</span></td>
-                    <td data-label="إجراء الأدمن">${isMe ? '<span style="color:#888; font-size:11px;">جلستك الحالية</span>' : `<button class="btn-mini btn-danger" onclick="terminateSession('${key}', '${escapeHtml(sess.servantName || '')}')">طرد الجهاز ❌</button>`}</td>
-                `;
-                tbody.appendChild(tr);
+                let key = doc.id;
+                let sess = doc.data() || {};
+                let lastActive = sess.lastActiveAt || 0;
+                let diffMs = now - lastActive;
+
+                // إزالة الجلسات الميتة التي تجاوزت 20 دقيقة تلقائياً
+                if (diffMs > 20 * 60 * 1000 && sess.sessionId !== myCurrentSessionId) {
+                    fsdb.collection('active_sessions').doc(key).delete().catch(() => {});
+                    return;
+                }
+
+                sess.__docKey = key;
+                sess.__isFresh = (diffMs < 5 * 60 * 1000); // نشط في آخر 5 دقائق
+                window.__liveActiveSessionsMap.set(key, sess);
+
+                if (sess.role === 'student') {
+                    if (sess.__isFresh) activeStudentsCount++;
+                } else {
+                    if (sess.__isFresh) activeServantsCount++;
+                }
             });
+
+            // تحديث شريط الإحصائيات العلوي
+            const totalActive = activeServantsCount + activeStudentsCount;
+            const countBadge = document.getElementById('activeSessionsCountBadge');
+            const subBadge = document.getElementById('activeSessionsSubCount');
+
+            if (countBadge) {
+                countBadge.innerHTML = `المتصلون الآن: <span style="color:var(--k-accent, #D4AF37);">${activeServantsCount} خادم</span> + <span style="color:var(--k-accent, #D4AF37);">${activeStudentsCount} طالب</span> (إجمالي النشطين: ${totalActive})`;
+            }
+            if (subBadge) {
+                subBadge.textContent = `🟢 سحابة Firebase مشفرة ومحدثة لحظياً (${new Date().toLocaleTimeString('ar-EG')})`;
+            }
+
+            renderActiveSessionsTable();
         }, err => {
-            console.warn('تعذر متابعة الجلسات النشطة:', err.code || err.message);
+            console.warn('تعذر متابعة الجلسات النشطة عبر Firebase:', err.code || err.message);
             renderCurrentDeviceFallback(tbody);
         });
     } catch(e) {
+        console.warn('خطأ في إعداد مراقبة الجلسات:', e);
         renderCurrentDeviceFallback(tbody);
     }
 }
 
-function terminateSession(servantKey, servantName) {
+function renderActiveSessionsTable(searchQuery) {
+    const tbody = document.getElementById('activeSessionsTbody');
+    if (!tbody) return;
 
-if (confirm(`هل أنت متأكد من رغبتك في طرد جهاز (${servantName}) وإخراجه فوراً؟`)) {
+    if (window.__activeSessionsCurrentView === 'all') {
+        renderFullDatabaseRoster(searchQuery);
+        return;
+    }
 
-fsdb.collection('active_sessions').doc(servantKey).update({ status: "terminated" }).then(() => {
+    // عرض المتصلين حالياً (Live Sessions View)
+    tbody.innerHTML = '';
+    const map = window.__liveActiveSessionsMap;
 
-logActivity("طرد جلسة خادم", servantName, "إنهاء اتصال عن بُعد");
+    if (!map || map.size === 0) {
+        renderCurrentDeviceFallback(tbody);
+        return;
+    }
 
-showToast(`✅ تم إرسال أمر الطرد لـ ${servantName}`);
+    map.forEach((sess, key) => {
+        let isMe = (sess.sessionId === myCurrentSessionId);
+        let roleBadge = (sess.role === 'student') ? 
+            `<span class="k-chip" style="font-size:0.75rem; background:rgba(33,150,243,0.15); color:#0284C7; font-weight:700;">طالب إعداد خدام (${escapeHtml(sess.stage || 'مرحلة أولى')})</span>` :
+            `<span class="k-chip" style="font-size:0.75rem; background:rgba(212,165,55,0.15); color:var(--k-accent, #D4AF37); font-weight:800;">خادم (${escapeHtml(sess.roleType || 'أمين خدمة')})</span>`;
 
-}).catch(() => showToast("❌ تعذر إرسال أمر الطرد", true));
+        let timeDiffText = '';
+        if (sess.lastActiveAt) {
+            let minutesAgo = Math.floor((Date.now() - sess.lastActiveAt) / 60000);
+            timeDiffText = (minutesAgo < 1) ? 'الآن' : `منذ ${minutesAgo} دقيقة`;
+        }
 
+        let isOnline = sess.__isFresh !== false;
+        let statusBadge = isOnline ?
+            `<span class="k-badge" style="background:var(--success, #16A34A); color:#fff;">متصل الآن 🟢</span>` :
+            `<span class="k-badge" style="background:#EAB308; color:#fff;">في الخلفية 🟡</span>`;
+
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td data-label="المستخدم">
+                <strong>${escapeHtml(sess.servantName || 'مستخدم')}</strong>
+                ${isMe ? '<span style="color:var(--k-accent, #D4AF37); font-size:11px; font-weight:bold;">(أنت - هذا الجهاز)</span>' : ''}
+            </td>
+            <td data-label="الصفة / الدور">${roleBadge}</td>
+            <td data-label="نوع الجهاز">${escapeHtml(sess.device || 'جهاز متصل')}</td>
+            <td data-label="وقت الدخول / النشاط" dir="ltr">
+                <span style="font-size:0.8rem; color:var(--k-text-muted);">${escapeHtml(sess.loginTime || '')}</span>
+                ${timeDiffText ? `<br><span style="font-size:0.75rem; color:var(--k-accent, #D4AF37);">نشط: ${timeDiffText}</span>` : ''}
+            </td>
+            <td data-label="الحالة">${statusBadge}</td>
+            <td data-label="إجراء الأدمن">
+                ${isMe ? 
+                    '<span style="color:var(--k-text-muted); font-size:11px;">جلستك الحالية</span>' : 
+                    `<button class="btn-mini btn-danger" onclick="terminateSession('${key}', '${escapeHtml(sess.servantName || '')}')">طرد الجهاز ❌</button>`
+                }
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
+function renderFullDatabaseRoster(searchQuery) {
+    const tbody = document.getElementById('activeSessionsTbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // جمع كافة الخدام المسجلين
+    let allServantsList = [];
+    try {
+        if (typeof servants !== 'undefined' && Array.isArray(servants)) {
+            allServantsList = servants;
+        } else {
+            allServantsList = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS)) || [];
+        }
+    } catch(e) { allServantsList = []; }
+
+    // جمع كافة الطلاب/المخدومين المسجلين
+    let allStudentsList = [];
+    try {
+        if (typeof members !== 'undefined' && Array.isArray(members)) {
+            allStudentsList = members;
+        } else {
+            allStudentsList = JSON.parse(localStorage.getItem(STORAGE_KEYS.MEMBERS)) || [];
+        }
+    } catch(e) { allStudentsList = []; }
+
+    // تجميع الكيان الموحد لجميع مستخدمي قاعدة البيانات
+    let unifiedRoster = [];
+
+    allServantsList.forEach(s => {
+        let code = String(s.code || s.id || '').trim();
+        let phone = String(s.phone || '').trim();
+        let srvKey = 'srv_' + (phone || code).replace(/\D/g, '');
+        let liveSess = window.__liveActiveSessionsMap.get(srvKey);
+
+        unifiedRoster.push({
+            name: s.name || 'خادم',
+            type: 'servant',
+            roleDesc: s.roleType || 'خادم / مسؤول',
+            codeOrPhone: code || phone,
+            isOnline: !!liveSess,
+            device: liveSess ? liveSess.device : null,
+            loginTime: liveSess ? liveSess.loginTime : null,
+            docKey: srvKey
+        });
+    });
+
+    allStudentsList.forEach(m => {
+        let code = String(m.code || m.id || '').trim();
+        let phone = String(m.phone || '').trim();
+        let stdKey = 'std_' + code;
+        let liveSess = window.__liveActiveSessionsMap.get(stdKey);
+
+        unifiedRoster.push({
+            name: m.name || 'طالب إعداد خدام',
+            type: 'student',
+            roleDesc: m.stage || m.level || 'طالب إعداد خدام',
+            codeOrPhone: code || phone,
+            isOnline: !!liveSess,
+            device: liveSess ? liveSess.device : null,
+            loginTime: liveSess ? liveSess.loginTime : null,
+            docKey: stdKey
+        });
+    });
+
+    if (searchQuery) {
+        let q = searchQuery.toLowerCase().trim();
+        unifiedRoster = unifiedRoster.filter(u => 
+            u.name.toLowerCase().includes(q) || 
+            u.codeOrPhone.toLowerCase().includes(q) || 
+            u.roleDesc.toLowerCase().includes(q)
+        );
+    }
+
+    if (unifiedRoster.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">لا توجد سجلات تطابق البحث</td></tr>';
+        return;
+    }
+
+    unifiedRoster.forEach(u => {
+        let tr = document.createElement('tr');
+        let icon = (u.type === 'servant') ? '✝️' : '🎓';
+        let roleBadge = (u.type === 'servant') ?
+            `<span class="k-chip" style="font-size:0.75rem; background:rgba(212,165,55,0.15); color:var(--k-accent, #D4AF37); font-weight:800;">${escapeHtml(u.roleDesc)}</span>` :
+            `<span class="k-chip" style="font-size:0.75rem; background:rgba(33,150,243,0.15); color:#0284C7; font-weight:700;">${escapeHtml(u.roleDesc)}</span>`;
+
+        let statusCell = u.isOnline ?
+            `<span class="k-badge" style="background:var(--success, #16A34A); color:#fff; font-weight:bold;">متصل الآن 🟢</span><br><span style="font-size:0.75rem; color:var(--k-text-muted);">${escapeHtml(u.device || '')}</span>` :
+            `<span class="k-badge" style="background:#94A3B8; color:#fff;">غير متصل ⚪</span>`;
+
+        let actionCell = u.isOnline ?
+            `<button class="btn-mini btn-danger" onclick="terminateSession('${u.docKey}', '${escapeHtml(u.name)}')">طرد الجهاز ❌</button>` :
+            `<span style="color:var(--k-text-muted); font-size:11px;">مغلق</span>`;
+
+        tr.innerHTML = `
+            <td data-label="المستخدم"><strong>${icon} ${escapeHtml(u.name)}</strong></td>
+            <td data-label="الصفة / الدور">${roleBadge}</td>
+            <td data-label="الكود / الهاتف" dir="ltr">${escapeHtml(u.codeOrPhone)}</td>
+            <td data-label="وقت الدخول / النشاط" dir="ltr">${u.loginTime ? escapeHtml(u.loginTime) : '<span style="color:#aaa;">—</span>'}</td>
+            <td data-label="الحالة">${statusCell}</td>
+            <td data-label="إجراء الأدمن">${actionCell}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function switchActiveSessionsView(viewType) {
+    window.__activeSessionsCurrentView = viewType;
+    const btnLive = document.getElementById('btnViewLiveSessions');
+    const btnAll = document.getElementById('btnViewAllRoster');
+
+    if (viewType === 'live') {
+        if (btnLive) btnLive.classList.add('active');
+        if (btnAll) btnAll.classList.remove('active');
+    } else {
+        if (btnLive) btnLive.classList.remove('active');
+        if (btnAll) btnAll.classList.add('active');
+    }
+
+    renderActiveSessionsTable();
+}
+window.switchActiveSessionsView = switchActiveSessionsView;
+
+function terminateSession(servantKey, servantName) {
+    if (confirm(`هل أنت متأكد من رغبتك في طرد جهاز (${servantName}) وإخراجه فوراً؟`)) {
+        fsdb.collection('active_sessions').doc(servantKey).update({ status: "terminated" }).then(() => {
+            logActivity("طرد جلسة مستخدم", servantName, "إنهاء اتصال عن بُعد");
+            showToast(`✅ تم إرسال أمر الطرد لـ ${servantName}`);
+        }).catch(() => showToast("❌ تعذر إرسال أمر الطرد", true));
+    }
 }
 
 async function terminateAllSessions() {
-
-let pwd = prompt("أدخل كلمة مرور الأدمن لتأكيد طرد جميع الأجهزة المسجلة:");
-
-if (!pwd) return;
-
-let pwdHash = await hashPassword(pwd);
-
-if (isAdminPasswordValid(pwdHash, pwd)) {
-
-fsdb.collection('active_sessions').get().then(snap => {
-
-snap.forEach(doc => {
-
-if (doc.data().sessionId !== myCurrentSessionId) {
-
-fsdb.collection('active_sessions').doc(doc.id).update({ status: "terminated" }).catch(() => {});
-
-}
-
-});
-
-logActivity("طرد شامل", "جميع الجلسات", "طرد جميع الأجهزة المتصلة");
-
-alert("✅ تم طرد جميع الأجهزة المتصلة بالمنظومة فوراً!");
-
-}).catch(() => alert("❌ تعذر الوصول لقائمة الجلسات!"));
-
-} else {
-
-alert("❌ كلمة المرور غير صحيحة!");
-
-}
-
+    let pwd = prompt("أدخل كلمة مرور الأدمن لتأكيد طرد جميع الأجهزة المسجلة:");
+    if (!pwd) return;
+    let pwdHash = await hashPassword(pwd);
+    if (isAdminPasswordValid(pwdHash, pwd)) {
+        fsdb.collection('active_sessions').get().then(snap => {
+            snap.forEach(doc => {
+                if (doc.data().sessionId !== myCurrentSessionId) {
+                    fsdb.collection('active_sessions').doc(doc.id).update({ status: "terminated" }).catch(() => {});
+                }
+            });
+            logActivity("طرد شامل", "جميع الجلسات", "طرد جميع الأجهزة المتصلة");
+            alert("✅ تم طرد جميع الأجهزة المتصلة بالمنظومة فوراً!");
+        }).catch(() => alert("❌ تعذر الوصول لقائمة الجلسات!"));
+    } else {
+        alert("❌ كلمة المرور غير صحيحة!");
+    }
 }
 
 // ==========================================
-
 // 18. رابط التهيئة التلقائي
 
 // ==========================================
