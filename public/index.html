@@ -161,47 +161,7 @@ body {
   line-height: 1.4;
 }
 
-/* محدد الصفة (Role Chips) */
-.role-chips-bar {
-  display: flex;
-  gap: 6px;
-  background: #F1F5F9;
-  padding: 4px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  border: 1px solid #E2E8F0;
-}
 
-.role-chip-btn {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 8px 6px;
-  border-radius: 12px;
-  border: none;
-  background: transparent;
-  color: #64748B;
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-}
-
-.role-chip-btn.active {
-  background: #FFFFFF;
-  color: var(--k-primary, #0B2A6B);
-  font-weight: 800;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(212, 165, 55, 0.3);
-}
-
-.role-chip-btn:hover:not(.active) {
-  color: #0F172A;
-  background: rgba(255, 255, 255, 0.5);
-}
 
 /* حقول الإدخال */
 .field {
@@ -476,35 +436,24 @@ body {
     <h1 class="app-title">إعداد خدام</h1>
     <p class="app-subtitle">اجتماع القديس بولس الرسول لإعداد الخدام &middot; بوابة الدخول الموحدة</p>
 
-    <!-- محدد الدور التفاعلي السريع -->
-    <div class="role-chips-bar" role="tablist" aria-label="اختيار الصفة">
-      <button type="button" id="chipRoleStudent" class="role-chip-btn active" onclick="setLoginRole('student')" role="tab" aria-selected="true">
-        <span>🎓</span> طالب / دارس
-      </button>
-      <button type="button" id="chipRoleServant" class="role-chip-btn" onclick="setLoginRole('servant')" role="tab" aria-selected="false">
-        <span>✝️</span> خادم
-      </button>
-      <button type="button" id="chipRoleAdmin" class="role-chip-btn" onclick="setLoginRole('admin')" role="tab" aria-selected="false">
-        <span>🛡️</span> أمين الخدمة
-      </button>
-    </div>
+
 
     <div id="err" class="err-box" role="alert"></div>
 
     <form id="form" autocomplete="off" novalidate>
       <div class="field">
-        <label for="u" id="labelU">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</label>
+        <label for="u" id="labelU">كود الدخول أو اسم المستخدم <span style="display:none;">اسم الخادم (للخدام) أو كود الامتحان (للطلبة)</span></label>
         <div class="input-box">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
-          <input id="u" type="text" placeholder="اكتب كود الامتحان (مثلاً: 1446 أو 1042)" autofocus>
+          <input id="u" type="text" placeholder="أدخل كود الدخول الخاص بك" autofocus>
         </div>
       </div>
 
       <div class="field">
-        <label for="p" id="labelP">رقم الهاتف المسجل بالكشف (01xxxxxxxxx)</label>
+        <label for="p" id="labelP">كلمة المرور أو رقم الهاتف المسجل</label>
         <div class="input-box">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <input id="p" type="password" placeholder="أدخل رقم الهاتف المسجل بالكشف" autocomplete="current-password">
+          <input id="p" type="password" placeholder="••••••••" autocomplete="current-password">
           <button type="button" class="eye-btn" id="eye" aria-label="إظهار كلمة المرور">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -515,7 +464,7 @@ body {
         <label><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
       </div>
 
-      <button type="submit" id="btn" class="btn-submit">عرض النتيجة والملف الشخصي 🎓</button>
+      <button type="submit" id="btn" class="btn-submit">تسجيل الدخول 🚪</button>
     </form>
 
     <div class="quick-guides-row">
@@ -533,7 +482,7 @@ body {
       </button>
     </div>
 
-    <p class="hint-box" id="hint">💡 <strong>للطلبة والدارسين:</strong> اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض ملفك ودرجاتك فوراً.</p>
+    <p class="hint-box" id="hint">💡 للمساعدة أو في حال نسيان بيانات الدخول، يرجى مراجعة أمانة الخدمة.</p>
   </div>
 
   <div class="verse-container">
@@ -570,46 +519,7 @@ const K = { servants:'my_church_servants', members:'my_church_class', adminPwd:'
             active:'my_church_active_user', fail:'khedmety_login_fail_count', lock:'khedmety_login_lock_until' };
 const $ = id => document.getElementById(id);
 
-function setLoginRole(role) {
-  const chipStudent = $('chipRoleStudent');
-  const chipServant = $('chipRoleServant');
-  const chipAdmin = $('chipRoleAdmin');
-  const labelU = $('labelU');
-  const labelP = $('labelP');
-  const inputU = $('u');
-  const inputP = $('p');
-  const btn = $('btn');
-  const hint = $('hint');
 
-  [chipStudent, chipServant, chipAdmin].forEach(c => c && c.classList.remove('active'));
-
-  if (role === 'student') {
-    if (chipStudent) chipStudent.classList.add('active');
-    if (labelU) labelU.textContent = 'كود الامتحان / رقم الجلوس (للطلبة)';
-    if (labelP) labelP.textContent = 'رقم الهاتف المسجل بالكشف (01xxxxxxxxx)';
-    if (inputU) inputU.placeholder = 'مثال: 1446 أو 1042';
-    if (inputP) inputP.placeholder = 'أدخل رقم الهاتف المسجل بالكشف';
-    if (btn) btn.innerHTML = 'عرض النتيجة والملف الشخصي 🎓';
-    if (hint) hint.innerHTML = '💡 <strong>للطلبة والدارسين:</strong> اكتب كود الامتحان في الخانة الأولى ورقم هاتفك المسجل في الخانة الثانية لعرض ملفك ودرجاتك فوراً.';
-  } else if (role === 'servant') {
-    if (chipServant) chipServant.classList.add('active');
-    if (labelU) labelU.textContent = 'اسم الخادم أو كود الخدمة';
-    if (labelP) labelP.textContent = 'كلمة المرور أو رقم الهاتف';
-    if (inputU) inputU.placeholder = 'اكتب اسمك أو كود الخادم';
-    if (inputP) inputP.placeholder = 'أدخل كلمة المرور';
-    if (btn) btn.innerHTML = 'دخول لوحة تحكم الخادم ✝️';
-    if (hint) hint.innerHTML = '💡 <strong>للخدام:</strong> ادخل باسمك أو كودك وكلمة المرور المسجلة للوصول لتحضيراتك ورصد الغياب والافتقاد.';
-  } else if (role === 'admin') {
-    if (chipAdmin) chipAdmin.classList.add('active');
-    if (labelU) labelU.textContent = 'اسم أمين الخدمة العام (أدمن)';
-    if (labelP) labelP.textContent = 'كلمة مرور المشرف العام';
-    if (inputU) inputU.placeholder = 'عادل جورج أو admin';
-    if (inputP) inputP.placeholder = 'أدخل كلمة مرور الأدمن';
-    if (btn) btn.innerHTML = 'دخول لوحة الإشراف العام 🛡️';
-    if (hint) hint.innerHTML = '💡 <strong>لأمين الخدمة:</strong> إدارة كاملة للرادار والتقارير وسجل الحركات وتخصيص الصلاحيات.';
-  }
-}
-window.setLoginRole = setLoginRole;
 
 
 // الإعدادات المدمجة لمشروع khedmety-plus
