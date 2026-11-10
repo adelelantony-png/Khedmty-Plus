@@ -19,7 +19,7 @@
     // حقن كود CSS الخاص بالدليل المحاكي
     const simStyle = document.createElement('style');
     simStyle.textContent = `
-        .sim-floating-btn {
+        .sim-floating-btn { display: none !important;
             position: fixed;
             bottom: 22px;
             right: 22px;

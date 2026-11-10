@@ -119,6 +119,14 @@ body { margin:0; font-family: 'Cairo','Tajawal','Segoe UI',Tahoma,sans-serif; ba
 
 
     <div class="topbar">
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button type="button" class="btn position-relative" onclick="GentleReminders.openNotificationsModal()" style="background:#fff; color:#334155; border:1px solid #cbd5e1; font-weight:700;" title="التنبيهات والإشعارات الرعوية">
+                <i class="fa-solid fa-bell text-warning"></i> التنبيهات <span id="khedmty-notif-badge" class="badge rounded-pill bg-danger ms-1">3</span>
+            </button>
+            <button type="button" class="btn" data-k-action="open-theme-picker" style="background:#fff; color:#334155; border:1px solid #cbd5e1; font-weight:700;" title="اختيار المظهر والثيم (7 ثيمات مريحة للعين)">
+                <i class="fa-solid fa-palette text-primary"></i> المظهر
+            </button>
+        </div>
 
         <button type="button" class="btn-smart-back btn" data-smart-back data-fallback="servant-dashboard.html?tab=membersTab&group=people">
 

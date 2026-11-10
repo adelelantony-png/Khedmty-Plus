@@ -2717,3 +2717,87 @@ html, body {
 .k-theme-transition, .k-theme-transition * {
     transition: background-color 0.3s ease, color 0.2s ease, border-color 0.25s ease !important;
 }
+
+
+/* ==========================================================================
+   Universal Theme Ignition & Absolute Floating Pill Suppression
+   ========================================================================== */
+.sim-floating-btn,
+.k-universal-theme-pill,
+.floating-theme-btn,
+.fab-btn-help {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+html[data-theme], body[data-theme] {
+    background-color: var(--k-bg-body, #EEF3FB) !important;
+    background-image: var(--k-bg) !important;
+    background-attachment: fixed !important;
+    color: var(--k-text, #071A38) !important;
+}
+
+/* Force full theme ignition across all dashboard containers, cards and tables */
+[data-theme] .container,
+[data-theme] .main-container,
+[data-theme] .ultra-content-container,
+[data-theme] .card,
+[data-theme] .card-menu,
+[data-theme] .k-card,
+[data-theme] .metric-card,
+[data-theme] .table-container,
+[data-theme] .table-responsive-wrapper,
+[data-theme] .stat-card,
+[data-theme] .followup-card,
+[data-theme] .spiritual-journey-card {
+    background-color: var(--k-surface, #FFFFFF) !important;
+    color: var(--k-text, #071A38) !important;
+    border-color: var(--k-border, #E2E8F0) !important;
+}
+
+/* Night warm theme specific deep contrast ignition */
+[data-theme="night-warm"] body,
+[data-theme="night-warm"] {
+    --bg-app: #0E1420 !important;
+    --card-bg: #1F2C46 !important;
+    --dark: #FFFFFF !important;
+    --text: #F1F5F9 !important;
+}
+
+[data-theme="night-warm"] .container,
+[data-theme="night-warm"] .main-container,
+[data-theme="night-warm"] .card,
+[data-theme="night-warm"] .k-card,
+[data-theme="night-warm"] .metric-card,
+[data-theme="night-warm"] .table-container,
+[data-theme="night-warm"] .table-responsive-wrapper,
+[data-theme="night-warm"] .stat-card,
+[data-theme="night-warm"] .followup-card {
+    background: #1F2C46 !important;
+    color: #F1F5F9 !important;
+    border-color: rgba(212, 175, 55, 0.3) !important;
+}
+
+[data-theme="night-warm"] .topbar,
+[data-theme="night-warm"] .role-bar,
+[data-theme="night-warm"] .header-title h1,
+[data-theme="night-warm"] h1, 
+[data-theme="night-warm"] h2, 
+[data-theme="night-warm"] h3, 
+[data-theme="night-warm"] h4, 
+[data-theme="night-warm"] h5, 
+[data-theme="night-warm"] h6,
+[data-theme="night-warm"] th,
+[data-theme="night-warm"] td {
+    color: #F1F5F9 !important;
+}
+
+[data-theme="night-warm"] table {
+    background: #1F2C46 !important;
+    color: #F1F5F9 !important;
+}
+
+[data-theme="night-warm"] tr:hover {
+    background: #273757 !important;
+}
