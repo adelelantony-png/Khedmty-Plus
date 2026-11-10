@@ -2498,6 +2498,7 @@ html, body {
    Universal Theme Floating Pill & Header Controls
    ========================================================================== */
 .k-universal-theme-pill {
+    display: none !important; /* معطل بناءً على التوجيه لاستبداله بأزرار ثابتة في الهيدر */
     position: fixed;
     bottom: 22px;
     right: 22px;
@@ -2709,4 +2710,10 @@ html, body {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
+}
+
+
+/* Smooth visual theme transition */
+.k-theme-transition, .k-theme-transition * {
+    transition: background-color 0.3s ease, color 0.2s ease, border-color 0.25s ease !important;
 }

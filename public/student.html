@@ -37,7 +37,9 @@
     <style>
 
         html, body { overflow-x: hidden !important; width: 100% !important; max-width: 100vw !important; }
-body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e293b; padding-bottom: 40px; }
+body { font-family: var(--font-arabic, 'Tajawal', sans-serif); background-color: var(--k-bg-body, #EEF3FB) !important; background-image: var(--k-bg) !important; background-attachment: fixed; color: var(--k-text, #071A38) !important; padding-bottom: 60px; min-height: 100vh; }
+        .card, .card-menu { background: var(--k-surface, #FFFFFF) !important; color: var(--k-text) !important; border-color: var(--k-border, #E2E8F0) !important; }
+        .welcome-header { background: var(--k-header-gradient, linear-gradient(135deg, #0B2A6B 0%, #071A38 100%)) !important; border-color: var(--k-border-gold, #D4AF37) !important; }
 
         .main-card {
             width: 100%;
@@ -309,8 +311,14 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         <div class="d-flex align-items-center gap-2">
             <span id="ui-level" class="badge bg-primary px-3 py-2 fs-6"></span>
             <div id="appUpdateContainer"></div>
-            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold" data-k-action="open-theme-picker" title="اختيار المظهر والثيم" style="color: var(--k-text); border-color: var(--k-border-gold); background: var(--k-surface-2); font-size: 0.8rem;">
-                <i class="fa-solid fa-palette text-warning me-1"></i> المظهر
+            <!-- زر التنبيهات الكنسية الفعّال -->
+            <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold position-relative" onclick="GentleReminders.openNotificationsModal()" title="الإشعارات والتنبيهات الرعوية" style="color:var(--k-text, #071A38); border:1.5px solid var(--k-border-gold, #D4AF37); background:var(--k-surface-2, #FFF6DC); font-size:0.82rem;">
+                <i class="fa-solid fa-bell text-warning me-1"></i> <span>التنبيهات</span>
+                <span id="khedmty-notif-badge" class="badge rounded-pill bg-danger ms-1" style="font-size:0.68rem; padding:3px 7px;">3</span>
+            </button>
+            <!-- زر المظهر الثابت غير العائم -->
+            <button type="button" class="btn btn-sm rounded-pill px-3 fw-bold" data-k-action="open-theme-picker" title="اختيار المظهر وثيم التطبيق (7 ثيمات كنسية)" style="color:var(--k-text, #071A38); border:1.5px solid var(--k-border-gold, #D4AF37); background:var(--k-surface-2, #FFF6DC); font-size:0.82rem;">
+                <i class="fa-solid fa-palette text-warning me-1"></i> <span>المظهر</span>
             </button>
             <a href="logout.html" class="btn btn-outline-danger btn-sm fw-bold rounded-pill px-3" title="تسجيل الخروج"><i class="fa-solid fa-power-off me-1"></i> خروج 🚪</a>
         </div>

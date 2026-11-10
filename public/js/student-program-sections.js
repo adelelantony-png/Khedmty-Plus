@@ -462,6 +462,199 @@
     // ==============================================================
     // 3️⃣ المواد التعليمية وكشك الاستعلام (Educational Materials & Kiosk View)
     // ==============================================================
+    window.toggleSubjectDetails = function (detailId) {
+        var el = document.getElementById(detailId);
+        if (!el) return;
+        el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+    };
+
+    // التبديل بين تبويب المواد والتبويب التفاعلي مع البوت
+    window.switchKioskTab = function (tabName) {
+        var subView = document.getElementById('kiosk-subjects-view');
+        var botView = document.getElementById('kiosk-bot-view');
+        var tabSubBtn = document.getElementById('kiosk-tab-subjects-btn');
+        var tabBotBtn = document.getElementById('kiosk-tab-bot-btn');
+
+        if (!subView || !botView) return;
+
+        if (tabName === 'bot') {
+            subView.style.display = 'none';
+            botView.style.display = 'block';
+            if (tabSubBtn) { 
+                tabSubBtn.classList.remove('active'); 
+                tabSubBtn.style.background = 'transparent'; 
+                tabSubBtn.style.color = 'var(--k-text, #071A38)'; 
+            }
+            if (tabBotBtn) { 
+                tabBotBtn.classList.add('active'); 
+                tabBotBtn.style.background = 'var(--k-primary, #0B2A6B)'; 
+                tabBotBtn.style.color = '#FFF'; 
+            }
+            var chatInput = document.getElementById('kiosk-chat-input');
+            if (chatInput) setTimeout(function () { chatInput.focus(); }, 150);
+        } else {
+            botView.style.display = 'none';
+            subView.style.display = 'block';
+            if (tabBotBtn) { 
+                tabBotBtn.classList.remove('active'); 
+                tabBotBtn.style.background = 'transparent'; 
+                tabBotBtn.style.color = 'var(--k-text, #071A38)'; 
+            }
+            if (tabSubBtn) { 
+                tabSubBtn.classList.add('active'); 
+                tabSubBtn.style.background = 'var(--k-primary, #0B2A6B)'; 
+                tabSubBtn.style.color = '#FFF'; 
+            }
+        }
+    };
+
+    // سؤال البوت مباشرة عن مادة معينة من كارت المادة
+    window.askKioskBotAboutSubject = function (subjectTitle, stage) {
+        window.switchKioskTab('bot');
+        setTimeout(function () {
+            window.sendKioskBotMessage('كورس ' + subjectTitle + ' — ' + (stage || 'الفرقة الأولى'));
+        }, 200);
+    };
+
+    // إرسال سؤال سريع بالضغط على الأزرار المقترحة
+    window.sendKioskQuickQuery = function (queryText) {
+        window.sendKioskBotMessage(queryText);
+    };
+
+    // إرسال محتوى حقل الإدخال في الشات
+    window.sendKioskChatFromInput = function () {
+        var input = document.getElementById('kiosk-chat-input');
+        if (!input) return;
+        var text = (input.value || '').trim();
+        if (!text) return;
+        input.value = '';
+        window.sendKioskBotMessage(text);
+    };
+
+    // محرك المحادثة التفاعلي الذكي للبوت داخل البوابة (Live In-App Kiosk Chatbot)
+    window.sendKioskBotMessage = function (userText) {
+        var chatBox = document.getElementById('kiosk-chat-messages');
+        if (!chatBox) return;
+
+        var studentStage = detectCurrentStudentStage() || 'الفرقة الأولى';
+        var studentName = (window.Auth && window.Auth.currentUser && window.Auth.currentUser.name) || 'مخدومنا المبارك';
+
+        // 1. إضافة فقاعة المستخدم (User Bubble)
+        var userBubble = document.createElement('div');
+        userBubble.style.cssText = 'display:flex; justify-content:flex-end; margin-bottom:10px;';
+        userBubble.innerHTML = [
+            '<div style="background:#25D366; color:#FFF; padding:10px 14px; border-radius:16px 16px 3px 16px; max-width:85%; font-size:0.83rem; box-shadow:0 2px 6px rgba(37,211,102,0.25); text-align:right; font-weight:600; line-height:1.45;">',
+            '  <div>' + userText + '</div>',
+            '  <div style="font-size:0.65rem; color:rgba(255,255,255,0.8); text-align:left; margin-top:3px;"><i class="fa-solid fa-check-double"></i> الآن</div>',
+            '</div>'
+        ].join('');
+        chatBox.appendChild(userBubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // 2. إضافة مؤشر جاري الكتابة (Typing Indicator)
+        var typingId = 'typing_' + Date.now();
+        var typingEl = document.createElement('div');
+        typingEl.id = typingId;
+        typingEl.style.cssText = 'display:flex; justify-content:flex-start; margin-bottom:10px;';
+        typingEl.innerHTML = [
+            '<div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); padding:8px 12px; border-radius:16px 16px 16px 3px; font-size:0.75rem; color:var(--k-text-muted, #64748B); display:inline-flex; align-items:center; gap:6px;">',
+            '  <i class="fa-solid fa-robot text-primary"></i> <span>جاري مراجعة الكشك والرد... ✍️</span>',
+            '</div>'
+        ].join('');
+        chatBox.appendChild(typingEl);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // 3. تحليل السؤال بذكاء وتقديم الرد اللحظي بعد 400ms
+        setTimeout(function () {
+            var tEl = document.getElementById(typingId);
+            if (tEl) tEl.remove();
+
+            var norm = userText.replace(/[أإآءئؤ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').toLowerCase().trim();
+            var replyTitle = '';
+            var replyBody = '';
+            var waDeepQuery = userText;
+            var downloadLink = '';
+
+            // فحص الفرقة المطلوبة
+            var targetStage = studentStage;
+            if (norm.includes('تانيه') || norm.includes('ثانيه') || norm.includes('ثانية')) {
+                targetStage = 'الفرقة الثانية';
+            } else if (norm.includes('اولي') || norm.includes('اولى') || norm.includes('أولى')) {
+                targetStage = 'الفرقة الأولى';
+            }
+
+            var stageSubjects = OFFICIAL_KIOSK_DATA.stages[targetStage] || OFFICIAL_KIOSK_DATA.stages['الفرقة الأولى'];
+
+            // مطابقة اسم المادة
+            var matchedSubj = null;
+            for (var i = 0; i < stageSubjects.length; i++) {
+                var s = stageSubjects[i];
+                var sNorm = s.title.replace(/[أإآءئؤ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').toLowerCase();
+                if (norm.includes(sNorm) || sNorm.includes(norm) ||
+                    (norm.includes('مقدس') && sNorm.includes('مقدس')) ||
+                    (norm.includes('عقيد') && sNorm.includes('عقيد')) ||
+                    (norm.includes('طقس') && sNorm.includes('طقس')) ||
+                    (norm.includes('تاريخ') && sNorm.includes('تاريخ')) ||
+                    (norm.includes('تربوي') && sNorm.includes('تربوي')) ||
+                    (norm.includes('مهارات') && sNorm.includes('مهارات')) ||
+                    (norm.includes('روحي') && sNorm.includes('روحي'))) {
+                    matchedSubj = s;
+                    break;
+                }
+            }
+
+            if (matchedSubj) {
+                replyTitle = '📚 مادة ' + matchedSubj.title + ' (' + targetStage + ')';
+                replyBody = matchedSubj.replyText;
+                downloadLink = matchedSubj.driveUrl;
+                waDeepQuery = 'كورس ' + matchedSubj.title + ' — ' + targetStage;
+            } else if (norm.includes('كارنيه') || norm.includes('كود') || norm.includes('qr') || norm.includes('باركود')) {
+                replyTitle = '💳 كارنيه الحضور الذكي المعتمد (QR)';
+                replyBody = 'سلام ونعمة يا ' + studentName + ' 🤍🕊️\n\nكارنيه الحضور الذكي الخاص بك مرمز برقم تسجيلك المعتمد للدخول بالكاميرا عند باب القاعة.\n\nيمكنك طلب إرسال صورة الكارنيه فوراً على رقمك عبر واتساب بالضغط بالأسفل!';
+                waDeepQuery = 'كارنيهي';
+            } else if (norm.includes('اعتذار') || norm.includes('عذر') || norm.includes('مش هقدر') || norm.includes('غياب')) {
+                replyTitle = '🕊️ رادار رصد الأعذار الذكي';
+                replyBody = 'سلام ونعمة يا ' + studentName + '.. تم استقبال رغبتك في تقديم عذر غياب عن اجتماع الجمعة.\n\nيمكنك تأكيد تسجيل العذر رسمياً في قاعدة بيانات الخدمة برابط مباشر لواتساب الخدمة:';
+                waDeepQuery = 'اعتذار عن حضور اجتماع الجمعة القادمة لظروف خاصة';
+            } else {
+                // عرض قائمة المواد الـ 7 للمرحلة
+                replyTitle = '📚 منهج ' + targetStage + ' المعتمد (الـ 7 مواد)';
+                var lines = ['أهلاً بك يا ' + studentName + '.. إليك قائمة الـ 7 مواد المعتمدة:'];
+                for (var j = 0; j < stageSubjects.length; j++) {
+                    lines.push((j + 1) + '. ' + stageSubjects[j].title + ' (' + stageSubjects[j].teachers + ')');
+                }
+                lines.push('\n💡 _اكتب اسم أي مادة من القائمة أعلاه لعرض جدولها وتحميل مذكرتها فوراً!_');
+                replyBody = lines.join('\n');
+                downloadLink = OFFICIAL_KIOSK_DATA.driveFolder;
+                waDeepQuery = 'مواد';
+            }
+
+            var botBubble = document.createElement('div');
+            botBubble.style.cssText = 'display:flex; justify-content:flex-start; margin-bottom:12px;';
+            
+            var actionBtnsHtml = '';
+            if (downloadLink) {
+                actionBtnsHtml += '<a href="' + downloadLink + '" target="_blank" class="k-btn k-btn-primary" style="font-size:0.75rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px;"><i class="fa-solid fa-cloud-arrow-down"></i> تحميل المذكرة 📥</a> ';
+            }
+            actionBtnsHtml += '<a href="https://wa.me/?text=' + encodeURIComponent(waDeepQuery) + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.75rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> فتح في واتساب الخدمة 📲</a>';
+
+            botBubble.innerHTML = [
+                '<div style="background:var(--k-surface, #FFF); border:1.5px solid var(--k-border, #E2E8F0); border-radius:16px 16px 16px 3px; max-width:90%; padding:14px; box-shadow:0 3px 10px rgba(0,0,0,0.05); text-align:right;">',
+                '  <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; border-bottom:1px solid #F1F5F9; padding-bottom:6px;">',
+                '    <div style="width:28px; height:28px; border-radius:50%; background:#0B2A6B; color:#D4AF37; display:flex; align-items:center; justify-content:center; font-size:0.85rem;"><i class="fa-solid fa-cross"></i></div>',
+                '    <strong style="font-size:0.86rem; color:var(--k-primary, #0B2A6B);">' + replyTitle + '</strong>',
+                '  </div>',
+                '  <div style="font-size:0.8rem; color:var(--k-text, #1E293B); line-height:1.55; white-space:pre-wrap; margin-bottom:10px;">' + replyBody + '</div>',
+                '  <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-start; margin-top:8px; border-top:1px dashed #E2E8F0; padding-top:8px;">' + actionBtnsHtml + '</div>',
+                '  <div style="font-size:0.65rem; color:#94A3B8; text-align:left; margin-top:6px;">🤖 رد آلي معتمد من سيرفر كشك الخدمة</div>',
+                '</div>'
+            ].join('');
+
+            chatBox.appendChild(botBubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }, 400);
+    };
+
     window.openStudentMaterialsModal = function (selectedStage) {
         var studentDefaultStage = detectCurrentStudentStage();
         var qualificationScore = 78;
@@ -470,9 +663,10 @@
             activeStage = 'الفرقة الأولى';
         }
 
+        var studentName = (window.Auth && window.Auth.currentUser && window.Auth.currentUser.name) || 'مخدومنا المبارك';
         var subjects = OFFICIAL_KIOSK_DATA.stages[activeStage] || [];
 
-        // 1. شريط كشك الواتساب التفاعلي الذكي
+        // 1. شريط كشك الواتساب التفاعلي الذكي (مع أزرار التبديل للمحادثة المباشرة)
         var kioskBanner = [
             '<div style="background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#FFF; border-radius:20px; padding:18px; margin-bottom:16px; border:1.5px solid var(--k-border-gold, #D4AF37); box-shadow:0 8px 20px rgba(7,26,56,0.25);">',
             '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">',
@@ -487,9 +681,9 @@
             '  </div>',
             '  <p style="font-size:0.8rem; color:#E2E8F0; margin:8px 0 12px 0; line-height:1.45;">أرسل كلمة <strong>«مواد»</strong> أو اسم أي مادة من الـ 7 مواد في واتساب الخدمة للرد عليك آلياً وفورياً بملف المادة المعتمد وجدولها 📚</p>',
             '  <div style="display:flex; gap:8px; flex-wrap:wrap;">',
-            '    <a href="https://wa.me/?text=' + encodeURIComponent('مواد') + '" target="_blank" class="k-btn" style="flex:1; background:#25D366; color:#FFF; font-size:0.82rem; padding:8px 14px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:800; box-shadow:0 4px 12px rgba(37,211,102,0.3);">',
-            '      <i class="fa-brands fa-whatsapp"></i> فتح كشك الاستعلام التفاعلي الآن 📲',
-            '    </a>',
+            '    <button type="button" onclick="switchKioskTab(\'bot\')" class="k-btn" style="flex:1; background:linear-gradient(135deg, #25D366 0%, #128C7E 100%); color:#FFF; font-size:0.82rem; padding:8px 14px; border-radius:10px; border:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:800; box-shadow:0 4px 12px rgba(37,211,102,0.3); cursor:pointer;">',
+            '      <i class="fa-solid fa-robot"></i> فتح كشك الاستعلام التفاعلي الآن 📲',
+            '    </button>',
             '    <a href="' + OFFICIAL_KIOSK_DATA.driveFolder + '" target="_blank" class="k-btn" style="background:rgba(255,255,255,0.12); color:#FFF; font-size:0.82rem; padding:8px 14px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border:1px solid rgba(255,255,255,0.25);">',
             '      <i class="fa-solid fa-folder-open text-warning"></i> مجلد الملازم السحابي 📁',
             '    </a>',
@@ -497,7 +691,19 @@
             '</div>'
         ].join('\n');
 
-        // 2. أزرار اختيار السنة الدراسية (Stage Switcher Chips)
+        // 2. شريط التبديل بين وضع البطاقات ووضع المحادثة الذكية (Mode Switcher)
+        var tabNavigation = [
+            '<div style="display:flex; background:var(--k-surface-2, #F1F5F9); padding:4px; border-radius:12px; margin-bottom:14px; border:1px solid var(--k-border, #E2E8F0);">',
+            '  <button type="button" id="kiosk-tab-subjects-btn" onclick="switchKioskTab(\'subjects\')" class="k-btn active" style="flex:1; background:var(--k-primary, #0B2A6B); color:#FFF; font-size:0.82rem; padding:7px 12px; border-radius:8px; border:none; font-weight:800; cursor:pointer; transition:all 0.2s;">',
+            '    <i class="fa-solid fa-layer-group me-1"></i> قائمة المواد الـ 7 المعتمدة',
+            '  </button>',
+            '  <button type="button" id="kiosk-tab-bot-btn" onclick="switchKioskTab(\'bot\')" class="k-btn" style="flex:1; background:transparent; color:var(--k-text, #071A38); font-size:0.82rem; padding:7px 12px; border-radius:8px; border:none; font-weight:800; cursor:pointer; transition:all 0.2s;">',
+            '    <i class="fa-solid fa-comments text-success me-1"></i> المحادثة التفاعلية الذكية (Chatbot)',
+            '  </button>',
+            '</div>'
+        ].join('\n');
+
+        // 3. أزرار اختيار السنة الدراسية (Stage Switcher Chips)
         var stageChips = [
             '<div style="display:flex; gap:8px; margin-bottom:14px; align-items:center;">',
             '  <span style="font-size:0.82rem; font-weight:800; color:var(--k-primary, #0B2A6B);">السنة الدراسية:</span>',
@@ -510,7 +716,7 @@
             '</div>'
         ].join('\n');
 
-        // 3. قائمة المواد الـ 7 الكاملة للمرحلة المحددة
+        // 4. قائمة المواد الـ 7 الكاملة للمرحلة المحددة
         var subjectsListHtml = subjects.map(function (s) {
             var detailsId = 'subj_detail_' + s.id;
             var waCourseQuery = 'كورس ' + s.title + ' — ' + activeStage;
@@ -538,10 +744,13 @@
                 '  </div>',
                 '  <!-- الأكورديون للتفاصيل الرسمية للكورس من الكشك -->',
                 '  <div id="' + detailsId + '" style="display:none; background:#FFFDF5; border:1px dashed #D4AF37; border-radius:12px; padding:12px; margin-bottom:10px; font-size:0.78rem; color:#334155; line-height:1.55; white-space:pre-wrap;">' + s.replyText + '</div>',
-                '  <!-- أزرار الإجراءات التفاعلية -->',
+                '  <!-- أزرار الإجراءات التفاعلية المحدثة -->',
                 '  <div style="display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;">',
-                '    <button type="button" onclick="toggleSubjectDetails(\'' + detailsId + '\')" class="k-btn" style="background:#F1F5F9; color:#334155; font-size:0.76rem; padding:6px 12px; border-radius:8px; border:1px solid #CBD5E1; cursor:pointer;">',
+                '    <button type="button" onclick="toggleSubjectDetails(\'" + detailsId + "\')" class="k-btn" style="background:#F1F5F9; color:#334155; font-size:0.76rem; padding:6px 12px; border-radius:8px; border:1px solid #CBD5E1; cursor:pointer;">',
                 '      <i class="fa-solid fa-circle-info text-primary"></i> المنهج والمحاضرات',
+                '    </button>',
+                '    <button type="button" onclick="askKioskBotAboutSubject(\'" + s.title + "\', \'" + activeStage + "\')" class="k-btn" style="background:#EFF6FF; color:#1D4ED8; font-size:0.76rem; padding:6px 12px; border-radius:8px; border:1px solid #BFDBFE; cursor:pointer; font-weight:700;">',
+                '      <i class="fa-solid fa-robot"></i> اسأل البوت 💬',
                 '    </button>',
                 '    <a href="' + waCourseUrl + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.76rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;">',
                 '      <i class="fa-brands fa-whatsapp"></i> طلب من الكشك 📲',
@@ -554,14 +763,65 @@
             ].join('\n');
         }).join('\n');
 
-        var fullContent = kioskBanner + stageChips + '<div style="max-height:55vh; overflow-y:auto; padding-right:2px;">' + subjectsListHtml + '</div>';
+        // 5. واجهة المحادثة التفاعلية الحية مع البوت (Interactive Chatbot View)
+        var botChatView = [
+            '<div id="kiosk-bot-view" style="display:none;">',
+            '  <!-- شريط حالة البوت الذكي -->',
+            '  <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:12px; padding:10px 14px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">',
+            '    <div style="display:flex; align-items:center; gap:8px;">',
+            '      <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#22C55E; box-shadow:0 0 8px #22C55E;"></span>',
+            '      <strong style="font-size:0.84rem; color:#166534;">روبوت كشك الخدمة الذكي متصل ومفعل فورياً</strong>',
+            '    </div>',
+            '    <span style="font-size:0.72rem; color:#15803D; font-weight:700;">سيرفر NewWhats 🟢</span>',
+            '  </div>',
+            '  <!-- صندوق الرسائل التفاعلية -->',
+            '  <div id="kiosk-chat-messages" style="height:36vh; min-height:260px; overflow-y:auto; background:var(--k-surface-2, #F8FAFC); border:1px solid var(--k-border, #E2E8F0); border-radius:16px; padding:14px; margin-bottom:10px;">',
+            '    <!-- رسالة ترحيب البوت المخصصة -->',
+            '    <div style="display:flex; justify-content:flex-start; margin-bottom:12px;">',
+            '      <div style="background:var(--k-surface, #FFF); border:1.5px solid var(--k-border, #E2E8F0); border-radius:16px 16px 16px 3px; max-width:90%; padding:14px; box-shadow:0 3px 10px rgba(0,0,0,0.04); text-align:right;">',
+            '        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">',
+            '          <div style="width:26px; height:26px; border-radius:50%; background:#0B2A6B; color:#D4AF37; display:flex; align-items:center; justify-content:center; font-size:0.78rem;"><i class="fa-solid fa-cross"></i></div>',
+            '          <strong style="font-size:0.86rem; color:var(--k-primary, #0B2A6B);">مساعد كشك الاستعلام الذاتي</strong>',
+            '        </div>',
+            '        <p style="font-size:0.81rem; color:var(--k-text, #1E293B); margin:0; line-height:1.5;">سلام ونعمة يا <strong>' + studentName + '</strong> 🤍🕊️\nمرحلتك المسجلة: <strong>' + studentDefaultStage + '</strong> 🎓\nأنا بوت كشك الخدمة الآلي، اضغط على أي استفسار مقترح بالأسفل أو اكتب اسم المادة التي تبحث عنها:</p>',
+            '      </div>',
+            '    </div>',
+            '  </div>',
+            '  <!-- أزرار الاستعلام السريع المقترحة (Suggestion Chips) -->',
+            '  <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:10px; scrollbar-width:thin;">',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'عرض مواد فرقتي الـ 7\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">📚 مواد فرقتي</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'كورس الكتاب المقدس\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">📖 كورس الكتاب المقدس</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'كورس العقيدة الأرثوذكسية\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">✝️ كورس العقيدة</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'كورس الطقس الكنسي\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">⛪ كورس الطقس</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'كورس تاريخ الكنيسة\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">📜 تاريخ الكنيسة</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'كارنيهي الذكي QR\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">💳 كارنيهي الذكي</button>',
+            '    <button type="button" onclick="sendKioskQuickQuery(\'عذر غياب عن اجتماع الجمعة\')" class="k-chip" style="font-size:0.75rem; padding:4px 10px; white-space:nowrap; border-radius:999px;">🕊️ عذر غياب</button>',
+            '  </div>',
+            '  <!-- شريط إدخال الرسالة للشات -->',
+            '  <div style="display:flex; gap:8px;">',
+            '    <input type="text" id="kiosk-chat-input" placeholder="اكتب سؤالك أو اسم المادة للبوت مباشرة..." onkeydown="if(event.key===\'Enter\') sendKioskChatFromInput()" style="flex:1; padding:9px 14px; border-radius:12px; border:1.5px solid var(--k-border, #CBD5E1); background:var(--k-surface, #FFF); color:var(--k-text, #071A38); font-size:0.83rem; outline:none;" />',
+            '    <button type="button" onclick="sendKioskChatFromInput()" class="k-btn k-btn-primary" style="padding:9px 16px; border-radius:12px; font-weight:800; font-size:0.83rem; display:inline-flex; align-items:center; gap:5px; cursor:pointer;">',
+            '      <span>إرسال</span> <i class="fa-solid fa-paper-plane"></i>',
+            '    </button>',
+            '  </div>',
+            '</div>'
+        ].join('\n');
+
+        var subjectsViewHtml = [
+            '<div id="kiosk-subjects-view">',
+            stageChips,
+            '<div style="max-height:55vh; overflow-y:auto; padding-right:2px;">' + subjectsListHtml + '</div>',
+            '</div>'
+        ].join('\n');
+
+        var fullContent = kioskBanner + tabNavigation + subjectsViewHtml + botChatView;
         showStudentModal('studentMaterialsModal', '<i class="fa-solid fa-book-bible" style="color:#D4AF37;"></i> المواد التعليمية وكشك الاستعلام', fullContent);
     };
 
     // ==============================================================
     // 4️⃣ متابعة التقدم والتأهيل (Qualification Index & Progress)
     // ==============================================================
-    window.openStudentProgressModal = function () {
+        window.openStudentProgressModal = function () {
         var studentDefaultStage = detectCurrentStudentStage();
         var content = [
             '<div style="background:var(--k-surface, #FFF); border:1.5px solid var(--k-border-gold, #D4AF37); border-radius:20px; padding:20px; margin-bottom:16px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.04);">',

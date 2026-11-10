@@ -113,6 +113,13 @@
         if (!themeId) themeId = 'royal-gold';
         var htmlEl = document.documentElement;
         htmlEl.setAttribute('data-theme', themeId);
+        if (document.body) {
+            document.body.setAttribute('data-theme', themeId);
+            document.body.classList.add('k-theme-transition');
+            setTimeout(function () {
+                if (document.body) document.body.classList.remove('k-theme-transition');
+            }, 350);
+        }
 
         // تحديث meta theme-color ليتناسق مع شريط حالة الموبايل
         var currentMeta = document.querySelector('meta[name="theme-color"]');
@@ -124,6 +131,13 @@
                 document.head.appendChild(currentMeta);
             }
             currentMeta.setAttribute('content', themeObj.primary);
+
+            // تفعيل فوري ومباشر لخلفية ونصوص الـ body
+            if (document.body) {
+                document.body.style.setProperty('--k-active-bg', themeObj.bg);
+                document.body.style.setProperty('--k-active-primary', themeObj.primary);
+                document.body.style.setProperty('--k-active-accent', themeObj.accent);
+            }
         }
 
         // تحديث مفاتيح الـ Toggle المتواجدة في الصفحة (إن وجدت)
@@ -298,19 +312,11 @@
         },
 
         injectUniversalThemePill: function () {
-            if (document.querySelector('.k-universal-theme-pill')) return;
-            var pill = document.createElement('button');
-            pill.type = 'button';
-            pill.className = 'k-universal-theme-pill';
-            pill.setAttribute('data-k-action', 'open-theme-picker');
-            pill.setAttribute('aria-label', 'تغيير ثيم ومظهر المنظومة');
-            pill.setAttribute('title', 'تغيير مظهر المنظومة (7 ثيمات كنسية)');
-            pill.innerHTML = '<span class="k-pill-dot"></span><span>🎨 المظهر</span>';
-            pill.onclick = function (e) {
-                e.preventDefault();
-                ThemeManager.openThemePicker();
-            };
-            document.body.appendChild(pill);
+            // تم إيقاف الزر العائم بناءً على رغبة المستخدم: الثيم الآن له زر ثابت منظم في الهيدر
+            var existingPill = document.querySelector('.k-universal-theme-pill');
+            if (existingPill && existingPill.parentNode) {
+                existingPill.parentNode.removeChild(existingPill);
+            }
         },
 
         bindThemeButtons: function () {

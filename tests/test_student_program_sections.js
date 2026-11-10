@@ -18,7 +18,7 @@ assert(code.includes('openStudentMaterialsModal'), 'Must define openStudentMater
 assert(code.includes('openStudentProgressModal'), 'Must define openStudentProgressModal');
 console.log('  ✅ 4 Functional Modal Controllers verified');
 
-// 3. Verify WhatsApp Kiosk Integration & 7 Subjects
+// 3. Verify WhatsApp Kiosk Integration & 7 Subjects & In-App Chatbot
 assert(code.includes('WhatsApp Kiosk'), 'Must support WhatsApp Kiosk integration');
 assert(code.includes('wa.me'), 'Must generate WhatsApp deep link');
 assert(code.includes('كشك الاستعلام الذاتي'), 'Must brand as church self-service kiosk');
@@ -26,7 +26,10 @@ assert(code.includes('OFFICIAL_KIOSK_DATA'), 'Must contain official kiosk data')
 assert(code.includes('detectCurrentStudentStage'), 'Must auto-detect student stage');
 assert(code.includes('الفرقة الأولى'), 'Must support الفرقة الأولى');
 assert(code.includes('الفرقة الثانية'), 'Must support الفرقة الثانية');
-console.log('  ✅ WhatsApp Kiosk & 7 Subjects Per Study Year verified');
+assert(code.includes('switchKioskTab'), 'Must define switchKioskTab for in-app interactive chatbot');
+assert(code.includes('sendKioskBotMessage'), 'Must define sendKioskBotMessage for interactive chatting');
+assert(code.includes('askKioskBotAboutSubject'), 'Must define askKioskBotAboutSubject for card-to-bot queries');
+console.log('  ✅ WhatsApp Kiosk & 7 Subjects Per Study Year & Interactive Chatbot verified');
 
 // 4. Verify Courses and Progress logic
 assert(code.includes('DEFAULT_COURSES'), 'Must have structured courses list');
