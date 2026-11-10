@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="css/app-theme.css">
     <script src="js/theme-manager.js"></script>
 <script src="js/gentle-reminders.js"></script>
+<script src="js/student-program-sections.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 
@@ -444,8 +445,23 @@ body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; color: #1e
         <a href="javascript:void(0)" onclick="switchStudentTab('grades')" class="text-decoration-none fw-bold small" style="color: #0C2461;">عرض الكل ◀</a>
     </div>
     <div class="program-section-grid mb-3">
-        <a href="javascript:void(0)" onclick="switchStudentTab('grades')" class="program-card-btn">
+        <a href="javascript:void(0)" onclick="openStudentCoursesModal()" class="program-card-btn" role="button" aria-label="الدورات التدريبية">
             <div class="icon-wrap"><i class="fa-solid fa-book-open"></i></div>
+            <span class="card-title">الدورات التدريبية</span>
+        </a>
+        <a href="javascript:void(0)" onclick="openStudentEventsModal()" class="program-card-btn" role="button" aria-label="الفعاليات والاجتماعات">
+            <div class="icon-wrap"><i class="fa-solid fa-calendar-days"></i></div>
+            <span class="card-title">الفعاليات والاجتماعات</span>
+        </a>
+        <a href="javascript:void(0)" onclick="openStudentMaterialsModal()" class="program-card-btn" role="button" aria-label="المواد التعليمية وكشك الاستعلام">
+            <div class="icon-wrap"><i class="fa-solid fa-book-bible"></i></div>
+            <span class="card-title">المواد التعليمية</span>
+        </a>
+        <a href="javascript:void(0)" onclick="openStudentProgressModal()" class="program-card-btn" role="button" aria-label="متابعة التقدم والتأهيل">
+            <div class="icon-wrap"><i class="fa-solid fa-chart-line"></i></div>
+            <span class="card-title">متابعة التقدم</span>
+        </a>
+    </div>
             <span class="card-title">الدورات التدريبية</span>
         </a>
         <a href="student_attendance.html" class="program-card-btn">
