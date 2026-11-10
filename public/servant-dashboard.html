@@ -5602,7 +5602,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
       </button>
 
       <div style="display:flex; gap:10px;">
-        <button type="button" onclick="previewDashboardAsServant(currentConfiguringServantId)" style="background:#eff6ff; color:#1d4ed8; border:1.5px solid #bfdbfe; border-radius:8px; padding:9px 18px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+        <button type="button" onclick="previewDashboardAsServant(window.currentConfiguringServantId)" style="background:#eff6ff; color:#1d4ed8; border:1.5px solid #bfdbfe; border-radius:8px; padding:9px 18px; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-eye"></i> معاينة الواجهة حياً بهذا الخادم 👁️
         </button>
         <button type="button" onclick="saveServantPermissions()" style="background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:#ffffff; border:none; border-radius:8px; padding:9px 22px; font-weight:800; cursor:pointer; box-shadow:0 2px 8px rgba(16,185,129,0.3); display:inline-flex; align-items:center; gap:6px;">
@@ -7491,6 +7491,7 @@ let servants = JSON.parse(localStorage.getItem(STORAGE_KEYS.SERVANTS)) || [
 { id: 1001, name: "عادل جورج", phone: "1234567", dob: "1995-05-15", code: "admin", role: "admin", permission: "admin", roleType: "أمين خدمة" }
 
 ];
+window.servants = servants;
 
 let settings = JSON.parse(localStorage.getItem(STORAGE_KEYS.SETTINGS)) || {
 

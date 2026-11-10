@@ -694,6 +694,7 @@ function applyGranularPermissions(perms) {
 // ==========================================
 
 let currentConfiguringServantId = null;
+if (typeof window !== "undefined") window.currentConfiguringServantId = null;
 
 function openServantPermissionsModal(servantId) {
     if (!servants || servants.length === 0) return alert('لا يوجد خدام مسجلون.');
@@ -702,6 +703,7 @@ function openServantPermissionsModal(servantId) {
     if (!s) return alert('تعذر العثور على بيانات الخادم!');
 
     currentConfiguringServantId = s.code || s.id;
+    if (typeof window !== "undefined") window.currentConfiguringServantId = currentConfiguringServantId;
 
     // تعبئة بطاقة الخادم
     const nameEl = document.getElementById('permModal_servantName');
@@ -863,9 +865,10 @@ async function saveServantPermissions() {
 // ==========================================
 
 function previewDashboardAsServant(servantId) {
-    if (!servants || servants.length === 0) return alert('لا يوجد خدام.');
-    const targetKey = String(servantId || currentConfiguringServantId).trim();
-    const s = servants.find(x => String(x.id || '').trim() === targetKey || String(x.code || '').trim() === targetKey);
+    const servantList = (typeof servants !== 'undefined' && Array.isArray(servants)) ? servants : ((typeof window !== 'undefined' && Array.isArray(window.servants)) ? window.servants : []);
+    if (!servantList || servantList.length === 0) return alert('لا يوجد خدام.');
+    const targetKey = String(servantId || currentConfiguringServantId || (typeof window !== 'undefined' ? window.currentConfiguringServantId : '')).trim();
+    const s = servantList.find(x => String(x.id || '').trim() === targetKey || String(x.code || '').trim() === targetKey);
     if (!s) return alert('تعذر العثور على بيانات الخادم للمعاينة!');
 
     // حفظ الجلسة الأصلية للأدمن
