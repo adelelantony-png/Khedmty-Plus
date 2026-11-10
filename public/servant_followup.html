@@ -1247,7 +1247,18 @@ body {
                 }
             } catch(e) {}
         }
-        if (!lastConf) return 999;
+        if (!lastConf) {
+            const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+            const spStart = sSettings.spiritualNoteStart || sSettings.serviceStart;
+            if (spStart) {
+                const spD = new Date(spStart);
+                if (!isNaN(spD.getTime())) {
+                    const elapsed = Math.max(0, Math.floor((Date.now() - spD.getTime()) / 86400000));
+                    return Math.min(999, elapsed);
+                }
+            }
+            return 999;
+        }
         const d = new Date(lastConf);
         if (isNaN(d.getTime())) return 999;
         const diff = Date.now() - d.getTime();
@@ -1259,7 +1270,18 @@ body {
         try {
             const localReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
             const keys = Object.keys(localReadings).filter(k => k.endsWith('_' + sCode));
-            if (keys.length === 0) return 999;
+            if (keys.length === 0) {
+                const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+                const spStart = sSettings.spiritualNoteStart || sSettings.serviceStart;
+                if (spStart) {
+                    const spD = new Date(spStart);
+                    if (!isNaN(spD.getTime())) {
+                        const elapsed = Math.max(0, Math.floor((Date.now() - spD.getTime()) / 86400000));
+                        return Math.min(999, elapsed);
+                    }
+                }
+                return 999;
+            }
             
             let latestTs = 0;
             const curYear = new Date().getFullYear();
@@ -1273,7 +1295,18 @@ body {
                     }
                 }
             });
-            if (latestTs === 0) return 999;
+            if (latestTs === 0) {
+                const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+                const spStart = sSettings.spiritualNoteStart || sSettings.serviceStart;
+                if (spStart) {
+                    const spD = new Date(spStart);
+                    if (!isNaN(spD.getTime())) {
+                        const elapsed = Math.max(0, Math.floor((Date.now() - spD.getTime()) / 86400000));
+                        return Math.min(999, elapsed);
+                    }
+                }
+                return 999;
+            }
             const diff = Date.now() - latestTs;
             return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
         } catch(e) {

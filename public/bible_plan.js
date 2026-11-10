@@ -2240,7 +2240,7 @@ window.BIBLE_PLAN_DATA = {
         }
 
         var mode = planMode || settings.biblePlanMode || 'service_year';
-        var serviceStartStr = customServiceStart || settings.serviceStart || '2026-09-01';
+        var serviceStartStr = customServiceStart || settings.spiritualNoteStart || settings.serviceStart || '2026-09-01';
 
         // 1. النمط الثابت (التقويم السنوي من 1 يناير)
         if (mode === 'calendar_year') {

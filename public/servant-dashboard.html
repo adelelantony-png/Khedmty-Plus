@@ -2944,7 +2944,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <div style="background:#fff; border:1px solid #dfe6e9; border-radius:12px; padding:14px; margin-bottom:14px; box-shadow:0 2px 6px rgba(0,0,0,0.04);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:5px;">
         <h4 style="margin:0; color:var(--primary); font-size:14px;">🔥 الخريطة الحرارية ومؤشر خطر الانقطاع (آخر 4 لقاءات جمعة)</h4>
-        <span id="attritionCountBadge" class="role-badge" style="background:var(--danger); font-size:11px;">0 معرض للتسرب</span>
+        <span id="attritionCountBadge" class="role-badge" style="background:var(--danger); font-size:11px; display:none;">0 معرض للتسرب</span>
     </div>
     <p style="font-size:11px; color:#636e72; margin:0 0 8px 0;">رصد استباقي لمن بدأ التزامه يتراجع في لقاءات الجمعة للتدخل بالافتقاد قبل الانقطاع.</p>
     <div id="heatmapContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:10px; margin-top:8px;"></div>
@@ -4092,6 +4092,13 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <div class="form-group"><label>📅 تاريخ بداية الخدمة (السنة):</label><input type="date" id="setServiceStart"></div>
 
 <div class="form-group"><label>📅 تاريخ نهاية الخدمة (السنة):</label><input type="date" id="setServiceEnd"></div>
+<div class="form-group">
+    <label>🕊️ تاريخ بداية النوتة الروحية والمتابعة:</label>
+    <input type="date" id="setSpiritualNoteStart">
+    <small style="font-size:10.5px; color:#64748b; display:block; margin-top:3px;">
+        💡 يتيح بدء احتساب متابعة قراءة الإنجيل والاعتراف من تاريخ لاحق لانطلاق السنة الخدمية عند تفعيل المنظومة لاحقاً.
+    </small>
+</div>
 
 <div class="form-group">
 
@@ -7497,6 +7504,8 @@ serviceStart: "2026-09-01",
 
 serviceEnd: "2027-07-01",
 
+spiritualNoteStart: "2026-11-06",
+
 startTime: "13:00",
 
 allowedDelay: 15,
@@ -8064,7 +8073,8 @@ const elServantsPercent = document.getElementById('statServantsPercent');
 
 if (elServantsPercent) elServantsPercent.innerText = servantPercent + "%";
 
-let fridayDates = Object.keys(attendanceRecord).filter(d => isFridaySession(d)).sort().reverse();
+const todayFridayStr = (typeof today !== 'undefined' && today) ? today : new Date().toISOString().split('T')[0];
+let fridayDates = Object.keys(attendanceRecord || {}).filter(d => isFridaySession(d) && d <= todayFridayStr && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0).sort().reverse();
 
 let alertBox = document.getElementById('absentAlertList');
 
@@ -8823,6 +8833,7 @@ settings.adminWhatsApp = formatWhatsAppPhone(document.getElementById('setAdminWh
 settings.serviceStart = document.getElementById('setServiceStart').value;
 
 settings.serviceEnd = document.getElementById('setServiceEnd').value;
+const spEl = document.getElementById('setSpiritualNoteStart'); if (spEl) settings.spiritualNoteStart = spEl.value;
 
 let planModeEl = document.getElementById('setBiblePlanMode');
 
@@ -10052,6 +10063,7 @@ let setW = document.getElementById('setAdminWhatsApp'); if (setW) setW.value = s
 let setSStart = document.getElementById('setServiceStart'); if (setSStart) setSStart.value = settings.serviceStart || "2026-09-01";
 
 let setSEnd = document.getElementById('setServiceEnd'); if (setSEnd) setSEnd.value = settings.serviceEnd || "2027-07-01";
+let setSpStart = document.getElementById('setSpiritualNoteStart'); if (setSpStart) setSpStart.value = settings.spiritualNoteStart || settings.serviceStart || "2026-11-06";
 
 let setPlanM = document.getElementById('setBiblePlanMode'); if (setPlanM) setPlanM.value = settings.biblePlanMode || "service_year";
 

@@ -420,141 +420,114 @@ showToast(`💾 تم حفظ حضور: ${member.name} محلياً بدون نت 
 // ==========================================
 
 function renderAttendanceHeatmap() {
-
-const container = document.getElementById('heatmapContainer');
-
-const badge = document.getElementById('attritionCountBadge');
-
-if (!container) return;
-
-container.innerHTML = '';
-
-let fridayDates = Object.keys(attendanceRecord).filter(d => isFridaySession(d)).sort().reverse();
-
-let recentDates = fridayDates.slice(0, 4);
-
-if (recentDates.length === 0) {
-
-container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">لا توجد سجلات جمعة كافية لبناء الخريطة.</div>';
-
-if (badge) badge.style.display = 'none';
-
-return;
-
-}
-
-let riskCount = 0;
-
-members.forEach(m => {
-
-let attendedCount = 0;
-
-let delayedCount = 0;
-
-let historyBlocks = [];
-
-[...recentDates].reverse().forEach(d => {
-
-let rec = (attendanceRecord[d] || []).find(a => a.id.toString() === m.id.toString());
-
-if (rec) {
-
-if (rec.isAbsentDueToDelay) {
-
-delayedCount++;
-
-historyBlocks.push('<span title="' + d + ': تأخير شديد" style="display:inline-block; width:18px; height:18px; background:#e17055; border-radius:3px; margin:0 2px;"></span>');
-
-} else {
-
-attendedCount++;
-
-historyBlocks.push('<span title="' + d + ': حاضر" style="display:inline-block; width:18px; height:18px; background:#00b894; border-radius:3px; margin:0 2px;"></span>');
-
-}
-
-} else {
-
-historyBlocks.push('<span title="' + d + ': غائب" style="display:inline-block; width:18px; height:18px; background:#dfe6e9; border:1px solid #b2bec3; border-radius:3px; margin:0 2px;"></span>');
-
-}
-
-});
-
-let statusTag = "";
-
-let isAtRisk = false;
-
-let lastTwoAbsent = recentDates.length >= 2 &&
-
-!(attendanceRecord[recentDates[0]] || []).some(x => x.id.toString() === m.id.toString()) &&
-
-!(attendanceRecord[recentDates[1]] || []).some(x => x.id.toString() === m.id.toString());
-
-if (attendedCount === 0 || lastTwoAbsent) {
-
-statusTag = '<span style="color:var(--danger); font-weight:bold; font-size:11px;">🔴 خطر تسرب مرتفع</span>';
-
-isAtRisk = true; riskCount++;
-
-} else if (attendedCount <= 1 || delayedCount >= 2) {
-
-statusTag = '<span style="color:#d35400; font-weight:bold; font-size:11px;">🟡 تذبذب وتراجع</span>';
-
-isAtRisk = true; riskCount++;
-
-}
-
-if (isAtRisk) {
-
-let cleanPhone = formatWhatsAppPhone(m.phone);
-
-let waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent('سلام ونعمة يا ' + m.name + '، بنطمن عليك ومستنيينك في اجتماعنا يوم الجمعة القادم ❤️')}` : '#';
-
-let card = document.createElement('div');
-
-card.style.cssText = "background:#fbfbfb; border:1px solid #eee; border-left:4px solid " + (attendedCount === 0 ? 'var(--danger)' : 'var(--warning)') + "; border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;";
-
-card.innerHTML = `
-
-<div>
-
-<div style="font-weight:bold; font-size:13px; color:var(--dark);">${m.name} (كود: ${m.code || m.id})</div>
-
-<div style="font-size:11px; color:#636e72; margin:2px 0;">${m.stage || 'سنة أولى'} • ${statusTag}</div>
-
-<div style="display:flex; align-items:center; margin-top:4px;">${historyBlocks.join('')}</div>
-
-</div>
-
-<div><a href="${waLink}" target="_blank" class="btn-mini btn-success" style="padding:5px 9px;">افتقاد 💬</a></div>
-
-`;
-
-container.appendChild(card);
-
-}
-
-});
-
-if (badge) {
-
-badge.innerText = `${riskCount} معرض للانقطاع`;
-
-badge.style.display = riskCount > 0 ? 'inline-block' : 'none';
-
-}
-
-if (riskCount === 0) {
-
-container.innerHTML = '<div style="color:var(--success); font-weight:bold; font-size:12px; padding:6px 0;">🌟 رائع! لا توجد مؤشرات تسرب أو تراجع في الالتزام حالياً.</div>';
-
-}
-
+    const container = document.getElementById('heatmapContainer');
+    const badge = document.getElementById('attritionCountBadge');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const todayStr = (typeof today !== 'undefined' && today) ? today : new Date().toISOString().split('T')[0];
+
+    // فقط اجتماعات الجمعة المنعقدة فعلياً حتى اليوم مع وجود حضور مسجل
+    let fridayDates = Object.keys(attendanceRecord || {}).filter(d => {
+        if (!isFridaySession(d)) return false;
+        if (d > todayStr) return false;
+        let list = attendanceRecord[d] || [];
+        return Array.isArray(list) && list.length > 0;
+    }).sort().reverse();
+
+    // يتطلب رصد تراجع الالتزام وخطر الانقطاع تسجيل اجتماعي جمعة فعليين على الأقل
+    if (fridayDates.length < 2) {
+        container.innerHTML = `
+            <div class="empty-state" style="grid-column:1/-1; padding:16px; text-align:center; background:#f8fafc; border-radius:10px; border:1px dashed #cbd5e1;">
+                <div style="font-size:22px; margin-bottom:6px;">📊</div>
+                <div style="font-weight:bold; font-size:13px; color:var(--dark);">يتطلب بناء خريطة خطر الانقطاع تسجيل اجتماعي جمعة فعليين على الأقل لرصد معدل التراجع والالتزام بدقة.</div>
+                <div style="font-size:11px; color:#64748b; margin-top:4px;">(تم تسجيل ${fridayDates.length === 1 ? 'اجتماع جمعة واحد حتى الآن: ' + fridayDates[0] : 'لا توجد اجتماعات مسجلة حتى الآن'})</div>
+            </div>
+        `;
+        if (badge) {
+            badge.style.display = 'none';
+            badge.innerText = '0 معرض للتسرب';
+        }
+        return;
+    }
+
+    let recentDates = fridayDates.slice(0, 4);
+    const N = recentDates.length;
+    let riskCount = 0;
+
+    members.forEach(m => {
+        let attendedCount = 0;
+        let delayedCount = 0;
+        let historyBlocks = [];
+
+        [...recentDates].reverse().forEach(d => {
+            let rec = (attendanceRecord[d] || []).find(a => a && a.id.toString() === m.id.toString());
+            if (rec) {
+                if (rec.isAbsentDueToDelay) {
+                    delayedCount++;
+                    historyBlocks.push('<span title="' + d + ': تأخير شديد" style="display:inline-block; width:18px; height:18px; background:#e17055; border-radius:3px; margin:0 2px;"></span>');
+                } else {
+                    attendedCount++;
+                    historyBlocks.push('<span title="' + d + ': حاضر" style="display:inline-block; width:18px; height:18px; background:#00b894; border-radius:3px; margin:0 2px;"></span>');
+                }
+            } else {
+                historyBlocks.push('<span title="' + d + ': غائب" style="display:inline-block; width:18px; height:18px; background:#dfe6e9; border:1px solid #b2bec3; border-radius:3px; margin:0 2px;"></span>');
+            }
+        });
+
+        // هل غاب آخر اجتماعي جمعة متتاليين؟
+        let lastTwoAbsent = N >= 2 &&
+            !(attendanceRecord[recentDates[0]] || []).some(x => x && x.id.toString() === m.id.toString() && !x.isAbsentDueToDelay) &&
+            !(attendanceRecord[recentDates[1]] || []).some(x => x && x.id.toString() === m.id.toString() && !x.isAbsentDueToDelay);
+
+        let statusTag = "";
+        let isAtRisk = false;
+        let borderCol = 'var(--warning)';
+
+        // معايير رعوية ذكية دقيقة:
+        // 1. خطر تسرب مرتفع: غياب آخر اجتماعين متتاليين، أو غياب تام لجميع اللقاءات الأخيرة (لـ 3 أو 4 اجتماعات)
+        if (lastTwoAbsent || (N >= 3 && attendedCount === 0)) {
+            statusTag = '<span style="color:var(--danger); font-weight:bold; font-size:11px;">🔴 خطر تسرب مرتفع</span>';
+            isAtRisk = true;
+            riskCount++;
+            borderCol = 'var(--danger)';
+        } 
+        // 2. تذبذب وتراجع: حضور جلسة واحدة فقط من أصل 3 أو 4، أو تكرار التأخير الشديد، أو تراجع بعد حضور
+        else if ((N >= 3 && attendedCount === 1) || delayedCount >= 2 || (N === 4 && attendedCount === 2 && !(attendanceRecord[recentDates[0]] || []).some(x => x && x.id.toString() === m.id.toString()))) {
+            statusTag = '<span style="color:#d35400; font-weight:bold; font-size:11px;">🟡 تذبذب وتراجع</span>';
+            isAtRisk = true;
+            riskCount++;
+            borderCol = '#d35400';
+        }
+
+        if (isAtRisk) {
+            let cleanPhone = formatWhatsAppPhone(m.phone);
+            let waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent('سلام ونعمة يا ' + m.name + '، بنطمن عليك ومستنيينك في اجتماعنا يوم الجمعة القادم ❤️')}` : '#';
+            let card = document.createElement('div');
+            card.style.cssText = `background:#fbfbfb; border:1px solid #eee; border-left:4px solid ${borderCol}; border-radius:6px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;`;
+            card.innerHTML = `
+                <div>
+                    <div style="font-weight:bold; font-size:13px; color:var(--dark);">${m.name} (كود: ${m.code || m.id})</div>
+                    <div style="font-size:11px; color:#636e72; margin:2px 0;">${m.stage || 'سنة أولى'} • ${statusTag}</div>
+                    <div style="display:flex; align-items:center; margin-top:4px;">${historyBlocks.join('')}</div>
+                </div>
+                <div><a href="${waLink}" target="_blank" class="btn-mini btn-success" style="padding:5px 9px;">افتقاد 💬</a></div>
+            `;
+            container.appendChild(card);
+        }
+    });
+
+    if (badge) {
+        badge.innerText = `${riskCount} معرض للانقطاع`;
+        badge.style.display = riskCount > 0 ? 'inline-block' : 'none';
+    }
+
+    if (riskCount === 0) {
+        container.innerHTML = '<div style="color:var(--success); font-weight:bold; font-size:12px; padding:12px; text-align:center; background:#ecfdf5; border-radius:8px; border:1px solid #a7f3d0; grid-column:1/-1;">🌟 رائع! لا توجد مؤشرات تسرب أو تراجع في الالتزام حالياً بين المخدومين.</div>';
+    }
 }
 
 // ==========================================
-
 
 // 14. عرض جدول الحضور
 
