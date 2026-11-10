@@ -304,18 +304,18 @@ function renderMasterPlanTable() {
         let tr = document.createElement('tr');
         tr.setAttribute('data-plan-id', item.id);
         tr.innerHTML = `
-            <td data-label="التاريخ"><strong style="color:#0B2A6B; font-family:monospace; font-size:0.95rem;">${escapeHtml(item.date)}</strong></td>
-            <td data-label="النوع"><span class="plan-tag ${tagClass}">${escapeHtml(item.type)}</span></td>
-            <td data-label="العنوان"><strong style="color:#1e293b;">${escapeHtml(item.title)}</strong></td>
-            <td data-label="المكان"><span style="color:#475569;">${escapeHtml(item.location || 'الكنيسة')}</span></td>
-            <td data-label="المرحلة"><span class="badge" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 8px; border-radius:6px; font-size:0.75rem;">${escapeHtml(item.stage || 'عام')}</span></td>
-            <td data-label="المسؤول"><strong style="color:var(--primary, #0B2A6B);">${escapeHtml(item.responsible || 'غير محدد')}</strong></td>
-            <td data-label="إجراء" class="admin-only" style="white-space:nowrap;">
-                <div style="display:inline-flex; align-items:center; gap:6px;">
-                    <button type="button" class="btn-mini" onclick="openEditMasterPlanModal('${item.id}')" style="background:rgba(212,175,55,0.18); color:#874F19; border:1px solid rgba(212,175,55,0.5); padding:5px 10px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" title="تعديل تفاصيل الفعالية">
+            <td data-label="التاريخ" style="white-space:nowrap; font-size:0.86rem;"><strong style="color:#0B2A6B; font-family:monospace;">${escapeHtml(item.date)}</strong></td>
+            <td data-label="النوع" style="white-space:nowrap;"><span class="plan-tag ${tagClass}" style="font-size:0.75rem; padding:3px 8px;">${escapeHtml(item.type)}</span></td>
+            <td data-label="العنوان" style="min-width:180px; max-width:320px; word-break:break-word; white-space:normal; line-height:1.45;"><strong style="color:#1e293b; font-size:0.88rem;">${escapeHtml(item.title)}</strong></td>
+            <td data-label="المكان" style="min-width:100px; max-width:160px; word-break:break-word; white-space:normal; font-size:0.82rem;"><span style="color:#475569;">${escapeHtml(item.location || 'الكنيسة')}</span></td>
+            <td data-label="المرحلة" style="white-space:nowrap;"><span class="badge" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:3px 7px; border-radius:6px; font-size:0.74rem;">${escapeHtml(item.stage || 'عام')}</span></td>
+            <td data-label="المسؤول" style="min-width:110px; max-width:180px; word-break:break-word; white-space:normal; font-size:0.82rem;"><strong style="color:var(--primary, #0B2A6B);">${escapeHtml(item.responsible || 'غير محدد')}</strong></td>
+            <td data-label="إجراء" class="admin-only" style="white-space:nowrap; text-align:center;">
+                <div style="display:inline-flex; align-items:center; gap:4px;">
+                    <button type="button" class="btn-mini" onclick="openEditMasterPlanModal('${item.id}')" style="background:rgba(212,175,55,0.18); color:#874F19; border:1px solid rgba(212,175,55,0.5); padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.72rem; display:inline-flex; align-items:center; gap:3px; transition:all 0.15s;" title="تعديل تفاصيل الفعالية">
                         <i class="fa-solid fa-pen-to-square"></i> تعديل
                     </button>
-                    <button type="button" class="btn-mini btn-danger" onclick="deleteMasterPlanEvent('${item.id}')" style="padding:5px 10px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;" title="حذف الفعالية من الخطة">
+                    <button type="button" class="btn-mini btn-danger" onclick="deleteMasterPlanEvent('${item.id}')" style="padding:4px 8px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.72rem; display:inline-flex; align-items:center; gap:3px;" title="حذف الفعالية من الخطة">
                         <i class="fa-solid fa-trash"></i> حذف
                     </button>
                 </div>
@@ -345,27 +345,26 @@ function openEditMasterPlanModal(id) {
     const modal = document.createElement('div');
     modal.id = 'editMasterPlanModal';
     modal.className = 'k-modal-backdrop active';
-    modal.style.zIndex = '100005';
-    modal.style.display = 'flex';
+    modal.style.cssText = 'position:fixed !important; inset:0 !important; top:0 !important; left:0 !important; right:0 !important; bottom:0 !important; width:100vw !important; height:100vh !important; background:rgba(7,26,56,0.75) !important; backdrop-filter:blur(8px) !important; -webkit-backdrop-filter:blur(8px) !important; z-index:100005 !important; display:flex !important; align-items:center !important; justify-content:center !important; padding:16px !important; box-sizing:border-box !important; overflow-y:auto !important; margin:0 !important;';
 
     modal.innerHTML = `
-        <div class="k-modal" style="max-width:560px; width:100%; border-radius:20px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.3); border:2px solid #D4AF37;">
-            <div style="background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#FFF; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #D4AF37;">
+        <div class="k-modal" style="position:relative; margin:auto; max-width:540px; width:100%; max-height:90vh; overflow-y:auto; border-radius:20px; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:2px solid #D4AF37; box-sizing:border-box; background:#ffffff;">
+            <div style="background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#FFF; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #D4AF37;">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:1.4rem;">🗓️</span>
+                    <span style="font-size:1.3rem;">🗓️</span>
                     <div>
-                        <h3 style="margin:0; font-size:1.1rem; color:#FFF; font-weight:800;">تعديل فعالية في خطة السنة</h3>
+                        <h3 style="margin:0; font-size:1.05rem; color:#FFF; font-weight:800;">تعديل فعالية في خطة السنة</h3>
                         <small style="color:#CBD5E1; font-size:0.75rem;">تعديل التاريخ والموضوع والمحاضر والمكان فورياً</small>
                     </div>
                 </div>
-                <button type="button" onclick="closeEditMasterPlanModal()" style="background:none; border:none; color:#FDE047; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+                <button type="button" onclick="closeEditMasterPlanModal()" style="background:none; border:none; color:#FDE047; font-size:1.5rem; cursor:pointer; line-height:1;" aria-label="إغلاق">&times;</button>
             </div>
 
-            <form onsubmit="event.preventDefault(); saveEditedMasterPlanEvent('${item.id}');" style="padding:20px 22px; background:#FFFFFF; display:flex; flex-direction:column; gap:14px; max-height:78vh; overflow-y:auto;">
+            <form onsubmit="event.preventDefault(); saveEditedMasterPlanEvent('${item.id}');" style="padding:18px 20px; background:#FFFFFF; display:flex; flex-direction:column; gap:12px;">
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">نوع الفعالية:</label>
-                        <select id="editPlanType" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">نوع الفعالية:</label>
+                        <select id="editPlanType" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600; box-sizing:border-box;">
                             <option value="محاضرة" ${item.type === 'محاضرة' ? 'selected' : ''}>محاضرة دراسية</option>
                             <option value="رحلة" ${item.type === 'رحلة' ? 'selected' : ''}>رحلة ترفيهية / دير (بونص ⭐)</option>
                             <option value="مؤتمر" ${item.type === 'مؤتمر' ? 'selected' : ''}>مؤتمر روحي (بونص ⭐)</option>
@@ -376,20 +375,20 @@ function openEditMasterPlanModal(id) {
                         </select>
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">تاريخ الفعالية:</label>
-                        <input type="date" id="editPlanDate" value="${escapeHtml(item.date)}" required style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:700; color:#0B2A6B;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">تاريخ الفعالية:</label>
+                        <input type="date" id="editPlanDate" value="${escapeHtml(item.date)}" required style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:700; color:#0B2A6B; box-sizing:border-box;">
                     </div>
                 </div>
 
                 <div>
-                    <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">عنوان الفعالية / الموضوع:</label>
-                    <input type="text" id="editPlanTitle" value="${escapeHtml(item.title)}" required placeholder="مثال: كورس الكتاب المقدس (محاضرة 1)..." style="width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.9rem; font-weight:600;">
+                    <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">عنوان الفعالية / الموضوع:</label>
+                    <input type="text" id="editPlanTitle" value="${escapeHtml(item.title)}" required placeholder="مثال: كورس الكتاب المقدس (محاضرة 1)..." style="width:100%; padding:8px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.88rem; font-weight:600; box-sizing:border-box;">
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المرحلة المستهدفة:</label>
-                        <select id="editPlanStage" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">المرحلة المستهدفة:</label>
+                        <select id="editPlanStage" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600; box-sizing:border-box;">
                             <option value="عام لكل الخدمة" ${(item.stage === 'عام لكل الخدمة' || item.stage === 'عام') ? 'selected' : ''}>عام لكل الخدمة والدارسين</option>
                             <option value="الفرقة الأولى" ${(item.stage === 'الفرقة الأولى' || item.stage === 'سنة أولى') ? 'selected' : ''}>سنة أولى (الفرقة الأولى)</option>
                             <option value="الفرقة الثانية" ${(item.stage === 'الفرقة الثانية' || item.stage === 'سنة ثانية') ? 'selected' : ''}>سنة ثانية (الفرقة الثانية)</option>
@@ -397,14 +396,14 @@ function openEditMasterPlanModal(id) {
                         </select>
                     </div>
                     <div>
-                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المكان / القاعة:</label>
-                        <input type="text" id="editPlanLocation" value="${escapeHtml(item.location || 'الكنيسة')}" placeholder="مثال: قاعة الفرقة الأولى..." style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem;">
+                        <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">المكان / القاعة:</label>
+                        <input type="text" id="editPlanLocation" value="${escapeHtml(item.location || 'الكنيسة')}" placeholder="مثال: قاعة الفرقة الأولى..." style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; box-sizing:border-box;">
                     </div>
                 </div>
 
                 <div>
-                    <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المسؤول / المحاضر:</label>
-                    <input type="text" id="editPlanResponsible" list="editPlanServantsList" value="${escapeHtml(item.responsible || '')}" placeholder="اكتب اسم المحاضر أو اختر خادماً مسؤولاً..." style="width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
+                    <label style="display:block; font-size:0.78rem; font-weight:700; color:#334155; margin-bottom:4px;">المسؤول / المحاضر:</label>
+                    <input type="text" id="editPlanResponsible" list="editPlanServantsList" value="${escapeHtml(item.responsible || '')}" placeholder="اكتب اسم المحاضر أو اختر خادماً مسؤولاً..." style="width:100%; padding:8px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.88rem; box-sizing:border-box;">
                     <datalist id="editPlanServantsList">
                         <option value="أمين الخدمة">
                         <option value="مسؤول الفرقة الأولى">
@@ -413,9 +412,9 @@ function openEditMasterPlanModal(id) {
                     </datalist>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:14px; border-top:1px solid #e2e8f0;">
-                    <button type="button" onclick="closeEditMasterPlanModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 18px; border-radius:8px; font-weight:700; cursor:pointer;">إلغاء</button>
-                    <button type="submit" style="background:#0B2A6B; color:#ffffff; border:none; padding:9px 24px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(11,42,107,0.25);">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:8px; padding-top:12px; border-top:1px solid #e2e8f0;">
+                    <button type="button" onclick="closeEditMasterPlanModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer; font-size:0.85rem;">إلغاء</button>
+                    <button type="submit" style="background:#0B2A6B; color:#ffffff; border:none; padding:8px 22px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(11,42,107,0.25);">
                         <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات 💾
                     </button>
                 </div>
@@ -427,12 +426,14 @@ function openEditMasterPlanModal(id) {
         if (e.target === modal) closeEditMasterPlanModal();
     };
 
+    document.body.style.overflow = 'hidden';
     document.body.appendChild(modal);
 }
 
 function closeEditMasterPlanModal() {
     const m = document.getElementById('editMasterPlanModal');
     if (m) m.remove();
+    document.body.style.overflow = '';
 }
 
 function saveEditedMasterPlanEvent(id) {

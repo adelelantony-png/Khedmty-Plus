@@ -50,6 +50,27 @@ return d;
 
 }
 
+
+var SEED_CANONICAL_COURSES = [
+    // سنة أولى (الفرقة الأولى)
+    { id: 'crs_1_1', year: 1, name: 'دراسات في العهد القديم (مقدمات وأسفار موسى)', lecturer: 'د. فليمون / أ. مجدي عطية', weeks: 4 },
+    { id: 'crs_1_2', year: 1, name: 'كورس العقيدة الأرثوذكسية وتاريخ العقائد', lecturer: 'أ. مجدي عطية / أ. جرجس', weeks: 4 },
+    { id: 'crs_1_3', year: 1, name: 'كورس الطقس الكنسي والألحان والليتورجيا', lecturer: 'أ. جرجس / أ. بيشوي', weeks: 4 },
+    { id: 'crs_1_4', year: 1, name: 'كورس تاريخ الكنيسة القبطية والآبائيات', lecturer: 'م. سهير / م. رباب', weeks: 4 },
+    { id: 'crs_1_5', year: 1, name: 'كورس دراسات تربوية وإدارة فصل وإعداد درس', lecturer: 'د. رشا / أ. بيشوي', weeks: 4 },
+    { id: 'crs_1_6', year: 1, name: 'كورس تنمية المهارات والإلقاء والتأثير', lecturer: 'د. رشا / د. مارسيل', weeks: 4 },
+    { id: 'crs_1_7', year: 1, name: 'كورس الروحانية الأرثوذكسية وروحانية الخادم', lecturer: 'م. سهير / أمين الخدمة', weeks: 4 },
+
+    // سنة ثانية (الفرقة الثانية)
+    { id: 'crs_2_1', year: 2, name: 'دراسات في العهد الجديد (الأناجيل والرسائل)', lecturer: 'د. فليمون / أ. مجدي عطية', weeks: 4 },
+    { id: 'crs_2_2', year: 2, name: 'كورس اللاهوت الدفاعي والمقارن', lecturer: 'أ. مجدي عطية / أ. جرجس', weeks: 4 },
+    { id: 'crs_2_3', year: 2, name: 'كورس طقس الأسرار الكنسية المتقدم', lecturer: 'أ. جرجس / أ. بيشوي', weeks: 4 },
+    { id: 'crs_2_4', year: 2, name: 'كورس تاريخ المجامع المسكونية وعصر الاستشهاد', lecturer: 'م. سهير / م. رباب', weeks: 4 },
+    { id: 'crs_2_5', year: 2, name: 'كورس علم النفس التطبيقي والتعامل مع الفئات العمرية', lecturer: 'د. رشا / أ. بيشوي', weeks: 4 },
+    { id: 'crs_2_6', year: 2, name: 'كورس القيادة المسيحية وإدارة فرق الخدمة', lecturer: 'أمين الخدمة / أ. مجدي عطية', weeks: 4 },
+    { id: 'crs_2_7', year: 2, name: 'كورس مشروع التخرج الميداني والجاهزية للرسامة', lecturer: 'لجنة الإشراف الرعوي', weeks: 4 }
+];
+
 var state;
 
 try { state = norm(JSON.parse(localStorage.getItem(LS_KEY))); } catch (e) { state = defaults(); }
@@ -200,7 +221,20 @@ i += n; k++;
 
 }
 
-state.blocks = state.blocks.filter(function (b) { return b.year !== y; }).concat(out);
+state.blocks = state.blocks.filter(function (b) { return b.year !== y; }
+
+// التغذية التلقائية الفورية بالمنهج الكنسي الرسمي الـ 7 مواد في حال كانت القائمة فارغة
+(function autoSeedCurriculum() {
+    if (!state.courses || state.courses.length === 0 || !state.blocks || state.blocks.length === 0) {
+        state.courses = Array.from(SEED_CANONICAL_COURSES);
+        rebuildBlocks(1);
+        rebuildBlocks(2);
+        try {
+            localStorage.setItem(LS_KEY, JSON.stringify(state));
+        } catch(e) {}
+    }
+})();
+).concat(out);
 
 }
 
