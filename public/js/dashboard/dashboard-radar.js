@@ -1837,14 +1837,16 @@ function isDelayExcuse(e) {
 async function loadRadarExcuses() {
     // تنظيف فوري وشامل لأي كاش متصفح قديم يخص مارسيل
     try {
-        const cachedRaw = localStorage.getItem('khedmty_cached_excuses');
-        if (cachedRaw && (cachedRaw.includes('مارسيل') || cachedRaw.includes('"11"') || cachedRaw.includes('201278054759'))) {
-            const parsed = JSON.parse(cachedRaw);
-            if (Array.isArray(parsed)) {
-                const cleaned = parsed.filter(e => !String(e.student_name || '').includes('مارسيل') && String(e.id) !== '11' && String(e.student_phone || '') !== '201278054759');
-                localStorage.setItem('khedmty_cached_excuses', JSON.stringify(cleaned));
+        ['khedmety_cached_excuses', 'khedmty_cached_excuses'].forEach(key => {
+            const cachedRaw = localStorage.getItem(key);
+            if (cachedRaw && (cachedRaw.includes('مارسيل') || cachedRaw.includes('"11"') || cachedRaw.includes('201278054759') || cachedRaw.includes('1278054759'))) {
+                const parsed = JSON.parse(cachedRaw);
+                if (Array.isArray(parsed)) {
+                    const cleaned = parsed.filter(e => !String(e.student_name || '').includes('مارسيل') && String(e.id) !== '11' && !String(e.student_phone || '').includes('1278054759'));
+                    localStorage.setItem(key, JSON.stringify(cleaned));
+                }
             }
-        }
+        });
     } catch(e) {}
 
     const tbody = document.getElementById('radar_excusesTableBody');
@@ -1914,11 +1916,16 @@ async function loadRadarExcuses() {
     // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً
     let deletedSet = new Set(['11', 'مارسيل باسم جميل منصور', '201278054759']);
     try {
-        const delRaw = localStorage.getItem('khedmety_deleted_excuses');
-        if (delRaw) {
-            const arr = JSON.parse(delRaw);
-            if (Array.isArray(arr)) deletedSet = new Set(arr.map(String));
-        }
+        ['khedmety_deleted_excuses', 'khedmty_deleted_excuses'].forEach(k => {
+            const delRaw = localStorage.getItem(k);
+            if (delRaw) {
+                const arr = JSON.parse(delRaw);
+                if (Array.isArray(arr)) arr.forEach(x => deletedSet.add(String(x)));
+            }
+        });
+        deletedSet.add('11');
+        deletedSet.add('مارسيل باسم جميل منصور');
+        deletedSet.add('201278054759');
     } catch(e){}
 
     // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً (مع استبعاد المحذوفات)

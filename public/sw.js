@@ -10,7 +10,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v9.0'; // Comprehensive declutter and cache bust v9.0
+const CACHE_NAME = 'khedmety-ultra-v9.1'; // Fix Theme & Notifications buttons, precache theme & reminders engines
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
@@ -26,6 +26,8 @@ const PRECACHE_ASSETS = [
     './servant_help.html',
     './student_help.html',
     './js/interactive-simulation-guide.js',
+    './js/theme-manager.js',
+    './js/gentle-reminders.js',
     './spiritual_note.html',
     './bible.html',
     './harvest.html',

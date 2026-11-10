@@ -218,7 +218,9 @@
         openThemePicker: function () {
             var existingModal = document.getElementById('khedmty-theme-modal');
             if (existingModal) {
+                existingModal.classList.add('active');
                 existingModal.style.display = 'flex';
+                existingModal.style.zIndex = '100005';
                 existingModal.setAttribute('aria-hidden', 'false');
                 return;
             }
@@ -229,6 +231,7 @@
         closeThemePicker: function () {
             var modal = document.getElementById('khedmty-theme-modal');
             if (modal) {
+                modal.classList.remove('active');
                 modal.style.display = 'none';
                 modal.setAttribute('aria-hidden', 'true');
             }
@@ -238,7 +241,9 @@
             var activeTheme = ThemeManager.getTheme();
             var modal = document.createElement('div');
             modal.id = 'khedmty-theme-modal';
-            modal.className = 'k-modal-backdrop';
+            modal.className = 'k-modal-backdrop active';
+            modal.style.display = 'flex';
+            modal.style.zIndex = '100005';
             modal.setAttribute('role', 'dialog');
             modal.setAttribute('aria-modal', 'true');
             modal.setAttribute('aria-label', 'اختيار المظهر وثيم التطبيق');

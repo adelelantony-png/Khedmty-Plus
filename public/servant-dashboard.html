@@ -1891,11 +1891,11 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
         </div>
     </div>
 
-    <button type="button" class="btn-mini position-relative" onclick="GentleReminders.openNotificationsModal()" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="التنبيهات والإشعارات الرعوية">
+    <button type="button" class="btn-mini position-relative" onclick="if(window.GentleReminders && typeof GentleReminders.openNotificationsModal==='function'){ GentleReminders.openNotificationsModal(); } else { alert('جاري تحميل التنبيهات...'); }" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="التنبيهات والإشعارات الرعوية">
         <i class="fa-solid fa-bell text-warning"></i> التنبيهات <span id="khedmty-servant-notif-badge" class="badge rounded-pill bg-danger" style="font-size:0.65rem; padding:2px 6px;">3</span>
     </button>
 
-    <button type="button" class="btn-mini" data-k-action="open-theme-picker" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="اختيار المظهر والثيم (7 ثيمات مريحة للعين)">
+    <button type="button" class="btn-mini" data-k-action="open-theme-picker" onclick="if(window.ThemeManager && typeof ThemeManager.openThemePicker==='function'){ ThemeManager.openThemePicker(); } else if(window.KhedmtyTheme){ window.KhedmtyTheme.openThemePicker(); }" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="اختيار المظهر والثيم (7 ثيمات مريحة للعين)">
         <i class="fa-solid fa-palette"></i> المظهر
     </button>
 </div>

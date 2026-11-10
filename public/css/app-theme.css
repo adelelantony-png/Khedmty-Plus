@@ -2280,7 +2280,7 @@ html, body {
     background: rgba(7, 26, 56, 0.65);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    z-index: 1050;
+    z-index: 100005 !important;
     display: flex;
     align-items: center;
     justify-content: center;

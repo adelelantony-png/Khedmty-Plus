@@ -395,46 +395,48 @@
         },
 
         openNotificationsModal: function () {
-            var existing = document.getElementById('khedmtyNotificationsModal');
-            if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+            try {
+                var existing = document.getElementById('khedmtyNotificationsModal');
+                if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
 
-            var list = this.getNotificationsList();
-            var unread = this.getUnreadCount();
+                var list = this.getNotificationsList() || [];
+                var unread = this.getUnreadCount();
 
-            var cardsHtml = list.map(function (item) {
-                var actionBtn = '';
-                if (item.actionUrl) {
-                    actionBtn = '<a href="' + item.actionUrl + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.75rem; padding:5px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> ' + item.actionText + '</a>';
-                } else if (item.id === 'notif_bible') {
-                    actionBtn = '<button type="button" class="k-btn k-btn-primary" onclick="GentleReminders.onActionClick(\'daily_bible\'); GentleReminders.updateBadges(); this.disabled=true; this.innerHTML=\'تم تسجيل القراءة ✔️\';" style="font-size:0.75rem; padding:5px 12px; border-radius:8px;">' + item.actionText + '</button>';
-                } else if (item.id === 'notif_agpeya') {
-                    actionBtn = '<button type="button" class="k-btn k-btn-secondary" onclick="GentleReminders.onActionClick(\'agpeya\'); this.disabled=true; this.innerHTML=\'تقبل الله صلواتك 🕊️\';" style="font-size:0.75rem; padding:5px 12px; border-radius:8px;">' + item.actionText + '</button>';
-                }
+                var cardsHtml = list.map(function (item) {
+                    var actionBtn = '';
+                    if (item.actionUrl) {
+                        actionBtn = '<a href="' + item.actionUrl + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.75rem; padding:5px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;"><i class="fa-brands fa-whatsapp"></i> ' + item.actionText + '</a>';
+                    } else if (item.id === 'notif_bible') {
+                        actionBtn = '<button type="button" class="k-btn k-btn-primary" onclick="GentleReminders.onActionClick(\'daily_bible\'); GentleReminders.updateBadges(); this.disabled=true; this.innerHTML=\'تم تسجيل القراءة ✔️\';" style="font-size:0.75rem; padding:5px 12px; border-radius:8px;">' + item.actionText + '</button>';
+                    } else if (item.id === 'notif_agpeya') {
+                        actionBtn = '<button type="button" class="k-btn k-btn-secondary" onclick="GentleReminders.onActionClick(\'agpeya\'); this.disabled=true; this.innerHTML=\'تقبل الله صلواتك 🕊️\';" style="font-size:0.75rem; padding:5px 12px; border-radius:8px;">' + item.actionText + '</button>';
+                    }
 
-                return [
-                    '<div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">',
-                    '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">',
-                    '    <div style="display:flex; align-items:center; gap:8px;">',
-                    '      <span style="font-size:1.4rem;">' + item.icon + '</span>',
-                    '      <div>',
-                    '        <strong style="font-size:0.92rem; color:var(--k-text, #071A38); display:block;">' + item.title + '</strong>',
-                    '      </div>',
-                    '    </div>',
-                    '    <span style="font-size:0.7rem; font-weight:800; background:' + item.badgeBg + '; color:' + item.badgeColor + '; padding:3px 9px; border-radius:999px;">' + item.badge + '</span>',
-                    '  </div>',
-                    '  <p style="font-size:0.82rem; color:var(--k-text-muted, #475569); margin:6px 0 8px 0; line-height:1.45;">' + item.text + '</p>',
-                    '  <div style="font-family:var(--font-amiri, serif); font-size:0.85rem; color:var(--k-accent, #B8860B); background:var(--k-surface-2, #FFF6DC); padding:6px 12px; border-radius:8px; margin-bottom:10px;">' + item.verse + '</div>',
-                    '  <div style="display:flex; justify-content:flex-end; gap:8px;">',
-                    actionBtn,
-                    '  </div>',
-                    '</div>'
-                ].join('\n');
-            }).join('\n');
+                    return [
+                        '<div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">',
+                        '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">',
+                        '    <div style="display:flex; align-items:center; gap:8px;">',
+                        '      <span style="font-size:1.4rem;">' + item.icon + '</span>',
+                        '      <div>',
+                        '        <strong style="font-size:0.92rem; color:var(--k-text, #071A38); display:block;">' + item.title + '</strong>',
+                        '      </div>',
+                        '    </div>',
+                        '    <span style="font-size:0.7rem; font-weight:800; background:' + item.badgeBg + '; color:' + item.badgeColor + '; padding:3px 9px; border-radius:999px;">' + item.badge + '</span>',
+                        '  </div>',
+                        '  <p style="font-size:0.82rem; color:var(--k-text-muted, #475569); margin:6px 0 8px 0; line-height:1.45;">' + item.text + '</p>',
+                        '  <div style="font-family:var(--font-amiri, serif); font-size:0.85rem; color:var(--k-accent, #B8860B); background:var(--k-surface-2, #FFF6DC); padding:6px 12px; border-radius:8px; margin-bottom:10px;">' + item.verse + '</div>',
+                        '  <div style="display:flex; justify-content:flex-end; gap:8px;">',
+                        actionBtn,
+                        '  </div>',
+                        '</div>'
+                    ].join('\n');
+                }).join('\n');
 
-            var modal = document.createElement('div');
-            modal.id = 'khedmtyNotificationsModal';
-            modal.className = 'k-modal-backdrop active';
-            modal.style.zIndex = '99999';
+                var modal = document.createElement('div');
+                modal.id = 'khedmtyNotificationsModal';
+                modal.className = 'k-modal-backdrop active';
+                modal.style.display = 'flex';
+                modal.style.zIndex = '100005';
             modal.innerHTML = [
                 '<div class="k-modal" style="max-width:540px; width:100%; max-height:88vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-radius:24px; box-shadow:0 20px 60px rgba(7,26,56,0.35);">',
                 '  <div class="k-modal-header" style="padding:16px 20px; background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); border-bottom:2px solid var(--k-border-gold, #D4AF37); display:flex; justify-content:space-between; align-items:center; margin:0;">',
@@ -463,7 +465,13 @@
             };
 
             document.body.appendChild(modal);
-        },
+        } catch(err) {
+            console.error('[GentleReminders] Error opening notifications modal:', err);
+            if (typeof showToast === 'function') {
+                showToast('🔔 تعذر فتح نافذة التنبيهات حالياً، جاري التحديث...');
+            }
+        }
+    },
 
         savePrefsFromModal: function () {
             var prefs = {
