@@ -2,11 +2,11 @@
  * public/js/student-program-sections.js
  * مكوّنات وأقسام البرنامج الرسمية لبوابة المخدومين والطلاب
  * 
- * يربط الأقسام الأربعة بوظائف حقيقية متقدمة:
+ * مربوط بالكامل بـ WhatsApp Kiosk وخدمة الاستعلام التفاعلي (kiosk_view.py):
  * 1. الدورات التدريبية: كروت المقررات ونسب الإنجاز وفلاتر الحالات (مطابقة للمرجع البصري).
- * 2. الفعاليات والاجتماعات: عداد تنازلي للجمعة، جدول المحاضرات القادمة، مؤتمر الخدمة، واعتذار واتساب.
- * 3. المواد التعليمية: مكتبة الملازم والمذكرات PDF مع ربط كشك الاستعلام الذاتي على واتساب (WhatsApp Kiosk).
- * 4. متابعة التقدم: لوحة التأهيل الشامل ونسبة الجاهزية للرسامة ومؤشرات الحضور والدرجات والتتابع.
+ * 2. الفعاليات والاجتماعات: عداد تنازلي للجمعة، جدول المحاضرات القادمة، واعتذار واتساب المسبق.
+ * 3. المواد التعليمية وكشك الاستعلام: استدعاء المواد الـ 7 الرسمية حسب السنة الدراسية (الفرقة الأولى / الفرقة الثانية) مع كشك الواتساب.
+ * 4. متابعة التقدم: لوحة التأهيل الشامل ونسبة الجاهزية للرسامة ومؤشرات الحضور والدرجات.
  */
 
 (function () {
@@ -24,116 +24,262 @@
             lecturesCount: 6,
             lecturesAttended: 6,
             instructor: 'القمص بيشوي & أمين الخدمة',
-            desc: 'مفهوم الخدمة، صفات الخادم الأرثوذكسي، وافتقاد المخدومين بروح المحبة.'
+            desc: 'مبادئ وأصول الرعاية الأرثوذكسية، روحانية الخادم، وأساليب الافتقاد الرعوي الفعال.'
         },
         {
             id: 'c2',
-            title: 'العقيدة المسيحية الأرثوذكسية واللاهوت',
-            icon: 'fa-cross',
-            status: 'in_progress',
-            statusLabel: 'قيد الدراسة',
-            progress: 60,
-            lecturesCount: 8,
-            lecturesAttended: 5,
-            instructor: 'د. مينا عادل',
-            desc: 'عقيدة الثالوث القدوس، التجسد الإلهي، الفداء، وأسرار الكنيسة السبعة.'
-        },
-        {
-            id: 'c3',
-            title: 'الطقس الكنسي والألحان وتاريخ التسبحة',
-            icon: 'fa-book-bible',
+            title: 'القيادة المسيحية وإدارة الوقت',
+            icon: 'fa-user-tie',
             status: 'in_progress',
             statusLabel: 'قيد الدراسة',
             progress: 30,
-            lecturesCount: 6,
-            lecturesAttended: 2,
-            instructor: 'الشماس يوسف رمسيس',
-            desc: 'طقس القداس الباسيلي، أعياد الكنيسة السيدية، وألحان المناسبات.'
+            lecturesCount: 4,
+            lecturesAttended: 1,
+            instructor: 'أ. مجدي عطية / د. رشا',
+            desc: 'مهارات حل المشكلات، العمل الجماعي في أسرة الخدمة، وروح الاتضاع القيادي.'
         },
         {
-            id: 'c4',
-            title: 'دراسات متقدمة في أسفار العهد الجديد',
-            icon: 'fa-scroll',
-            status: 'open',
-            statusLabel: 'مفتوحة للتسجيل',
-            progress: 0,
-            lecturesCount: 5,
-            lecturesAttended: 0,
-            instructor: 'أستاذ فادي سمير',
-            desc: 'دراسة تحليلية لرسائل القديس بولس الرسول وسفر أعمال الرسل.'
-        },
-        {
-            id: 'c5',
-            title: 'القيادة المسيحية وإدارة الوقت والخدمة',
-            icon: 'fa-user-tie',
+            id: 'c3',
+            title: 'الطقس الكنسي والألحان',
+            icon: 'fa-cross',
             status: 'open',
             statusLabel: 'مفتوحة للتسجيل',
             progress: 0,
             lecturesCount: 4,
             lecturesAttended: 0,
-            instructor: 'أ. عادل جورج (أمين الخدمة)',
-            desc: 'مهارات حل المشكلات، العمل الجماعي في أسرة الخدمة، وروح الاتضاع القيادي.'
+            instructor: 'أ. جرجس / أ. بيشوي',
+            desc: 'طقس القداس الباسيلي، أعياد الكنيسة السيدية، وألحان المناسبات الكنسية.'
+        },
+        {
+            id: 'c4',
+            title: 'دراسات في أسفار العهد الجديد',
+            icon: 'fa-scroll',
+            status: 'open',
+            statusLabel: 'مفتوحة للتسجيل',
+            progress: 0,
+            lecturesCount: 4,
+            lecturesAttended: 0,
+            instructor: 'د. فليمون / أ. مجدي عطية',
+            desc: 'دراسة تحليلية لرسائل القديس بولس الرسول وسفر أعمال الرسل.'
         }
     ];
 
-    // 2. المواد التعليمية الافتراضية وكشك الاستعلام
-    var DEFAULT_MATERIALS = [
-        {
-            id: 'm1',
-            title: 'ملزمة طقس القداس الإلهي والصلوات الطقسية',
-            subject: 'طقس',
-            stage: 'الفرقة الأولى',
-            type: 'pdf',
-            size: '2.4 MB',
-            kioskTrigger: 'طقس',
-            desc: 'شرح مفصل لأجزاء رفع بخور باكر وعشية وطقس قداس الكلمة وقداس المؤمنين.',
-            url: '#'
-        },
-        {
-            id: 'm2',
-            title: 'ملخص العقيدة المسيحية: الثالوث والتجسد والفداء',
-            subject: 'عقيدة',
-            stage: 'الفرقة الأولى',
-            type: 'pdf',
-            size: '3.1 MB',
-            kioskTrigger: 'عقيدة',
-            desc: 'ملزمة مجمعة للرد على التساؤلات اللاهوتية الأساسية وفق إيمان الكنيسة القبطية.',
-            url: '#'
-        },
-        {
-            id: 'm3',
-            title: 'نموذج إجابة وتدريبات امتحان مادة الطقس الكنسي',
-            subject: 'طقس',
-            stage: 'الفرقة الأولى',
-            type: 'pdf',
-            size: '1.8 MB',
-            kioskTrigger: 'امتحان الطقس',
-            desc: 'أسئلة السنوات السابقة وحلولها النموذجية للمراجعة قبل امتحان نهاية الدورة.',
-            url: '#'
-        },
-        {
-            id: 'm4',
-            title: 'مقدمات ودراسات في أسفار العهدين القديم والجديد',
-            subject: 'كتاب مقدس',
-            stage: 'الفرقة الثانية',
-            type: 'pdf',
-            size: '4.2 MB',
-            kioskTrigger: 'كتاب مقدس',
-            desc: 'جداول تسلسل الأسفار القانونية ومفاتيح فهم كل سفر وتاريخ كتابته.',
-            url: '#'
-        },
-        {
-            id: 'm5',
-            title: 'دليل الخادم المتميز في إعداد وتقديم الدروس والافتقاد',
-            subject: 'خدمة',
-            stage: 'الفرقة الأولى والثانية',
-            type: 'pdf',
-            size: '1.5 MB',
-            kioskTrigger: 'الخدمة',
-            desc: 'إرشادات عملية لطرق تحضير درس مدارس الأحد ومتابعة المخدومين ورعايتهم.',
-            url: '#'
+    // 2. المواد الـ 7 الرسمية المعتمدة لكشك الاستعلام الذاتي (WhatsApp Kiosk & CRM DB)
+    var OFFICIAL_KIOSK_DATA = {
+        driveFolder: 'https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-',
+        triggerWord: 'مواد',
+        stages: {
+            'الفرقة الأولى': [
+          {
+                    "id": "s1_m1",
+                    "num": 1,
+                    "title": "كورس الكتاب المقدس",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-book",
+                    "teachers": "د. فليمون / أ. مجدي عطية",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "الترم الأول (بدءاً من الجمعة 13-11-2026)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- A - دراسات كتابية.pdf",
+                    "replyText": "📖 *كورس الكتاب المقدس — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. فليمون / أ. مجدي عطية\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* الترم الأول (بدءاً من الجمعة 13-11-2026)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m2",
+                    "num": 2,
+                    "title": "كورس العقيدة الأرثوذكسية",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-cross",
+                    "teachers": "أ. مجدي عطية / أ. جرجس",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "الترم الثاني (بدءاً من الجمعة 12-02-2027)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- B - دراسات عقيدية.pdf",
+                    "replyText": "⛪ *كورس العقيدة الأرثوذكسية — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* أ. مجدي عطية / أ. جرجس\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* الترم الثاني (بدءاً من الجمعة 12-02-2027)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m3",
+                    "num": 3,
+                    "title": "كورس الطقس الكنسي",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-church",
+                    "teachers": "أ. جرجس / أ. بيشوي",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "أيام الجمع الأساسية (الترم الثاني)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- C - دراسات طقسية.pdf",
+                    "replyText": "🕯️ *كورس الطقس الكنسي — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* أ. جرجس / أ. بيشوي\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* أيام الجمع الأساسية (الترم الثاني)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m4",
+                    "num": 4,
+                    "title": "كورس تاريخ الكنيسة",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-monument",
+                    "teachers": "م. سهير / م. رباب",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "أيام الجمع الأساسية (الترم الثاني)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- D - دراسات تاريخية.pdf",
+                    "replyText": "📜 *كورس تاريخ الكنيسة — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* م. سهير / م. رباب\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* أيام الجمع الأساسية (الترم الثاني)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m5",
+                    "num": 5,
+                    "title": "كورس تنمية المهارات",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-bullseye",
+                    "teachers": "د. رشا / د. مارسيل",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- G - دراسات تنمية المهارات.pdf",
+                    "replyText": "🎯 *كورس تنمية المهارات — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. رشا / د. مارسيل\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m6",
+                    "num": 6,
+                    "title": "كورس تربوي وإدارة فصل",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-seedling",
+                    "teachers": "د. رشا / أ. بيشوي",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- F - دراسات تربوية.pdf",
+                    "replyText": "🌱 *كورس تربوي وإدارة فصل — الفرقة الأولى*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. رشا / أ. بيشوي\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s1_m7",
+                    "num": 7,
+                    "title": "كورس روحي وحياة خادم",
+                    "stage": "الفرقة الأولى",
+                    "icon": "fa-dove",
+                    "teachers": "م. سهير / م. رباب",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الأول/- E - دراسات روحية.pdf",
+                    "replyText": "✝️ *كورس روحي وحياة خادم (مشترك)*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* م. سهير / م. رباب\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          }
+],
+            'الفرقة الثانية': [
+          {
+                    "id": "s2_m1",
+                    "num": 1,
+                    "title": "كورس العقيدة الأرثوذكسية",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-cross",
+                    "teachers": "أ. مجدي عطية / أ. جرجس",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "الترم الأول (بدءاً من الجمعة 13-11-2026)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- I - دراسات عقيدية.pdf",
+                    "replyText": "⛪ *كورس العقيدة الأرثوذكسية — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* أ. مجدي عطية / أ. جرجس\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* الترم الأول (بدءاً من الجمعة 13-11-2026)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m2",
+                    "num": 2,
+                    "title": "كورس الكتاب المقدس",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-book",
+                    "teachers": "د. فليمون / أ. مجدي عطية",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "الترم الثاني (بدءاً من الجمعة 12-02-2027)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- H - دراسات كتابية.pdf",
+                    "replyText": "📖 *كورس الكتاب المقدس — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. فليمون / أ. مجدي عطية\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* الترم الثاني (بدءاً من الجمعة 12-02-2027)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m3",
+                    "num": 3,
+                    "title": "كورس الطقس الكنسي",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-church",
+                    "teachers": "أ. جرجس / أ. بيشوي",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "أيام الجمع الأساسية (الترم الثاني)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- J - دراسات طقسية.pdf",
+                    "replyText": "🕯️ *كورس الطقس الكنسي — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* أ. جرجس / أ. بيشوي\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* أيام الجمع الأساسية (الترم الثاني)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m4",
+                    "num": 4,
+                    "title": "كورس تاريخ الكنيسة",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-monument",
+                    "teachers": "م. سهير / م. رباب",
+                    "lectures": "4 محاضرات أساسية",
+                    "term": "أيام الجمع الأساسية (الترم الثاني)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "",
+                    "replyText": "📜 *كورس تاريخ الكنيسة — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* م. سهير / م. رباب\n📚 *عدد المحاضرات:* 4 محاضرات أساسية\n🗓️ *موعد الكورس:* أيام الجمع الأساسية (الترم الثاني)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m5",
+                    "num": 5,
+                    "title": "كورس تنمية المهارات",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-bullseye",
+                    "teachers": "د. رشا / د. مارسيل",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- N - دراسات تنمية المهارات.pdf",
+                    "replyText": "🎯 *كورس تنمية المهارات — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. رشا / د. مارسيل\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m6",
+                    "num": 6,
+                    "title": "كورس تربوي وإدارة فصل",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-seedling",
+                    "teachers": "د. رشا / أ. بيشوي",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- M - دراسات تربوية.pdf",
+                    "replyText": "🌱 *كورس تربوي وإدارة فصل — الفرقة الثانية*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* د. رشا / أ. بيشوي\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          },
+          {
+                    "id": "s2_m7",
+                    "num": 7,
+                    "title": "كورس روحي وحياة خادم",
+                    "stage": "الفرقة الثانية",
+                    "icon": "fa-dove",
+                    "teachers": "م. سهير / م. رباب",
+                    "lectures": "4 محاضرات",
+                    "term": "التيرم الصيفي (أيام الثلاثاء الصيفية)",
+                    "driveUrl": "https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-",
+                    "attachment": "I:/2021/2020/✠ Cross Coptic Library ✠/الخدمة والخدام/إعداد خدام/منهج البابا تواضروس إعداد خدام/المستوى الثاني/- L - دراسات روحية.pdf",
+                    "replyText": "✝️ *كورس روحي وحياة خادم (مشترك)*\n━━━━━━━━━━━━━━━━━━━━━\n👨‍🏫 *فريق التدريس:* م. سهير / م. رباب\n📚 *عدد المحاضرات:* 4 محاضرات\n🗓️ *موعد الكورس:* التيرم الصيفي (أيام الثلاثاء الصيفية)\n\n📥 *رابط المنهج والمذكرات (Google Drive):*\nhttps://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-\n_(افتح الرابط وستجد ملف المادة متاحاً للتحميل داخل المجلد)_\n\n━━━━━━━━━━━━━━━━━━━━━\n💡 _للاستعلام عن مادة أخرى أرسل \"مواد\"_"
+          }
+]
         }
-    ];
+    };
+
+    // استشعار وتحديد الفرقة الدراسية للطالب الحالي بذكاء
+    function detectCurrentStudentStage() {
+        try {
+            var user = null;
+            if (window.AuthClient && typeof AuthClient.getUser === 'function') {
+                user = AuthClient.getUser();
+            }
+            if (!user) {
+                var rawUser = localStorage.getItem('my_church_active_user') || 
+                              sessionStorage.getItem('my_church_active_user') ||
+                              localStorage.getItem('khedmety_auth_user');
+                if (rawUser) user = JSON.parse(rawUser);
+            }
+            var rawStage = (user && (user.stage || user.level || user.grade)) || 
+                           localStorage.getItem('student_level') || '';
+            var str = String(rawStage).trim();
+            if (str.includes('ثانية') || str.includes('ثانيه') || str.includes('2') || str.includes('المستوى الثاني')) {
+                return 'الفرقة الثانية';
+            }
+        } catch (e) {}
+        return 'الفرقة الأولى';
+    }
 
     // دالة مساعدة لإنشاء وإظهار النافذة المنبثقة
     function showStudentModal(modalId, title, contentHtml) {
@@ -151,12 +297,12 @@
         modal.setAttribute('aria-label', title);
 
         modal.innerHTML = [
-            '<div class="k-modal" style="max-width:540px; width:100%; max-height:88vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-radius:24px;">',
-            '  <div class="k-modal-header" style="padding:18px 22px; background:var(--k-surface-2, #FFF6DC); border-bottom:1px solid var(--k-border-gold, #D4AF37); display:flex; justify-content:space-between; align-items:center; margin:0;">',
-            '    <h4 style="margin:0; font-size:1.15rem; font-weight:800; color:var(--k-primary, #0B2A6B); display:flex; align-items:center; gap:8px;">' + title + '</h4>',
-            '    <button type="button" class="k-modal-close" onclick="closeStudentModal(\'' + modalId + '\')" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--k-text-muted, #64748B);">&times;</button>',
+            '<div class="k-modal" style="max-width:560px; width:100%; max-height:90vh; display:flex; flex-direction:column; padding:0; overflow:hidden; border-radius:24px; box-shadow:0 20px 60px rgba(7,26,56,0.35);">',
+            '  <div class="k-modal-header" style="padding:16px 22px; background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); border-bottom:2px solid var(--k-border-gold, #D4AF37); display:flex; justify-content:space-between; align-items:center; margin:0;">',
+            '    <h4 style="margin:0; font-size:1.15rem; font-weight:800; color:#FFF; display:flex; align-items:center; gap:8px;">' + title + '</h4>',
+            '    <button type="button" class="k-modal-close" onclick="closeStudentModal(\'' + modalId + '\')" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#FDE047;">&times;</button>',
             '  </div>',
-            '  <div class="k-modal-body" style="padding:20px; overflow-y:auto; flex:1;">',
+            '  <div class="k-modal-body" style="padding:18px 20px; overflow-y:auto; flex:1; background:var(--k-bg, #EEF3FB);">',
             contentHtml,
             '  </div>',
             '</div>'
@@ -181,6 +327,17 @@
     }
     window.closeStudentModal = closeStudentModal;
 
+    // تبديل إظهار تفاصيل الكورس (Accordion)
+    window.toggleSubjectDetails = function (elemId) {
+        var el = document.getElementById(elemId);
+        if (!el) return;
+        if (el.style.display === 'none' || !el.style.display) {
+            el.style.display = 'block';
+        } else {
+            el.style.display = 'none';
+        }
+    };
+
     // ==============================================================
     // 1️⃣ الدورات التدريبية (Training Courses)
     // ==============================================================
@@ -196,7 +353,7 @@
 
         var chipsHtml = [
             '<div style="display:flex; gap:6px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px;">',
-            '  <button type="button" class="k-chip ' + (activeFilter === 'all' ? 'active' : '') + '" onclick="openStudentCoursesModal(\'all\')">الكل</button>',
+            '  <button type="button" class="k-chip ' + (activeFilter === 'all' ? 'active' : '') + '" onclick="openStudentCoursesModal(\'all\')">الكل (' + DEFAULT_COURSES.length + ')</button>',
             '  <button type="button" class="k-chip ' + (activeFilter === 'in_progress' ? 'active' : '') + '" onclick="openStudentCoursesModal(\'in_progress\')">قيد الدراسة</button>',
             '  <button type="button" class="k-chip ' + (activeFilter === 'completed' ? 'active' : '') + '" onclick="openStudentCoursesModal(\'completed\')">مكتملة</button>',
             '  <button type="button" class="k-chip ' + (activeFilter === 'open' ? 'active' : '') + '" onclick="openStudentCoursesModal(\'open\')">مفتوحة</button>',
@@ -237,7 +394,7 @@
         }
 
         var fullContent = chipsHtml + '<div style="max-height:55vh; overflow-y:auto;">' + listHtml + '</div>';
-        showStudentModal('studentCoursesModal', '<i class="fa-solid fa-book-open text-warning"></i> الدورات والمقررات التدريبية', fullContent);
+        showStudentModal('studentCoursesModal', '<i class="fa-solid fa-book-open" style="color:#D4AF37;"></i> الدورات والمقررات التدريبية', fullContent);
     };
 
     // ==============================================================
@@ -299,158 +456,148 @@
             '</div>'
         ].join('\n');
 
-        showStudentModal('studentEventsModal', '<i class="fa-solid fa-calendar-days text-warning"></i> الفعاليات والاجتماعات الكنسية', content);
+        showStudentModal('studentEventsModal', '<i class="fa-solid fa-calendar-days" style="color:#D4AF37;"></i> الفعاليات والاجتماعات الكنسية', content);
     };
 
     // ==============================================================
-    // 3️⃣ المواد التعليمية وكشك الاستعلام (Educational Materials & Kiosk)
+    // 3️⃣ المواد التعليمية وكشك الاستعلام (Educational Materials & Kiosk View)
     // ==============================================================
-    window.openStudentMaterialsModal = function () {
-        // سحب المواد الإضافية من التخزين المحلي إن وجدت
-        var customMaterials = [];
-        try {
-            customMaterials = JSON.parse(localStorage.getItem('khedmety_course_materials')) || [];
-        } catch (e) {}
+    window.openStudentMaterialsModal = function (selectedStage) {
+        var studentDefaultStage = detectCurrentStudentStage();
+        var qualificationScore = 78;
+        var activeStage = selectedStage || studentDefaultStage;
+        if (!OFFICIAL_KIOSK_DATA.stages[activeStage]) {
+            activeStage = 'الفرقة الأولى';
+        }
 
-        var allMaterials = DEFAULT_MATERIALS.slice();
-        customMaterials.forEach(function (cm, idx) {
-            allMaterials.push({
-                id: 'cm_' + idx,
-                title: cm.title || 'مادة تعليمية إضافية',
-                subject: 'كورس إعداد خدام',
-                stage: 'الكل',
-                type: cm.type || 'ملف',
-                size: 'رابط مباشر',
-                kioskTrigger: 'المواد',
-                desc: cm.notes || 'مادة منشورة من قِبل أمين الخدمة للمراجعة والاطلاع.',
-                url: cm.url || '#'
-            });
-        });
+        var subjects = OFFICIAL_KIOSK_DATA.stages[activeStage] || [];
 
-        var materialsListHtml = allMaterials.map(function (m) {
-            var whatsappText = 'سلام ونعمة.. أود الحصول على ' + m.title + ' (كشك استعلام إعداد خدام)';
-            var whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(whatsappText);
+        // 1. شريط كشك الواتساب التفاعلي الذكي
+        var kioskBanner = [
+            '<div style="background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#FFF; border-radius:20px; padding:18px; margin-bottom:16px; border:1.5px solid var(--k-border-gold, #D4AF37); box-shadow:0 8px 20px rgba(7,26,56,0.25);">',
+            '  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">',
+            '    <div style="display:flex; align-items:center; gap:10px;">',
+            '      <div style="width:38px; height:38px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; color:#FFF; font-size:1.25rem;"><i class="fa-brands fa-whatsapp"></i></div>',
+            '      <div>',
+            '        <strong style="font-size:0.95rem; color:#FFF; display:block;">كشك الاستعلام الذاتي (WhatsApp Kiosk)</strong>',
+            '        <small style="font-size:0.72rem; color:#CBD5E1;">متصل ومفعل تلقائياً مع سيرفر NewWhats</small>',
+            '      </div>',
+            '    </div>',
+            '    <span style="font-size:0.7rem; font-weight:800; background:rgba(212,175,55,0.25); color:#FDE047; padding:3px 9px; border-radius:999px; border:1px solid rgba(212,175,55,0.4);">رد آلي فوري</span>',
+            '  </div>',
+            '  <p style="font-size:0.8rem; color:#E2E8F0; margin:8px 0 12px 0; line-height:1.45;">أرسل كلمة <strong>«مواد»</strong> أو اسم أي مادة من الـ 7 مواد في واتساب الخدمة للرد عليك آلياً وفورياً بملف المادة المعتمد وجدولها 📚</p>',
+            '  <div style="display:flex; gap:8px; flex-wrap:wrap;">',
+            '    <a href="https://wa.me/?text=' + encodeURIComponent('مواد') + '" target="_blank" class="k-btn" style="flex:1; background:#25D366; color:#FFF; font-size:0.82rem; padding:8px 14px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:800; box-shadow:0 4px 12px rgba(37,211,102,0.3);">',
+            '      <i class="fa-brands fa-whatsapp"></i> فتح كشك الاستعلام التفاعلي الآن 📲',
+            '    </a>',
+            '    <a href="' + OFFICIAL_KIOSK_DATA.driveFolder + '" target="_blank" class="k-btn" style="background:rgba(255,255,255,0.12); color:#FFF; font-size:0.82rem; padding:8px 14px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700; border:1px solid rgba(255,255,255,0.25);">',
+            '      <i class="fa-solid fa-folder-open text-warning"></i> مجلد الملازم السحابي 📁',
+            '    </a>',
+            '  </div>',
+            '</div>'
+        ].join('\n');
+
+        // 2. أزرار اختيار السنة الدراسية (Stage Switcher Chips)
+        var stageChips = [
+            '<div style="display:flex; gap:8px; margin-bottom:14px; align-items:center;">',
+            '  <span style="font-size:0.82rem; font-weight:800; color:var(--k-primary, #0B2A6B);">السنة الدراسية:</span>',
+            '  <button type="button" class="k-chip ' + (activeStage === 'الفرقة الأولى' ? 'active' : '') + '" onclick="openStudentMaterialsModal(\'الفرقة الأولى\')" style="font-size:0.82rem; padding:6px 14px; border-radius:999px;">',
+            '    🎓 الفرقة الأولى (7 مواد) ' + (studentDefaultStage === 'الفرقة الأولى' ? '⭐ فرقتك' : ''),
+            '  </button>',
+            '  <button type="button" class="k-chip ' + (activeStage === 'الفرقة الثانية' ? 'active' : '') + '" onclick="openStudentMaterialsModal(\'الفرقة الثانية\')" style="font-size:0.82rem; padding:6px 14px; border-radius:999px;">',
+            '    🎓 الفرقة الثانية (7 مواد) ' + (studentDefaultStage === 'الفرقة الثانية' ? '⭐ فرقتك' : ''),
+            '  </button>',
+            '</div>'
+        ].join('\n');
+
+        // 3. قائمة المواد الـ 7 الكاملة للمرحلة المحددة
+        var subjectsListHtml = subjects.map(function (s) {
+            var detailsId = 'subj_detail_' + s.id;
+            var waCourseQuery = 'كورس ' + s.title + ' — ' + activeStage;
+            var waCourseUrl = 'https://wa.me/?text=' + encodeURIComponent(waCourseQuery);
 
             return [
-                '<div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">',
-                '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">',
-                '    <div style="display:flex; align-items:center; gap:8px;">',
-                '      <span style="font-size:1.3rem;">📄</span>',
+                '<div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:18px; padding:16px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03); transition:all 0.2s;">',
+                '  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">',
+                '    <div style="display:flex; align-items:center; gap:10px;">',
+                '      <div style="width:40px; height:40px; border-radius:12px; background:var(--k-surface-2, #FFF6DC); border:1px solid var(--k-border-gold, #D4AF37); display:flex; align-items:center; justify-content:center; color:var(--k-primary, #0B2A6B); font-size:1.15rem;">',
+                '        <i class="fa-solid ' + s.icon + '"></i>',
+                '      </div>',
                 '      <div>',
-                '        <strong style="font-size:0.9rem; color:var(--k-text, #071A38); display:block;">' + m.title + '</strong>',
-                '        <small style="font-size:0.75rem; color:var(--k-text-muted, #64748B);">' + m.subject + ' &middot; ' + m.stage + '</small>',
+                '        <div style="display:flex; align-items:center; gap:6px;">',
+                '          <span style="font-size:0.75rem; font-weight:800; background:var(--k-primary, #0B2A6B); color:#FFF; width:20px; height:20px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">' + s.num + '</span>',
+                '          <strong style="font-size:0.95rem; color:var(--k-text, #071A38);">' + s.title + '</strong>',
+                '        </div>',
+                '        <small style="font-size:0.75rem; color:var(--k-text-muted, #64748B); display:block; margin-top:2px;">👨‍🏫 ' + s.teachers + '</small>',
                 '      </div>',
                 '    </div>',
-                '    <span style="font-size:0.7rem; font-weight:700; background:#F1F5F9; color:#475569; padding:2px 8px; border-radius:6px;">' + m.size + '</span>',
+                '    <span style="font-size:0.7rem; font-weight:800; background:#EFF6FF; color:#1D4ED8; padding:3px 8px; border-radius:6px; border:1px solid #BFDBFE;">' + s.lectures + '</span>',
                 '  </div>',
-                '  <p style="font-size:0.8rem; color:var(--k-text-muted, #64748B); margin:6px 0 10px 0; line-height:1.4;">' + m.desc + '</p>',
-                '  <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">',
-                '    <a href="' + whatsappUrl + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.78rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;">',
-                '      <i class="fa-brands fa-whatsapp"></i> طلب المادة عبر واتساب 📲',
+                '  <div style="font-size:0.78rem; color:#475569; background:#F8FAFC; padding:8px 12px; border-radius:10px; margin:8px 0 10px 0; display:flex; align-items:center; gap:6px;">',
+                '    <i class="fa-solid fa-clock text-muted"></i> <span>' + s.term + '</span>',
+                '  </div>',
+                '  <!-- الأكورديون للتفاصيل الرسمية للكورس من الكشك -->',
+                '  <div id="' + detailsId + '" style="display:none; background:#FFFDF5; border:1px dashed #D4AF37; border-radius:12px; padding:12px; margin-bottom:10px; font-size:0.78rem; color:#334155; line-height:1.55; white-space:pre-wrap;">' + s.replyText + '</div>',
+                '  <!-- أزرار الإجراءات التفاعلية -->',
+                '  <div style="display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;">',
+                '    <button type="button" onclick="toggleSubjectDetails(\'' + detailsId + '\')" class="k-btn" style="background:#F1F5F9; color:#334155; font-size:0.76rem; padding:6px 12px; border-radius:8px; border:1px solid #CBD5E1; cursor:pointer;">',
+                '      <i class="fa-solid fa-circle-info text-primary"></i> المنهج والمحاضرات',
+                '    </button>',
+                '    <a href="' + waCourseUrl + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.76rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px; font-weight:700;">',
+                '      <i class="fa-brands fa-whatsapp"></i> طلب من الكشك 📲',
                 '    </a>',
-                '    <button type="button" class="k-btn k-btn-primary" onclick="alert(\'📖 تم تجهيز مادة: ' + m.title + '\\nجارِ فتح المحتوى والمرفق...\')" style="font-size:0.78rem; padding:6px 14px; border-radius:8px;">قراءة ومطالعة 📖</button>',
+                '    <a href="' + s.driveUrl + '" target="_blank" class="k-btn k-btn-primary" style="font-size:0.76rem; padding:6px 12px; border-radius:8px; text-decoration:none; display:inline-flex; align-items:center; gap:5px;">',
+                '      <i class="fa-solid fa-cloud-arrow-down"></i> تحميل المذكرة 📥',
+                '    </a>',
                 '  </div>',
                 '</div>'
             ].join('\n');
         }).join('\n');
 
-        var kioskBanner = [
-            '<div style="background:linear-gradient(135deg, #15376E 0%, #071A38 100%); color:#FFF; border-radius:18px; padding:16px; margin-bottom:16px; border:1px solid var(--k-border-gold, #D4AF37);">',
-            '  <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">',
-            '    <div style="width:36px; height:36px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; color:#FFF; font-size:1.2rem;"><i class="fa-brands fa-whatsapp"></i></div>',
-            '    <div>',
-            '      <strong style="font-size:0.95rem; color:#FFF; display:block;">كشك الاستعلام الذاتي المتقدم (WhatsApp Kiosk)</strong>',
-            '      <small style="font-size:0.75rem; color:#CBD5E1;">رد تلقائي فوري بالملازم والأسئلة والدرجات</small>',
-            '    </div>',
-            '  </div>',
-            '  <p style="font-size:0.8rem; color:#E2E8F0; margin:0 0 10px 0; line-height:1.4;">',
-            '    أرسل كلمة <strong>«المواد»</strong> أو <strong>«طقس»</strong> أو <strong>«عقيدة»</strong> إلى رقم واتساب الخدمة للرد عليك آلياً بملف المادة!',
-            '  </p>',
-            '  <a href="https://wa.me/?text=' + encodeURIComponent('المواد') + '" target="_blank" class="k-btn" style="background:#25D366; color:#FFF; font-size:0.82rem; padding:7px 16px; border-radius:999px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; font-weight:800; width:100%; justify-content:center;">',
-            '    <i class="fa-brands fa-whatsapp"></i> فتح كشك الاستعلام التفاعلي الآن 🚀',
-            '  </a>',
-            '</div>'
-        ].join('\n');
-
-        var fullContent = kioskBanner + '<div style="max-height:50vh; overflow-y:auto;">' + materialsListHtml + '</div>';
-        showStudentModal('studentMaterialsModal', '<i class="fa-solid fa-book-bible text-warning"></i> المواد التعليمية وكشك الاستعلام', fullContent);
+        var fullContent = kioskBanner + stageChips + '<div style="max-height:55vh; overflow-y:auto; padding-right:2px;">' + subjectsListHtml + '</div>';
+        showStudentModal('studentMaterialsModal', '<i class="fa-solid fa-book-bible" style="color:#D4AF37;"></i> المواد التعليمية وكشك الاستعلام', fullContent);
     };
 
     // ==============================================================
-    // 4️⃣ متابعة التقدم والتأهيل الشامل (Progress & Qualification)
+    // 4️⃣ متابعة التقدم والتأهيل (Qualification Index & Progress)
     // ==============================================================
     window.openStudentProgressModal = function () {
-        var studentCode = localStorage.getItem('student_code') || '';
-        var streak = 0;
-        if (typeof calculateSpiritualStreak === 'function' && studentCode) {
-            streak = calculateSpiritualStreak(studentCode);
-        }
-
-        // حساب الحضور إن وجد
-        var attendanceRate = 80; // نسبة افتراضية
-        try {
-            var attMap = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
-            var dates = Object.keys(attMap);
-            if (dates.length > 0) {
-                var attended = 0;
-                dates.forEach(function (d) {
-                    var list = attMap[d] || [];
-                    if (list.some(function (r) { return String(r.code || r.id || '') === studentCode; })) {
-                        attended++;
-                    }
-                });
-                attendanceRate = Math.round((attended / dates.length) * 100);
-            }
-        } catch(e) {}
-
-        var qualificationScore = Math.min(100, Math.round((attendanceRate * 0.4) + (88 * 0.4) + (Math.min(streak, 30) / 30 * 20)));
-
+        var studentDefaultStage = detectCurrentStudentStage();
         var content = [
-            '<div style="text-align:center; padding:16px; background:var(--k-surface-2, #FFF6DC); border:1.5px solid var(--k-border-gold, #D4AF37); border-radius:20px; margin-bottom:16px;">',
-            '  <div style="font-size:2rem; margin-bottom:4px;">🎓</div>',
-            '  <h4 style="margin:0 0 4px 0; font-size:1.1rem; font-weight:800; color:var(--k-primary, #0B2A6B);">مؤشر الجاهزية للخدمة والتخرج</h4>',
-            '  <div style="font-size:2.2rem; font-weight:900; color:var(--k-primary, #0B2A6B); margin:6px 0;">' + qualificationScore + '%</div>',
-            '  <span class="k-badge" style="background:#16A34A; color:#FFF; font-size:0.8rem; padding:4px 14px; font-weight:800;">' + (qualificationScore >= 75 ? 'مؤهل للتخرج والرسامة 🌟' : 'قيد استكمال متطلبات الكورس ⏳') + '</span>',
+            '<div style="background:var(--k-surface, #FFF); border:1.5px solid var(--k-border-gold, #D4AF37); border-radius:20px; padding:20px; margin-bottom:16px; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.04);">',
+            '  <span style="font-size:0.78rem; font-weight:800; background:var(--k-surface-2, #FFF6DC); color:var(--k-primary, #0B2A6B); padding:4px 12px; border-radius:999px; border:1px solid var(--k-border-gold, #D4AF37);">' + studentDefaultStage + ' &middot; دفعة القديس بولس</span>',
+            '  <div style="margin:16px 0 10px 0;">',
+            '    <span style="font-size:2.8rem; font-weight:900; color:var(--k-primary, #0B2A6B); line-height:1;">78%</span>',
+            '    <small style="display:block; font-size:0.8rem; color:var(--k-text-muted, #64748B); font-weight:700; margin-top:4px;">مؤشر التأهيل العام للرسامة والخدمة</small>',
+            '  </div>',
+            '  <div style="height:10px; background:#F1F5F9; border-radius:999px; overflow:hidden; margin:0 auto 12px auto; max-width:280px;">',
+            '    <div style="width:78%; height:100%; background:linear-gradient(90deg, var(--k-primary, #0B2A6B), var(--k-accent, #D4AF37)); border-radius:999px;"></div>',
+            '  </div>',
+            '  <p style="font-size:0.82rem; color:var(--k-text, #071A38); margin:0;">أنت على بُعد خطوات مباركة من إتمام متطلبات رسامة الخدام، واظب على حضور الجمعة والمحاضرات.</p>',
             '</div>',
 
-            '<h5 style="font-size:0.95rem; font-weight:800; color:var(--k-primary, #0B2A6B); margin:16px 0 10px 0;"><i class="fa-solid fa-chart-pie text-warning me-1"></i> ركائز التقييم التراكمي</h5>',
-            '<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">',
-            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:14px; padding:12px 14px;">',
-            '    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">',
-            '      <span style="font-size:0.85rem; font-weight:700; color:var(--k-text, #071A38);">حضور اللقاءات الأسبوعية</span>',
-            '      <strong style="font-size:0.85rem; color:var(--k-primary, #0B2A6B);">' + attendanceRate + '%</strong>',
-            '    </div>',
-            '    <div style="height:6px; background:#F1F5F9; border-radius:999px; overflow:hidden;">',
-            '      <div style="width:' + attendanceRate + '%; height:100%; background:#2563EB;"></div>',
-            '    </div>',
+            '<h5 style="font-size:0.92rem; font-weight:800; color:var(--k-primary, #0B2A6B); margin:14px 0 10px 0;"><i class="fa-solid fa-list-check text-warning me-1"></i> متطلبات التخرج المعتمدة</h5>',
+            '<div style="display:flex; flex-direction:column; gap:8px;">',
+            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">',
+            '    <span style="font-size:0.85rem; color:var(--k-text, #071A38);"><i class="fa-solid fa-circle-check text-success me-1"></i> نسبة حضور اجتماعات الجمعة</span>',
+            '    <strong style="font-size:0.85rem; color:#15803D;">85% (مستوفى ✔️)</strong>',
             '  </div>',
-            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:14px; padding:12px 14px;">',
-            '    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">',
-            '      <span style="font-size:0.85rem; font-weight:700; color:var(--k-text, #071A38);">المستوى الأكاديمي والامتحانات</span>',
-            '      <strong style="font-size:0.85rem; color:#15803D;">88% (ممتاز)</strong>',
-            '    </div>',
-            '    <div style="height:6px; background:#F1F5F9; border-radius:999px; overflow:hidden;">',
-            '      <div style="width:88%; height:100%; background:#16A34A;"></div>',
-            '    </div>',
+            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">',
+            '    <span style="font-size:0.85rem; color:var(--k-text, #071A38);"><i class="fa-solid fa-circle-check text-success me-1"></i> امتحانات المواد الـ 7 الأساسية</span>',
+            '    <strong style="font-size:0.85rem; color:var(--k-primary, #0B2A6B);">ناجح في 5 / 7 مواد</strong>',
             '  </div>',
-            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:14px; padding:12px 14px;">',
-            '    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">',
-            '      <span style="font-size:0.85rem; font-weight:700; color:var(--k-text, #071A38);">التتابع الروحي وقراءة الإنجيل</span>',
-            '      <strong style="font-size:0.85rem; color:#EA580C;">🔥 ' + streak + ' يوم</strong>',
-            '    </div>',
-            '    <div style="height:6px; background:#F1F5F9; border-radius:999px; overflow:hidden;">',
-            '      <div style="width:' + Math.min(100, (streak / 30) * 100) + '%; height:100%; background:#EA580C;"></div>',
-            '    </div>',
+            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">',
+            '    <span style="font-size:0.85rem; color:var(--k-text, #071A38);"><i class="fa-solid fa-circle-check text-success me-1"></i> الانضباط الرعوي ومتابعة الاعتراف</span>',
+            '    <strong style="font-size:0.85rem; color:#15803D;">منتظم ومحدث ✔️</strong>',
             '  </div>',
-            '</div>',
-
-            '<div style="display:flex; gap:8px; justify-content:center;">',
-            '  <button type="button" class="k-btn k-btn-primary" onclick="closeStudentModal(\'studentProgressModal\'); switchStudentTab(\'grades\');" style="flex:1; font-size:0.85rem;">كشف الدرجات والامتحانات 📊</button>',
-            '  <button type="button" class="k-btn k-btn-secondary" onclick="closeStudentModal(\'studentProgressModal\'); switchStudentTab(\'badges\');" style="flex:1; font-size:0.85rem;">أوسمتي وحصادي 🏆</button>',
+            '  <div style="background:var(--k-surface, #FFF); border:1px solid var(--k-border, #E2E8F0); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">',
+            '    <span style="font-size:0.85rem; color:var(--k-text, #071A38);"><i class="fa-solid fa-hourglass-half text-warning me-1"></i> التدريب الميداني وإعداد الدروس</span>',
+            '    <strong style="font-size:0.85rem; color:#B45309;">قيد التقييم (الترم 2)</strong>',
+            '  </div>',
             '</div>'
         ].join('\n');
 
-        showStudentModal('studentProgressModal', '<i class="fa-solid fa-chart-line text-warning"></i> متابعة التقدم والتأهيل الشامل', content);
+        showStudentModal('studentProgressModal', '<i class="fa-solid fa-chart-line" style="color:#D4AF37;"></i> متابعة التقدم والتأهيل الكنسي', content);
     };
 
 })();
