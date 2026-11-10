@@ -259,6 +259,8 @@
     };
 
     // استشعار وتحديد الفرقة الدراسية للطالب الحالي بذكاء
+    window.OFFICIAL_KIOSK_DATA = OFFICIAL_KIOSK_DATA;
+
     function detectCurrentStudentStage() {
         try {
             var user = null;

@@ -1663,6 +1663,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <script src="js/firebase-config.js"></script>
 <script src="js/khedmty-offline-roster.js"></script>
 
+    <script src="js/student-program-sections.js?v=9.0"></script>
 </head>
 
 <body>
@@ -1823,9 +1824,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px; z-index: 1;">
-        <button type="button" class="btn-royal-presentation" onclick="openPresentationMode()" style="background: rgba(12, 36, 97, 0.55); color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.45); padding: 7px 15px; font-size: 12px; border-radius: 10px; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: inline-flex; align-items: center; gap: 7px; backdrop-filter: blur(8px); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(212,175,55,0.2)'; this.style.borderColor='#F3C64F'" onmouseout="this.style.background='rgba(12, 36, 97, 0.55)'; this.style.borderColor='rgba(212, 175, 55, 0.45)'" title="وضع الإلقاء والخطابة للمحاضرين">
-            <i class="fa-solid fa-chalkboard-user"></i> وضع الإلقاء
-        </button>
+        
     </div>
 </div>
 <div class="role-bar" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #071A38 0%, #0C2461 100%); border-radius: 14px; padding: 10px 16px; margin-bottom: 14px; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 6px 18px rgba(7, 26, 56, 0.25); flex-wrap: wrap; gap: 10px;">
@@ -1839,9 +1838,58 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
         <i class="fa-solid fa-user-pen" style="color: #F3C64F;"></i> ملفي الشخصي
     </button>
 
-    <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="toggleZenMode()" title="تبديل الوضع الهادئ لتنظيم اللوحة وإخفاء الأزرار التقنية">
-        <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ</span>
-    </button>
+    <!-- 🕊️ قائمة متابعتك الروحية الخاصة -->
+    <div class="header-dropdown" style="position:relative; display:inline-block;">
+        <button type="button" id="btnSpiritualToolsDropdown" class="btn-mini" onclick="toggleSpiritualMenu(event)" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%); color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; padding: 5px 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; box-shadow:0 2px 8px rgba(0,0,0,0.15);" title="كافة أدوات الخادم الروحية الخاصة">
+            <i class="fa-solid fa-dove"></i> <span>متابعتك الروحية الخاصة 🕊️</span> <i class="fa-solid fa-chevron-down" style="font-size:0.68rem;"></i>
+        </button>
+        <div id="spiritualDropdownMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:245px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.45); z-index:9999; padding:6px; direction:rtl;">
+            <a href="servant_spiritual_note.html?fromTab=dashTab&from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">🕊️</span> نوتة الخادم الروحية الخاصة
+            </a>
+            <a href="servant_journal.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">✍️</span> مفكرة وخواطر الخادم
+            </a>
+            <a href="bible.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">📖</span> قارئ ومفسر الكتاب المقدس
+            </a>
+            <a href="katamaros.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">📜</span> القطمارس والقراءات اليومية
+            </a>
+            <a href="synaxarium.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">⛪</span> السنكسار وسير القديسين
+            </a>
+            <div style="border-top:1px solid rgba(255,255,255,0.12); margin:4px 0;"></div>
+            <a href="javascript:void(0)" onclick="closeAllHeaderDropdowns(); switchTab('reflectionsTab');" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#a7f3d0; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                <span style="font-size:1.1rem;">🌿</span> واحة الخادم الروحية الشاملة
+            </a>
+        </div>
+    </div>
+
+    <!-- ⚡ قائمة الأدوات السريعة وحالات الطوارئ -->
+    <div class="header-dropdown" style="position:relative; display:inline-block;">
+        <button type="button" id="btnQuickToolsDropdown" class="btn-mini" onclick="toggleQuickToolsMenu(event)" style="background: rgba(255, 255, 255, 0.08); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 8px; padding: 5px 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; transition: all 0.2s;" title="أدوات سريعة وإجراءات الطوارئ">
+            <i class="fa-solid fa-bolt" style="color:#F3C64F;"></i> <span>أدوات سريعة ⚡</span> <i class="fa-solid fa-chevron-down" style="font-size:0.68rem;"></i>
+        </button>
+        <div id="quickToolsDropdownMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:265px; background:#071A38; border:1.5px solid rgba(255,255,255,0.22); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.45); z-index:9999; padding:6px; direction:rtl;">
+            <button type="button" onclick="closeAllHeaderDropdowns(); exportTodaySessionToWhatsApp();" style="width:100%; text-align:right; background:transparent; border:none; color:#4ade80; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-brands fa-whatsapp" style="font-size:1rem;"></i> 📲 إرسال كود طوارئ اليوم لأمين الخدمة
+            </button>
+            <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); importFromEmergencyCode();" style="width:100%; text-align:right; background:transparent; border:none; color:#c084fc; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-file-import" style="font-size:1rem;"></i> 📥 استيراد ودمج كود طوارئ الحضور
+            </button>
+            <button type="button" onclick="closeAllHeaderDropdowns(); openPresentationMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#fde047; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-chalkboard-user" style="font-size:1rem;"></i> 🖥️ وضع الإلقاء والخطابة للمحاضرين
+            </button>
+            <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="closeAllHeaderDropdowns(); toggleZenMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#a7f3d0; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ (Zen Mode)</span>
+            </button>
+            <div style="border-top:1px solid rgba(255,255,255,0.12); margin:4px 0;"></div>
+            <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); openTripartiteSyncModal();" style="width:100%; text-align:right; background:transparent; border:none; color:#cbd5e1; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-arrows-rotate" style="color:#D4AF37;"></i> 🔄 المزامنة الثلاثية (Excel + CRM + Cloud)
+            </button>
+        </div>
+    </div>
 
     <button type="button" class="btn-mini position-relative" onclick="GentleReminders.openNotificationsModal()" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="التنبيهات والإشعارات الرعوية">
         <i class="fa-solid fa-bell text-warning"></i> التنبيهات <span id="khedmty-servant-notif-badge" class="badge rounded-pill bg-danger" style="font-size:0.65rem; padding:2px 6px;">3</span>
@@ -1871,13 +1919,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 </div>
 
-<div class="zen-hide" style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
 
-<button class="btn-mini btn-success" onclick="exportTodaySessionToWhatsApp()" style="flex:1; padding:8px;">📲 إرسال كود طوارئ اليوم لأمين الخدمة (WhatsApp)</button>
-
-<button class="btn-mini btn-purple admin-only" onclick="importFromEmergencyCode()" style="flex:1; padding:8px;">📥 استيراد ودمج كود طوارئ الحضور</button>
-
-</div>
 
 <!-- 🛡️ Early Safety Shield for Tabs Navigation -->
 <script>
@@ -1933,7 +1975,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <!-- استبدال التقييم الروحي بنوتة الخادم الروحية -->
 
-<a href="servant_spiritual_note.html?from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">نوتة الخادم الروحية 🕊️</a><a href="servant_journal.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مفكرة الخادم ✍️</a><a href="bible.html?from=servant&group=spirit" onclick="this.href='bible.html?from=servant&group=spirit';" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">قارئ الكتاب المقدس 📖</a><a href="katamaros.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">القطمارس اليومي 📜</a><a href="synaxarium.html?from=servant&group=spirit" class="tab-btn" data-group="spirit" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">السنكسار ⛪</a>            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل أمان العمليات والرقابة الرعوية 🛡️</div>
+            <div class="tab-btn admin-only" onclick="switchTab('auditTab', this)">سجل أمان العمليات والرقابة الرعوية 🛡️</div>
 
 <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
 
@@ -1951,9 +1993,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <a href="servant_spiritual_report.html?fromTab=membersTab&group=people" onclick="this.href='servant_spiritual_report.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">متابعة السلوك الروحي 📈</a>
 
 
-<a href="servant_grades_entry.html" class="tab-btn" data-group="study" style="text-decoration:none; display:flex; align-items:center; justify-content:center; border:1.5px solid #bfdbfe; color:#1e40af; font-weight:800; background:#eff6ff;">
-    <i class="fa-solid fa-graduation-cap me-1"></i> رصد درجات التأهيل ✍️🎓
-</a>
+
 <div class="tab-btn" id="tabBtn_reflections" data-group="spirit" onclick="switchTab('reflectionsTab', this)" style="border:1.5px solid #a7f3d0; color:#065f46; font-weight:800; background:#ecfdf5;">
     <i class="fa-solid fa-dove me-1"></i> واحة الخادم الروحية 🕊️
 </div>
@@ -1965,45 +2005,66 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <div id="coursesTab" class="tab-content"></div>
 
 <div id="materialsTab" class="tab-content">
+    <div style="background: linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#ffffff; border-radius:16px; padding:20px; margin-bottom:18px; border:1.5px solid #D4AF37; box-shadow:0 8px 24px rgba(7,26,56,0.25);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+                <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(212,175,55,0.2); border:1px solid rgba(212,175,55,0.4); padding:3px 12px; border-radius:999px; font-size:0.75rem; color:#FDE047; font-weight:800; margin-bottom:6px;">
+                    <i class="fa-solid fa-graduation-cap"></i> المناهج الرسمية المعتمدة • كشك الاستعلام الذاتي (WhatsApp Kiosk)
+                </div>
+                <h2 style="margin:0; font-size:1.45rem; font-weight:900; color:#ffffff;">
+                    📚 مكتبة المناهج والمواد الدراسية الـ 7
+                </h2>
+                <div style="font-size:0.82rem; color:#CBD5E1; margin-top:4px;">
+                    استعراض وتحميل المذكرات والمحاضرات المقررة لكل مادة والمطابقة تماماً لردود بوت الواتساب للدارسين.
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <a href="https://drive.google.com/drive/folders/1EO7WjD2tv5-0nID1xct0O5GRX7XWwQo-" target="_blank" style="background:#2563EB; color:#ffffff; text-decoration:none; font-weight:800; padding:8px 16px; border-radius:10px; font-size:0.83rem; display:inline-flex; align-items:center; gap:7px; box-shadow:0 4px 12px rgba(37,99,235,0.3);">
+                    <i class="fa-brands fa-google-drive"></i> فتح مجلد Google Drive الرئيسي 📁
+                </a>
+            </div>
+        </div>
 
-<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <!-- أزرار التبديل بين الفرق الدراسية -->
+        <div style="display:flex; gap:10px; margin-top:16px; border-top:1px solid rgba(255,255,255,0.15); padding-top:14px; flex-wrap:wrap;">
+            <button type="button" class="btn-custom" id="btnMatStage1" onclick="switchMaterialsStage('الفرقة الأولى')" style="background:#FDE047; color:#071A38; font-weight:800; padding:7px 16px; border-radius:8px; border:none; cursor:pointer; font-size:0.83rem; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-star"></i> الفرقة الأولى (سنة أولى)
+            </button>
+            <button type="button" class="btn-custom" id="btnMatStage2" onclick="switchMaterialsStage('الفرقة الثانية')" style="background:rgba(255,255,255,0.15); color:#ffffff; font-weight:800; padding:7px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.25); cursor:pointer; font-size:0.83rem; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-graduation-cap"></i> الفرقة الثانية (سنة ثانية)
+            </button>
+        </div>
+    </div>
 
-<h2>📚 مكتبة مواد الكورس</h2>
+    <!-- شبكة بطاقات المواد الـ 7 الرسمية المطابقة للكشك -->
+    <div id="officialKioskMaterialsContainer" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:14px; margin-bottom:20px;">
+        <!-- Injected via JavaScript from OFFICIAL_KIOSK_DATA -->
+    </div>
 
-</div>
-
-<div class="admin-only" style="background:#fdfefe; border:2px dashed var(--primary); padding:15px; border-radius:8px; margin-bottom:15px;">
-
-<h4 style="margin-top:0; color:var(--primary);">➕ إضافة مادة جديدة</h4>
-
-<div class="form-group"><label>عنوان المادة:</label><input type="text" id="mat_title" placeholder="مثال: محاضرة (١) - أسرار الكنيسة"></div>
-
-<div class="form-group">
-
-<label>النوع:</label>
-
-<select id="mat_type">
-
-<option value="محاضرة">🎥 محاضرة / فيديو</option>
-
-<option value="ملزمة">📄 ملزمة / PDF</option>
-
-<option value="رابط">🔗 رابط خارجي</option>
-
-</select>
-
-</div>
-
-<div class="form-group"><label>الرابط (Google Drive / YouTube / أي رابط):</label><input type="url" id="mat_url" placeholder="https://..."></div>
-
-<div class="form-group"><label>ملاحظات (اختياري):</label><input type="text" id="mat_notes" placeholder="وصف مختصر"></div>
-
-<button class="btn-primary" onclick="addCourseMaterial()">إضافة للمكتبة 📚</button>
-
-</div>
-
-<div id="materialsListContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
-
+    <!-- لوحة المشرف لإضافة ملفات أو روابط إضافية (Collapsible Admin Controls) -->
+    <div class="admin-only" style="background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; margin-top:20px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="var el=document.getElementById('adminMatAddForm'); el.style.display=(el.style.display==='none'?'block':'none');">
+            <h4 style="margin:0; font-size:0.95rem; color:#0c2461; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-circle-plus text-primary"></i> إضافة روابط أو ملفات إضافية مخصصة للمكتبة
+            </h4>
+            <span style="font-size:0.75rem; color:#64748b;">(انقر للفتح/الطي) ▼</span>
+        </div>
+        <div id="adminMatAddForm" style="display:none; margin-top:14px; border-top:1px solid #f1f5f9; padding-top:14px;">
+            <div class="form-group"><label>عنوان المادة:</label><input type="text" id="mat_title" placeholder="مثال: محاضرة إضافية - تاريخ الكنيسة المعاصر"></div>
+            <div class="form-group">
+                <label>النوع:</label>
+                <select id="mat_type">
+                    <option value="محاضرة">🎥 محاضرة / فيديو</option>
+                    <option value="ملزمة">📄 ملزمة / PDF</option>
+                    <option value="رابط">🔗 رابط خارجي</option>
+                </select>
+            </div>
+            <div class="form-group"><label>الرابط (Google Drive / YouTube / أي رابط):</label><input type="url" id="mat_url" placeholder="https://..."></div>
+            <div class="form-group"><label>ملاحظات (اختياري):</label><input type="text" id="mat_notes" placeholder="وصف مختصر"></div>
+            <button class="btn-primary" onclick="addCourseMaterial()">إضافة للمكتبة 📚</button>
+            <div id="materialsListContainer" style="display:flex; flex-direction:column; gap:10px; margin-top:12px;"></div>
+        </div>
+    </div>
 </div>
 
 
@@ -2110,33 +2171,68 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 </div>
 
 
-<!-- متابعة السلوك الروحي للمخدومين وشيت الإكسيل -->
+<!-- متابعة السلوك الروحي للمخدومين وشيت الإكسيل (بوابة موحدة احترافية) -->
 
 <div id="followupTab" class="tab-content admin-or-servant">
 
-<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+<div style="background: linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#ffffff; border-radius:16px; padding:20px; margin-bottom:18px; border:1.5px solid #D4AF37; box-shadow:0 8px 24px rgba(7,26,56,0.25);">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+        <div>
+            <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(212,175,55,0.2); border:1px solid rgba(212,175,55,0.4); padding:3px 12px; border-radius:999px; font-size:0.75rem; color:#FDE047; font-weight:800; margin-bottom:6px;">
+                <i class="fa-solid fa-heart-pulse"></i> المتابعة الرعوية والافتقاد الذكي الموحد
+            </div>
+            <h2 style="margin:0; font-size:1.45rem; font-weight:900; color:#ffffff;">
+                📈 منظومة الافتقاد والمتابعة الشاملة
+            </h2>
+            <div style="font-size:0.82rem; color:#CBD5E1; margin-top:4px;">
+                منعاً لتشتت الخادم بين جداول مكررة، تم توحيد مهام الافتقاد في بوابتين مركزيتين متخصصتين:
+            </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-success btn-mini" onclick="exportFollowupToExcel()" style="width:auto; padding:8px 16px; font-weight:bold;">
+                <i class="fa-solid fa-file-excel me-1"></i> كشف الإكسيل المعتمد 📊
+            </button>
+            <button class="btn-success btn-mini" onclick="exportFollowupForWhatsApp()" style="background:#25D366; border-color:#128C7E; color:#fff; width:auto; padding:8px 16px; font-weight:bold;">
+                <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
+            </button>
+        </div>
+    </div>
 
-<h2>📈 تقرير السلوك الروحي للمخدومين</h2>
-
-<div style="display:flex; gap:8px; flex-wrap:wrap;">
-
-                    <button class="btn-success btn-mini" onclick="exportFollowupToExcel()" style="width:auto; padding:8px 16px;">
-
-                        <i class="fa-solid fa-file-excel me-1"></i> كشف الإكسيل المعتمد 📊
-
-                    </button>
-
-                    <button class="btn-success btn-mini" onclick="exportFollowupForWhatsApp()" style="background:#25D366; border-color:#128C7E; color:#fff; width:auto; padding:8px 16px; font-weight:bold;">
-
-                        <i class="fa-brands fa-whatsapp me-1"></i> رسائل الواتساب الرعوية 📲
-
-                    </button>
-
+    <!-- بطاقات البوابات المركزية -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-top:16px;">
+        <a href="servant_followup.html?fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(212,175,55,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <span style="font-size:1.6rem;">🤝</span>
+                    <strong style="font-size:1.05rem; color:#FDE047;">بوابة الافتقاد الذكي والمكالمات</strong>
                 </div>
+                <p style="font-size:0.8rem; color:#e2e8f0; line-height:1.5; margin:0;">
+                    الاتصال السريع بنقرة واحدة، رسائل الواتساب الفردية، وتوثيق الزيارات المنزلية وملاحظات الخدمة.
+                </p>
+            </div>
+            <div style="margin-top:12px; color:#FDE047; font-weight:800; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
+                <span>فتح شاشة الافتقاد</span> <i class="fa-solid fa-arrow-left"></i>
+            </div>
+        </a>
 
+        <a href="servant_spiritual_report.html?fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(147,197,253,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <span style="font-size:1.6rem;">📊</span>
+                    <strong style="font-size:1.05rem; color:#93c5fd;">تقرير السلوك الروحي وحصاد المخدومين</strong>
+                </div>
+                <p style="font-size:0.8rem; color:#e2e8f0; line-height:1.5; margin:0;">
+                    متابعة قراءات الإنجيل اليومية، التزام النوتة الروحية، نقاط الحصاد، وأوسمة الدارسين.
+                </p>
+            </div>
+            <div style="margin-top:12px; color:#93c5fd; font-weight:800; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
+                <span>عرض تقرير السلوك الروحي</span> <i class="fa-solid fa-arrow-left"></i>
+            </div>
+        </a>
+    </div>
 </div>
 
-<p style="font-size:12px; color:#636e72;">كشف شامل لحضور الاجتماع، قراءة الإنجيل، وسجلات النوتة الروحية لكل مخدوم.</p>
+<p style="font-size:12px; color:#636e72;">كشف تحليلي فوري لبيانات السلوك الروحي (متوفر أيضاً للتصدير الفوري):</p>
 
 <div class="table-responsive">
 
@@ -2596,6 +2692,20 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
                 
                 <div id="radar_absenceBody">
+                <!-- بوابة الانتقال إلى الافتقاد الشامل لمنع تكرار الجداول -->
+                <div style="background: linear-gradient(135deg, #071A38 0%, #0C2461 100%); color: #ffffff; border-radius: 12px; padding: 12px 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border: 1.5px solid rgba(212, 175, 55, 0.45); box-shadow: 0 4px 14px rgba(7,26,56,0.15);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:1.5rem;">📋</span>
+                        <div>
+                            <strong style="color:#F3C64F; font-size:0.92rem; display:block;">بوابة الافتقاد الرعوي الشاملة والمكالمات</strong>
+                            <small style="color:#cbd5e1; font-size:0.75rem;">سجل المكالمات، الزيارات المنزلية، وتتبع التراجع الروحي لكافة المخدومين بالتفصيل</small>
+                        </div>
+                    </div>
+                    <a href="servant_followup.html?fromTab=radarTab&group=people" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #ffffff; text-decoration: none; font-weight: 800; padding: 7px 16px; border-radius: 8px; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        <span>فتح شاشة الافتقاد الشاملة</span> <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                </div>
+
                 <!-- شريط تصفية حالات الغياب وإجراءات الزيارة -->
                 <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;">
                     <button type="button" class="btn-custom" onclick="filterRadarAbsence('all')" id="btnRadarAbsFilterAll" style="background: #0c2461; color: white; padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer;">
@@ -11786,6 +11896,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
   </div>
 </div>
+
+
+<!-- سكريبت إدارة القوائم المنسدلة ومكتبة المواد الرسمية المطابقة للكشك -->
+<script>
+function toggleSpiritualMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('spiritualDropdownMenu');
+    const quickMenu = document.getElementById('quickToolsDropdownMenu');
+    if (quickMenu) quickMenu.style.display = 'none';
+    if (menu) menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+function toggleQuickToolsMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('quickToolsDropdownMenu');
+    const spiritMenu = document.getElementById('spiritualDropdownMenu');
+    if (spiritMenu) spiritMenu.style.display = 'none';
+    if (menu) menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+}
+
+function closeAllHeaderDropdowns() {
+    const m1 = document.getElementById('spiritualDropdownMenu');
+    const m2 = document.getElementById('quickToolsDropdownMenu');
+    if (m1) m1.style.display = 'none';
+    if (m2) m2.style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.header-dropdown')) {
+        closeAllHeaderDropdowns();
+    }
+});
+
+// دوال عرض مواد الكشك الرسمية الـ 7
+window.switchMaterialsStage = function(stageName) {
+    window.currentMaterialsStage = stageName;
+    const btn1 = document.getElementById('btnMatStage1');
+    const btn2 = document.getElementById('btnMatStage2');
+    if (stageName === 'الفرقة الأولى') {
+        if (btn1) { btn1.style.background = '#FDE047'; btn1.style.color = '#071A38'; }
+        if (btn2) { btn2.style.background = 'rgba(255,255,255,0.15)'; btn2.style.color = '#ffffff'; }
+    } else {
+        if (btn2) { btn2.style.background = '#FDE047'; btn2.style.color = '#071A38'; }
+        if (btn1) { btn1.style.background = 'rgba(255,255,255,0.15)'; btn1.style.color = '#ffffff'; }
+    }
+    renderOfficialKioskMaterials(stageName);
+};
+
+window.renderOfficialKioskMaterials = function(stageName = 'الفرقة الأولى') {
+    const container = document.getElementById('officialKioskMaterialsContainer');
+    if (!container) return;
+    const data = window.OFFICIAL_KIOSK_DATA;
+    if (!data || !data.stages || !data.stages[stageName]) {
+        container.innerHTML = '<div style="grid-column:1/-1; padding:20px; text-align:center; color:#64748b;">جاري تحميل بيانات المناهج...</div>';
+        return;
+    }
+    const subjects = data.stages[stageName];
+    container.innerHTML = subjects.map(s => {
+        const detailsId = 'kiosk_mat_servant_' + s.id;
+        return `
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:16px; box-shadow:0 3px 10px rgba(0,0,0,0.03); display:flex; flex-direction:column; justify-content:space-between; transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.boxShadow='0 6px 16px rgba(0,0,0,0.07)'" onmouseout="this.style.boxShadow='0 3px 10px rgba(0,0,0,0.03)'">
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="width:24px; height:24px; border-radius:50%; background:#0B2A6B; color:#ffffff; font-weight:800; font-size:0.75rem; display:inline-flex; align-items:center; justify-content:center;">${s.num}</span>
+                            <strong style="color:#0f172a; font-size:0.95rem;">${s.title}</strong>
+                        </div>
+                        <span style="font-size:0.68rem; font-weight:800; background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; border-radius:6px; padding:2px 7px;">${s.lectures}</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:#475569; margin-bottom:6px;">
+                        <i class="fa-solid fa-chalkboard-user text-muted me-1"></i> ${s.teachers}
+                    </div>
+                    <div style="font-size:0.72rem; color:#64748b; background:#f8fafc; border-radius:6px; padding:4px 8px; margin-bottom:10px;">
+                        <i class="fa-regular fa-clock me-1"></i> ${s.term}
+                    </div>
+                    <div id="${detailsId}" style="display:none; background:#fffdf5; border:1px dashed #d4af37; border-radius:8px; padding:10px; font-size:0.76rem; color:#334155; line-height:1.5; white-space:pre-wrap; margin-bottom:10px;">${s.replyText}</div>
+                </div>
+                <div style="display:flex; gap:6px; justify-content:space-between; align-items:center; margin-top:8px; border-top:1px solid #f1f5f9; padding-top:10px;">
+                    <button type="button" onclick="var d=document.getElementById('${detailsId}'); d.style.display=(d.style.display==='none'?'block':'none');" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; border-radius:6px; padding:5px 10px; font-size:0.74rem; font-weight:700; cursor:pointer;">
+                        <i class="fa-solid fa-circle-info text-primary"></i> تفاصيل المنهج
+                    </button>
+                    <a href="${s.driveUrl || data.driveFolder}" target="_blank" style="background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; padding:5px 12px; font-size:0.74rem; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                        <i class="fa-brands fa-google-drive"></i> تحميل المذكرات
+                    </a>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        if (typeof renderOfficialKioskMaterials === 'function') {
+            renderOfficialKioskMaterials('الفرقة الأولى');
+        }
+    }, 400);
+});
+</script>
 
 </body>
 

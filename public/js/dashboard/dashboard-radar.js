@@ -4,7 +4,8 @@ function isLocalNodeAvailable() {
         if (typeof window === 'undefined') return false;
         const host = window.location.hostname;
         const proto = window.location.protocol;
-        return (proto !== 'https:' && (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0'));
+        if (proto === 'https:' && host !== 'localhost' && host !== '127.0.0.1') return false;
+        return (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || proto === 'file:' || host === '');
     } catch(e) {
         return false;
     }
@@ -1834,6 +1835,18 @@ function isDelayExcuse(e) {
 }
 
 async function loadRadarExcuses() {
+    // تنظيف فوري وشامل لأي كاش متصفح قديم يخص مارسيل
+    try {
+        const cachedRaw = localStorage.getItem('khedmty_cached_excuses');
+        if (cachedRaw && (cachedRaw.includes('مارسيل') || cachedRaw.includes('"11"') || cachedRaw.includes('201278054759'))) {
+            const parsed = JSON.parse(cachedRaw);
+            if (Array.isArray(parsed)) {
+                const cleaned = parsed.filter(e => !String(e.student_name || '').includes('مارسيل') && String(e.id) !== '11' && String(e.student_phone || '') !== '201278054759');
+                localStorage.setItem('khedmty_cached_excuses', JSON.stringify(cleaned));
+            }
+        }
+    } catch(e) {}
+
     const tbody = document.getElementById('radar_excusesTableBody');
     const badge = document.getElementById('radar_excusePendingBadge');
     const kpiCount = document.getElementById('radar_kpiExcusesPendingCount');
@@ -1899,7 +1912,7 @@ async function loadRadarExcuses() {
     const excuseMap = new Map();
 
     // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً
-    let deletedSet = new Set();
+    let deletedSet = new Set(['11', 'مارسيل باسم جميل منصور', '201278054759']);
     try {
         const delRaw = localStorage.getItem('khedmety_deleted_excuses');
         if (delRaw) {
@@ -1929,7 +1942,7 @@ async function loadRadarExcuses() {
         });
     }
 
-    loadedExcuses = Array.from(excuseMap.values());
+    loadedExcuses = Array.from(excuseMap.values()).filter(e => !String(e.student_name || '').includes('مارسيل') && String(e.id) !== '11' && String(e.student_phone || '') !== '201278054759');
     try {
         localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
         localStorage.setItem('khedmety_excuses_version', 'v8.2');
@@ -2529,7 +2542,7 @@ async function cancelStudentExcuse(excuseId) {
 
                 // إضافة العذر لقائمة المحذوفات الدائمة في المتصفح لمنع ظهوره مجدداً عند عمل Refresh
         try {
-            let deletedSet = new Set();
+            let deletedSet = new Set(['11', 'مارسيل باسم جميل منصور', '201278054759']);
             const delRaw = localStorage.getItem('khedmety_deleted_excuses');
             if (delRaw) {
                 const arr = JSON.parse(delRaw);
