@@ -236,76 +236,256 @@ document.getElementById('planLocation').value = '';
 
 }
 
-function renderMasterPlanTable() {
+window.masterPlanFilterStage = 'all';
+window.masterPlanSearchQuery = '';
 
-const tbody = document.querySelector('#masterPlanTable tbody');
-
-if (!tbody) return;
-
-tbody.innerHTML = '';
-
-let list = [...masterPlan].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-if (list.length === 0) {
-
-tbody.innerHTML = '<tr><td colspan="7" class="empty-state">لا توجد فعاليات مسجلة في الخطة حالياً.</td></tr>';
-
-return;
-
+function setMasterPlanFilter(stage, btn) {
+    window.masterPlanFilterStage = stage;
+    if (btn && btn.parentElement) {
+        btn.parentElement.querySelectorAll('button').forEach(b => {
+            b.style.background = '#f1f5f9';
+            b.style.color = '#475569';
+            b.style.borderColor = '#cbd5e1';
+            b.style.fontWeight = '600';
+        });
+        btn.style.background = '#0B2A6B';
+        btn.style.color = '#ffffff';
+        btn.style.borderColor = '#0B2A6B';
+        btn.style.fontWeight = '800';
+    }
+    renderMasterPlanTable();
 }
 
-const tagClasses = { 'محاضرة': 'tag-lecture', 'رحلة': 'tag-trip', 'مؤتمر': 'tag-camp', 'يوم خلوة': 'tag-retreat', 'يوم رياضي': 'tag-trip', 'حفل تخرج': 'tag-grad', 'امتحان': 'tag-exam' };
+function onMasterPlanSearch(query) {
+    window.masterPlanSearchQuery = (query || '').trim().toLowerCase();
+    renderMasterPlanTable();
+}
 
-list.forEach(item => {
+function renderMasterPlanTable() {
+    const tbody = document.querySelector('#masterPlanTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-let tagClass = tagClasses[item.type] || 'tag-lecture';
+    let list = [...masterPlan].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-let tr = document.createElement('tr');
+    // تصفية حسب المرحلة
+    if (window.masterPlanFilterStage && window.masterPlanFilterStage !== 'all') {
+        list = list.filter(item => {
+            const st = (item.stage || '').toLowerCase();
+            if (window.masterPlanFilterStage === 'stage1') return st.includes('أولى') || st.includes('اولى');
+            if (window.masterPlanFilterStage === 'stage2') return st.includes('ثانية') || st.includes('تانية');
+            if (window.masterPlanFilterStage === 'general') return st.includes('عام') || st.includes('كل الخدمة');
+            if (window.masterPlanFilterStage === 'servants') return st.includes('خدام');
+            return true;
+        });
+    }
 
-tr.innerHTML = `
+    // تصفية بكلمة البحث
+    if (window.masterPlanSearchQuery) {
+        const q = window.masterPlanSearchQuery;
+        list = list.filter(item => {
+            const text = `${item.title || ''} ${item.type || ''} ${item.location || ''} ${item.responsible || ''} ${item.stage || ''} ${item.date || ''}`.toLowerCase();
+            return text.includes(q);
+        });
+    }
 
-<td data-label="التاريخ"><strong>${escapeHtml(item.date)}</strong></td>
+    const countEl = document.getElementById('masterPlanFilteredCount');
+    if (countEl) countEl.textContent = list.length;
 
-<td data-label="النوع"><span class="plan-tag ${tagClass}">${escapeHtml(item.type)}</span></td>
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state" style="text-align:center; padding:25px; color:#64748b; font-weight:700;">لا توجد فعاليات مسجلة مطابقة للبحث أو التصفية.</td></tr>';
+        return;
+    }
 
-<td data-label="العنوان"><strong>${escapeHtml(item.title)}</strong></td>
+    const tagClasses = { 'محاضرة': 'tag-lecture', 'رحلة': 'tag-trip', 'مؤتمر': 'tag-camp', 'يوم خلوة': 'tag-retreat', 'يوم رياضي': 'tag-trip', 'حفل تخرج': 'tag-grad', 'امتحان': 'tag-exam' };
 
-<td data-label="المكان">${escapeHtml(item.location)}</td>
+    list.forEach(item => {
+        let tagClass = tagClasses[item.type] || 'tag-lecture';
+        let tr = document.createElement('tr');
+        tr.setAttribute('data-plan-id', item.id);
+        tr.innerHTML = `
+            <td data-label="التاريخ"><strong style="color:#0B2A6B; font-family:monospace; font-size:0.95rem;">${escapeHtml(item.date)}</strong></td>
+            <td data-label="النوع"><span class="plan-tag ${tagClass}">${escapeHtml(item.type)}</span></td>
+            <td data-label="العنوان"><strong style="color:#1e293b;">${escapeHtml(item.title)}</strong></td>
+            <td data-label="المكان"><span style="color:#475569;">${escapeHtml(item.location || 'الكنيسة')}</span></td>
+            <td data-label="المرحلة"><span class="badge" style="background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; padding:4px 8px; border-radius:6px; font-size:0.75rem;">${escapeHtml(item.stage || 'عام')}</span></td>
+            <td data-label="المسؤول"><strong style="color:var(--primary, #0B2A6B);">${escapeHtml(item.responsible || 'غير محدد')}</strong></td>
+            <td data-label="إجراء" class="admin-only" style="white-space:nowrap;">
+                <div style="display:inline-flex; align-items:center; gap:6px;">
+                    <button type="button" class="btn-mini" onclick="openEditMasterPlanModal('${item.id}')" style="background:rgba(212,175,55,0.18); color:#874F19; border:1px solid rgba(212,175,55,0.5); padding:5px 10px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" title="تعديل تفاصيل الفعالية">
+                        <i class="fa-solid fa-pen-to-square"></i> تعديل
+                    </button>
+                    <button type="button" class="btn-mini btn-danger" onclick="deleteMasterPlanEvent('${item.id}')" style="padding:5px 10px; border-radius:6px; font-weight:700; cursor:pointer; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;" title="حذف الفعالية من الخطة">
+                        <i class="fa-solid fa-trash"></i> حذف
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-<td data-label="المرحلة">${escapeHtml(item.stage)}</td>
+    updateRoleUI();
+}
 
-<td data-label="المسؤول"><strong style="color:var(--primary);">${escapeHtml(item.responsible)}</strong></td>
+function openEditMasterPlanModal(id) {
+    const item = masterPlan.find(x => String(x.id) === String(id));
+    if (!item) {
+        return alert('تعذر العثور على الفعالية المحددة!');
+    }
 
-<td data-label="إجراء" class="admin-only"><button class="btn-mini btn-danger" onclick="deleteMasterPlanEvent(${item.id})">حذف</button></td>
+    closeEditMasterPlanModal();
 
-`;
+    let servantsOptions = '';
+    try {
+        if (typeof servants !== 'undefined' && Array.isArray(servants)) {
+            servantsOptions = servants.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)} (${escapeHtml(s.role || 'خادم')})</option>`).join('');
+        }
+    } catch(e) {}
 
-tbody.appendChild(tr);
+    const modal = document.createElement('div');
+    modal.id = 'editMasterPlanModal';
+    modal.className = 'k-modal-backdrop active';
+    modal.style.zIndex = '100005';
+    modal.style.display = 'flex';
 
-});
+    modal.innerHTML = `
+        <div class="k-modal" style="max-width:560px; width:100%; border-radius:20px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.3); border:2px solid #D4AF37;">
+            <div style="background:linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#FFF; padding:16px 22px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #D4AF37;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:1.4rem;">🗓️</span>
+                    <div>
+                        <h3 style="margin:0; font-size:1.1rem; color:#FFF; font-weight:800;">تعديل فعالية في خطة السنة</h3>
+                        <small style="color:#CBD5E1; font-size:0.75rem;">تعديل التاريخ والموضوع والمحاضر والمكان فورياً</small>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditMasterPlanModal()" style="background:none; border:none; color:#FDE047; font-size:1.5rem; cursor:pointer; line-height:1;">&times;</button>
+            </div>
 
-updateRoleUI();
+            <form onsubmit="event.preventDefault(); saveEditedMasterPlanEvent('${item.id}');" style="padding:20px 22px; background:#FFFFFF; display:flex; flex-direction:column; gap:14px; max-height:78vh; overflow-y:auto;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">نوع الفعالية:</label>
+                        <select id="editPlanType" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
+                            <option value="محاضرة" ${item.type === 'محاضرة' ? 'selected' : ''}>محاضرة دراسية</option>
+                            <option value="رحلة" ${item.type === 'رحلة' ? 'selected' : ''}>رحلة ترفيهية / دير (بونص ⭐)</option>
+                            <option value="مؤتمر" ${item.type === 'مؤتمر' ? 'selected' : ''}>مؤتمر روحي (بونص ⭐)</option>
+                            <option value="يوم خلوة" ${item.type === 'يوم خلوة' ? 'selected' : ''}>يوم خلوة وصلاة (بونص ⭐)</option>
+                            <option value="يوم رياضي" ${item.type === 'يوم رياضي' ? 'selected' : ''}>يوم رياضي / مهرجان (بونص ⭐)</option>
+                            <option value="امتحان" ${item.type === 'امتحان' ? 'selected' : ''}>امتحان / كويز 📝</option>
+                            <option value="حفل تخرج" ${item.type === 'حفل تخرج' ? 'selected' : ''}>حفل تخرج واجتياز الدورة</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">تاريخ الفعالية:</label>
+                        <input type="date" id="editPlanDate" value="${escapeHtml(item.date)}" required style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:700; color:#0B2A6B;">
+                    </div>
+                </div>
 
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">عنوان الفعالية / الموضوع:</label>
+                    <input type="text" id="editPlanTitle" value="${escapeHtml(item.title)}" required placeholder="مثال: كورس الكتاب المقدس (محاضرة 1)..." style="width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.9rem; font-weight:600;">
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المرحلة المستهدفة:</label>
+                        <select id="editPlanStage" style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem; font-weight:600;">
+                            <option value="عام لكل الخدمة" ${(item.stage === 'عام لكل الخدمة' || item.stage === 'عام') ? 'selected' : ''}>عام لكل الخدمة والدارسين</option>
+                            <option value="الفرقة الأولى" ${(item.stage === 'الفرقة الأولى' || item.stage === 'سنة أولى') ? 'selected' : ''}>سنة أولى (الفرقة الأولى)</option>
+                            <option value="الفرقة الثانية" ${(item.stage === 'الفرقة الثانية' || item.stage === 'سنة ثانية') ? 'selected' : ''}>سنة ثانية (الفرقة الثانية)</option>
+                            <option value="الخدام فقط" ${item.stage === 'الخدام فقط' ? 'selected' : ''}>اجتماع الخدام فقط</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المكان / القاعة:</label>
+                        <input type="text" id="editPlanLocation" value="${escapeHtml(item.location || 'الكنيسة')}" placeholder="مثال: قاعة الفرقة الأولى..." style="width:100%; padding:8px 10px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.85rem;">
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:700; color:#334155; margin-bottom:5px;">المسؤول / المحاضر:</label>
+                    <input type="text" id="editPlanResponsible" list="editPlanServantsList" value="${escapeHtml(item.responsible || '')}" placeholder="اكتب اسم المحاضر أو اختر خادماً مسؤولاً..." style="width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid #cbd5e1; font-size:0.9rem;">
+                    <datalist id="editPlanServantsList">
+                        <option value="أمين الخدمة">
+                        <option value="مسؤول الفرقة الأولى">
+                        <option value="مسؤول الفرقة الثانية">
+                        ${servantsOptions}
+                    </datalist>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; padding-top:14px; border-top:1px solid #e2e8f0;">
+                    <button type="button" onclick="closeEditMasterPlanModal()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:9px 18px; border-radius:8px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="submit" style="background:#0B2A6B; color:#ffffff; border:none; padding:9px 24px; border-radius:8px; font-weight:800; cursor:pointer; font-size:0.9rem; display:inline-flex; align-items:center; gap:6px; box-shadow:0 3px 10px rgba(11,42,107,0.25);">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات 💾
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.onclick = function(e) {
+        if (e.target === modal) closeEditMasterPlanModal();
+    };
+
+    document.body.appendChild(modal);
+}
+
+function closeEditMasterPlanModal() {
+    const m = document.getElementById('editMasterPlanModal');
+    if (m) m.remove();
+}
+
+function saveEditedMasterPlanEvent(id) {
+    const item = masterPlan.find(x => String(x.id) === String(id));
+    if (!item) {
+        return alert('الفعالية غير موجودة!');
+    }
+
+    const type = document.getElementById('editPlanType').value;
+    const date = document.getElementById('editPlanDate').value;
+    const title = document.getElementById('editPlanTitle').value.trim();
+    const stage = document.getElementById('editPlanStage').value;
+    const location = document.getElementById('editPlanLocation').value.trim();
+    const responsible = document.getElementById('editPlanResponsible').value.trim();
+
+    if (!date || !title) {
+        return alert('يرجى تحديد التاريخ وعنوان الفعالية!');
+    }
+
+    const oldTitle = item.title;
+    item.type = type;
+    item.date = date;
+    item.title = title;
+    item.stage = stage;
+    item.location = location || "الكنيسة";
+    item.responsible = responsible || "غير محدد";
+
+    saveMasterPlan();
+
+    if (typeof logActivity === 'function') {
+        logActivity("تعديل فعالية خطة", title, `تعديل فعالية "${oldTitle}" ليوم ${date}`);
+    }
+
+    renderMasterPlanTable();
+    checkUpcomingMasterPlanEvents();
+    closeEditMasterPlanModal();
+
+    if (typeof showToast === 'function') {
+        showToast("✅ تم تحديث الفعالية في خطة السنة والمزامنة فوراً!");
+    } else {
+        alert("✅ تم حفظ تعديلات الفعالية بنجاح!");
+    }
 }
 
 function deleteMasterPlanEvent(id) {
-
-let item = masterPlan.find(x => x.id === id);
-
-if (confirm("حذف هذه الفعالية من خطة السنة؟")) {
-
-masterPlan = masterPlan.filter(x => x.id !== id);
-
-saveMasterPlan();
-
-if (item) logActivity("حذف فعالية خطة", item.title, `حذف فعالية تاريخ ${item.date}`);
-
-renderMasterPlanTable();
-
-checkUpcomingMasterPlanEvents();
-
-}
-
+    let item = masterPlan.find(x => String(x.id) === String(id));
+    if (confirm("حذف هذه الفعالية من خطة السنة؟")) {
+        masterPlan = masterPlan.filter(x => String(x.id) !== String(id));
+        saveMasterPlan();
+        if (item) logActivity("حذف فعالية خطة", item.title, `حذف فعالية تاريخ ${item.date}`);
+        renderMasterPlanTable();
+        checkUpcomingMasterPlanEvents();
+    }
 }
 
 async function clearAllMasterPlan() {

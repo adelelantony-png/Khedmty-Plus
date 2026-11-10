@@ -3181,6 +3181,25 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 </div>
 
+<!-- شريط التصفية والبحث في خطة السنة -->
+<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 16px; margin:14px 0; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+        <span style="font-size:0.8rem; font-weight:800; color:#475569;"><i class="fa-solid fa-filter text-warning"></i> تصفية بالمرحلة:</span>
+        <button type="button" class="btn-mini" onclick="setMasterPlanFilter('all', this)" style="background:#0B2A6B; color:#ffffff; border:1px solid #0B2A6B; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:800; cursor:pointer;">الكل 🌟</button>
+        <button type="button" class="btn-mini" onclick="setMasterPlanFilter('stage1', this)" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">سنة أولى 📘</button>
+        <button type="button" class="btn-mini" onclick="setMasterPlanFilter('stage2', this)" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">سنة ثانية 📙</button>
+        <button type="button" class="btn-mini" onclick="setMasterPlanFilter('general', this)" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">عام لكل الخدمة ⛪</button>
+        <button type="button" class="btn-mini" onclick="setMasterPlanFilter('servants', this)" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:5px 12px; border-radius:6px; font-size:0.75rem; font-weight:600; cursor:pointer;">اجتماع الخدام 🕊️</button>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:250px; justify-content:flex-end;">
+        <div style="position:relative; width:100%; max-width:320px;">
+            <input type="text" placeholder="🔍 بحث في خطة السنة (موضوع، محاضر، قاعة)..." oninput="onMasterPlanSearch(this.value)" style="width:100%; padding:7px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.82rem;">
+        </div>
+        <span class="badge" style="background:#e0e7ff; color:#3730a3; padding:6px 10px; border-radius:6px; font-size:0.76rem; font-weight:700; white-space:nowrap;">
+            المعروض: <strong id="masterPlanFilteredCount">0</strong>
+        </span>
+    </div>
+</div>
 <div class="table-responsive">
 
 <table id="masterPlanTable" class="adaptive-card-table">
