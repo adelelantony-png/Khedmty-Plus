@@ -34,7 +34,9 @@ const tests = [
   'test_attendance_time_editor.js',
   'test_student_bible_plan.js',
   'tests/test_phase_a_design_system.js',
-  'tests/test_sessions_themes_reminders.js'
+  'tests/test_sessions_themes_reminders.js',
+  'tests/test_student_program_sections.js',
+  'tests/test_servant_followup_robustness.js'
 ];
 
 console.log('================================================================');

@@ -1097,13 +1097,29 @@ body {
         }, 3200);
     }
 
+    // تصفية التكرار وضمان عدم مضاعفة المخدومين (Deduplication)
+    function deduplicateMembers(list) {
+        if (!Array.isArray(list)) return [];
+        const seen = new Set();
+        return list.filter(m => {
+            if (!m) return false;
+            const key = String(m.code || m.id || m.exam_code || m.phone || m.name || '').trim();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
     // العرض الفوري اللحظي من الذاكرة المحلية (Zero-Wait Rendering)
     function initImmediateLocalData() {
         try {
             const cachedMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
             const cachedAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
             if (Array.isArray(cachedMembers) && cachedMembers.length > 0) {
-                allMembers = cachedMembers;
+                allMembers = deduplicateMembers(cachedMembers);
+                if (allMembers.length !== cachedMembers.length) {
+                    try { localStorage.setItem('my_church_class', JSON.stringify(allMembers)); } catch(e){}
+                }
                 attendanceRecord = cachedAtt;
                 populateStageFilter();
                 renderStats();
@@ -1160,10 +1176,10 @@ body {
             }
 
             if (membersFromCloud.length > 0) {
-                allMembers = membersFromCloud;
+                allMembers = deduplicateMembers(membersFromCloud);
                 try { localStorage.setItem('my_church_class', JSON.stringify(allMembers)); } catch(e){}
             } else {
-                allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
+                allMembers = deduplicateMembers(JSON.parse(localStorage.getItem('my_church_class')) || []);
                 updateSyncStatus(false, 'تم التحميل من الذاكرة المحلية');
             }
 
@@ -1183,7 +1199,7 @@ body {
             }
         } catch (err) {
             console.error("Cloud load error:", err);
-            allMembers = JSON.parse(localStorage.getItem('my_church_class')) || [];
+            allMembers = deduplicateMembers(JSON.parse(localStorage.getItem('my_church_class')) || []);
             attendanceRecord = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
             updateSyncStatus(false, 'وضع عدم الاتصال (بيانات محلية)');
             populateStageFilter();
@@ -1266,6 +1282,8 @@ body {
         let disconnectedCount = 0;
         let warningCount = 0;
         let visitedCount = 0;
+        let confessionRiskCount = 0;
+        let bibleRiskCount = 0;
 
         allMembers.forEach(m => {
             const sCode = m.code || m.id;
@@ -1276,12 +1294,22 @@ body {
             if (isVisitedWithinDays(m.visitations, 30)) {
                 visitedCount++;
             }
+            if (getDaysSinceConfession(sCode, m) >= 40) confessionRiskCount++;
+            if (getDaysSinceBibleReading(sCode) >= 7) bibleRiskCount++;
         });
 
-        document.getElementById('statTotalMembers').textContent = total;
-        document.getElementById('statDisconnected').textContent = disconnectedCount;
-        document.getElementById('statWarning').textContent = warningCount;
-        document.getElementById('statVisitedThisMonth').textContent = visitedCount;
+        const elTotal = document.getElementById('statTotalMembers');
+        if (elTotal) elTotal.textContent = total;
+        const elDisc = document.getElementById('statDisconnected');
+        if (elDisc) elDisc.textContent = disconnectedCount;
+        const elWarn = document.getElementById('statWarning');
+        if (elWarn) elWarn.textContent = warningCount;
+        const elVis = document.getElementById('statVisitedThisMonth');
+        if (elVis) elVis.textContent = visitedCount;
+        const elConf = document.getElementById('statConfessionRisk');
+        if (elConf) elConf.textContent = confessionRiskCount;
+        const elBible = document.getElementById('statBibleRisk');
+        if (elBible) elBible.textContent = bibleRiskCount;
     }
 
     // تبديل الفلتر السريع
@@ -1293,6 +1321,8 @@ body {
             'all': 'cardFilterAll',
             'disconnected': 'cardFilterDisconnected',
             'warning': 'cardFilterWarning',
+            'confession_alert': 'cardFilterConfession',
+            'bible_alert': 'cardFilterBible',
             'visited': 'cardFilterVisited'
         };
         const activeCard = document.getElementById(cardMap[type]);
@@ -1303,6 +1333,8 @@ body {
             if (type === 'all') statusSelect.value = 'all';
             else if (type === 'disconnected') statusSelect.value = 'disconnected';
             else if (type === 'warning') statusSelect.value = 'warning';
+            else if (type === 'confession_alert') statusSelect.value = 'confession_alert';
+            else if (type === 'bible_alert') statusSelect.value = 'bible_alert';
             else if (type === 'visited') statusSelect.value = 'all'; // handled in filter logic
         }
 
@@ -1335,6 +1367,8 @@ body {
             const sParentPhone = String(m.parent_phone || '').trim();
             const sArea = String(m.area || m.address || '').trim();
             const streak = calculateConsecutiveAbsences(sCode);
+            const confDays = getDaysSinceConfession(sCode, m);
+            const bibleDays = getDaysSinceBibleReading(sCode);
             const visitations = Array.isArray(m.visitations) ? m.visitations : [];
             const lastVisit = visitations.length > 0 ? visitations[0] : null;
             const visitedRecently = isVisitedWithinDays(visitations, 30);
@@ -1349,6 +1383,8 @@ body {
                 parentPhone: sParentPhone,
                 area: sArea,
                 streak: streak,
+                confDays: confDays,
+                bibleDays: bibleDays,
                 visitations: visitations,
                 lastVisit: lastVisit,
                 visitedRecently: visitedRecently
@@ -1369,6 +1405,10 @@ body {
         // 3. تطبيق فلتر الحالة
         if (activeQuickFilter === 'visited') {
             enriched = enriched.filter(item => item.visitedRecently);
+        } else if (activeQuickFilter === 'confession_alert' || statusVal === 'confession_alert') {
+            enriched = enriched.filter(item => item.confDays >= 40);
+        } else if (activeQuickFilter === 'bible_alert' || statusVal === 'bible_alert') {
+            enriched = enriched.filter(item => item.bibleDays >= 7);
         } else if (statusVal === 'disconnected') {
             enriched = enriched.filter(item => item.streak >= 3);
         } else if (statusVal === 'warning') {
@@ -1435,6 +1475,16 @@ body {
             if (callButtons.length === 0) {
                 callButtons.push('<span class="text-muted small">لا يوجد هاتف</span>');
             }
+
+            // شارات الإنذار الروحي والإرشاد
+            let triageBadges = [];
+            if (item.confDays >= 40) {
+                triageBadges.push(`<span class="badge" style="background:#7c3aed; color:#fff; font-size:0.72rem; padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-dove"></i> اعتراف (${item.confDays > 365 ? '+سنة' : item.confDays + 'ي'})</span>`);
+            }
+            if (item.bibleDays >= 7) {
+                triageBadges.push(`<span class="badge bg-warning text-dark" style="font-size:0.72rem; padding:2px 6px; border-radius:4px;"><i class="fa-solid fa-book-bible"></i> إنجيل (${item.bibleDays > 365 ? '+سنة' : item.bibleDays + 'ي'})</span>`);
+            }
+            const triageBadgesHtml = triageBadges.join(' ');
 
             // آخر افتقاد
             let lastVisitHtml = '';
