@@ -1810,20 +1810,20 @@ const KHEDMETY_SEED_EXCUSES = [
         "resolved_by": "prior_submission",
         "created_at": 1794064047000
     },
-    {
-        "id": 11,
-        "student_id": 0,
-        "student_code": "",
-        "student_name": "مارسيل باسم جميل منصور",
-        "student_phone": "201278054759",
-        "stage": "سنة أولى",
-        "message_text": "بعتذر عن الحضور بسبب الامتحان",
-        "reason_category": "امتحانات ومذاكرة 📚",
-        "friday_date": "2026-11-06",
+        {
+        "id": 12,
+        "student_id": 89,
+        "student_code": "1272",
+        "student_name": "جومانا رضا نعيم",
+        "student_phone": "201507713029",
+        "stage": "سنة ثانية",
+        "message_text": "صباح الخير يا أستاذ عادل بعتزر عن يوم الجمعة مش هقدر اجي هيبقا عندي شغل",
+        "reason_category": "عمل وشفت 💼",
+        "friday_date": "2026-11-13",
         "status": "pending",
-        "servant_notes": "اعتذار مسبق وارد عبر واتساب (امتحانات)",
+        "servant_notes": "اعتذار مسبق وارد عبر واتساب (ارتباط عمل)",
         "resolved_by": "prior_submission",
-        "created_at": 1793877550000
+        "created_at": 1794306017000
     }
 ];
 
@@ -1899,15 +1899,28 @@ async function loadRadarExcuses() {
     const excuseMap = new Map();
 
     // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً
+    let deletedSet = new Set();
+    try {
+        const delRaw = localStorage.getItem('khedmety_deleted_excuses');
+        if (delRaw) {
+            const arr = JSON.parse(delRaw);
+            if (Array.isArray(arr)) deletedSet = new Set(arr.map(String));
+        }
+    } catch(e){}
+
+    // أولاً: حقن الأعذار التأسيسية المعتمدة مسبقاً (مع استبعاد المحذوفات)
     KHEDMETY_SEED_EXCUSES.forEach(seed => {
         const key = String(seed.id || (seed.student_code + '_' + seed.friday_date));
-        excuseMap.set(key, { ...seed });
+        if (!deletedSet.has(String(seed.id)) && !deletedSet.has(key)) {
+            excuseMap.set(key, { ...seed });
+        }
     });
 
     // ثانياً: دمج أي بيانات محملة من السيرفر أو الكاش المحلي مع الحفاظ التام على القرارات الرعوية (مقبول / مرفوض)
     if (Array.isArray(candidateList) && candidateList.length > 0) {
         candidateList.forEach(item => {
             const key = String(item.id || (item.student_code + '_' + item.friday_date));
+            if (deletedSet.has(String(item.id)) || deletedSet.has(key)) return;
             if (excuseMap.has(key)) {
                 excuseMap.set(key, { ...excuseMap.get(key), ...item });
             } else {
@@ -2514,9 +2527,29 @@ async function cancelStudentExcuse(excuseId) {
             }
         }
 
-        // إزالة العذر من القائمة المعروضة
+                // إضافة العذر لقائمة المحذوفات الدائمة في المتصفح لمنع ظهوره مجدداً عند عمل Refresh
+        try {
+            let deletedSet = new Set();
+            const delRaw = localStorage.getItem('khedmety_deleted_excuses');
+            if (delRaw) {
+                const arr = JSON.parse(delRaw);
+                if (Array.isArray(arr)) deletedSet = new Set(arr.map(String));
+            }
+            deletedSet.add(String(excuseId));
+            if (deletedExcuse) {
+                if (deletedExcuse.student_code && deletedExcuse.friday_date) {
+                    deletedSet.add(String(deletedExcuse.student_code + '_' + deletedExcuse.friday_date));
+                }
+            }
+            localStorage.setItem('khedmety_deleted_excuses', JSON.stringify(Array.from(deletedSet)));
+        } catch(e){}
+
+        // إزالة العذر من القائمة المعروضة وتحديث كاش المتصفح فوراً
         if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
             window.lastRadarExcusesList = window.lastRadarExcusesList.filter(e => String(e.id) !== String(excuseId));
+            try {
+                localStorage.setItem('khedmety_cached_excuses', JSON.stringify(window.lastRadarExcusesList));
+            } catch(e){}
         }
 
         // إلغاء وسم العذر من كشف الحضور إذا كان مسجلاً فيه
