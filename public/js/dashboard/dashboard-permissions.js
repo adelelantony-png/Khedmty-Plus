@@ -882,6 +882,18 @@ function previewDashboardAsServant(servantId) {
     window.__simulatedServant = s;
     const effectivePerms = getServantEffectivePermissions(s);
 
+    // 🌟 تحديث اسم الخادم ورتبته في الهيدر لترى الواجهة تماماً كأنك مسجل بحسابه هو فقط
+    const nameEl = document.getElementById('loggedInUserName');
+    if (nameEl) {
+        if (!window.__realAdminSession.name) window.__realAdminSession.name = nameEl.textContent;
+        nameEl.textContent = s.name;
+    }
+    const badgeEl = document.getElementById('currentRoleBadge');
+    if (badgeEl) {
+        if (!window.__realAdminSession.roleBadge) window.__realAdminSession.roleBadge = badgeEl.textContent;
+        badgeEl.textContent = s.roleType || (s.permission === 'admin' ? 'أمين خدمة' : 'خادم');
+    }
+
     // إغلاق أي نافذة مفتوحة
     closeServantPermissionsModal();
     if (typeof closeEditServantModal === 'function') closeEditServantModal();
@@ -928,6 +940,9 @@ function previewDashboardAsServant(servantId) {
             </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" onclick="generateServantDirectLoginLink('${s.code || s.id}')" style="background:#16a34a; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <i class="fa-brands fa-whatsapp"></i> نسخ رابط واتساب للخادم 🔗
+            </button>
             <button type="button" onclick="openServantPermissionsModal('${s.code || s.id}')" style="background:#0284c7; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
                 <i class="fa-solid fa-sliders"></i> تعديل الصلاحيات
             </button>
@@ -959,6 +974,18 @@ function exitServantPreviewMode() {
     document.body.style.paddingTop = '';
 
     window.__simulatedServant = null;
+
+    // استعادة اسم الأدمن ورتبته في شريط الرأس
+    if (window.__realAdminSession) {
+        const nameEl = document.getElementById('loggedInUserName');
+        if (nameEl && window.__realAdminSession.name) {
+            nameEl.textContent = window.__realAdminSession.name;
+        }
+        const badgeEl = document.getElementById('currentRoleBadge');
+        if (badgeEl && window.__realAdminSession.roleBadge) {
+            badgeEl.textContent = window.__realAdminSession.roleBadge;
+        }
+    }
 
     // استعادة صلاحيات أمين الخدمة الحقيقية
     if (window.__realAdminSession) {
@@ -1011,4 +1038,129 @@ if (typeof window !== 'undefined') {
             getDefaultPermissionsForRole(typeof currentPermission !== 'undefined' ? currentPermission : 'full');
         applyGranularPermissions(userPerms);
     }
+}
+
+
+// ==========================================
+// 📲 توليد رابط الدخول السريع المخصص للخادم (Magic WhatsApp Login Link)
+// ==========================================
+
+function generateServantDirectLoginLink(servantId) {
+    const servantList = (typeof servants !== 'undefined' && Array.isArray(servants)) ? servants : ((typeof window !== 'undefined' && Array.isArray(window.servants)) ? window.servants : []);
+    const targetKey = String(servantId || currentConfiguringServantId || (typeof window !== 'undefined' ? window.currentConfiguringServantId : '')).trim();
+    const s = servantList.find(x => String(x.id || '').trim() === targetKey || String(x.code || '').trim() === targetKey);
+    if (!s) return alert('تعذر العثور على بيانات الخادم لتوليد الرابط!');
+
+    const payload = {
+        code: String(s.code || s.id),
+        id: String(s.id || s.code),
+        phone: String(s.phone || '').replace(/\D/g, ''),
+        name: s.name,
+        role: s.role || 'servant',
+        perm: s.permission || 'full',
+        stage: s.stage || 'عام',
+        roleType: s.roleType || 'خادم',
+        ts: Date.now()
+    };
+
+    const tokenStr = btoa(encodeURIComponent(JSON.stringify(payload)));
+    const baseUrl = window.location.href.split('?')[0].replace(/servant-dashboard\.html.*$/, 'servant-dashboard.html');
+    const directUrl = `${baseUrl}?quick_servant=${encodeURIComponent(tokenStr)}`;
+
+    let cleanPhone = String(s.phone || '').replace(/\D/g, '');
+    if (cleanPhone.startsWith('01') && cleanPhone.length === 11) {
+        cleanPhone = '2' + cleanPhone;
+    }
+
+    showServantDirectLoginModal(s, directUrl, cleanPhone);
+}
+
+function showServantDirectLoginModal(servant, fullLink, cleanPhone) {
+    let modal = document.getElementById('modalServantDirectLogin');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'modalServantDirectLogin';
+        modal.className = 'modal';
+        document.body.appendChild(modal);
+    }
+
+    const waMsg = `سلام ونعمة يا أستاذ ${servant.name} 🤍🕊️\nتفضل رابط الدخول المباشر المعتمد الخاص بك لمنظومة خدمة إعداد خدام:\n🔗 ${fullLink}\n\n💡 بمجرد الضغط على الرابط، ستفتح لوحة التحكم بحسابك وصلاحياتك المخصصة مباشرة وتلقائياً دون الحاجة لكتابة اسم مستخدم أو كلمة مرور.`;
+    const waUrl = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}` : `https://wa.me/?text=${encodeURIComponent(waMsg)}`;
+
+    modal.style.cssText = `
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 9999999;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(6px);
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        direction: rtl;
+        font-family: inherit;
+    `;
+
+    modal.innerHTML = `
+        <div style="background:#ffffff; width:100%; max-width:540px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.3); border:1.5px solid #e2e8f0; overflow:hidden; animation:kRiseUp 0.3s cubic-bezier(0.16,1,0.3,1) both;">
+            <!-- هيدر النافذة -->
+            <div style="background:linear-gradient(135deg, #071A38 0%, #0C2461 100%); color:#ffffff; padding:18px 22px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #D4AF37;">
+                <div>
+                    <h3 style="margin:0; font-size:1.15rem; font-weight:900; color:#F3C64F; display:flex; align-items:center; gap:8px;">
+                        <span>📲</span> رابط الدخول السريع للخادم (Magic Link)
+                    </h3>
+                    <p style="margin:4px 0 0; font-size:0.8rem; color:#cbd5e1;">
+                        دخول فوري تلقائي ومباشر بدون كلمة سر بحساب وصلاحيات الخادم
+                    </p>
+                </div>
+                <button type="button" onclick="document.getElementById('modalServantDirectLogin').style.display='none'" style="background:none; border:none; color:#ffffff; font-size:24px; cursor:pointer; line-height:1;">&times;</button>
+            </div>
+
+            <!-- محتوى النافذة -->
+            <div style="padding:22px;">
+                <!-- بطاقة الخادم -->
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <div style="font-weight:900; font-size:1rem; color:#0f172a;">${servant.name}</div>
+                        <div style="font-size:0.78rem; color:#64748b; margin-top:2px;">
+                            كود: <strong>${servant.code || servant.id}</strong> • المرحلة: <strong>${servant.stage || 'عام'}</strong> • هاتف: <strong>${servant.phone || 'غير مسجل'}</strong>
+                        </div>
+                    </div>
+                    <span style="background:#dbeafe; color:#1e40af; border:1px solid #bfdbfe; font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:999px;">
+                        ${servant.roleType || 'خادم'}
+                    </span>
+                </div>
+
+                <label style="display:block; font-size:0.82rem; font-weight:800; color:#334155; margin-bottom:6px;">
+                    🔗 رابط الدخول الشخصي المخصص:
+                </label>
+                <div style="position:relative; margin-bottom:16px;">
+                    <textarea id="txtServantDirectLink" readonly style="width:100%; height:75px; padding:10px; font-size:0.82rem; border:1.5px solid #cbd5e1; border-radius:10px; background:#f1f5f9; color:#0f172a; resize:none; font-family:monospace; direction:ltr; text-align:left; line-height:1.4;">${fullLink}</textarea>
+                </div>
+
+                <div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:10px 14px; margin-bottom:18px; font-size:0.8rem; color:#065f46; line-height:1.6;">
+                    💡 <strong>كيف يعمل هذا الرابط؟</strong><br>
+                    بمجرد أن يضغط الخادم على الرابط في واتساب من هاتفه، ستفتح المنظومة فوراً بحسابه وصلاحياته المحددة فقط دون طلب اسم مستخدم أو كلمة سر.
+                </div>
+
+                <!-- أزرار الإجراءات -->
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <a href="${waUrl}" target="_blank" style="flex:1; min-width:180px; text-decoration:none; background:#16a34a; color:#ffffff; padding:11px 16px; border-radius:10px; font-weight:800; font-size:0.88rem; display:inline-flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 3px 10px rgba(22,163,74,0.3); transition:all 0.2s;">
+                        <i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> إرسال للخادم عبر واتساب 📲
+                    </a>
+                    <button type="button" onclick="navigator.clipboard.writeText('${fullLink}').then(()=>{ this.innerHTML='<i class=\"fa-solid fa-check\"></i> تم النسخ بنجاح! ✅'; setTimeout(()=>{ this.innerHTML='<i class=\"fa-solid fa-copy\"></i> نسخ الرابط'; }, 2000); })" style="background:#0284c7; color:#ffffff; border:none; padding:11px 18px; border-radius:10px; font-weight:800; font-size:0.88rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(2,132,199,0.3); transition:all 0.2s;">
+                        <i class="fa-solid fa-copy"></i> نسخ الرابط
+                    </button>
+                    <button type="button" onclick="window.open('${fullLink}', '_blank')" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; padding:11px 14px; border-radius:10px; font-weight:800; font-size:0.82rem; cursor:pointer;" title="فتح الرابط في تبويب جديد لتجربته بنفسك">
+                        👁️ تجربة
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+if (typeof window !== 'undefined') {
+    window.generateServantDirectLoginLink = generateServantDirectLoginLink;
+    window.showServantDirectLoginModal = showServantDirectLoginModal;
 }

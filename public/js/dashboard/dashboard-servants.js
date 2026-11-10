@@ -711,6 +711,7 @@ tr.innerHTML = `
     <button class="btn-mini btn-warning" onclick="openEditServantModal('${escapeHtml(s.code || s.id)}')" title="تعديل البيانات الأساسية">تعديل</button>
     <button class="btn-mini" style="background:#4f46e5; color:#ffffff; margin-right:3px;" onclick="openServantPermissionsModal('${escapeHtml(s.code || s.id)}')" title="تخصيص الصلاحيات بالتفصيل الممل لهذا الخادم">🛡️ الصلاحيات</button>
     <button class="btn-mini" style="background:#0284c7; color:#ffffff; margin-right:3px;" onclick="previewDashboardAsServant('${escapeHtml(s.code || s.id)}')" title="معاينة لوحة التحكم الحية كما يراها هذا الخادم بالضبط">👁️ معاينة</button>
+    <button class="btn-mini" style="background:#16a34a; color:#ffffff; margin-right:3px;" onclick="generateServantDirectLoginLink('${escapeHtml(s.code || s.id)}')" title="توليد ونسخ رابط الدخول السريع المخصص لهذا الخادم عبر واتساب">📲 رابط الدخول</button>
 </td>
 
 <td data-label="السجل" class="admin-only"><button class="btn-mini" style="background:#dfe6e9; color:#2d3436;" onclick="showVersionHistoryModal('servant', '${s.id}', '${escapeHtml(s.name)}')">🕘</button></td>
