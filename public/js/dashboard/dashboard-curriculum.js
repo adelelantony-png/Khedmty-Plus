@@ -221,7 +221,9 @@ i += n; k++;
 
 }
 
-state.blocks = state.blocks.filter(function (b) { return b.year !== y; }
+state.blocks = state.blocks.filter(function (b) { return b.year !== y; }).concat(out);
+
+}
 
 // التغذية التلقائية الفورية بالمنهج الكنسي الرسمي الـ 7 مواد في حال كانت القائمة فارغة
 (function autoSeedCurriculum() {
@@ -234,9 +236,6 @@ state.blocks = state.blocks.filter(function (b) { return b.year !== y; }
         } catch(e) {}
     }
 })();
-).concat(out);
-
-}
 
 /* ---------- المُجدول الذكي (الفرقتان معاً) ---------- */
 

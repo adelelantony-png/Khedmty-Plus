@@ -426,7 +426,9 @@ function openEditMasterPlanModal(id) {
         if (e.target === modal) closeEditMasterPlanModal();
     };
 
+    window.scrollTo({ left: 0, behavior: 'instant' });
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     document.body.appendChild(modal);
 }
 
@@ -434,6 +436,7 @@ function closeEditMasterPlanModal() {
     const m = document.getElementById('editMasterPlanModal');
     if (m) m.remove();
     document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
 }
 
 function saveEditedMasterPlanEvent(id) {
