@@ -6383,24 +6383,19 @@ return n;
 // عدد الجمعات المتتالية الأخيرة التي غابها الدارس (من آخر جمعة مسجّل فيها حضور لأي أحد)
 
 function consecutiveFridayAbsences(sCode) {
+    let startStr = (typeof settings === 'object' && settings.serviceStart) ? settings.serviceStart : "2026-11-06";
+    let todayStr = new Date().toISOString().split('T')[0];
+    let fridays = Object.keys(attendanceRecord).filter(d => isFridaySession(d) && d >= startStr && d <= todayStr && (attendanceRecord[d] || []).length > 0).sort().reverse();
 
-let startStr = (typeof settings === 'object' && settings.serviceStart) ? settings.serviceStart : "2026-11-06";
-let fridays = Object.keys(attendanceRecord).filter(d => isFridaySession(d) && d >= startStr && (attendanceRecord[d] || []).length > 0).sort().reverse();
+    if (fridays.length === 0) return 0;
 
-let n = 0;
-
-for (let d of fridays) {
-
-let present = (attendanceRecord[d] || []).some(a => String(a.code || a.id) === String(sCode) && !a.isAbsentDueToDelay);
-
-if (present) break;
-
-n++;
-
-}
-
-return n;
-
+    let n = 0;
+    for (let d of fridays) {
+        let present = (attendanceRecord[d] || []).some(a => String(a.code || a.id) === String(sCode) && (a.attended === true || a.attended === 'حاضر') && !a.isAbsentDueToDelay && !a.isAbsent);
+        if (present) break;
+        n++;
+    }
+    return Math.min(n, fridays.length);
 }
 
 // ==========================================

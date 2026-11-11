@@ -2451,6 +2451,14 @@ function renderStudentExcuseHistoryInModal(currentExcuse) {
 function markStudentExcusedInAttendance(excuse) {
     try {
         const friday = excuse.friday_date;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // صرامة المنظومة: منع حقن التواريخ المستقبلية في كشف الحضور الفعلي
+        if (friday > todayStr) {
+            console.log(`ℹ️ [Attendance Shield] تم اعتماد الاستئذان المسبق لتاريخ مستقبلي [${friday}]. محفوظ في رادار الأعذار ولن يُحقن كحضور فعلي قبل انعقاد اليوم.`);
+            return;
+        }
+
         let record = (typeof attendanceRecord !== 'undefined' && attendanceRecord) ? attendanceRecord : {};
         if (!record[friday]) record[friday] = [];
 
@@ -2469,6 +2477,7 @@ function markStudentExcusedInAttendance(excuse) {
                 attended: false,
                 isAbsentDueToDelay: false,
                 isExcused: true,
+                isAbsent: !isDelay,
                 hasApprovedDelay: isDelay,
                 excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (excuse.reason_category || 'عذر غياب مقبول')
             };
@@ -2481,6 +2490,7 @@ function markStudentExcusedInAttendance(excuse) {
                 item.attended = false;
                 item.isAbsentDueToDelay = false;
                 item.isExcused = true;
+                item.isAbsent = true;
                 item.excuseReason = excuse.reason_category || 'عذر غياب مقبول';
             }
         }

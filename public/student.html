@@ -1210,15 +1210,21 @@ body { font-family: var(--font-arabic, 'Tajawal', sans-serif); background-color:
         renderTodayStatus(localAtt);
         if (typeof renderConferenceDiscountCard === 'function') { try { renderConferenceDiscountCard(); } catch(e){} }
 
-        // تحديث كارت حضور الجمعة الشخصي للدارس
+        // تحديث كارت حضور الجمعة الشخصي للدارس وفق المعايير الصارمة
         try {
             const myCode = (window.AuthClient && AuthClient.getUserCode()) || String(localStorage.getItem('student_code') || '').trim();
             if (myCode) {
                 let friAttendedCount = 0;
+                const todayStr = new Date().toISOString().split('T')[0];
+                const sStart = (typeof settings === 'object' && settings && settings.serviceStart) ? settings.serviceStart : '2026-11-06';
+                
                 Object.keys(localAtt).forEach(dKey => {
+                    // استبعاد أي تواريخ سابقة للانطلاق أو مستقبلية
+                    if (dKey < sStart || dKey > todayStr) return;
                     const list = localAtt[dKey] || [];
                     const rec = list.find(a => String(a.code || a.id || '').trim() === myCode);
-                    if (rec && !rec.isAbsentDueToDelay && !rec.isAbsent) {
+                    // الحضور الفعلي فقط هو من يُحتسب (لا يُحتسب الاستئذان المسبق حضوراً)
+                    if (rec && (rec.attended === true || rec.attended === 'حاضر') && !rec.isAbsentDueToDelay && !rec.isAbsent) {
                         const dt = new Date(dKey);
                         if (dt.getDay() === 5) friAttendedCount++;
                     }

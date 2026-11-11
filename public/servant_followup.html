@@ -689,6 +689,55 @@ body {
             box-shadow: 0 4px 14px rgba(16, 185, 129, 0.15);
         }
 
+    
+        /* أنماط الشاشة الموحدة 360° */
+        .coptic-fasting-banner {
+            background: linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+        }
+        .view-mode-tabs {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+        }
+        .view-mode-btn {
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 800;
+            font-size: 0.88rem;
+            color: #475569;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-mode-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .badge-conf-ok { background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+        .badge-conf-warn { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+        .badge-conf-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+
+        .badge-coaching-ready { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; font-weight: 800; font-size: 0.78rem; border-radius: 6px; padding: 4px 8px; display: inline-block; }
+        .badge-coaching-progress { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-weight: 800; font-size: 0.78rem; border-radius: 6px; padding: 4px 8px; display: inline-block; }
+        .badge-coaching-confession { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; font-weight: 800; font-size: 0.78rem; border-radius: 6px; padding: 4px 8px; display: inline-block; }
+        .badge-coaching-followup { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; font-weight: 800; font-size: 0.78rem; border-radius: 6px; padding: 4px 8px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -700,11 +749,17 @@ body {
             <i class="fa-solid fa-arrow-right"></i> لوحة الخادم
         </button>
         <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn-action-top" onclick="openSystemIntegrityAuditModal()" style="background:#fef3c7; color:#92400e; border:1.5px solid #f59e0b; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-shield-halved"></i> مدقق الحسابات والمعايير (أمين الخدمة) 🛡️
+            </button>
             <a href="servant_spiritual_report.html" class="btn-action-top" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
                 <i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
             </a>
             <button class="btn-action-top btn-refresh" onclick="loadDataFromCloud(true)">
                 <i class="fa-solid fa-arrows-rotate"></i> تحديث
+            </button>
+            <button class="btn-action-top" onclick="exportSpiritualGraceExcel()" style="background:#4f46e5; color:#ffffff; border:1px solid #4338ca; font-weight:700;">
+                <i class="fa-solid fa-trophy"></i> كشف وسائط النعمة والدرجات (Excel) 📊
             </button>
             <button class="btn-action-top btn-export" onclick="exportVisitationExcel()">
                 <i class="fa-solid fa-file-excel"></i> تصدير Excel
@@ -717,8 +772,8 @@ body {
 
     <!-- Header Card -->
     <div class="header-card">
-        <h3><i class="fa-solid fa-handshake-angle"></i> منظومة الافتقاد الذكي ورصد الغياب</h3>
-        <p>حصر ومتابعة المخدومين الغائبين والمنقطعين، مع أرقام هواتفهم، والتواصل المباشر، وتوثيق سجل الافتقاد والكبسولات الميدانية.</p>
+        <h3><i class="fa-solid fa-cross text-warning me-2"></i> المنظومة الرعوية الشاملة: الافتقاد الذكي وحصاد وسائط النعمة 360°</h3>
+        <p>منصة موحدة متكاملة تجمع بين رصد الغياب والافتقاد الميداني السريع 🤝 ومتابعة السلوك الروحي وحصاد وسائط النعمة (القداس، النوتة، الإنجيل، والاعتراف) 🕊️.</p>
         <span class="sync-badge">
             <span class="dot" id="syncDot"></span>
             <span id="syncText">جاري فحص الاتصال...</span>
@@ -726,6 +781,20 @@ body {
     </div>
 
     <!-- Quick Stats Grid -->
+        <!-- بطاقة طقس الكنيسة القبطية والأصوام الذكية الموحدة -->
+    <div class="coptic-fasting-banner" id="copticFastingBanner">
+        <div style="display:flex; align-items:center; gap:14px;">
+            <div id="ui-fast-icon" style="font-size:2.2rem; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.15); border-radius:12px;">🥖</div>
+            <div>
+                <div style="font-weight:800; font-size:1.1rem;" id="ui-fast-title">طقس الكنيسة القبطية الأرثوذكسية اليوم</div>
+                <div style="font-size:0.85rem; opacity:0.92;" id="ui-fast-desc">متابعة مواسم الأصوام والأعياد الكنسية لتوجيه مخدومي إعداد الخدام في حياتهم الروحية</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span class="badge" style="background:rgba(255,255,255,0.22); color:#fff; padding:8px 16px; font-size:0.9rem; border-radius:8px;" id="ui-coptic-date-display">التقويم القبطي</span>
+        </div>
+    </div>
+
     <div class="stats-grid">
         <div class="stat-card c-all active-filter" id="cardFilterAll" onclick="applyQuickFilter('all')">
             <div class="stat-info">
@@ -777,6 +846,24 @@ body {
     </div>
 
     <!-- Filter & Search Toolbar -->
+    <!-- مبدل أنماط العرض الرعوي الموحد -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="view-mode-tabs" role="tablist">
+            <button type="button" class="view-mode-btn active" id="viewModeVisitation" onclick="switchViewMode('visitation')">
+                <i class="fa-solid fa-handshake-angle text-primary"></i> 🤝 الرعاية والافتقاد الميداني
+            </button>
+            <button type="button" class="view-mode-btn" id="viewModeSpiritual" onclick="switchViewMode('spiritual')">
+                <i class="fa-solid fa-dove text-purple"></i> 🕊️ السلوك الروحي ووسائط النعمة
+            </button>
+            <button type="button" class="view-mode-btn" id="viewModeCombined" onclick="switchViewMode('combined')">
+                <i class="fa-solid fa-star text-warning"></i> 🌟 العرض الشامل المدمج 360°
+            </button>
+        </div>
+        <div id="viewModeDescription" class="small text-muted fw-bold">
+            <i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات.
+        </div>
+    </div>
+
     <div class="filter-panel">
         <div class="filter-row">
             <div class="filter-search">
@@ -812,17 +899,9 @@ body {
     <div class="table-card">
         <div class="table-responsive">
             <table class="table" id="visitationTable">
-                <thead>
-                    <tr>
-                        <th style="width: 80px;">كود الدارس</th>
-                        <th>اسم المخدوم</th>
-                        <th>الفرقة / المرحلة</th>
-                        <th>حالة الغياب المتتالي</th>
-                        <th>التواصل السريع</th>
-                        <th>آخر افتقاد مسجل</th>
-                        <th style="width: 140px;">إجراء الافتقاد</th>
-                    </tr>
-                </thead>
+                            <thead id="tableHead">
+                <!-- يتم توليد ترويسة الجدول ديناميكياً بحسب نمط العرض المحدد -->
+            </thead>
                 <tbody id="tableBody">
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
@@ -900,6 +979,70 @@ body {
 </div>
 
 <!-- Modal: تسجيل افتقاد جديد -->
+<!-- Modal: مدقق نزاهة الحسابات والمعايير الرعوية -->
+<div class="custom-modal-backdrop" id="integrityModalBackdrop">
+    <div class="custom-modal-content" style="max-width: 740px;">
+        <div class="modal-header-styled" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;">
+            <h5><i class="fa-solid fa-shield-halved text-warning me-2"></i> مدقق نزاهة الحسابات والمعايير الرعوية (أمانة الخدمة)</h5>
+            <button class="modal-close-btn" style="color:#fff;" onclick="closeSystemIntegrityModal()">&times;</button>
+        </div>
+        <div class="modal-body-styled">
+            <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary me-1"></i> الجمعات المنقضية رسمياً منذ انطلاق الخدمة:</span>
+                    <span class="badge bg-primary fs-6 px-3 py-1" id="auditElapsedFridaysBadge">1 جمعة (2026-11-06)</span>
+                </div>
+                <div class="small text-muted">
+                    القاعدة الصارمة: لا يمكن لأي مخدوم أن يتجاوز حضوره أو غيابه المتتالي عدد الجمعات المنقضية فعلياً حتى تاريخ اليوم (<strong id="auditTodayStr">-</strong>).
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3 text-center">
+                <div class="col-4">
+                    <div class="p-2 rounded-3 border" style="background:#fff;">
+                        <small class="text-muted d-block">إنذارات غياب غير منطقية</small>
+                        <strong class="fs-5" id="auditFalseStreaksCount" style="color:#dc2626;">0</strong>
+                        <div class="small text-muted" style="font-size:0.7rem;">(تجاوزت المنقضي)</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded-3 border" style="background:#fff;">
+                        <small class="text-muted d-block">حضور زائف/مستقبلي</small>
+                        <strong class="fs-5" id="auditFalseAttCount" style="color:#d97706;">0</strong>
+                        <div class="small text-muted" style="font-size:0.7rem;">(استئذان حُسب كحضور)</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2 rounded-3 border" style="background:#fff;">
+                        <small class="text-muted d-block">جلسات مستقبلية محقونة</small>
+                        <strong class="fs-5" id="auditFutureSessionsCount" style="color:#2563eb;">0</strong>
+                        <div class="small text-muted" style="font-size:0.7rem;">(تواريخ &gt; اليوم)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h6 class="fw-bold text-dark small mb-2"><i class="fa-solid fa-clipboard-list me-1"></i> تقرير الفحص والتدقيق الميداني المباشر:</h6>
+                <div id="auditReportDetails" style="max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.85rem;">
+                    جاري فحص الحسابات...
+                </div>
+            </div>
+
+            <div class="p-2 rounded-3 mb-3" style="background:#fef3c7; border:1px solid #fde047; font-size:0.82rem; color:#854d0e;">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                <strong>إجراء التصحيح الفوري:</strong> سيقوم بإزالة الجلسات المستقبلية من كشف الحضور، وتصحيح متتالية الغياب لتعود للواقع (غائب جمعة واحدة بدلاً من إنذار جمعتين)، وإلغاء احتساب الاستئذان المسبق كحضور ليصبح (1 لقاء للملتزمين).
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center gap-2">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSystemIntegrityModal()">إلغاء / إغلاق</button>
+                <button type="button" class="btn btn-success fw-bold px-4" id="btnApplyAuditFix" onclick="applySystemIntegrityFix()">
+                    <i class="fa-solid fa-check-double me-1"></i> الموافقة على التصحيح وتثبيت المعايير الصارمة ✅
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="custom-modal-backdrop" id="visitModalBackdrop">
     <div class="custom-modal-content">
         <div class="modal-header-styled">
@@ -1029,26 +1172,34 @@ body {
         return !isNaN(d.getTime()) && d.getDay() === 5;
     }
 
-    // حساب عدد الجمعات المتتالية التي غابها الدارس
+    // حساب عدد الجمعات المتتالية التي غابها الدارس وفق المعايير الصارمة
     function calculateConsecutiveAbsences(sCode) {
         const codeStr = String(sCode || '').trim();
-        const startStr = (typeof settings === 'object' && settings && settings.serviceStart) ? settings.serviceStart : "2026-11-06";
+        const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+        const startStr = sSettings.serviceStart || "2026-11-06";
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // الصرامة 1: استبعاد أي جمعات مستقبلية لم تنعقد بعد
         const fridays = Object.keys(attendanceRecord || {})
-            .filter(d => isFridaySession(d) && d >= startStr && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
+            .filter(d => isFridaySession(d) && d >= startStr && d <= todayStr && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0)
             .sort()
             .reverse();
+
+        if (fridays.length === 0) return 0;
 
         let streak = 0;
         for (const fDate of fridays) {
             const attendees = attendanceRecord[fDate] || [];
+            // الحضور الفعلي فقط هو من يُسقط الغياب (attended === true) ولا يُحتسب الاستئذان حضوراً
             const attended = attendees.some(a => {
                 const aCode = String(a.code || a.id || a.studentCode || '').trim();
-                return aCode === codeStr && !a.isAbsentDueToDelay;
+                return aCode === codeStr && (a.attended === true || a.attended === 'حاضر') && !a.isAbsentDueToDelay && !a.isAbsent;
             });
             if (attended) break;
             streak++;
         }
-        return streak;
+        // الحد الأقصى الرياضي: لا يمكن لمتتالية الغياب أن تتجاوز عدد الجمعات المنقضية فعلياً
+        return Math.min(streak, fridays.length);
     }
 
     // فحص هل افتُقد هذا الشهر (خلال آخر 30 يوماً)
@@ -1382,6 +1533,162 @@ body {
         filterAndRender();
     }
 
+    
+    // ========================================================
+    // ✝️ محرك التقويم القبطي وحالة الأصوام الذكية
+    // ========================================================
+    const CopticLiturgicalCalendar = {
+        easterDates: {
+            2024: new Date(2024, 4, 5),
+            2025: new Date(2025, 3, 20),
+            2026: new Date(2026, 3, 12),
+            2027: new Date(2027, 4, 2),
+            2028: new Date(2028, 3, 16),
+            2029: new Date(2029, 3, 8),
+            2030: new Date(2030, 3, 28)
+        },
+        getCopticDate: function(date = new Date()) {
+            try {
+                const parts = new Intl.DateTimeFormat('en-US-u-ca-coptic', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                }).formatToParts(date);
+                let day = 1, month = 1, year = 1740;
+                for (const p of parts) {
+                    if (p.type === 'day') day = parseInt(p.value, 10);
+                    if (p.type === 'month') month = parseInt(p.value, 10);
+                    if (p.type === 'year') year = parseInt(p.value, 10);
+                }
+                const monthNames = ['', 'توت', 'بابه', 'هاتور', 'كيهك', 'طوبة', 'أمشير', 'برمهات', 'برمودة', 'بشنس', 'بؤونة', 'أبيب', 'مسرى', 'النسئ'];
+                return { day, month, monthName: monthNames[month] || '', year, formatted: `${day} ${monthNames[month] || ''} ${year} ش` };
+            } catch(e) {
+                return { day: 1, month: 1, monthName: '', year: 1740, formatted: 'التقويم القبطي' };
+            }
+        },
+        getFastingStatus: function(date = new Date()) {
+            const c = this.getCopticDate(date);
+            const dayOfWeek = date.getDay(); // 0: Sun, 3: Wed, 5: Fri
+            const isWedOrFri = (dayOfWeek === 3 || dayOfWeek === 5);
+            const y = date.getFullYear();
+            const easter = this.easterDates[y] || new Date(y, 3, 15);
+            const diffDaysToEaster = Math.round((date - easter) / (1000 * 60 * 60 * 24));
+
+            if (diffDaysToEaster >= 0 && diffDaysToEaster <= 49) {
+                if (diffDaysToEaster === 0) return { isFast: false, name: "عيد القيامة المجيد 👑", icon: "🎉", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بالقيامة" };
+                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🎉", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
+            }
+            if (diffDaysToEaster >= -7 && diffDaysToEaster <= -1) {
+                return { isFast: true, name: "أسبوع الآلام المقدس (البصخة) ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
+            }
+            if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
+                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع (بدون سمك)" };
+            }
+            if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
+                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى" };
+            }
+            if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
+                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+            }
+            if (c.month === 12 && c.day >= 1 && c.day <= 15) {
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية)" };
+            }
+            if (isWedOrFri) {
+                const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
+                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: "صوم كنسي أسبوعي مقدس - صوم انقطاعي" };
+            }
+            return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
+        }
+    };
+
+    function renderFastingStatus() {
+        const now = new Date();
+        const f = CopticLiturgicalCalendar.getFastingStatus(now);
+        const c = CopticLiturgicalCalendar.getCopticDate(now);
+        const iconEl = document.getElementById('ui-fast-icon');
+        const titleEl = document.getElementById('ui-fast-title');
+        const descEl = document.getElementById('ui-fast-desc');
+        const dateEl = document.getElementById('ui-coptic-date-display');
+        if (iconEl) iconEl.textContent = f.icon;
+        if (titleEl) titleEl.textContent = f.name;
+        if (descEl) descEl.textContent = f.desc;
+        if (dateEl) dateEl.textContent = c.formatted || 'التقويم القبطي';
+    }
+
+    // ========================================================
+    // 🎛️ إدارة أنماط العرض الرعوي الموحد (Visitation / Spiritual / Combined)
+    // ========================================================
+    let currentViewMode = 'visitation'; // 'visitation' | 'spiritual' | 'combined'
+
+    function switchViewMode(mode) {
+        currentViewMode = mode;
+        try { localStorage.setItem('khedmety_followup_view_mode', mode); } catch(e){}
+
+        document.querySelectorAll('.view-mode-btn').forEach(btn => btn.classList.remove('active'));
+        if (mode === 'visitation') {
+            document.getElementById('viewModeVisitation')?.classList.add('active');
+            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات.';
+        } else if (mode === 'spiritual') {
+            document.getElementById('viewModeSpiritual')?.classList.add('active');
+            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-purple me-1"></i> وضع وسائط النعمة: حضور الجمعة، القداسات، أيام النوتة، الإنجيل، والاعتراف، وإجمالي النقاط.';
+        } else if (mode === 'combined') {
+            document.getElementById('viewModeCombined')?.classList.add('active');
+            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-warning me-1"></i> العرض الشامل 360°: يجمع مؤشرات الالتزام والرعاية والتأهيل الروحي في جدول واحد متكامل.';
+        }
+
+        renderTableHeader();
+        filterAndRender();
+    }
+
+    function renderTableHeader() {
+        const thead = document.getElementById('tableHead');
+        if (!thead) return;
+
+        if (currentViewMode === 'visitation') {
+            thead.innerHTML = `
+                <tr>
+                    <th>كود الدارس</th>
+                    <th>اسم المخدوم</th>
+                    <th>الفرقة / المرحلة</th>
+                    <th>حالة الغياب والالتزام</th>
+                    <th>التواصل السريع</th>
+                    <th>آخر افتقاد</th>
+                    <th>إجراء الافتقاد</th>
+                </tr>
+            `;
+        } else if (currentViewMode === 'spiritual') {
+            thead.innerHTML = `
+                <tr>
+                    <th>كود الدارس</th>
+                    <th>اسم المخدوم</th>
+                    <th>الفرقة / المرحلة</th>
+                    <th>حضور الجمعة ▾</th>
+                    <th>القداس والتناول 🍞 ▾</th>
+                    <th>أيام النوتة ▾</th>
+                    <th>قراءات الإنجيل ▾</th>
+                    <th>حالة الاعتراف 🕊️ ▾</th>
+                    <th>مؤشر التأهيل الخدمي 🎯</th>
+                    <th>إجمالي النقاط ⭐ ▾</th>
+                </tr>
+            `;
+        } else if (currentViewMode === 'combined') {
+            thead.innerHTML = `
+                <tr>
+                    <th>كود الدارس</th>
+                    <th>اسم المخدوم</th>
+                    <th>الفرقة</th>
+                    <th>الغياب والالتزام</th>
+                    <th>وسائط النعمة المجمعة (قداس/نوتة/إنجيل)</th>
+                    <th>الاعتراف والتأهيل 🕊️</th>
+                    <th>النقاط ⭐</th>
+                    <th>التواصل وآخر افتقاد</th>
+                    <th>تسجيل افتقاد</th>
+                </tr>
+            `;
+        }
+    }
+
+
     // فلترة وترتيب وعرض الجدول
     function filterAndRender() {
         const query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
@@ -1395,7 +1702,17 @@ body {
             return;
         }
 
-        // 1. حساب بيانات كل مخدوم
+        // 1. حساب بيانات كل مخدوم الشاملة (رعوية + سلوك روحي)
+        const spiritualLogs = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+        let candidatesGrades = [];
+        try { candidatesGrades = JSON.parse(localStorage.getItem('khedmety_candidates_grades')) || []; } catch(e){}
+
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+        const startStr = sSettings.serviceStart || "2026-11-06";
+
         let enriched = allMembers.map(m => {
             const sCode = String(m.code || m.id || '').trim();
             const sName = String(m.name || 'مخدوم').trim();
@@ -1409,6 +1726,85 @@ body {
             const visitations = Array.isArray(m.visitations) ? m.visitations : [];
             const lastVisit = visitations.length > 0 ? visitations[0] : null;
             const visitedRecently = isVisitedWithinDays(visitations, 30);
+
+            // أ) حضور الجمعة والقداسات والتناول
+            let fridayCount = 0;
+            let liturgies = 0;
+            Object.keys(attendanceRecord || {}).forEach(dateKey => {
+                if (dateKey < startStr || dateKey > todayStr) return;
+                const dt = new Date(dateKey + 'T00:00:00');
+                const isFri = dt.getDay() === 5;
+                const found = (attendanceRecord[dateKey] || []).find(a =>
+                    String(a.code || a.id || '').trim() === sCode && (a.attended === true || a.attended === 'حاضر') && !a.isAbsentDueToDelay && !a.isAbsent
+                );
+                if (found) {
+                    if (isFri) fridayCount++;
+                    if (dt.getDay() === 0 || found.mass || found.communion || found.type === 'liturgy') liturgies++;
+                }
+            });
+
+            // ب) أيام النوتة الروحية
+            let spiritualDays = 0;
+            let communionInNote = 0;
+            Object.keys(spiritualLogs).forEach(k => {
+                if (k.endsWith('_' + sCode)) {
+                    spiritualDays++;
+                    const entry = spiritualLogs[k];
+                    if (entry && (entry.communion || entry.mass || entry.eucharist)) communionInNote++;
+                }
+            });
+            const totalLiturgies = Math.max(liturgies, communionInNote);
+
+            // ج) قراءات الإنجيل
+            let bibleChapters = 0;
+            Object.keys(bibleReadings).forEach(k => {
+                if (k.endsWith('_' + sCode) || String((bibleReadings[k] || {}).code || '') === sCode) {
+                    const item = bibleReadings[k] || {};
+                    if (Array.isArray(item.completed_chapters)) bibleChapters += item.completed_chapters.length;
+                    else if (item.chapters_read_count) bibleChapters += item.chapters_read_count;
+                    else if (item.is_completed || item.completed) bibleChapters += (item.total_chapters || 1);
+                    else bibleChapters += 1;
+                }
+            });
+
+            // د) حالة سر الاعتراف
+            let confDate = m.lastConfession || null;
+            if (!confDate) {
+                const rawConf = localStorage.getItem('khedmety_student_confession_' + sCode) || localStorage.getItem('khedmety_private_confession_' + sCode);
+                if (rawConf) {
+                    try { const p = JSON.parse(rawConf); confDate = (typeof p === 'string') ? p : (p.date || p.lastConfession || null); } catch(e) { confDate = rawConf; }
+                }
+            }
+            if (!confDate) {
+                const cand = candidatesGrades.find(cg => String(cg.code) === sCode);
+                if (cand && cand.lastConfession) confDate = cand.lastConfession;
+            }
+
+            let confessionStatus = { label: 'لم يسجل بعد ⏳', badgeClass: 'badge bg-light text-muted border', daysAgo: 999 };
+            if (confDate) {
+                const cDate = new Date(confDate);
+                if (!isNaN(cDate.getTime())) {
+                    const diffDays = Math.floor((now - cDate) / (1000 * 60 * 60 * 24));
+                    if (diffDays <= 30) confessionStatus = { label: `منذ ${diffDays} يوم 🟢`, badgeClass: 'badge-conf-ok', daysAgo: diffDays };
+                    else if (diffDays <= 45) confessionStatus = { label: `منذ ${diffDays} يوم 🟡`, badgeClass: 'badge-conf-warn', daysAgo: diffDays };
+                    else confessionStatus = { label: `تأخر (${diffDays} يوم) ⚠️`, badgeClass: 'badge-conf-danger', daysAgo: diffDays };
+                } else {
+                    confessionStatus = { label: 'مسجل 🕊️', badgeClass: 'badge-conf-ok', daysAgo: 0 };
+                }
+            }
+
+            // هـ) مؤشر التأهيل الخدمي
+            let coachingStatus = { text: 'في مسار التأهيل 🟡', badgeClass: 'badge-coaching-progress' };
+            if (confessionStatus.daysAgo <= 40 && (fridayCount >= 1 || spiritualDays >= 2 || totalLiturgies >= 1)) {
+                coachingStatus = { text: 'مؤهل ومجتهد 🟢', badgeClass: 'badge-coaching-ready' };
+            } else if (confessionStatus.daysAgo > 45 || !confDate) {
+                coachingStatus = { text: 'يحتاج متابعة اعتراف ⚠️', badgeClass: 'badge-coaching-confession' };
+            } else if (fridayCount === 0 && spiritualDays === 0) {
+                coachingStatus = { text: 'يحتاج تشجيع وافتقاد 🤝', badgeClass: 'badge-coaching-followup' };
+            }
+
+            // و) إجمالي النقاط
+            const totalPoints = (fridayCount * 5) + (totalLiturgies * 4) + (spiritualDays * 5) + (bibleChapters * 2) + (confessionStatus.daysAgo <= 35 ? 10 : 0);
 
             return {
                 raw: m,
@@ -1424,7 +1820,14 @@ body {
                 bibleDays: bibleDays,
                 visitations: visitations,
                 lastVisit: lastVisit,
-                visitedRecently: visitedRecently
+                visitedRecently: visitedRecently,
+                fridayCount,
+                liturgies: totalLiturgies,
+                spiritualDays,
+                bibleChapters,
+                confessionStatus,
+                coachingStatus,
+                points: totalPoints
             };
         });
 
@@ -1485,7 +1888,7 @@ body {
             return;
         }
 
-        // 6. توليد صفوف الجدول
+        // 6. توليد صفوف الجدول بحسب نمط العرض المحدد ديناميكياً
         let html = '';
         enriched.forEach(item => {
             // شارة الغياب
@@ -1542,30 +1945,77 @@ body {
                 lastVisitHtml = '<span class="badge bg-light text-muted border">لم يُفتقد بعد ⚠️</span>';
             }
 
-            html += `
-                <tr>
-                    <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
-                    <td data-label="اسم المخدوم" class="text-start">
-                        <div class="fw-bold text-dark fs-6">${item.name}</div>
-                        ${item.area ? `<div class="text-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.area}</div>` : ''}
-                    </td>
-                    <td data-label="المرحلة">
-                        <span class="badge bg-light text-dark border fw-bold">${item.stage}</span>
-                    </td>
-                    <td data-label="حالة الغياب">${streakBadge}${triageBadgesHtml ? `<div class="mt-1">${triageBadgesHtml}</div>` : ''}</td>
-                    <td data-label="التواصل السريع">
-                        <div class="d-flex gap-1 justify-content-center flex-wrap">
-                            ${callButtons.join('')}
-                        </div>
-                    </td>
-                    <td data-label="آخر افتقاد">${lastVisitHtml}</td>
-                    <td data-label="إجراء الافتقاد">
-                        <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
-                            <i class="fa-solid fa-plus"></i> تسجيل افتقاد
-                        </button>
-                    </td>
-                </tr>
-            `;
+            if (currentViewMode === 'visitation') {
+                html += `
+                    <tr>
+                        <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
+                        <td data-label="اسم المخدوم" class="text-start">
+                            <div class="fw-bold text-dark fs-6">${item.name}</div>
+                            ${item.area ? `<div class="text-muted small"><i class="fa-solid fa-location-dot me-1 text-danger"></i>${item.area}</div>` : ''}
+                        </td>
+                        <td data-label="المرحلة">
+                            <span class="badge bg-light text-dark border fw-bold">${item.stage}</span>
+                        </td>
+                        <td data-label="حالة الغياب">${streakBadge}${triageBadgesHtml ? `<div class="mt-1">${triageBadgesHtml}</div>` : ''}</td>
+                        <td data-label="التواصل السريع">
+                            <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                ${callButtons.join('')}
+                            </div>
+                        </td>
+                        <td data-label="آخر افتقاد">${lastVisitHtml}</td>
+                        <td data-label="إجراء الافتقاد">
+                            <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
+                                <i class="fa-solid fa-plus"></i> تسجيل افتقاد
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            } else if (currentViewMode === 'spiritual') {
+                html += `
+                    <tr>
+                        <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
+                        <td data-label="اسم المخدوم" class="text-start fw-bold text-dark fs-6">${item.name}</td>
+                        <td data-label="المرحلة"><span class="badge bg-light text-dark border">${item.stage}</span></td>
+                        <td data-label="حضور الجمعة" style="color:#16a34a; font-weight:800;">${item.fridayCount} لقاء</td>
+                        <td data-label="القداس والتناول" style="color:#7c3aed; font-weight:800;">${item.liturgies} قداس 🍞</td>
+                        <td data-label="أيام النوتة" style="color:#dc2626; font-weight:800;">${item.spiritualDays} يوم</td>
+                        <td data-label="قراءات الإنجيل" style="color:#b45309; font-weight:800;">${item.bibleChapters} إصحاح</td>
+                        <td data-label="الاعتراف"><span class="${item.confessionStatus.badgeClass}">${escapeHtml(item.confessionStatus.label)}</span></td>
+                        <td data-label="التأهيل الخدمي"><span class="${item.coachingStatus.badgeClass}">${escapeHtml(item.coachingStatus.text)}</span></td>
+                        <td data-label="إجمالي النقاط" style="font-weight:900; color:#4f46e5; font-size:1.05rem;">${item.points} ⭐</td>
+                    </tr>
+                `;
+            } else if (currentViewMode === 'combined') {
+                html += `
+                    <tr>
+                        <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
+                        <td data-label="اسم المخدوم" class="text-start">
+                            <div class="fw-bold text-dark">${item.name}</div>
+                            <div class="text-muted small">${item.area || ''}</div>
+                        </td>
+                        <td data-label="الفرقة"><span class="badge bg-light text-dark border small">${item.stage}</span></td>
+                        <td data-label="الغياب والالتزام">${streakBadge}<div class="small fw-bold text-success mt-1">${item.fridayCount} لقاء جمعة</div></td>
+                        <td data-label="وسائط النعمة">
+                            <div class="d-flex gap-1 flex-wrap justify-content-center">
+                                <span class="badge" style="background:#ede9fe; color:#6d28d9;">🍞 ${item.liturgies} قداس</span>
+                                <span class="badge" style="background:#fee2e2; color:#b91c1c;">📝 ${item.spiritualDays} نوتة</span>
+                                <span class="badge" style="background:#fef3c7; color:#b45309;">📖 ${item.bibleChapters} إصحاح</span>
+                            </div>
+                        </td>
+                        <td data-label="الاعتراف والتأهيل">
+                            <div><span class="${item.confessionStatus.badgeClass}">${escapeHtml(item.confessionStatus.label)}</span></div>
+                            <div class="mt-1"><span class="${item.coachingStatus.badgeClass}">${escapeHtml(item.coachingStatus.text)}</span></div>
+                        </td>
+                        <td data-label="النقاط" class="fw-bold" style="color:#4f46e5; font-size:1.05rem;">${item.points} ⭐</td>
+                        <td data-label="التواصل">${lastVisitHtml}<div class="d-flex gap-1 justify-content-center mt-1">${callButtons.join('')}</div></td>
+                        <td data-label="إجراء الافتقاد">
+                            <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
+                                <i class="fa-solid fa-plus"></i> افتقاد
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
         });
 
         tbody.innerHTML = html;
@@ -1962,9 +2412,282 @@ body {
         const hModal = document.getElementById('historyModalBackdrop');
         if (e.target === vModal) closeVisitModal();
         if (e.target === hModal) closeHistoryModal();
+        const iModal = document.getElementById('integrityModalBackdrop');
+        if (e.target === iModal) closeSystemIntegrityModal();
     });
 
     // التهيئة عند تحميل الصفحة
+    
+    // ========================================================
+    // 🛡️ مدقق الحسابات والمعايير الرعوية (System Integrity Auditor)
+    // ========================================================
+    function openSystemIntegrityAuditModal() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+        const startStr = sSettings.serviceStart || "2026-11-06";
+
+        // 1. حساب الجمعات المنقضية رسمياً
+        const elapsedFridays = [];
+        let curD = new Date(startStr);
+        const endD = new Date(todayStr);
+        while (curD <= endD) {
+            if (curD.getDay() === 5) {
+                elapsedFridays.push(curD.toISOString().split('T')[0]);
+            }
+            curD.setDate(curD.getDate() + 1);
+        }
+        const elapsedCount = elapsedFridays.length; // 1 جمعة حالياً (2026-11-06)
+
+        document.getElementById('auditElapsedFridaysBadge').textContent = `${elapsedCount} جمعة (${elapsedFridays.join(', ') || 'لا يوجد'})`;
+        document.getElementById('auditTodayStr').textContent = todayStr;
+
+        // 2. فحص كاش الحضور
+        const curAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+        const futureSessions = [];
+        Object.keys(curAtt).forEach(d => {
+            if (d > todayStr && Array.isArray(curAtt[d]) && curAtt[d].length > 0) {
+                futureSessions.push({ date: d, count: curAtt[d].length });
+            }
+        });
+
+        // 3. فحص المخدومين والإنذارات
+        let falseStreaks = [];
+        let falseAttendees = [];
+
+        (allMembers || []).forEach(m => {
+            const sCode = String(m.code || m.id || '').trim();
+            // فحص مرات الحضور المحسوبة
+            let attCount = 0;
+            Object.keys(curAtt).forEach(dKey => {
+                const list = curAtt[dKey] || [];
+                const rec = list.find(a => String(a.code || a.id || '').trim() === sCode);
+                if (rec && (rec.attended === true || rec.attended === 'حاضر') && !rec.isAbsentDueToDelay && !rec.isAbsent) {
+                    attCount++;
+                }
+            });
+
+            if (attCount > elapsedCount) {
+                falseAttendees.push({
+                    name: m.name,
+                    code: sCode,
+                    count: attCount
+                });
+            }
+
+            // فحص هل كان مسجلاً خطأ كغياب جمعتين
+            const fridaysRaw = Object.keys(curAtt)
+                .filter(d => isFridaySession(d) && d >= startStr && Array.isArray(curAtt[d]) && curAtt[d].length > 0);
+            if (fridaysRaw.length > elapsedCount) {
+                // كانت هناك جمعات مستقبلية تسببت في إنذار غياب جمعتين
+                const attendedFirst = (curAtt['2026-11-06'] || []).some(a => String(a.code || a.id) === sCode && (a.attended === true || a.attended === 'حاضر'));
+                if (!attendedFirst) {
+                    falseStreaks.push({
+                        name: m.name,
+                        code: sCode
+                    });
+                }
+            }
+        });
+
+        document.getElementById('auditFalseStreaksCount').textContent = falseStreaks.length;
+        document.getElementById('auditFalseAttCount').textContent = falseAttendees.length;
+        document.getElementById('auditFutureSessionsCount').textContent = futureSessions.length;
+
+        // بناء التقرير النصي
+        let reportHtml = '';
+        if (futureSessions.length > 0 || falseAttendees.length > 0 || falseStreaks.length > 0) {
+            reportHtml += '<div class="alert alert-warning p-2 mb-2" style="font-size:0.82rem;"><strong>⚠️ تم رصد عدم ثبات في المعايير ناتج عن خلط الاستئذان المسبق بالحضور الفعلي:</strong></div>';
+            
+            if (futureSessions.length > 0) {
+                reportHtml += `<div class="mb-2"><strong>🗓️ جلسات مستقبلية محقونة في الذاكرة:</strong><ul>`;
+                futureSessions.forEach(fs => {
+                    reportHtml += `<li>جلسة تاريخ <code>${fs.date}</code> بها ${fs.count} سجل مسجل قبل انعقاد اليوم!</li>`;
+                });
+                reportHtml += `</ul></div>`;
+            }
+
+            if (falseAttendees.length > 0) {
+                reportHtml += `<div class="mb-2"><strong>🚫 مخدومين محسوب لهم حضور تجاوز الجمعات المنقضية (${elapsedCount}):</strong><ul>`;
+                falseAttendees.forEach(fa => {
+                    reportHtml += `<li><strong>${fa.name}</strong> (كود: ${fa.code}): مسجل له حضور ${fa.count} لقاءات!</li>`;
+                });
+                reportHtml += `</ul></div>`;
+            }
+
+            if (falseStreaks.length > 0) {
+                reportHtml += `<div class="mb-2"><strong>⚠️ إنذار غياب جمعتين زائف لـ (${falseStreaks.length} مخدوم):</strong>`;
+                reportHtml += `<div class="text-muted small">هؤلاء المخدومين غابوا الجمعة الماضية فقط (2026-11-06)، وحساب غيابهم كجمعتين خطأ رياضي ناتج عن الجمعة المستقبلية. سيتم تصحيحهم إلى "غائب جمعة واحدة".</div>`;
+                reportHtml += `</div>`;
+            }
+        } else {
+            reportHtml = '<div class="text-success text-center py-3"><i class="fa-solid fa-circle-check fa-2x mb-2"></i><br><strong>كافة المعايير والحسابات الرعوية متطابقة ومنضبطة 100%!</strong><br><span class="text-muted small">لا توجد أي جلسات مستقبلية أو إنذارات زائفة.</span></div>';
+        }
+
+        document.getElementById('auditReportDetails').innerHTML = reportHtml;
+        document.getElementById('integrityModalBackdrop').classList.add('show');
+    }
+
+    function closeSystemIntegrityModal() {
+        document.getElementById('integrityModalBackdrop').classList.remove('show');
+    }
+
+    function applySystemIntegrityFix() {
+        const todayStr = new Date().toISOString().split('T')[0];
+        let curAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+        
+        // 1. حذف أي جلسات مستقبلية من كشف الحضور
+        let cleanedDates = [];
+        Object.keys(curAtt).forEach(d => {
+            if (d > todayStr) {
+                delete curAtt[d];
+                cleanedDates.push(d);
+            }
+        });
+
+        // 2. تصحيح سجلات الجمعة المنقضية (2026-11-06): الاستئذان المسبق لا يحسب حضوراً
+        if (curAtt['2026-11-06'] && Array.isArray(curAtt['2026-11-06'])) {
+            curAtt['2026-11-06'].forEach(item => {
+                if (item.hasApprovedDelay && item.attended !== true && item.attended !== 'حاضر') {
+                    item.attended = false;
+                }
+            });
+        }
+
+        localStorage.setItem('my_church_attendance', JSON.stringify(curAtt));
+        attendanceRecord = curAtt;
+
+        // 3. إعادة حساب وتحديث كل واجهات الصفحة
+        renderStats();
+        filterAndRender();
+
+        closeSystemIntegrityModal();
+        showToast('🎉 تم تصحيح كافة الحسابات بنجاح تام! اختفت الإنذارات الزائفة وعادت الإحصائيات للمعيار الصارم (1 جمعة منقضية).');
+    }
+
+
+    
+    // تصدير كشف وسائط النعمة والدرجات الشامل إكسيل
+    function exportSpiritualGraceExcel() {
+        if (!allMembers || allMembers.length === 0) {
+            alert('لا توجد بيانات متاحة للتصدير.');
+            return;
+        }
+
+        const headers = [
+            "كود الدارس",
+            "اسم المخدوم",
+            "الفرقة / المرحلة",
+            "حضور الجمعة",
+            "القداس والتناول 🍞",
+            "أيام النوتة الروحية",
+            "قراءات الإنجيل (إصحاحات)",
+            "حالة سر الاعتراف 🕊️",
+            "مؤشر التأهيل الخدمي 🎯",
+            "إجمالي النقاط ⭐",
+            "رقم الهاتف",
+            "هاتف ولي الأمر"
+        ];
+
+        // إعادة حساب البيانات للتصدير الشامل
+        const spiritualLogs = JSON.parse(localStorage.getItem('khedmety_student_spiritual')) || {};
+        const bibleReadings = JSON.parse(localStorage.getItem('khedmety_bible_readings')) || {};
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
+        const startStr = sSettings.serviceStart || "2026-11-06";
+
+        const rows = allMembers.map(m => {
+            const sCode = String(m.code || m.id || '').trim();
+            const sName = String(m.name || 'مخدوم').trim();
+            const sStage = String(m.stage || m.level || 'غير محدد').trim();
+
+            let fridayCount = 0;
+            let liturgies = 0;
+            Object.keys(attendanceRecord || {}).forEach(dateKey => {
+                if (dateKey < startStr || dateKey > todayStr) return;
+                const dt = new Date(dateKey + 'T00:00:00');
+                const isFri = dt.getDay() === 5;
+                const found = (attendanceRecord[dateKey] || []).find(a =>
+                    String(a.code || a.id || '').trim() === sCode && (a.attended === true || a.attended === 'حاضر') && !a.isAbsentDueToDelay && !a.isAbsent
+                );
+                if (found) {
+                    if (isFri) fridayCount++;
+                    if (dt.getDay() === 0 || found.mass || found.communion || found.type === 'liturgy') liturgies++;
+                }
+            });
+
+            let spiritualDays = 0;
+            let communionInNote = 0;
+            Object.keys(spiritualLogs).forEach(k => {
+                if (k.endsWith('_' + sCode)) {
+                    spiritualDays++;
+                    const entry = spiritualLogs[k];
+                    if (entry && (entry.communion || entry.mass || entry.eucharist)) communionInNote++;
+                }
+            });
+            const totalLiturgies = Math.max(liturgies, communionInNote);
+
+            let bibleChapters = 0;
+            Object.keys(bibleReadings).forEach(k => {
+                if (k.endsWith('_' + sCode) || String((bibleReadings[k] || {}).code || '') === sCode) {
+                    const item = bibleReadings[k] || {};
+                    if (Array.isArray(item.completed_chapters)) bibleChapters += item.completed_chapters.length;
+                    else if (item.chapters_read_count) bibleChapters += item.chapters_read_count;
+                    else if (item.is_completed || item.completed) bibleChapters += (item.total_chapters || 1);
+                    else bibleChapters += 1;
+                }
+            });
+
+            const confDays = getDaysSinceConfession(sCode, m);
+            const confLabel = confDays >= 40 ? `تأخر (${confDays} يوم) ⚠️` : `منتظم (${confDays} يوم) 🟢`;
+            const coachingLabel = (confDays <= 40 && (fridayCount >= 1 || spiritualDays >= 2)) ? 'مؤهل ومجتهد 🟢' : 'يحتاج رعاية ومتابعة 🟡';
+            const points = (fridayCount * 5) + (totalLiturgies * 4) + (spiritualDays * 5) + (bibleChapters * 2) + (confDays <= 35 ? 10 : 0);
+
+            return [
+                sCode,
+                sName,
+                sStage,
+                fridayCount,
+                totalLiturgies,
+                spiritualDays,
+                bibleChapters,
+                confLabel,
+                coachingLabel,
+                points,
+                m.phone || '',
+                m.parent_phone || ''
+            ];
+        });
+
+        const aoa = [headers, ...rows];
+        const fileName = `كشف_وسائط_النعمة_الشامل_${new Date().toISOString().split('T')[0]}.xlsx`;
+
+        if (typeof XLSX !== 'undefined') {
+            try {
+                const ws = XLSX.utils.aoa_to_sheet(aoa);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "وسائط_النعمة");
+                XLSX.writeFile(wb, fileName);
+                return;
+            } catch(e) {}
+        }
+
+        let csv = '\uFEFF' + headers.map(h => `"${h}"`).join(',') + '\n';
+        rows.forEach(r => {
+            csv += r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',') + '\n';
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName.replace('.xlsx', '.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+
     window.addEventListener('DOMContentLoaded', () => {
         try {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1975,6 +2698,12 @@ body {
                 smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
             }
         } catch (e) {}
+
+        renderFastingStatus();
+
+        // قراءة نمط العرض من الرابط أو التخزين المحلي
+        const viewParam = urlParams.get('view') || localStorage.getItem('khedmety_followup_view_mode') || 'visitation';
+        switchViewMode(viewParam);
 
         initImmediateLocalData();
         loadDataFromCloud();
