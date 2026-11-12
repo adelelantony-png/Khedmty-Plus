@@ -978,65 +978,140 @@ body {
 </div>
 
 <!-- Modal: تسجيل افتقاد جديد -->
-<!-- Modal: مدقق نزاهة الحسابات والمعايير الرعوية -->
+<!-- Modal: مدقق نزاهة الحسابات والمعايير الرعوية وميزان التحقق الرياضي 100% (أمانة الخدمة) -->
 <div class="custom-modal-backdrop" id="integrityModalBackdrop">
-    <div class="custom-modal-content" style="max-width: 740px;">
-        <div class="modal-header-styled" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;">
-            <h5><i class="fa-solid fa-shield-halved text-warning me-2"></i> مدقق نزاهة الحسابات والمعايير الرعوية (أمانة الخدمة)</h5>
+    <div class="custom-modal-content" style="max-width: 900px; width: 95%;">
+        <div class="modal-header-styled" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff;">
+            <h5><i class="fa-solid fa-shield-halved text-warning me-2"></i> مدقق الحسابات والمعايير الرعوية وميزان التحقق 100% (أمانة الخدمة) 🛡️</h5>
             <button class="modal-close-btn" style="color:#fff;" onclick="closeSystemIntegrityModal()">&times;</button>
         </div>
         <div class="modal-body-styled">
-            <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary me-1"></i> الجمعات المنقضية رسمياً منذ انطلاق الخدمة:</span>
+            <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1.5px solid #e2e8f0;">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                    <span class="fw-bold text-dark"><i class="fa-solid fa-calendar-check text-primary me-1"></i> الجمعات المنقضية رسمياً منذ انطلاق الخدمة ($BL$3):</span>
                     <span class="badge bg-primary fs-6 px-3 py-1" id="auditElapsedFridaysBadge">1 جمعة (2026-11-06)</span>
                 </div>
                 <div class="small text-muted">
-                    القاعدة الصارمة: لا يمكن لأي مخدوم أن يتجاوز حضوره أو غيابه المتتالي عدد الجمعات المنقضية فعلياً حتى تاريخ اليوم (<strong id="auditTodayStr">-</strong>).
+                    المعيار الرياضي الصارم: المقام الفعلي للحسابات ($BL$3) هو عدد الجمعات المنقضية حتى اليوم (<strong id="auditTodayStr">-</strong>). لا يمكن لأي مخدوم أن يتجاوز حضوره أو غيابه المتتالي هذا العدد، ومجموع نسب (الحضور + الغياب + الاعتذارات) يجب أن يساوي 100% دائماً.
                 </div>
             </div>
 
-            <div class="row g-2 mb-3 text-center">
-                <div class="col-4">
-                    <div class="p-2 rounded-3 border" style="background:#fff;">
-                        <small class="text-muted d-block">إنذارات غياب غير منطقية</small>
-                        <strong class="fs-5" id="auditFalseStreaksCount" style="color:#dc2626;">0</strong>
-                        <div class="small text-muted" style="font-size:0.7rem;">(تجاوزت المنقضي)</div>
+            <!-- تبويبات المدقق الداخلية -->
+            <div class="d-flex gap-2 mb-3 border-bottom pb-2">
+                <button type="button" class="btn btn-sm btn-primary fw-bold" id="tabBtnAuditBalance" onclick="switchAuditSubTab('balance')">
+                    <i class="fa-solid fa-scale-balanced me-1"></i> ميزان التحقق 100% ومعامل التصحيح (Excel BI - BJ)
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="tabBtnAuditIssues" onclick="switchAuditSubTab('issues')">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> فحص الإنذارات والجلسات الزائفة
+                </button>
+            </div>
+
+            <!-- محتوى تبويب 1: ميزان التحقق الرياضي والتأهيل (Excel BI - BJ) -->
+            <div id="auditSubTabBalance">
+                <div class="row g-2 mb-3 text-center">
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border" style="background:#f0fdf4; border-color:#bbf7d0;">
+                            <small class="text-success fw-bold d-block">ميزان التحقق 100% (BJ)</small>
+                            <strong class="fs-5 text-success" id="audit100PctCount">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">منضبطون رياضياً تماماً</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border" style="background:#eff6ff; border-color:#bfdbfe;">
+                            <small class="text-primary fw-bold d-block">مؤهلين للتخرج (BI ≥ 75%)</small>
+                            <strong class="fs-5 text-primary" id="auditQualifiedCount">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">حققوا النسبة الذهبية</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border" style="background:#fffbeb; border-color:#fde68a;">
+                            <small class="text-warning fw-bold d-block">يحتاجون تعويضاً (20%-75%)</small>
+                            <strong class="fs-5" style="color:#b45309;" id="auditNeedCompCount">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">معامل التصحيح = 75%/الحضور</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border" style="background:#fef2f2; border-color:#fecaca;">
+                            <small class="text-danger fw-bold d-block">حالات حرجة (BI ≤ 20%)</small>
+                            <strong class="fs-5 text-danger" id="auditCriticalCount">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">تستلزم افتقاداً استثنائياً</div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-4">
-                    <div class="p-2 rounded-3 border" style="background:#fff;">
-                        <small class="text-muted d-block">حضور زائف/مستقبلي</small>
-                        <strong class="fs-5" id="auditFalseAttCount" style="color:#d97706;">0</strong>
-                        <div class="small text-muted" style="font-size:0.7rem;">(استئذان حُسب كحضور)</div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                    <input type="search" class="form-control form-control-sm" id="auditSearchInput" placeholder="بحث بالاسم أو الكود..." style="max-width:260px;" oninput="filterAuditLedgerTable()">
+                    <button type="button" class="btn btn-outline-success btn-sm fw-bold" onclick="exportIntegrityVerificationExcel()">
+                        <i class="fa-solid fa-file-excel me-1"></i> تصدير ميزان التحقق والتأهيل (Excel)
+                    </button>
+                </div>
+
+                <div style="max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <table class="table table-sm table-hover text-center mb-0" style="font-size:0.8rem;">
+                        <thead style="position:sticky; top:0; background:#f1f5f9; z-index:2;">
+                            <tr>
+                                <th>الكود</th>
+                                <th class="text-start">اسم المخدوم</th>
+                                <th>حضور (BL)</th>
+                                <th>غياب (BM)</th>
+                                <th>اعتذار (BP)</th>
+                                <th>نسبة الحضور (BN)</th>
+                                <th>معامل التحقق (BJ)</th>
+                                <th>معامل التصحيح والتأهيل (BI)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLedgerTbody">
+                            <tr><td colspan="8" class="py-3 text-muted">جاري الحساب...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- محتوى تبويب 2: فحص الإنذارات والجلسات الزائفة -->
+            <div id="auditSubTabIssues" style="display:none;">
+                <div class="row g-2 mb-3 text-center">
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 border" style="background:#fff;">
+                            <small class="text-muted d-block">إنذارات غياب غير منطقية</small>
+                            <strong class="fs-5" id="auditFalseStreaksCount" style="color:#dc2626;">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">(تجاوزت المنقضي)</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 border" style="background:#fff;">
+                            <small class="text-muted d-block">حضور زائف/مستقبلي</small>
+                            <strong class="fs-5" id="auditFalseAttCount" style="color:#d97706;">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">(استئذان حُسب كحضور)</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded-3 border" style="background:#fff;">
+                            <small class="text-muted d-block">جلسات مستقبلية محقونة</small>
+                            <strong class="fs-5" id="auditFutureSessionsCount" style="color:#2563eb;">0</strong>
+                            <div class="small text-muted" style="font-size:0.7rem;">(تواريخ &gt; اليوم)</div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-4">
-                    <div class="p-2 rounded-3 border" style="background:#fff;">
-                        <small class="text-muted d-block">جلسات مستقبلية محقونة</small>
-                        <strong class="fs-5" id="auditFutureSessionsCount" style="color:#2563eb;">0</strong>
-                        <div class="small text-muted" style="font-size:0.7rem;">(تواريخ &gt; اليوم)</div>
+
+                <div class="mb-3">
+                    <h6 class="fw-bold text-dark small mb-2"><i class="fa-solid fa-clipboard-list me-1"></i> تقرير الفحص والتدقيق الميداني المباشر:</h6>
+                    <div id="auditReportDetails" style="max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.85rem;">
+                        جاري فحص الحسابات...
                     </div>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <h6 class="fw-bold text-dark small mb-2"><i class="fa-solid fa-clipboard-list me-1"></i> تقرير الفحص والتدقيق الميداني المباشر:</h6>
-                <div id="auditReportDetails" style="max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; font-size: 0.85rem;">
-                    جاري فحص الحسابات...
+                <div class="p-2 rounded-3 mb-3" style="background:#fef3c7; border:1px solid #fde047; font-size:0.82rem; color:#854d0e;">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    <strong>إجراء التصحيح الفوري:</strong> يقوم بإزالة أي جلسات مستقبلية محقونة بالخطأ، ويضبط متتالية الغياب للواقع (غائب جمعة واحدة بدلاً من إنذار جمعتين)، ويعيد الحساب الصارم لقاعدة $BL$3.
                 </div>
-            </div>
 
-            <div class="p-2 rounded-3 mb-3" style="background:#fef3c7; border:1px solid #fde047; font-size:0.82rem; color:#854d0e;">
-                <i class="fa-solid fa-circle-info me-1"></i>
-                <strong>إجراء التصحيح الفوري:</strong> سيقوم بإزالة الجلسات المستقبلية من كشف الحضور، وتصحيح متتالية الغياب لتعود للواقع (غائب جمعة واحدة بدلاً من إنذار جمعتين)، وإلغاء احتساب الاستئذان المسبق كحضور ليصبح (1 لقاء للملتزمين).
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center gap-2">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSystemIntegrityModal()">إلغاء / إغلاق</button>
-                <button type="button" class="btn btn-success fw-bold px-4" id="btnApplyAuditFix" onclick="applySystemIntegrityFix()">
+                <button type="button" class="btn btn-success fw-bold w-100" id="btnApplyAuditFix" onclick="applySystemIntegrityFix()">
                     <i class="fa-solid fa-check-double me-1"></i> الموافقة على التصحيح وتثبيت المعايير الصارمة ✅
                 </button>
+            </div>
+
+            <div class="d-flex justify-content-end align-items-center mt-3 pt-2 border-top">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeSystemIntegrityModal()">إغلاق النافذة</button>
             </div>
         </div>
     </div>
@@ -2374,14 +2449,36 @@ body {
     // التهيئة عند تحميل الصفحة
     
     // ========================================================
-    // 🛡️ مدقق الحسابات والمعايير الرعوية (System Integrity Auditor)
+    // 🛡️ مدقق الحسابات والمعايير وميزان التحقق 100% (أمانة الخدمة)
+    // طبقاً لقواعد إكسل شيت "الغياب نسب" (الأعمدة BJ و BI والقاعدة $BL$3)
     // ========================================================
+    window.currentAuditVerificationRows = [];
+
+    function switchAuditSubTab(tabName) {
+        const btnBal = document.getElementById('tabBtnAuditBalance');
+        const btnIss = document.getElementById('tabBtnAuditIssues');
+        const pBal = document.getElementById('auditSubTabBalance');
+        const pIss = document.getElementById('auditSubTabIssues');
+
+        if (tabName === 'balance') {
+            if (btnBal) { btnBal.style.background = '#0C2461'; btnBal.style.color = '#fff'; }
+            if (btnIss) { btnIss.style.background = 'transparent'; btnIss.style.color = '#64748b'; }
+            if (pBal) pBal.style.display = 'block';
+            if (pIss) pIss.style.display = 'none';
+        } else {
+            if (btnBal) { btnBal.style.background = 'transparent'; btnBal.style.color = '#64748b'; }
+            if (btnIss) { btnIss.style.background = '#0C2461'; btnIss.style.color = '#fff'; }
+            if (pBal) pBal.style.display = 'none';
+            if (pIss) pIss.style.display = 'block';
+        }
+    }
+
     function openSystemIntegrityAuditModal() {
         const todayStr = new Date().toISOString().split('T')[0];
         const sSettings = (typeof settings === 'object' && settings) ? settings : (JSON.parse(localStorage.getItem('my_church_settings')) || {});
         const startStr = sSettings.serviceStart || "2026-11-06";
 
-        // 1. حساب الجمعات المنقضية رسمياً
+        // 1. حساب الجمعات المنقضية رسمياً ($BL$3)
         const elapsedFridays = [];
         let curD = new Date(startStr);
         const endD = new Date(todayStr);
@@ -2391,13 +2488,22 @@ body {
             }
             curD.setDate(curD.getDate() + 1);
         }
-        const elapsedCount = elapsedFridays.length; // 1 جمعة حالياً (2026-11-06)
+        const elapsedCount = Math.max(1, elapsedFridays.length); // BL$3 - حالياً 1 جمعة (2026-11-06)
 
-        document.getElementById('auditElapsedFridaysBadge').textContent = `${elapsedCount} جمعة (${elapsedFridays.join(', ') || 'لا يوجد'})`;
-        document.getElementById('auditTodayStr').textContent = todayStr;
+        const elBadge = document.getElementById('auditElapsedFridaysBadge');
+        if (elBadge) elBadge.textContent = `${elapsedCount} جمعة (${elapsedFridays.join(', ') || 'لا يوجد'})`;
+        const elToday = document.getElementById('auditTodayStr');
+        if (elToday) elToday.textContent = todayStr;
 
-        // 2. فحص كاش الحضور
-        const curAtt = JSON.parse(localStorage.getItem('my_church_attendance')) || {};
+        // 2. كاش الحضور والأعذار المعتمدة
+        const curAtt = (typeof attendanceRecord === 'object' && attendanceRecord) ? attendanceRecord : (JSON.parse(localStorage.getItem('my_church_attendance')) || {});
+        let cachedExcuses = [];
+        try {
+            cachedExcuses = JSON.parse(localStorage.getItem('khedmety_cached_excuses') || '[]');
+        } catch(e) {}
+        if (!Array.isArray(cachedExcuses)) cachedExcuses = [];
+
+        // فحص الجلسات المستقبلية المحقونة
         const futureSessions = [];
         Object.keys(curAtt).forEach(d => {
             if (d > todayStr && Array.isArray(curAtt[d]) && curAtt[d].length > 0) {
@@ -2405,54 +2511,162 @@ body {
             }
         });
 
-        // 3. فحص المخدومين والإنذارات
+        // 3. احتساب ميزان التحقق 100% (BJ) ومعامل التصحيح والتأهيل (BI) لكل مخدوم
         let falseStreaks = [];
         let falseAttendees = [];
+        let count100 = 0;
+        let countQualified = 0;
+        let countNeedComp = 0;
+        let countCritical = 0;
+        const verificationRows = [];
 
-        (allMembers || []).forEach(m => {
+        const membersList = (Array.isArray(allMembers) && allMembers.length > 0)
+            ? allMembers
+            : (JSON.parse(localStorage.getItem('my_church_class')) || []);
+
+        membersList.forEach(m => {
             const sCode = String(m.code || m.id || '').trim();
-            // فحص مرات الحضور المحسوبة
-            let attCount = 0;
+            const sName = String(m.name || 'مخدوم').trim();
+            const sStage = String(m.stage || m.level || '-').trim();
+            const sPhone = String(m.phone || '').trim().replace(/\D/g, '');
+
+            // حساب الحضور (BL) في الجمعات المنقضية فقط
+            let blCount = 0;
+            // حساب الاستئذان/الاعتذار المقبول (BP)
+            let bpCount = 0;
+
+            elapsedFridays.forEach(fDate => {
+                const list = curAtt[fDate] || [];
+                const rec = list.find(a => String(a.code || a.id || '').trim() === sCode);
+                
+                // فحص الحضور
+                if (rec && (rec.attended === true || rec.attended === 'حاضر') && !rec.isAbsentDueToDelay && !rec.isAbsent) {
+                    blCount++;
+                }
+
+                // فحص الاعتذار
+                const hasSessionExcuse = rec && (rec.isExcused === true || rec.hasApprovedDelay);
+                const hasCloudExcuse = cachedExcuses.some(ex => {
+                    if (ex.friday_date !== fDate) return false;
+                    if (ex.status !== 'accepted') return false;
+                    const exCode = String(ex.student_code || '').trim();
+                    const exName = String(ex.student_name || '').trim();
+                    const exPhone = String(ex.student_phone || '').replace(/\D/g, '');
+                    if (sCode && exCode && sCode === exCode) return true;
+                    if (sPhone && exPhone && (sPhone.endsWith(exPhone.slice(-8)) || exPhone.endsWith(sPhone.slice(-8)))) return true;
+                    if (sName && exName === sName) return true;
+                    return false;
+                });
+
+                if (hasSessionExcuse || hasCloudExcuse) {
+                    if (!rec || (rec.attended !== true && rec.attended !== 'حاضر')) {
+                        bpCount++;
+                    }
+                }
+            });
+
+            // فحص إجمالي مرات الحضور المسجلة عبر كل الأيام (بما فيها المستقبلية) لكشف الخلل
+            let totalAllAtt = 0;
             Object.keys(curAtt).forEach(dKey => {
                 const list = curAtt[dKey] || [];
                 const rec = list.find(a => String(a.code || a.id || '').trim() === sCode);
                 if (rec && (rec.attended === true || rec.attended === 'حاضر') && !rec.isAbsentDueToDelay && !rec.isAbsent) {
-                    attCount++;
+                    totalAllAtt++;
                 }
             });
 
-            if (attCount > elapsedCount) {
-                falseAttendees.push({
-                    name: m.name,
-                    code: sCode,
-                    count: attCount
-                });
+            if (totalAllAtt > elapsedCount) {
+                falseAttendees.push({ name: sName, code: sCode, count: totalAllAtt });
             }
 
-            // فحص هل كان مسجلاً خطأ كغياب جمعتين
-            const fridaysRaw = Object.keys(curAtt)
-                .filter(d => isFridaySession(d) && d >= startStr && Array.isArray(curAtt[d]) && curAtt[d].length > 0);
+            // فحص متتالية الغياب الزائفة
+            const fridaysRaw = Object.keys(curAtt).filter(d => isFridaySession(d) && d >= startStr && Array.isArray(curAtt[d]) && curAtt[d].length > 0);
             if (fridaysRaw.length > elapsedCount) {
-                // كانت هناك جمعات مستقبلية تسببت في إنذار غياب جمعتين
                 const attendedFirst = (curAtt['2026-11-06'] || []).some(a => String(a.code || a.id) === sCode && (a.attended === true || a.attended === 'حاضر'));
                 if (!attendedFirst) {
-                    falseStreaks.push({
-                        name: m.name,
-                        code: sCode
-                    });
+                    falseStreaks.push({ name: sName, code: sCode });
                 }
             }
+
+            // الغياب الفعلي (BM) = الجمعات المنقضية - (حضور + اعتذار)
+            let bmCount = Math.max(0, elapsedCount - blCount - bpCount);
+
+            // نسب إكسل الدقيقة:
+            // BN: نسبة الحضور = BL / BL$3
+            const bnRate = blCount / elapsedCount;
+            // BO: نسبة الغياب = BM / BL$3
+            const boRate = bmCount / elapsedCount;
+            // BS: نسبة الاعتذار = BP / BL$3
+            const bsRate = bpCount / elapsedCount;
+
+            // معامل التحقق BJ = (BL + BM + BP) / BL$3
+            const bjTotal = bnRate + boRate + bsRate;
+            const is100Pct = Math.abs(bjTotal - 1.0) < 0.001;
+
+            if (is100Pct) count100++;
+
+            // معامل التصحيح والتأهيل BI:
+            // IF(BN>=75%, "لا يحتاج", IF(BN<=20%, "لا يمكن تصحيحه", 75%/BN))
+            let biStatus = '';
+            let biClass = '';
+            let compFridays = 0;
+
+            if (bnRate >= 0.75) {
+                biStatus = 'مؤهل للخدمة ✅ (لا يحتاج تصحيح)';
+                biClass = 'badge-success-subtle text-success';
+                countQualified++;
+            } else if (bnRate <= 0.20) {
+                biStatus = 'حرج 🚨 (لا يمكن تصحيحه بالغياب الحالي)';
+                biClass = 'badge-danger-subtle text-danger';
+                countCritical++;
+            } else {
+                const ratio = 0.75 / bnRate;
+                compFridays = Math.max(1, Math.ceil(3 * elapsedCount - 4 * blCount));
+                biStatus = `معامل: ${ratio.toFixed(2)} (يحتاج ${compFridays} جمعات للتعويض)`;
+                biClass = 'badge-warning-subtle text-dark';
+                countNeedComp++;
+            }
+
+            verificationRows.push({
+                code: sCode || '-',
+                name: sName,
+                stage: sStage,
+                bl: blCount,
+                bm: bmCount,
+                bp: bpCount,
+                bn: bnRate,
+                bo: boRate,
+                bs: bsRate,
+                bj: bjTotal,
+                is100Pct: is100Pct,
+                biStatus: biStatus,
+                biClass: biClass,
+                compFridays: compFridays
+            });
         });
 
-        document.getElementById('auditFalseStreaksCount').textContent = falseStreaks.length;
-        document.getElementById('auditFalseAttCount').textContent = falseAttendees.length;
-        document.getElementById('auditFutureSessionsCount').textContent = futureSessions.length;
+        // تحديث إحصائيات الميزان (KPIs)
+        const el100 = document.getElementById('audit100PctCount');
+        if (el100) el100.textContent = count100;
+        const elQual = document.getElementById('auditQualifiedCount');
+        if (elQual) elQual.textContent = countQualified;
+        const elComp = document.getElementById('auditNeedCompCount');
+        if (elComp) elComp.textContent = countNeedComp;
+        const elCrit = document.getElementById('auditCriticalCount');
+        if (elCrit) elCrit.textContent = countCritical;
 
-        // بناء التقرير النصي
+        // تحديث إحصائيات تبويب الفحص
+        const elStreaks = document.getElementById('auditFalseStreaksCount');
+        if (elStreaks) elStreaks.textContent = falseStreaks.length;
+        const elFalseAtt = document.getElementById('auditFalseAttCount');
+        if (elFalseAtt) elFalseAtt.textContent = falseAttendees.length;
+        const elFut = document.getElementById('auditFutureSessionsCount');
+        if (elFut) elFut.textContent = futureSessions.length;
+
+        // بناء تقرير الفحص
         let reportHtml = '';
         if (futureSessions.length > 0 || falseAttendees.length > 0 || falseStreaks.length > 0) {
             reportHtml += '<div class="alert alert-warning p-2 mb-2" style="font-size:0.82rem;"><strong>⚠️ تم رصد عدم ثبات في المعايير ناتج عن خلط الاستئذان المسبق بالحضور الفعلي:</strong></div>';
-            
             if (futureSessions.length > 0) {
                 reportHtml += `<div class="mb-2"><strong>🗓️ جلسات مستقبلية محقونة في الذاكرة:</strong><ul>`;
                 futureSessions.forEach(fs => {
@@ -2460,7 +2674,6 @@ body {
                 });
                 reportHtml += `</ul></div>`;
             }
-
             if (falseAttendees.length > 0) {
                 reportHtml += `<div class="mb-2"><strong>🚫 مخدومين محسوب لهم حضور تجاوز الجمعات المنقضية (${elapsedCount}):</strong><ul>`;
                 falseAttendees.forEach(fa => {
@@ -2468,18 +2681,144 @@ body {
                 });
                 reportHtml += `</ul></div>`;
             }
-
             if (falseStreaks.length > 0) {
                 reportHtml += `<div class="mb-2"><strong>⚠️ إنذار غياب جمعتين زائف لـ (${falseStreaks.length} مخدوم):</strong>`;
                 reportHtml += `<div class="text-muted small">هؤلاء المخدومين غابوا الجمعة الماضية فقط (2026-11-06)، وحساب غيابهم كجمعتين خطأ رياضي ناتج عن الجمعة المستقبلية. سيتم تصحيحهم إلى "غائب جمعة واحدة".</div>`;
                 reportHtml += `</div>`;
             }
         } else {
-            reportHtml = '<div class="text-success text-center py-3"><i class="fa-solid fa-circle-check fa-2x mb-2"></i><br><strong>كافة المعايير والحسابات الرعوية متطابقة ومنضبطة 100%!</strong><br><span class="text-muted small">لا توجد أي جلسات مستقبلية أو إنذارات زائفة.</span></div>';
+            reportHtml = '<div class="text-success text-center py-3"><i class="fa-solid fa-circle-check fa-2x mb-2"></i><br><strong>كافة المعايير والحسابات الرعوية متطابقة ومنضبطة 100%!</strong><br><span class="text-muted small">لا توجد أي جلسات مستقبلية أو إنذارات زائفة. الميزان الرياضي $BN + $BO + $BS = 100% تماماً.</span></div>';
         }
 
-        document.getElementById('auditReportDetails').innerHTML = reportHtml;
+        const elRep = document.getElementById('auditReportDetails');
+        if (elRep) elRep.innerHTML = reportHtml;
+
+        // حفظ الصفوف وعرض الجدول
+        window.currentAuditVerificationRows = verificationRows;
+        renderAuditLedgerTable(verificationRows);
+
+        // فتح التبويب الأول افتراضياً
+        switchAuditSubTab('balance');
+
         document.getElementById('integrityModalBackdrop').classList.add('show');
+    }
+
+    function renderAuditLedgerTable(rows) {
+        const tbody = document.getElementById('auditLedgerTbody');
+        if (!tbody) return;
+
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-muted py-3">لا توجد سجلات مطابقة للبحث</td></tr>';
+            return;
+        }
+
+        let html = '';
+        rows.forEach(r => {
+            const bnPct = (r.bn * 100).toFixed(0) + '%';
+            const bjPct = (r.bj * 100).toFixed(0) + '%';
+            let bjBadge = '';
+            if (r.is100Pct) {
+                bjBadge = `<span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;">${bjPct} ✅ متزن</span>`;
+            } else if (r.bj > 1.0) {
+                bjBadge = `<span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:800;">${bjPct} 🚨 تجاوز</span>`;
+            } else {
+                bjBadge = `<span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fcd34d; font-weight:800;">${bjPct} ⚠️ غير مكتمل</span>`;
+            }
+
+            let biBadge = '';
+            if (r.bn >= 0.75) {
+                biBadge = `<span class="badge" style="background:#ecfdf5; color:#047857; border:1px solid #a7f3d0; font-size:0.75rem;">${r.biStatus}</span>`;
+            } else if (r.bn <= 0.20) {
+                biBadge = `<span class="badge" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; font-size:0.75rem;">${r.biStatus}</span>`;
+            } else {
+                biBadge = `<span class="badge" style="background:#fffbeb; color:#92400e; border:1px solid #fde68a; font-size:0.75rem;">${r.biStatus}</span>`;
+            }
+
+            html += `<tr>
+                <td style="font-family:monospace; font-weight:bold; color:#475569;">${escapeHtml(r.code)}</td>
+                <td class="text-start fw-bold" style="color:#0f172a;">${escapeHtml(r.name)}</td>
+                <td><span class="badge bg-light text-dark border">${r.bl}</span></td>
+                <td><span class="badge bg-light text-dark border">${r.bm}</span></td>
+                <td><span class="badge bg-light text-dark border">${r.bp}</span></td>
+                <td><strong style="color:${r.bn >= 0.75 ? '#16a34a' : (r.bn <= 0.20 ? '#dc2626' : '#d97706')};">${bnPct}</strong></td>
+                <td>${bjBadge}</td>
+                <td>${biBadge}</td>
+            </tr>`;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function filterAuditLedgerTable() {
+        const query = (document.getElementById('auditSearchInput')?.value || '').trim().toLowerCase();
+        if (!query) {
+            renderAuditLedgerTable(window.currentAuditVerificationRows);
+            return;
+        }
+
+        const filtered = (window.currentAuditVerificationRows || []).filter(r => {
+            return (r.name && r.name.toLowerCase().includes(query)) ||
+                   (r.code && r.code.toLowerCase().includes(query)) ||
+                   (r.stage && r.stage.toLowerCase().includes(query)) ||
+                   (r.biStatus && r.biStatus.toLowerCase().includes(query));
+        });
+
+        renderAuditLedgerTable(filtered);
+    }
+
+    function exportIntegrityVerificationExcel() {
+        if (!window.currentAuditVerificationRows || window.currentAuditVerificationRows.length === 0) {
+            alert('لا توجد بيانات متاحة للتصدير.');
+            return;
+        }
+
+        const headers = [
+            "كود المخدوم",
+            "اسم المخدوم",
+            "المرحلة / الفرقة",
+            "حضور فعلي (BL)",
+            "غياب فعلي (BM)",
+            "اعتذارات معتمدة (BP)",
+            "نسبة الحضور (BN)",
+            "نسبة الغياب (BO)",
+            "نسبة الاعتذارات (BS)",
+            "معامل التحقق الكلي (BJ)",
+            "حالة ميزان التحقق",
+            "معامل التصحيح والتأهيل الخدمي (BI)"
+        ];
+
+        const csvRows = [headers];
+
+        window.currentAuditVerificationRows.forEach(r => {
+            csvRows.push([
+                r.code,
+                r.name,
+                r.stage,
+                r.bl,
+                r.bm,
+                r.bp,
+                (r.bn * 100).toFixed(1) + '%',
+                (r.bo * 100).toFixed(1) + '%',
+                (r.bs * 100).toFixed(1) + '%',
+                (r.bj * 100).toFixed(1) + '%',
+                r.is100Pct ? 'متزن 100% ✅' : (r.bj > 1.0 ? 'خلل تجاوز 🚨' : 'غير مكتمل ⚠️'),
+                r.biStatus.replace(/,/g, ' - ')
+            ]);
+        });
+
+        const csvContent = "\uFEFF" + csvRows.map(row =>
+            row.map(cell => `"${String(cell || '').replace(/"/g, '""')}"`).join(',')
+        ).join("\r\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ميزان_التحقق_والتأهيل_الرسمي_100_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     function closeSystemIntegrityModal() {
@@ -2681,6 +3020,19 @@ body {
             loadDataFromCloud();
         } catch(e) {
             console.error("loadDataFromCloud error:", e);
+        }
+
+        // فتح مدقق المعايير والميزان 100% تلقائياً إذا طلب الرابط ذلك
+        try {
+            if (urlParams && (urlParams.get('openAudit') === '1' || urlParams.get('audit') === '1')) {
+                setTimeout(() => {
+                    if (typeof openSystemIntegrityAuditModal === 'function') {
+                        openSystemIntegrityAuditModal();
+                    }
+                }, 500);
+            }
+        } catch(e) {
+            console.error("openAudit trigger error:", e);
         }
     });
 </script>

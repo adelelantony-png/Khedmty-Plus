@@ -2226,7 +2226,7 @@ tr.innerHTML = `
 </td>
 <td data-label="التناول بالقداس" class="modal-col-check">
     <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isCom ? '#e0f2fe' : '#f8fafc'}; border:1.5px solid ${isCom ? '#0284c7' : '#cbd5e1'}; font-weight:bold; color:${isCom ? '#0369a1' : '#64748b'}; opacity:${!isAtt ? '0.45' : '1'}; transition:0.2s;">
-        <span style="font-size:12px;">🍞 تناول بالقداس (+10)</span>
+        <span style="font-size:12px;">🕊️ تناول بالقداس (+10)</span>
         <input type="checkbox" ${isCom ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'communion', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#0284c7;">
     </label>
 </td>

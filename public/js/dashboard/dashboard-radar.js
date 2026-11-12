@@ -125,31 +125,31 @@ function evaluateExcuseTiming(createdAtTimestamp, fridayDateStr) {
                 return { isFast: true, name: "أسبوع الآلام المقدس ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
             }
             if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
-                return { isFast: true, name: "الصوم الكبير (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع بدون سمك" };
+                return { isFast: true, name: "الصوم الكبير (الأربعين المقدسة) ✝️", icon: "✝️", desc: "صوم من الدرجة الأولى - نسك وانقطاع بدون سمك" };
             }
             if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
                 return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى بدون سمك 3 أيام" };
             }
             if (diffDaysToEaster >= 50 && c.month >= 9 && (c.month < 11 || (c.month === 11 && c.day <= 5))) {
-                if (isWedOrFri) return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل" };
+                if (isWedOrFri) return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "✝️", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل" };
                 return { isFast: true, name: "صوم الرسل الأطهار ✝️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بالسمك)" };
             }
             if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
-                if (c.month === 4 && c.day === 28) return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك" };
-                if (isWedOrFri) return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد" };
+                if (c.month === 4 && c.day === 28) return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🕯️", desc: "صوم انقطاعي مشدد بدون سمك" };
+                if (isWedOrFri) return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "✝️", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد" };
                 return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بالسمك)" };
             }
             if (c.month === 4 && c.day === 29) return { isFast: false, name: "عيد الميلاد المجيد 🎄", icon: "🎉", desc: "عيد سيدي كبير - فطر وابتهاج بميلاد مخلصنا" };
-            if (c.month === 5 && c.day === 10) return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك" };
+            if (c.month === 5 && c.day === 10) return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🕊️", desc: "صوم انقطاعي مشدد بدون سمك" };
             if (c.month === 5 && c.day === 11) return { isFast: false, name: "عيد الغطاس المجيد (الثيؤفانيا) 🕊️", icon: "🎉", desc: "عيد سيدي كبير - فطر بميلاد الماء والروح" };
             if (c.month === 12 && c.day >= 1 && c.day <= 15) {
-                if (isWedOrFri) return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء" };
+                if (isWedOrFri) return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🕊️", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء" };
                 return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
             }
             if (isWedOrFri) {
                 const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
                 const reason = (dayOfWeek === 3) ? "تذكار التآمر على مخلصنا وتسليمه" : "تذكار صلب وفداء رب المجد";
-                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
+                return { isFast: true, name: `صوم يوم ${dayName} ✝️`, icon: "✝️", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
             }
             return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
         }
@@ -1326,7 +1326,7 @@ function renderRadarDashboard() {
                     statusStr = "حاضر ✅";
                 }
                 timeStr = att.time || "-";
-                liturgyStr = (att.communion || att.liturgy) ? "حاضر قداس وتناول 🍞" : "اجتماع فقط";
+                liturgyStr = (att.communion || att.liturgy) ? "حاضر قداس وتناول 🕊️" : "اجتماع فقط";
             }
 
             rows.push([

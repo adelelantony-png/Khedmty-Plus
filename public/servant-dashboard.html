@@ -1955,9 +1955,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div class="tab-btn" onclick="switchTab('planTab', this)">خطة السنة 🗓️</div>
 
-<div class="tab-btn" onclick="switchTab('coursesTab', this)">المناهج والتقييم التأهيلي 🎓</div>
-
-<div class="tab-btn" onclick="switchTab('materialsTab', this)">مكتبة المواد 📚</div>
+<div class="tab-btn" onclick="switchTab('materialsTab', this)">المناهج ومكتبة المواد 📚🎓</div>
 
 <div class="tab-btn can-attend" onclick="switchTab('attendanceTab', this)">تسجيل الحضور 📷</div>
 
@@ -1979,7 +1977,6 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div class="tab-btn admin-only" onclick="switchTab('settingsTab', this)">الإعدادات 🔒</div>
 
-<a href="servant_migrate_attendance.html" class="tab-btn admin-only" data-group="admin" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">مزامنة الحضور بالسحابة ☁️</a>
 <div class="tab-btn admin-only" data-group="admin" onclick="openTripartiteSyncModal()" style="border: 1.5px solid rgba(212, 175, 55, 0.45); color: #0C2461; font-weight: 800; background: #fffdf5; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;" title="المزامنة الثلاثية المعتمدة بين إكسل وقاعدة البيانات والسحابة">
     <i class="fa-solid fa-arrows-rotate" style="color: #D4AF37;"></i> المزامنة الثلاثية (Excel + CRM + Cloud)
 </div>
@@ -1998,9 +1995,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 </div>
 
-<!-- مكتبة المواد -->
-
-<div id="coursesTab" class="tab-content"></div>
+<!-- مكتبة المواد والمناهج -->
 
 <div id="materialsTab" class="tab-content">
     <div style="background: linear-gradient(135deg, #071A38 0%, #0B2A6B 100%); color:#ffffff; border-radius:16px; padding:20px; margin-bottom:18px; border:1.5px solid #D4AF37; box-shadow:0 8px 24px rgba(7,26,56,0.25);">
@@ -4102,6 +4097,21 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div id="auditTab" class="tab-content admin-only">
 
+    <!-- كارت إطلاق مدقق المعايير وميزان التحقق 100% -->
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; border-radius: 14px; padding: 18px 22px; margin-bottom: 22px; border: 1.5px solid #D4AF37; box-shadow: 0 4px 16px rgba(0,0,0,0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <div style="font-weight: 900; font-size: 1.15rem; color: #fbbf24; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-scale-balanced"></i> ميزان التدقيق الرياضي 100% ونزاهة الحسابات (أمين الخدمة) 🛡️
+            </div>
+            <div style="font-size: 0.85rem; color: #cbd5e1; margin-top: 4px;">
+                تطبيق القواعد الصارمة لشيت إكسل الرسمي (معامل التحقق BJ = 100%، معامل التصحيح والتأهيل BI، وقاعدة الجمعات المنقضية $BL$3).
+            </div>
+        </div>
+        <a href="servant_followup.html?openAudit=1" class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 800; border: none; padding: 10px 20px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);">
+            <i class="fa-solid fa-shield-halved"></i> تشغيل مدقق المعايير والميزان 100% ⚖️
+        </a>
+    </div>
+
 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
 
 <h2>سجل النشاط والتدقيق الأمني (Audit Log) 🛡️</h2>
@@ -4994,12 +5004,14 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 </div>
 
-<div id="cloudHealthStatusBadge" style="background:#e6fffa; color:#234e52; border:1px solid #38b2ac; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
-
-<span style="display:inline-block; width:10px; height:10px; background:#38a169; border-radius:50%;"></span>
-
-النطاق فائق الأمان (100% مجاني بدون أي تكاليف)
-
+<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <a href="servant_migrate_attendance.html" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #cbd5e1; color:#475569; padding:7px 14px; border-radius:20px; font-weight:700; font-size:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05);" title="أداة الترحيل اليدوي القديمة لقاعدة البيانات">
+        <i class="fa-solid fa-cloud-arrow-up text-primary"></i> أداة الترحيل اليدوي
+    </a>
+    <div id="cloudHealthStatusBadge" style="background:#e6fffa; color:#234e52; border:1px solid #38b2ac; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+        <span style="display:inline-block; width:10px; height:10px; background:#38a169; border-radius:50%;"></span>
+        النطاق فائق الأمان (100% مجاني بدون أي تكاليف)
+    </div>
 </div>
 
 </div>
