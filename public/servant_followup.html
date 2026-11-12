@@ -710,9 +710,12 @@ body {
             padding: 4px;
             border-radius: 10px;
             gap: 4px;
+            width: 100%;
+            max-width: 620px;
         }
         .view-mode-btn {
-            padding: 9px 18px;
+            flex: 1;
+            padding: 10px 14px;
             border-radius: 8px;
             border: none;
             font-weight: 800;
@@ -723,7 +726,9 @@ body {
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
+            white-space: nowrap;
         }
         .view-mode-btn.active {
             background: #ffffff;
@@ -752,9 +757,6 @@ body {
             <button type="button" class="btn-action-top" onclick="openSystemIntegrityAuditModal()" style="background:#fef3c7; color:#92400e; border:1.5px solid #f59e0b; font-weight:800; display:inline-flex; align-items:center; gap:6px;">
                 <i class="fa-solid fa-shield-halved"></i> مدقق الحسابات والمعايير (أمين الخدمة) 🛡️
             </button>
-            <a href="servant_spiritual_report.html" class="btn-action-top" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
-                <i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
-            </a>
             <button class="btn-action-top btn-refresh" onclick="loadDataFromCloud(true)">
                 <i class="fa-solid fa-arrows-rotate"></i> تحديث
             </button>
@@ -784,7 +786,7 @@ body {
         <!-- بطاقة طقس الكنيسة القبطية والأصوام الذكية الموحدة -->
     <div class="coptic-fasting-banner" id="copticFastingBanner">
         <div style="display:flex; align-items:center; gap:14px;">
-            <div id="ui-fast-icon" style="font-size:2.2rem; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.15); border-radius:12px;">🥖</div>
+            <div id="ui-fast-icon" style="font-size:1.85rem; width:50px; height:50px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.15); border-radius:12px; color:#d5a947;">✝️</div>
             <div>
                 <div style="font-weight:800; font-size:1.1rem;" id="ui-fast-title">طقس الكنيسة القبطية الأرثوذكسية اليوم</div>
                 <div style="font-size:0.85rem; opacity:0.92;" id="ui-fast-desc">متابعة مواسم الأصوام والأعياد الكنسية لتوجيه مخدومي إعداد الخدام في حياتهم الروحية</div>
@@ -846,21 +848,18 @@ body {
     </div>
 
     <!-- Filter & Search Toolbar -->
-    <!-- مبدل أنماط العرض الرعوي الموحد -->
+    <!-- مبدل أنماط العرض الرعوي الموحد (الافتقاد vs السجل الروحي الشامل) -->
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div class="view-mode-tabs" role="tablist">
             <button type="button" class="view-mode-btn active" id="viewModeVisitation" onclick="switchViewMode('visitation')">
-                <i class="fa-solid fa-handshake-angle text-primary"></i> 🤝 الرعاية والافتقاد الميداني
+                <i class="fa-solid fa-handshake-angle text-primary"></i> 🤝 كشف الرعاية والافتقاد
             </button>
             <button type="button" class="view-mode-btn" id="viewModeSpiritual" onclick="switchViewMode('spiritual')">
-                <i class="fa-solid fa-dove text-purple"></i> 🕊️ السلوك الروحي ووسائط النعمة
-            </button>
-            <button type="button" class="view-mode-btn" id="viewModeCombined" onclick="switchViewMode('combined')">
-                <i class="fa-solid fa-star text-warning"></i> 🌟 العرض الشامل المدمج 360°
+                <i class="fa-solid fa-dove text-purple"></i> 🕊️ السجل الروحي ووسائط النعمة 360°
             </button>
         </div>
         <div id="viewModeDescription" class="small text-muted fw-bold">
-            <i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات.
+            <i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات الرعوية.
         </div>
     </div>
 
@@ -1575,29 +1574,29 @@ body {
             const diffDaysToEaster = Math.round((date - easter) / (1000 * 60 * 60 * 24));
 
             if (diffDaysToEaster >= 0 && diffDaysToEaster <= 49) {
-                if (diffDaysToEaster === 0) return { isFast: false, name: "عيد القيامة المجيد 👑", icon: "🎉", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بالقيامة" };
-                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🎉", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
+                if (diffDaysToEaster === 0) return { isFast: false, name: "عيد القيامة المجيد ✝️", icon: "✝️", desc: "أعظم أعياد الكنيسة - فطر وابتهاج بقيامة ربنا يسوع المسيح" };
+                return { isFast: false, name: "الخمسين المقدسة الفرايحية 🕊️", icon: "🕊️", desc: "فترة فطر وحل دائم (لا يوجد صوم أربعاء أو جمعة)" };
             }
             if (diffDaysToEaster >= -7 && diffDaysToEaster <= -1) {
-                return { isFast: true, name: "أسبوع الآلام المقدس (البصخة) ☦️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وانقطاع" };
+                return { isFast: true, name: "أسبوع الآلام المقدس (البصخة) ✝️", icon: "✝️", desc: "أقدس أصوام السنة - صوم نسكي حازم وصلوات البصخة المقدسة" };
             }
             if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
-                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع (بدون سمك)" };
+                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) ✝️", icon: "✝️", desc: "صوم نسكي مقدس من الدرجة الأولى - انقطاع وزهد بحسب طقس الكنيسة" };
             }
             if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
-                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى" };
+                return { isFast: true, name: "صوم نينوى (يونان النبي) ✝️", icon: "✝️", desc: "صوم نسكي انقطاعي مشدد من الدرجة الأولى توبةً وتذللاً" };
             }
             if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
-                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+                return { isFast: true, name: "صوم الميلاد المجيد 🕯️", icon: "🕯️", desc: "صوم استقبال سر التجسد الإلهي (صوم كنسي مبارك)" };
             }
             if (c.month === 12 && c.day >= 1 && c.day <= 15) {
-                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية)" };
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🕊️", icon: "🕊️", desc: "صوم مبارك ومحبوب في طقس كنيستنا القبطية الأرثوذكسية" };
             }
             if (isWedOrFri) {
                 const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
-                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: "صوم كنسي أسبوعي مقدس - صوم انقطاعي" };
+                return { isFast: true, name: `صوم نسكي مبارك (${dayName}) ✝️`, icon: "✝️", desc: `صوم كنسي أسبوعي مقدس - انقطاع ونسك بحسب الطقس الأرثوذكسي` };
             }
-            return { isFast: false, name: "يوم فطر كنسي 🕊️", icon: "🕊️", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
+            return { isFast: false, name: "يوم فطر كنسي ⛪", icon: "⛪", desc: "اليوم حل وفطر بحسب طقس الكنيسة القبطية الأرثوذكسية" };
         }
     };
 
@@ -1616,24 +1615,22 @@ body {
     }
 
     // ========================================================
-    // 🎛️ إدارة أنماط العرض الرعوي الموحد (Visitation / Spiritual / Combined)
+    // 🎛️ إدارة أنماط العرض الرعوي الموحد (الافتقاد والرعاية vs السجل الروحي ووسائط النعمة)
     // ========================================================
-    let currentViewMode = 'visitation'; // 'visitation' | 'spiritual' | 'combined'
+    let currentViewMode = 'visitation'; // 'visitation' | 'spiritual'
 
     function switchViewMode(mode) {
-        currentViewMode = mode;
-        try { localStorage.setItem('khedmety_followup_view_mode', mode); } catch(e){}
+        currentViewMode = (mode === 'spiritual' || mode === 'combined') ? 'spiritual' : 'visitation';
+        try { localStorage.setItem('khedmety_followup_view_mode', currentViewMode); } catch(e){}
 
         document.querySelectorAll('.view-mode-btn').forEach(btn => btn.classList.remove('active'));
-        if (mode === 'visitation') {
+        const descEl = document.getElementById('viewModeDescription');
+        if (currentViewMode === 'visitation') {
             document.getElementById('viewModeVisitation')?.classList.add('active');
-            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات.';
-        } else if (mode === 'spiritual') {
+            if (descEl) descEl.innerHTML = '<i class="fa-solid fa-circle-info text-info me-1"></i> وضع الرعاية: متابعة الغياب، أرقام الهواتف، تسجيل الافتقاد، والكبسولات الرعوية.';
+        } else {
             document.getElementById('viewModeSpiritual')?.classList.add('active');
-            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-purple me-1"></i> وضع وسائط النعمة: حضور الجمعة، القداسات، أيام النوتة، الإنجيل، والاعتراف، وإجمالي النقاط.';
-        } else if (mode === 'combined') {
-            document.getElementById('viewModeCombined')?.classList.add('active');
-            document.getElementById('viewModeDescription').innerHTML = '<i class="fa-solid fa-circle-info text-warning me-1"></i> العرض الشامل 360°: يجمع مؤشرات الالتزام والرعاية والتأهيل الروحي في جدول واحد متكامل.';
+            if (descEl) descEl.innerHTML = '<i class="fa-solid fa-circle-info text-purple me-1"></i> وضع وسائط النعمة الشامل 360°: حضور الجمعة، القداسات، أيام النوتة، قراءات الإنجيل، سر الاعتراف، ومؤشر التأهيل.';
         }
 
         renderTableHeader();
@@ -1656,33 +1653,19 @@ body {
                     <th>إجراء الافتقاد</th>
                 </tr>
             `;
-        } else if (currentViewMode === 'spiritual') {
+        } else {
             thead.innerHTML = `
                 <tr>
                     <th>كود الدارس</th>
                     <th>اسم المخدوم</th>
                     <th>الفرقة / المرحلة</th>
                     <th>حضور الجمعة ▾</th>
-                    <th>القداس والتناول 🍞 ▾</th>
+                    <th>القداس والتناول ⛪ ▾</th>
                     <th>أيام النوتة ▾</th>
                     <th>قراءات الإنجيل ▾</th>
-                    <th>حالة الاعتراف 🕊️ ▾</th>
+                    <th>حالة سر الاعتراف 🕊️ ▾</th>
                     <th>مؤشر التأهيل الخدمي 🎯</th>
                     <th>إجمالي النقاط ⭐ ▾</th>
-                </tr>
-            `;
-        } else if (currentViewMode === 'combined') {
-            thead.innerHTML = `
-                <tr>
-                    <th>كود الدارس</th>
-                    <th>اسم المخدوم</th>
-                    <th>الفرقة</th>
-                    <th>الغياب والالتزام</th>
-                    <th>وسائط النعمة المجمعة (قداس/نوتة/إنجيل)</th>
-                    <th>الاعتراف والتأهيل 🕊️</th>
-                    <th>النقاط ⭐</th>
-                    <th>التواصل وآخر افتقاد</th>
-                    <th>تسجيل افتقاد</th>
                 </tr>
             `;
         }
@@ -1698,7 +1681,8 @@ body {
         const tbody = document.getElementById('tableBody');
 
         if (!allMembers || allMembers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted">لا يوجد مخدومين مسجلين في النظام حتى الآن.</td></tr>';
+            const colspan = currentViewMode === 'visitation' ? 7 : 10;
+            tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-5 text-muted">لا يوجد مخدومين مسجلين في النظام حتى الآن.</td></tr>`;
             return;
         }
 
@@ -1884,7 +1868,8 @@ body {
         });
 
         if (enriched.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-5 text-muted"><i class="fa-solid fa-filter-circle-xmark fa-2x mb-2 text-secondary"></i><br>لا توجد نتائج مطابقة لخيارات البحث والفلترة.</td></tr>';
+            const colspan = currentViewMode === 'visitation' ? 7 : 10;
+            tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-5 text-muted"><i class="fa-solid fa-filter-circle-xmark fa-2x mb-2 text-secondary"></i><br>لا توجد نتائج مطابقة لخيارات البحث والفلترة.</td></tr>`;
             return;
         }
 
@@ -1970,49 +1955,19 @@ body {
                         </td>
                     </tr>
                 `;
-            } else if (currentViewMode === 'spiritual') {
+            } else {
                 html += `
                     <tr>
                         <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
                         <td data-label="اسم المخدوم" class="text-start fw-bold text-dark fs-6">${item.name}</td>
                         <td data-label="المرحلة"><span class="badge bg-light text-dark border">${item.stage}</span></td>
                         <td data-label="حضور الجمعة" style="color:#16a34a; font-weight:800;">${item.fridayCount} لقاء</td>
-                        <td data-label="القداس والتناول" style="color:#7c3aed; font-weight:800;">${item.liturgies} قداس 🍞</td>
+                        <td data-label="القداس والتناول" style="color:#7c3aed; font-weight:800;">${item.liturgies} قداس ⛪</td>
                         <td data-label="أيام النوتة" style="color:#dc2626; font-weight:800;">${item.spiritualDays} يوم</td>
                         <td data-label="قراءات الإنجيل" style="color:#b45309; font-weight:800;">${item.bibleChapters} إصحاح</td>
                         <td data-label="الاعتراف"><span class="${item.confessionStatus.badgeClass}">${escapeHtml(item.confessionStatus.label)}</span></td>
                         <td data-label="التأهيل الخدمي"><span class="${item.coachingStatus.badgeClass}">${escapeHtml(item.coachingStatus.text)}</span></td>
                         <td data-label="إجمالي النقاط" style="font-weight:900; color:#4f46e5; font-size:1.05rem;">${item.points} ⭐</td>
-                    </tr>
-                `;
-            } else if (currentViewMode === 'combined') {
-                html += `
-                    <tr>
-                        <td data-label="كود الدارس" class="fw-bold text-primary">${item.code}</td>
-                        <td data-label="اسم المخدوم" class="text-start">
-                            <div class="fw-bold text-dark">${item.name}</div>
-                            <div class="text-muted small">${item.area || ''}</div>
-                        </td>
-                        <td data-label="الفرقة"><span class="badge bg-light text-dark border small">${item.stage}</span></td>
-                        <td data-label="الغياب والالتزام">${streakBadge}<div class="small fw-bold text-success mt-1">${item.fridayCount} لقاء جمعة</div></td>
-                        <td data-label="وسائط النعمة">
-                            <div class="d-flex gap-1 flex-wrap justify-content-center">
-                                <span class="badge" style="background:#ede9fe; color:#6d28d9;">🍞 ${item.liturgies} قداس</span>
-                                <span class="badge" style="background:#fee2e2; color:#b91c1c;">📝 ${item.spiritualDays} نوتة</span>
-                                <span class="badge" style="background:#fef3c7; color:#b45309;">📖 ${item.bibleChapters} إصحاح</span>
-                            </div>
-                        </td>
-                        <td data-label="الاعتراف والتأهيل">
-                            <div><span class="${item.confessionStatus.badgeClass}">${escapeHtml(item.confessionStatus.label)}</span></div>
-                            <div class="mt-1"><span class="${item.coachingStatus.badgeClass}">${escapeHtml(item.coachingStatus.text)}</span></div>
-                        </td>
-                        <td data-label="النقاط" class="fw-bold" style="color:#4f46e5; font-size:1.05rem;">${item.points} ⭐</td>
-                        <td data-label="التواصل">${lastVisitHtml}<div class="d-flex gap-1 justify-content-center mt-1">${callButtons.join('')}</div></td>
-                        <td data-label="إجراء الافتقاد">
-                            <button type="button" class="btn-record-visit" onclick="openRecordVisitModal('${escapeHtml(String(item.id))}')">
-                                <i class="fa-solid fa-plus"></i> افتقاد
-                            </button>
-                        </td>
                     </tr>
                 `;
             }
@@ -2578,7 +2533,7 @@ body {
             "اسم المخدوم",
             "الفرقة / المرحلة",
             "حضور الجمعة",
-            "القداس والتناول 🍞",
+            "القداس والتناول (سر الإفخارستيا)",
             "أيام النوتة الروحية",
             "قراءات الإنجيل (إصحاحات)",
             "حالة سر الاعتراف 🕊️",
@@ -2689,24 +2644,44 @@ body {
 
 
     window.addEventListener('DOMContentLoaded', () => {
+        let urlParams = null;
         try {
-            const urlParams = new URLSearchParams(window.location.search);
+            urlParams = new URLSearchParams(window.location.search);
             const fromTab = urlParams.get('fromTab') || urlParams.get('tab') || 'membersTab';
             const fromGroup = urlParams.get('group') || 'people';
             const smartBackBtn = document.querySelector('[data-smart-back]');
             if (smartBackBtn) {
                 smartBackBtn.setAttribute('data-fallback', `servant-dashboard.html?tab=${encodeURIComponent(fromTab)}&group=${encodeURIComponent(fromGroup)}`);
             }
-        } catch (e) {}
+        } catch (e) {
+            console.warn("URL params parsing error:", e);
+        }
 
-        renderFastingStatus();
+        try {
+            renderFastingStatus();
+        } catch(e) {
+            console.error("renderFastingStatus error:", e);
+        }
 
         // قراءة نمط العرض من الرابط أو التخزين المحلي
-        const viewParam = urlParams.get('view') || localStorage.getItem('khedmety_followup_view_mode') || 'visitation';
-        switchViewMode(viewParam);
+        try {
+            const viewParam = (urlParams && urlParams.get('view')) || localStorage.getItem('khedmety_followup_view_mode') || 'visitation';
+            switchViewMode(viewParam);
+        } catch(e) {
+            console.error("switchViewMode error:", e);
+        }
 
-        initImmediateLocalData();
-        loadDataFromCloud();
+        try {
+            initImmediateLocalData();
+        } catch(e) {
+            console.error("initImmediateLocalData error:", e);
+        }
+
+        try {
+            loadDataFromCloud();
+        } catch(e) {
+            console.error("loadDataFromCloud error:", e);
+        }
     });
 </script>
 <a href="servant_help.html?g=followup" class="help-fab" title="مركز مساعدة الخادم" aria-label="مركز المساعدة">؟</a>

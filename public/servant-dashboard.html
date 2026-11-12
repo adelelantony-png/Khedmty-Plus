@@ -1988,9 +1988,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div class="tab-btn admin-only" onclick="switchTab('cloudUsageTab', this)" data-group="admin">مؤشرات المزامنة وحالة السحابة ☁️</div>
 
-<a href="servant_followup.html?fromTab=membersTab&group=people" onclick="this.href='servant_followup.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الافتقاد الذكي 🤝</a>
-
-<a href="servant_spiritual_report.html?fromTab=membersTab&group=people" onclick="this.href='servant_spiritual_report.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">متابعة السلوك الروحي 📈</a>
+<a href="servant_followup.html?fromTab=membersTab&group=people" onclick="this.href='servant_followup.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'membersTab') + '&group=people';" class="tab-btn admin-or-servant" data-group="people" style="text-decoration:none; display:flex; align-items:center; justify-content:center;">الرعاية والافتقاد الشامل 360° 🕊️</a>
 
 
 
@@ -2198,35 +2196,35 @@ window.switchTab = window.switchTab || function(tabId, btn) {
         </div>
     </div>
 
-    <!-- بطاقات البوابات المركزية -->
+    <!-- بطاقات البوابات المركزية الموحدة -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-top:16px;">
-        <a href="servant_followup.html?fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(212,175,55,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+        <a href="servant_followup.html?view=visitation&fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(212,175,55,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
             <div>
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                     <span style="font-size:1.6rem;">🤝</span>
-                    <strong style="font-size:1.05rem; color:#FDE047;">بوابة الافتقاد الذكي والمكالمات</strong>
+                    <strong style="font-size:1.05rem; color:#FDE047;">بوابة الرعاية والافتقاد والمكالمات</strong>
                 </div>
                 <p style="font-size:0.8rem; color:#e2e8f0; line-height:1.5; margin:0;">
                     الاتصال السريع بنقرة واحدة، رسائل الواتساب الفردية، وتوثيق الزيارات المنزلية وملاحظات الخدمة.
                 </p>
             </div>
             <div style="margin-top:12px; color:#FDE047; font-weight:800; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
-                <span>فتح شاشة الافتقاد</span> <i class="fa-solid fa-arrow-left"></i>
+                <span>فتح كشف الافتقاد والرعاية</span> <i class="fa-solid fa-arrow-left"></i>
             </div>
         </a>
 
-        <a href="servant_spiritual_report.html?fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(147,197,253,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+        <a href="servant_followup.html?view=spiritual&fromTab=followupTab&group=people" style="background:rgba(255,255,255,0.1); border:1.5px solid rgba(147,197,253,0.4); border-radius:12px; padding:16px; text-decoration:none; color:#ffffff; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.18)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
             <div>
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                    <span style="font-size:1.6rem;">📊</span>
-                    <strong style="font-size:1.05rem; color:#93c5fd;">تقرير السلوك الروحي وحصاد المخدومين</strong>
+                    <span style="font-size:1.6rem;">🕊️</span>
+                    <strong style="font-size:1.05rem; color:#93c5fd;">السجل الروحي الشامل وحصاد وسائط النعمة 360°</strong>
                 </div>
                 <p style="font-size:0.8rem; color:#e2e8f0; line-height:1.5; margin:0;">
-                    متابعة قراءات الإنجيل اليومية، التزام النوتة الروحية، نقاط الحصاد، وأوسمة الدارسين.
+                    متابعة قراءات الإنجيل اليومية، التزام النوتة الروحية، حضور القداسات، سر الاعتراف، ونقاط الحصاد.
                 </p>
             </div>
             <div style="margin-top:12px; color:#93c5fd; font-weight:800; font-size:0.84rem; display:flex; align-items:center; gap:6px;">
-                <span>عرض تقرير السلوك الروحي</span> <i class="fa-solid fa-arrow-left"></i>
+                <span>عرض السجل الروحي الموحد 360°</span> <i class="fa-solid fa-arrow-left"></i>
             </div>
         </a>
     </div>
@@ -2327,7 +2325,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
             <!-- شريط طقس الكنيسة القبطية والأصوام الذكي للرادار -->
             <div id="radar_copticBanner" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: #ffffff; border-radius: 14px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid rgba(255,255,255,0.12);">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <span id="radar_fastIcon" style="font-size: 1.6rem;">🥖</span>
+                    <span id="radar_fastIcon" style="font-size: 1.6rem; color:#fde047;">✝️</span>
                     <div>
                         <strong id="radar_fastTitle" style="font-size: 0.95rem; color: #fde047;">طقس الكنيسة اليوم</strong>
                         <span style="font-size: 0.8rem; opacity: 0.9; margin-right: 8px;" id="radar_fastDesc">حساب تلقائي بحسب الطقس القبطي الأرثوذكسي</span>
@@ -2374,7 +2372,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
                 <div class="radar-kpi-card harmonized-kpi" onclick="switchRadarSection('pulse')" style="cursor: pointer;" title="انقر للانتقال الفوري لقسم نبض القداس">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                         <span style="font-size: 0.82rem; color: #475569; font-weight: 800;">القداس والتناول</span>
-                        <span style="font-size: 0.7rem; font-weight: 800; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 1.5px 8px;">بركة 🍞</span>
+                        <span style="font-size: 0.7rem; font-weight: 800; color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 1.5px 8px;">بركة ونعمة ✝️</span>
                     </div>
                     <div style="font-size: 2rem; font-weight: 900; color: #0C2461; margin: 2px 0;" id="radar_kpiLiturgyPct">0%</div>
                     <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;" id="radar_kpiLiturgyCount">0 من 0 حاضرين</div>
@@ -3714,16 +3712,8 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
 
-<a href="servant_followup.html" class="btn-mini" style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
-
-<i class="fa-solid fa-handshake-angle"></i> الافتقاد الذكي والرعاية الأبوية 🤝
-
-</a>
-
-<a href="servant_spiritual_report.html" class="btn-mini" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
-
-<i class="fa-solid fa-chart-line"></i> تقرير السلوك الروحي 📊
-
+<a href="servant_followup.html" class="btn-mini" style="background:#e0e7ff; color:#3730a3; border:1px solid #c7d2fe; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+    <i class="fa-solid fa-cross text-warning"></i> المنظومة الرعوية الشاملة والافتقاد 360° 🕊️
 </a>
 
                     <a href="barcode.html?bulk=all" target="_blank" class="btn-mini" style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; font-weight:bold; padding:6px 12px; text-decoration:none; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
@@ -3826,7 +3816,7 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 <button type="button" class="btn-mini btn-primary" onclick="setGeneralBroadcastTemplate()" style="flex:1; min-width:140px;">📢 غياب وافتقاد عام</button>
 <button type="button" class="btn-mini btn-purple" onclick="setSpiritualBroadcastTemplate()" style="flex:1; min-width:140px;">🕊️ افتقاد روحي واعتراف</button>
 <button type="button" class="btn-mini" onclick="setBirthdayBroadcastTemplate()" style="flex:1; min-width:140px; background:#d97706; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">🎂 تهنئة عيد ميلاد</button>
-<button type="button" class="btn-mini" onclick="setLiturgyReminderBroadcastTemplate()" style="flex:1; min-width:140px; background:#0284c7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">🍞 تذكير القداس والتناول</button>
+<button type="button" class="btn-mini" onclick="setLiturgyReminderBroadcastTemplate()" style="flex:1; min-width:140px; background:#0284c7; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">⛪ تذكير القداس والتناول</button>
 <button type="button" class="btn-mini" onclick="setExamEncouragementBroadcastTemplate()" style="flex:1; min-width:140px; background:#166534; color:#fff; border:none; padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer;">✍️ تشجيع الشيت والامتحان</button>
 </div>
 
@@ -8780,7 +8770,7 @@ window.setBirthdayBroadcastTemplate = setBirthdayBroadcastTemplate;
 
 function setLiturgyReminderBroadcastTemplate() {
     document.getElementById('customBroadcastMsg').value =
-    "صباح البركة يا [الاسم] الغالي.. بنفكرك بميعاد قداس واجتماع إعداد الخدام الجمعة القادمة الساعة 8:30 ص.. ننتظر بركة حضورك وتناولك معنا 🍞🕊️";
+    "صباح البركة يا [الاسم] الغالي.. بنفكرك بميعاد قداس واجتماع إعداد الخدام الجمعة القادمة الساعة 8:30 ص.. ننتظر بركة حضورك وتناولك معنا ⛪🕊️";
 }
 window.setLiturgyReminderBroadcastTemplate = setLiturgyReminderBroadcastTemplate;
 

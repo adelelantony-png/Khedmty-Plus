@@ -519,7 +519,7 @@ body { font-family: var(--font-arabic, 'Tajawal', sans-serif); background-color:
         <!-- 2. شريط الصيام والطقس الكنسي الذكي حسب الكنيسة القبطية الأرثوذكسية -->
         <div class="mb-3 p-2 px-3 rounded-4 d-flex align-items-center justify-content-between" style="background: #ffffff; border: 1.5px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
             <div class="d-flex align-items-center gap-2">
-                <span id="ui-fast-icon" style="font-size: 1.35rem;">🥖</span>
+                <span id="ui-fast-icon" style="font-size: 1.35rem; color:#d97706;">✝️</span>
                 <div>
                     <div class="fw-bold text-dark small" id="ui-fast-title">جاري تحديد طقس وصوم اليوم...</div>
                     <div style="font-size: 0.72rem; color: #64748b;" id="ui-fast-desc">بحسب طقس الكنيسة القبطية الأرثوذكسية</div>
@@ -602,7 +602,7 @@ body { font-family: var(--font-arabic, 'Tajawal', sans-serif); background-color:
             <!-- إشعار التناول المسجل بالنوتة الروحية -->
             <div class="d-flex align-items-center justify-content-between p-2 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.76rem; color: #cbd5e1;">
                 <div>
-                    <span>🍞</span> التناول والقداس الإلهي يُسجّلان بالتفصيل في النوتة:
+                    <span>⛪</span> التناول والقداس الإلهي يُسجّلان بالتفصيل في النوتة:
                 </div>
                 <a href="spiritual_note.html" class="fw-bold" style="color: #fde047; text-decoration: none;">
                     فتح النوتة الروحية ◀
@@ -1871,18 +1871,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // ج) الصوم الكبير (الأربعين المقدسة): (-55 حتى -8)
             if (diffDaysToEaster >= -55 && diffDaysToEaster < -7) {
-                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) 🥖", icon: "🥖", desc: "صوم من الدرجة الأولى - نسك وانقطاع (لا يُسمح فيه بالسمك)" };
+                return { isFast: true, name: "الصوم الكبير المقدس (الأربعين المقدسة) ✝️", icon: "✝️", desc: "صوم من الدرجة الأولى - نسك وانقطاع بحسب الطقس الكنسي" };
             }
 
             // د) صوم يونان / نينوى: (-69 حتى -67)
             if (diffDaysToEaster >= -69 && diffDaysToEaster <= -67) {
-                return { isFast: true, name: "صوم نينوى (يونان النبي) 🐋", icon: "🐋", desc: "صوم انقطاعي مشدد من الدرجة الأولى (بدون سمك 3 أيام)" };
+                return { isFast: true, name: "صوم نينوى (يونان النبي) ✝️", icon: "✝️", desc: "صوم انقطاعي مشدد من الدرجة الأولى توبةً وتذللاً" };
             }
 
             // هـ) صوم الرسل: بعد العنصرة (diff >= 50) حتى 5 أبيب (شهر 11)
             if (diffDaysToEaster >= 50 && c.month >= 9 && (c.month < 11 || (c.month === 11 && c.day <= 5))) {
                 if (isWedOrFri) {
-                    return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل (بدون سمك)" };
+                    return { isFast: true, name: "صوم الرسل الأطهار (أربعاء/جمعة) ✝️", icon: "✝️", desc: "صوم انقطاعي أسبوعي خلال صوم الرسل" };
                 }
                 return { isFast: true, name: "صوم الرسل الأطهار ✝️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
             }
@@ -1890,12 +1890,12 @@ document.addEventListener('DOMContentLoaded', function () {
             // 2. صوم الميلاد المجيد: 16 هاتور (شهر 3) إلى 28 كيهك (شهر 4)
             if ((c.month === 3 && c.day >= 16) || (c.month === 4 && c.day <= 28)) {
                 if (c.month === 4 && c.day === 28) {
-                    return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للميلاد" };
+                    return { isFast: true, name: "برمون عيد الميلاد المجيد 🕯️", icon: "🕯️", desc: "صوم انقطاعي مشدد استعداداً للميلاد" };
                 }
                 if (isWedOrFri) {
-                    return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد (بدون سمك)" };
+                    return { isFast: true, name: "صوم الميلاد المجيد (أربعاء/جمعة) ✝️", icon: "✝️", desc: "صوم انقطاعي أسبوعي خلال صوم الميلاد" };
                 }
-                return { isFast: true, name: "صوم الميلاد المجيد 🎄", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
+                return { isFast: true, name: "صوم الميلاد المجيد 🕯️", icon: "🐟", desc: "صوم من الدرجة الثانية (يُسمح فيه بأكل السمك)" };
             }
 
             // 3. عيد الميلاد المجيد (29 كيهك): فطر دائم
@@ -1905,7 +1905,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // 4. برمون الغطاس: 10 طوبة
             if (c.month === 5 && c.day === 10) {
-                return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🥖", desc: "صوم انقطاعي مشدد بدون سمك استعداداً للغطاس" };
+                return { isFast: true, name: "برمون عيد الغطاس المجيد 🕊️", icon: "🕊️", desc: "صوم انقطاعي مشدد استعداداً للغطاس" };
             }
 
             // 5. عيد الغطاس المجيد: 11 طوبة
@@ -1916,16 +1916,16 @@ document.addEventListener('DOMContentLoaded', function () {
             // 6. صوم السيدة العذراء: 1 مسرى إلى 15 مسرى (16 مسرى عيدها)
             if (c.month === 12 && c.day >= 1 && c.day <= 15) {
                 if (isWedOrFri) {
-                    return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة)", icon: "🥖", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء (بدون سمك)" };
+                    return { isFast: true, name: "صوم السيدة العذراء مريم (أربعاء/جمعة) ✝️", icon: "✝️", desc: "صوم انقطاعي أسبوعي خلال صوم العذراء" };
                 }
-                return { isFast: true, name: "صوم السيدة العذراء مريم 🌹", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
+                return { isFast: true, name: "صوم السيدة العذراء مريم 🕊️", icon: "🐟", desc: "صوم محبوبة الكنيسة (درجة ثانية - يُسمح بالسمك)" };
             }
 
             // 7. صوم الأربعاء والجمعة الأسبوعي
             if (isWedOrFri) {
                 const dayName = (dayOfWeek === 3) ? "الأربعاء" : "الجمعة";
                 const reason = (dayOfWeek === 3) ? "تذكار التآمر على مخلصنا وتسليمه" : "تذكار صلب وفداء رب المجد";
-                return { isFast: true, name: `صوم يوم ${dayName} 🥖`, icon: "🥖", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم انقطاعي بدون سمك` };
+                return { isFast: true, name: `صوم يوم ${dayName} ✝️`, icon: "✝️", desc: `صوم كنسي أسبوعي مقدس (${reason}) - صوم نسكي انقطاعي` };
             }
 
             // 8. أيام الفطر العادية
