@@ -181,7 +181,7 @@ window.currentRadarAbsenceFilter = 'all';
 window.lastRadarAbsentMems = [];
 window.lastRadarBirthdaysList = [];
 
-function renderRadarPulseChart(validMeetingDates) {
+function renderRadarPulseChart(validMeetingDates, selectedDate) {
     const container = document.getElementById('radar_attendancePulseBars');
     const commentEl = document.getElementById('radar_pulseTrendComment');
     const stabilityEl = document.getElementById('radar_pulseOverallStability');
@@ -201,8 +201,8 @@ function renderRadarPulseChart(validMeetingDates) {
     const stage1Total = stage1Members.length || 1;
     const stage2Total = stage2Members.length || 1;
 
-    // التاريخ الأحدث للجلسة
-    const latestDate = dates[0] || '2026-11-06';
+    // التاريخ المحدد للجلسة (الافتراضي هو أحدث جمعة، مع دعم التبديل اليدوي بين اللقاءات)
+    const latestDate = selectedDate || window.selectedPulseMeetingDate || dates[0] || '2026-11-06';
     const latestAttList = (attendanceRecord && attendanceRecord[latestDate]) || [];
 
     // دالة فحص حضور المخدوم في كشف الحضور
@@ -230,10 +230,11 @@ function renderRadarPulseChart(validMeetingDates) {
     const liturgyCount = latestAttList.filter(r => r.communion || r.liturgy).length;
     const litPct = totalMembers > 0 ? Math.round((liturgyCount / totalMembers) * 100) : 0;
 
-    // رصد الأعذار المعتمدة
+    // رصد الأعذار المعتمدة الخاصة بهذه الجمعة المعروضة فقط
     const excusesList = window.lastRadarExcusesList || [];
     const validExcuses = excusesList.filter(e => {
-        const isTargetDate = !e.session_date || e.session_date === latestDate;
+        const excuseDate = e.friday_date || e.session_date;
+        const isTargetDate = excuseDate === latestDate;
         return isTargetDate && e.status !== 'rejected';
     });
     const excuseCount = validExcuses.length;
@@ -392,7 +393,7 @@ function renderRadarPulseChart(validMeetingDates) {
                     <i class="fa-solid fa-layer-group text-primary"></i> مقارنة نبض وتنافسية الفرق (Stage Pulse Breakdown)
                 </strong>
                 <span style="font-size: 0.76rem; color: #64748b;">
-                    جمعة 06 نوفمبر (إجمالي القوة المسجلة: <strong>${totalMembers}</strong> دارساً)
+                    جمعة <strong>${latestDate}</strong> (إجمالي القوة المسجلة: <strong>${totalMembers}</strong> دارساً)
                 </span>
             </div>
 
@@ -478,16 +479,17 @@ function renderRadarPulseChart(validMeetingDates) {
         const barHeight = Math.max(16, Math.round(curAttPct * 1.15));
         const litHeight = Math.max(8, Math.round(curLitPct * 1.15));
 
+        const isSelected = (d === latestDate);
         barsHtml += `
-            <div style="flex: 1; max-width: 140px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;">
-                <div style="font-size: 0.84rem; font-weight: 900; color: #1e3a8a;">${curAttPct}%</div>
-                <div style="width: 100%; max-width: 58px; height: 120px; display: flex; align-items: flex-end; justify-content: center; background: #f8fafc; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid #e2e8f0; gap: 4px; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);" title="تاريخ: ${d} | الحضور: ${attended} (${curAttPct}%) | القداس والتناول: ${liturgy} (${curLitPct}%)">
+            <div onclick="selectPulseMeetingDate('${d}')" style="flex: 1; max-width: 140px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2; cursor: pointer; transition: transform 0.2s; ${isSelected ? 'transform: scale(1.06); filter: drop-shadow(0 4px 8px rgba(37,99,235,0.25));' : 'opacity: 0.85;'}" title="انقر لعرض وتحليل نبض جمعة ${d}">
+                <div style="font-size: 0.84rem; font-weight: 900; color: ${isSelected ? '#1d4ed8' : '#64748b'};">${curAttPct}%</div>
+                <div style="width: 100%; max-width: 58px; height: 120px; display: flex; align-items: flex-end; justify-content: center; background: ${isSelected ? '#eff6ff' : '#f8fafc'}; border-radius: 8px; overflow: hidden; position: relative; border: ${isSelected ? '2px solid #3b82f6' : '1px solid #e2e8f0'}; gap: 4px; padding: 0 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
                     <div style="width: 50%; height: ${barHeight}px; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
                     <div style="width: 50%; height: ${litHeight}px; background: linear-gradient(180deg, #10b981 0%, #059669 100%); border-radius: 4px 4px 0 0; transition: height 0.4s ease;"></div>
                 </div>
                 <div style="font-size: 0.78rem; font-weight: 800; color: #0f172a; margin-top: 3px;">${shortDate}</div>
                 <div style="font-size: 0.7rem; color: #64748b; font-weight: bold;">${attended} مخدوم</div>
-                <span style="background: #dcfce7; color: #15803d; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; font-weight: 800; margin-top: 1px; border: 1px solid #bbf7d0;">فعلي 🟢</span>
+                <span style="background: ${isSelected ? '#15803d' : '#dcfce7'}; color: ${isSelected ? '#ffffff' : '#15803d'}; font-size: 0.68rem; padding: 2px 8px; border-radius: 6px; font-weight: 800; margin-top: 1px; border: 1px solid #bbf7d0;">${isSelected ? 'المعروض 🎯' : 'فعلي 🟢'}</span>
             </div>
         `;
     });
@@ -537,6 +539,10 @@ function renderRadarPulseChart(validMeetingDates) {
     }
 }
 
+function selectPulseMeetingDate(d) {
+    window.selectedPulseMeetingDate = d;
+    renderRadarPulseChart(window.lastValidMeetingDates || [], d);
+}
 
 // ==========================================
 // 🕊️ كاشف النوع واللغة الذكي للأسماء المسيحية والرعوية (Smart Pastoral Gender Engine)
@@ -2945,6 +2951,7 @@ if (typeof window !== 'undefined') {
     window.closeManualExcuseModal = closeManualExcuseModal;
     window.renderManualExcuseModalList = renderManualExcuseModalList;
     window.submitManualExcuseFromModal = submitManualExcuseFromModal;
+    window.selectPulseMeetingDate = selectPulseMeetingDate;
     window.getUpcomingFriday = getUpcomingFriday;
 }
 
