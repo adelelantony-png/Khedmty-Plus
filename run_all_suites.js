@@ -36,7 +36,8 @@ const tests = [
   'tests/test_phase_a_design_system.js',
   'tests/test_sessions_themes_reminders.js',
   'tests/test_student_program_sections.js',
-  'tests/test_servant_followup_robustness.js'
+  'tests/test_servant_followup_robustness.js',
+  'tests/test_servant_attendance_ux.js'
 ];
 
 console.log('================================================================');

@@ -392,24 +392,28 @@ location.reload();
 <style>
 
 :root { 
-    --primary: #0C2461; 
-    --primary-dark: #071A38;
+    --primary: #071A38; 
+    --primary-dark: #051329;
     --primary-light: #EEF2FF;
     --primary-gradient: linear-gradient(135deg, #071A38 0%, #0C2461 60%, #15376E 100%);
     --secondary: #D4AF37; 
     --secondary-hover: #B8860B;
-    --accent: #F59E0B; 
+    --accent: #D4AF37; 
     --accent-glow: rgba(212, 175, 55, 0.35);
     --success: #059669; 
     --danger: #DC2626; 
     --warning: #D97706; 
-    --purple: #7C3AED; 
+    --purple: #0C2461; /* Replaced purple with primary navy token */
     --dark: #0F172A;
     --text-muted: #64748B;
     --border-soft: #E2E8F0;
     --border-gold: rgba(212, 175, 55, 0.45);
     --bg-app: #F8FAFC;
     --card-bg: #FFFFFF;
+    --card-radius: 14px;
+    --spacing-unit: 8px;
+    --header-height-desktop: 68px;
+    --header-height-mobile: 56px;
 }
 
 * { box-sizing: border-box; }
@@ -1664,6 +1668,7 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 <script src="js/khedmty-offline-roster.js"></script>
 
     <script src="js/student-program-sections.js?v=9.0"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -1796,130 +1801,178 @@ th { background: linear-gradient(135deg, var(--primary), #2d4bbf); }
 
 <div class="container" id="mainApp" style="display:none;">
 
-<div id="pwaInstallBanner">
-
-<div style="font-size: 12px; font-weight: bold;">📱 تثبيت تطبيق "إعداد خدام" على هاتفك؟</div>
-
-<button id="pwaInstallBtn" class="btn-mini btn-success" style="width: auto; padding: 6px 12px; margin: 0;">تثبيت الآن ⬇️</button>
-
+<div id="pwaInstallBanner" class="pwa-slim-banner" style="display:none;">
+    <div style="display:flex; align-items:center; gap:8px;">
+        <span>📱</span>
+        <span>تثبيت تطبيق "إعداد خدام" لتجربة سريعة بدون إنترنت</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:6px;">
+        <button id="pwaInstallBtn" class="btn-mini btn-success" style="padding:4px 10px; font-size:12px; margin:0;">تثبيت الآن ⬇️</button>
+        <button type="button" class="btn-close-pwa" onclick="dismissPwaBanner()" aria-label="إغلاق التنبيه" style="background:none; border:none; color:inherit; font-size:16px; cursor:pointer; padding:2px 6px;">✕</button>
+    </div>
 </div>
 
-<div class="app-hero-banner" style="background: linear-gradient(135deg, #071A38 0%, #0C2461 55%, #15376E 100%); border: 1.5px solid rgba(212, 175, 55, 0.45); border-radius: 18px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(7, 26, 56, 0.22); color: #ffffff; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; position: relative; overflow: hidden;">
-    <div style="position: absolute; left: -20px; top: -20px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%); pointer-events: none;"></div>
-    
-    <div style="display: flex; align-items: center; gap: 14px; z-index: 1;">
-        <div style="position: relative; width: 56px; height: 56px; border-radius: 16px; padding: 3px; background: linear-gradient(135deg, #B8860B 0%, #D4AF37 50%, #F5CE66 100%); box-shadow: 0 4px 14px rgba(0,0,0,0.3); flex-shrink: 0;">
-            <img src="icons/icon-192.png" alt="شعار إعداد خدام" style="width: 100%; height: 100%; object-fit: contain; border-radius: 13px; background: #071A38;">
+<!-- 🏛️ شريط التطبيق العلوي الموحد المدمج (Compact Top App Bar) -->
+<header id="compactTopAppBar" class="compact-app-bar">
+    <!-- الجانب الأيمن (بداية RTL): الشعار واسم الكنيسة -->
+    <div class="app-bar-start">
+        <div class="app-bar-logo">
+            <img src="icons/icon-192.png" alt="شعار إعداد خدام">
         </div>
-        <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <h1 id="appChurchName" style="margin: 0; font-size: clamp(16px, 4vw, 22px); font-weight: 900; color: #ffffff; letter-spacing: -0.3px;">كنيسة الملاك والروماني بالمطرية</h1>
-                <span style="background: rgba(212, 175, 55, 0.2); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.5); padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 800;">إعداد خدام</span>
+        <div class="app-bar-title-block">
+            <div class="app-bar-title-row">
+                <h1 id="appChurchName" class="app-bar-church-name">كنيسة الملاك والروماني بالمطرية</h1>
+                <span class="app-bar-badge">إعداد خدام</span>
             </div>
-            <p id="appServiceName" style="margin: 3px 0 0 0; font-weight: 700; color: #E2E8F0; font-size: clamp(11.5px, 2.5vw, 13.5px);">اجتماع القديس بولس الرسول لإعداد الخدام</p>
-            <div style="font-size: 0.74rem; color: #F3C64F; font-weight: 700; margin-top: 4px; opacity: 0.95;">
+            <div id="compactDesktopVerse" class="app-bar-verse">
                 «أعدّوا لخدمة الرب بكل قلبكم» (كولوسي 3: 23)
             </div>
+            <p id="appServiceName" style="display:none;">اجتماع القديس بولس الرسول لإعداد الخدام</p>
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 8px; z-index: 1;">
-        
-    </div>
-</div>
-<div class="role-bar" style="display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #071A38 0%, #0C2461 100%); border-radius: 14px; padding: 10px 16px; margin-bottom: 14px; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 6px 18px rgba(7, 26, 56, 0.25); flex-wrap: wrap; gap: 10px;">
+    <!-- الجانب الأيسر (نهاية RTL): أدوات سريعة، تنبيهات، مزامنة، وقائمة الخادم -->
+    <div class="app-bar-end">
+        <!-- ⚡ زر الأدوات السريعة كأيقونة في شريط التطبيق -->
+        <div class="header-dropdown" style="position:relative;">
+            <button type="button" id="btnQuickToolsIcon" class="icon-btn" onclick="toggleQuickToolsMenu(event)" title="أدوات سريعة وإجراءات الطوارئ" aria-label="أدوات سريعة">
+                <i class="fa-solid fa-bolt" style="color:var(--accent);"></i>
+            </button>
+            <div id="quickToolsDropdownMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 8px); left:0; min-width:260px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:9999; padding:6px; direction:rtl;">
+                <button type="button" onclick="closeAllHeaderDropdowns(); exportTodaySessionToWhatsApp();" style="width:100%; text-align:right; background:transparent; border:none; color:#4ade80; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-brands fa-whatsapp" style="font-size:1rem;"></i> 📲 إرسال كود طوارئ اليوم لأمين الخدمة
+                </button>
+                <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); importFromEmergencyCode();" style="width:100%; text-align:right; background:transparent; border:none; color:#c084fc; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-file-import" style="font-size:1rem;"></i> 📥 استيراد ودمج كود طوارئ الحضور
+                </button>
+                <button type="button" onclick="closeAllHeaderDropdowns(); openPresentationMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#fde047; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-chalkboard-user" style="font-size:1rem;"></i> 🖥️ وضع الإلقاء والخطابة للمحاضرين
+                </button>
+                <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="closeAllHeaderDropdowns(); toggleZenMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#a7f3d0; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ (Zen Mode)</span>
+                </button>
+                <div style="border-top:1px solid rgba(255,255,255,0.12); margin:4px 0;"></div>
+                <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); openTripartiteSyncModal();" style="width:100%; text-align:right; background:transparent; border:none; color:#cbd5e1; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-arrows-rotate" style="color:#D4AF37;"></i> 🔄 المزامنة الثلاثية (Excel + CRM + Cloud)
+                </button>
+            </div>
+        </div>
 
-<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-    <span style="color: #cbd5e1; font-size: 0.84rem;">المستخدم:</span>
-    <strong id="loggedInUserName" style="color: #ffffff; font-weight: 900; font-size: 0.88rem;">...</strong>
-    <span id="currentRoleBadge" class="role-badge" style="background: rgba(212, 175, 55, 0.2); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); padding: 2px 10px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">خادم</span>
-
-    <button type="button" class="btn-mini" onclick="openMyServantProfileModal()" style="background: rgba(255, 255, 255, 0.08); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.16)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'" title="تعديل بيانات ملفي الشخصي">
-        <i class="fa-solid fa-user-pen" style="color: #F3C64F;"></i> ملفي الشخصي
-    </button>
-
-    <!-- 🕊️ قائمة متابعتك الروحية الخاصة -->
-    <div class="header-dropdown" style="position:relative; display:inline-block;">
-        <button type="button" id="btnSpiritualToolsDropdown" class="btn-mini" onclick="toggleSpiritualMenu(event)" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%); color: #F3C64F; border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; padding: 5px 12px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; box-shadow:0 2px 8px rgba(0,0,0,0.15);" title="كافة أدوات الخادم الروحية الخاصة">
-            <i class="fa-solid fa-dove"></i> <span>متابعتك الروحية الخاصة 🕊️</span> <i class="fa-solid fa-chevron-down" style="font-size:0.68rem;"></i>
+        <!-- 🔔 زر الإشعارات والتنبيهات -->
+        <button type="button" id="khedmty-servant-notif-btn" class="icon-btn position-relative" onclick="if(window.GentleReminders && typeof GentleReminders.openNotificationsModal==='function'){ GentleReminders.openNotificationsModal(); } else { alert('جاري تحميل التنبيهات...'); }" title="التنبيهات والإشعارات الرعوية" aria-label="التنبيهات والإشعارات">
+            <i class="fa-solid fa-bell text-warning"></i>
+            <span id="khedmty-servant-notif-badge" class="badge rounded-pill bg-danger notif-badge">3</span>
         </button>
-        <div id="spiritualDropdownMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:245px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.45); z-index:9999; padding:6px; direction:rtl;">
-            <a href="servant_spiritual_note.html?fromTab=dashTab&from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">🕊️</span> نوتة الخادم الروحية الخاصة
-            </a>
-            <a href="servant_journal.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">✍️</span> مفكرة وخواطر الخادم
-            </a>
-            <a href="bible.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">📖</span> قارئ ومفسر الكتاب المقدس
-            </a>
-            <a href="katamaros.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">📜</span> القطمارس والقراءات اليومية
-            </a>
-            <a href="synaxarium.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">⛪</span> السنكسار وسير القديسين
-            </a>
-            <div style="border-top:1px solid rgba(255,255,255,0.12); margin:4px 0;"></div>
-            <a href="javascript:void(0)" onclick="closeAllHeaderDropdowns(); switchTab('reflectionsTab');" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#a7f3d0; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
-                <span style="font-size:1.1rem;">🌿</span> واحة الخادم الروحية الشاملة
-            </a>
+
+        <!-- ☁️ مؤشر حالة المزامنة السحابية كنقطة صغيرة مع tooltip -->
+        <div class="sync-dot-wrapper" title="متصل سحابياً" id="syncStatusWrapper">
+            <span id="cloudIndicator" class="cloud-status sync-dot"></span>
+            <span id="cloudStatusText" class="sr-only" style="display:none;">متصل سحابياً</span>
+            <div id="cloudLastSyncBadge" style="display:none;"><span id="cloudLastSyncTime">لم يتم الرفع بعد</span></div>
+        </div>
+
+        <!-- 👤 زر وقائمة الحساب المنسدلة (Avatar Button + Dropdown) -->
+        <div class="header-dropdown" style="position:relative;">
+            <button type="button" id="btnUserAvatarDropdown" class="avatar-btn" onclick="toggleUserAvatarMenu(event)" title="حساب الخادم والإعدادات" aria-label="قائمة المستخدم">
+                <span class="avatar-initial" id="avatarInitial">خ</span>
+            </button>
+            <div id="userAvatarDropdownMenu" class="header-dropdown-menu user-dropdown" style="display:none; position:absolute; top:calc(100% + 8px); left:0; min-width:250px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:9999; padding:8px; direction:rtl;">
+                <!-- رأس القائمة: اسم المستخدم والرتبة -->
+                <div class="user-dropdown-header">
+                    <strong id="loggedInUserName" class="user-name-label">...</strong>
+                    <span id="currentRoleBadge" class="role-badge" style="background: rgba(212, 175, 55, 0.2); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); padding: 2px 10px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">خادم</span>
+                </div>
+                <div class="dropdown-divider"></div>
+
+                <a href="javascript:void(0)" onclick="closeAllHeaderDropdowns(); openMyServantProfileModal();" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                    <i class="fa-solid fa-user-pen" style="color:var(--accent);"></i> ملفي الشخصي
+                </a>
+
+                <!-- 🕊️ متابعتك الروحية الخاصة -->
+                <div class="dropdown-submenu-section">
+                    <div class="submenu-title">متابعتك الروحية الخاصة 🕊️</div>
+                    <a href="servant_spiritual_note.html?fromTab=dashTab&from=servant&group=spirit" onclick="this.href='servant_spiritual_note.html?fromTab=' + encodeURIComponent(new URLSearchParams(window.location.search).get('tab') || 'dashTab') + '&from=servant&group=spirit';" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        🕊️ نوتة الخادم الروحية الخاصة
+                    </a>
+                    <a href="servant_journal.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        ✍️ مفكرة وخواطر الخادم
+                    </a>
+                    <a href="bible.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        📖 قارئ ومفسر الكتاب المقدس
+                    </a>
+                    <a href="katamaros.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        📜 القطمارس والقراءات اليومية
+                    </a>
+                    <a href="synaxarium.html?from=servant&group=spirit" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#ffffff; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        ⛪ السنكسار وسير القديسين
+                    </a>
+                    <a href="javascript:void(0)" onclick="closeAllHeaderDropdowns(); switchTab('reflectionsTab');" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:6px 10px; color:#a7f3d0; text-decoration:none; border-radius:6px; font-size:0.8rem; font-weight:700;">
+                        🌿 واحة الخادم الروحية
+                    </a>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <a href="javascript:void(0)" data-k-action="open-theme-picker" onclick="closeAllHeaderDropdowns(); if(window.ThemeManager && typeof ThemeManager.openThemePicker==='function'){ ThemeManager.openThemePicker(); } else if(window.KhedmtyTheme){ window.KhedmtyTheme.openThemePicker(); }" class="dropdown-item-link" style="display:flex; align-items:center; gap:8px; padding:8px 12px; color:#ffffff; text-decoration:none; border-radius:8px; font-size:0.83rem; font-weight:700;">
+                    <i class="fa-solid fa-palette" style="color:var(--accent);"></i> المظهر
+                </a>
+
+                <div id="appUpdateContainer" style="display:flex; align-items:center; padding:4px 8px;"></div>
+
+                <div class="dropdown-divider"></div>
+
+                <button type="button" onclick="closeAllHeaderDropdowns(); logout();" class="dropdown-logout-btn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> خروج آمن
+                </button>
+            </div>
         </div>
     </div>
+</header>
 
-    <!-- ⚡ قائمة الأدوات السريعة وحالات الطوارئ -->
-    <div class="header-dropdown" style="position:relative; display:inline-block;">
-        <button type="button" id="btnQuickToolsDropdown" class="btn-mini" onclick="toggleQuickToolsMenu(event)" style="background: rgba(255, 255, 255, 0.08); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 8px; padding: 5px 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; transition: all 0.2s;" title="أدوات سريعة وإجراءات الطوارئ">
-            <i class="fa-solid fa-bolt" style="color:#F3C64F;"></i> <span>أدوات سريعة ⚡</span> <i class="fa-solid fa-chevron-down" style="font-size:0.68rem;"></i>
-        </button>
-        <div id="quickToolsDropdownMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 6px); right:0; min-width:265px; background:#071A38; border:1.5px solid rgba(255,255,255,0.22); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.45); z-index:9999; padding:6px; direction:rtl;">
-            <button type="button" onclick="closeAllHeaderDropdowns(); exportTodaySessionToWhatsApp();" style="width:100%; text-align:right; background:transparent; border:none; color:#4ade80; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                <i class="fa-brands fa-whatsapp" style="font-size:1rem;"></i> 📲 إرسال كود طوارئ اليوم لأمين الخدمة
-            </button>
-            <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); importFromEmergencyCode();" style="width:100%; text-align:right; background:transparent; border:none; color:#c084fc; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                <i class="fa-solid fa-file-import" style="font-size:1rem;"></i> 📥 استيراد ودمج كود طوارئ الحضور
-            </button>
-            <button type="button" onclick="closeAllHeaderDropdowns(); openPresentationMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#fde047; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                <i class="fa-solid fa-chalkboard-user" style="font-size:1rem;"></i> 🖥️ وضع الإلقاء والخطابة للمحاضرين
-            </button>
-            <button type="button" id="btnZenToggle" class="btn-zen-mode" onclick="closeAllHeaderDropdowns(); toggleZenMode();" style="width:100%; text-align:right; background:transparent; border:none; color:#a7f3d0; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                <span id="zenIcon">🌿</span> <span id="zenText">الوضع الهادئ (Zen Mode)</span>
-            </button>
-            <div style="border-top:1px solid rgba(255,255,255,0.12); margin:4px 0;"></div>
-            <button type="button" class="admin-only" onclick="closeAllHeaderDropdowns(); openTripartiteSyncModal();" style="width:100%; text-align:right; background:transparent; border:none; color:#cbd5e1; padding:8px 12px; border-radius:8px; font-size:0.82rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                <i class="fa-solid fa-arrows-rotate" style="color:#D4AF37;"></i> 🔄 المزامنة الثلاثية (Excel + CRM + Cloud)
-            </button>
-        </div>
-    </div>
+<script>
+// دوال القوائم العلوية والشريط المدمج
+function toggleUserAvatarMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('userAvatarDropdownMenu');
+    if (!menu) return;
+    const isShown = menu.style.display === 'block';
+    closeAllHeaderDropdowns();
+    if (!isShown) menu.style.display = 'block';
+}
+function toggleQuickToolsMenu(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('quickToolsDropdownMenu');
+    if (!menu) return;
+    const isShown = menu.style.display === 'block';
+    closeAllHeaderDropdowns();
+    if (!isShown) menu.style.display = 'block';
+}
+function closeAllHeaderDropdowns() {
+    document.querySelectorAll('.header-dropdown-menu').forEach(m => m.style.display = 'none');
+}
+document.addEventListener('click', closeAllHeaderDropdowns);
 
-    <button type="button" class="btn-mini position-relative" onclick="if(window.GentleReminders && typeof GentleReminders.openNotificationsModal==='function'){ GentleReminders.openNotificationsModal(); } else { alert('جاري تحميل التنبيهات...'); }" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="التنبيهات والإشعارات الرعوية">
-        <i class="fa-solid fa-bell text-warning"></i> التنبيهات <span id="khedmty-servant-notif-badge" class="badge rounded-pill bg-danger" style="font-size:0.65rem; padding:2px 6px;">3</span>
-    </button>
+function dismissPwaBanner() {
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner) banner.style.display = 'none';
+    try {
+        localStorage.setItem('khedmety_pwa_dismissed', 'true');
+    } catch(e) {}
+}
 
-    <button type="button" class="btn-mini" data-k-action="open-theme-picker" onclick="if(window.ThemeManager && typeof ThemeManager.openThemePicker==='function'){ ThemeManager.openThemePicker(); } else if(window.KhedmtyTheme){ window.KhedmtyTheme.openThemePicker(); }" style="background: rgba(212, 175, 55, 0.15); color: #F3C64F; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 8px; padding: 5px 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: all 0.2s;" title="اختيار المظهر والثيم (7 ثيمات مريحة للعين)">
-        <i class="fa-solid fa-palette"></i> المظهر
-    </button>
-</div>
-
-<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8;">
-        <span id="cloudIndicator" class="cloud-status"></span>
-        <span id="cloudStatusText">جاري الاتصال...</span>
-    </div>
-
-    <div id="cloudLastSyncBadge" class="cloud-health-badge" style="display:none; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 2px 8px; font-size: 0.76rem; color: #cbd5e1;">
-        ⏱️ <span id="cloudLastSyncTime">لم يتم الرفع بعد</span>
-    </div>
-
-    <div id="appUpdateContainer" style="display:inline-flex; align-items:center;"></div>
-
-    <button type="button" onclick="logout()" style="background: rgba(239, 68, 68, 0.12); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 5px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'; this.style.color='#ffffff'" onmouseout="this.style.background='rgba(239,68,68,0.12)'; this.style.color='#fca5a5'" title="تسجيل الخروج الآمن">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> خروج آمن
-    </button>
-</div>
-
-</div>
-
-
+function checkPwaBanner() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    let isDismissed = false;
+    try {
+        isDismissed = localStorage.getItem('khedmety_pwa_dismissed') === 'true';
+    } catch(e) {}
+    const banner = document.getElementById('pwaInstallBanner');
+    if (banner && (isStandalone || isDismissed)) {
+        banner.style.display = 'none';
+    }
+}
+document.addEventListener('DOMContentLoaded', checkPwaBanner);
+</script>
 
 <!-- 🛡️ Early Safety Shield for Tabs Navigation -->
 <script>
@@ -3223,122 +3276,143 @@ window.switchTab = window.switchTab || function(tabId, btn) {
 
 <div id="attendanceTab" class="tab-content">
 
-<!-- شريط التاريخ المفتوح والتحكم الزمني لحضور المخدومين -->
-<div style="background: #ffffff; border: 1.5px solid rgba(212, 175, 55, 0.4); border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; box-shadow: 0 4px 16px rgba(12, 36, 97, 0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-    
-    <!-- الجانب الأيمن: عنوان التاريخ النشط مع إمكانية التحديد الحر -->
-    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 1.25rem;">📅</span>
-            <div>
-                <div style="font-size: 0.76rem; color: #64748b; font-weight: 700;">تاريخ كشف حضور المخدومين:</div>
-                <strong id="studentAttendanceSelectedDateLabel" style="font-size: 1rem; color: #0C2461; font-weight: 900;">...</strong>
-            </div>
-        </div>
-
-        <!-- حقل اختيار التاريخ المفتوح -->
-        <div style="display: inline-flex; align-items: center; gap: 6px; background: #FAF7F2; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 4px 10px;">
-            <label for="studentAttendanceDatePicker" style="font-size: 0.8rem; font-weight: 800; color: #874F19; margin: 0; cursor: pointer;">
-                <i class="fa-regular fa-calendar-days"></i> اختيار تاريخ:
-            </label>
-            <input type="date" id="studentAttendanceDatePicker" onchange="selectAttendanceDate(this.value)" style="border: none; background: transparent; font-family: 'Cairo', sans-serif; font-size: 0.85rem; font-weight: 800; color: #0C2461; outline: none; cursor: pointer;">
-        </div>
-    </div>
-
-    <!-- الجانب الأيسر: أزرار القفز السريع للأيام والجمعات ومزامنة الخدام -->
-    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn-mini" onclick="shiftStudentAttendanceDate(-7)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'" title="الانتقال للجمعة السابقة (7 أيام قبل)">
-            ◀ الجمعة السابقة
+<!-- رأس صفحة الحضور والتحكم الجزئي (Segmented Control) -->
+<div class="attendance-page-header">
+    <h2 class="attendance-page-title">منظومة الحضور والافتقاد الذكي</h2>
+    <div class="attendance-segmented-control" role="tablist" aria-label="أقسام الحضور">
+        <button type="button" class="tab-btn active can-attend" onclick="switchTab('attendanceTab', this)" role="tab" aria-selected="true">
+            <i class="fa-solid fa-camera"></i> تسجيل الحضور
         </button>
-
-        <button type="button" class="btn-mini" onclick="selectAttendanceDate(today)" style="background: #FAF7F2; color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'" title="العودة لتاريخ اليوم">
-            اليوم الحالي ⏱️
-        </button>
-
-        <button type="button" class="btn-mini" onclick="shiftStudentAttendanceDate(7)" style="background: #0C2461; color: #ffffff; border: 1px solid #0C2461; border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0C2461'" title="الانتقال للجمعة التالية (7 أيام بعد)">
-            الجمعة التالية ▶
-        </button>
-
-        <button type="button" class="btn-mini" onclick="syncWithServantAttendanceDate()" style="background: rgba(12, 36, 97, 0.08); color: #0C2461; border: 1px solid rgba(12, 36, 97, 0.25); border-radius: 8px; padding: 6px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(12,36,97,0.15)'" onmouseout="this.style.background='rgba(12, 36, 97, 0.08)'" title="مزامنة نفس اليوم المحدد في كشف حضور الخدام">
-            <i class="fa-solid fa-arrows-rotate"></i> نفس يوم الخدام
-        </button>
-
-        <button type="button" class="btn-mini" onclick="openAttendanceCalendarModal()" style="background: linear-gradient(135deg, #FAF7F2 0%, #fffdfa 100%); color: #874F19; border: 1.5px solid #D4AF37; border-radius: 8px; padding: 6px 14px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(212, 175, 55, 0.15); transition: all 0.2s;" onmouseover="this.style.background='#F5EFE6'" onmouseout="this.style.background='#FAF7F2'" title="عرض بانوراما الشهر وتقويم لقاءات الحضور والأرشيف الكامل">
-            <i class="fa-solid fa-calendar-days" style="color: #D4AF37;"></i> بانوراما الشهر والأرشيف 📊
+        <button type="button" class="tab-btn" onclick="switchTab('servantsAttendanceTab', this)" role="tab" aria-selected="false">
+            <i class="fa-solid fa-clipboard-user"></i> سجل الخدام
         </button>
     </div>
-
 </div>
 
+<!-- تنبيه تسجيل ليوم سابق أو تاريخ مختلف -->
+<div id="pastDateNotice" class="alert-past-date" style="display:none;">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span id="pastDateNoticeText">أنت تعرض/تسجل ليوم سابق</span>
+</div>
 
+<!-- شريط التاريخ المفتوح المدمج (Compact Date Bar) -->
+<div class="compact-date-bar">
+    <div class="date-controls-group">
+        <!-- زر السابقة -->
+        <button type="button" class="btn-date-nav" onclick="shiftStudentAttendanceDate(-7)" title="الانتقال لليوم/الجمعة السابقة" aria-label="السابقة">
+            ◀ السابقة
+        </button>
+
+        <!-- حقل وعرض التاريخ المفتوح - الضغط عليه يفتح DatePicker -->
+        <div class="date-display-wrapper" onclick="triggerStudentDatePicker()" title="اضغط لتغيير التاريخ بحرية">
+            <i class="fa-regular fa-calendar-days" style="color:var(--accent);"></i>
+            <strong id="studentAttendanceSelectedDateLabel" class="date-display-text">...</strong>
+            <input type="date" id="studentAttendanceDatePicker" onchange="selectAttendanceDate(this.value)" class="date-hidden-input" aria-label="اختر التاريخ">
+        </div>
+
+        <!-- زر التالية -->
+        <button type="button" class="btn-date-nav" onclick="shiftStudentAttendanceDate(7)" title="الانتقال لليوم/الجمعة التالية" aria-label="التالية">
+            التالية ▶
+        </button>
+
+        <!-- زر اليوم الحالي -->
+        <button type="button" class="btn-date-today" onclick="selectAttendanceDate(today)" title="العودة لتاريخ اليوم الحالي">
+            اليوم
+        </button>
+    </div>
+
+    <!-- قائمة الخيارات الإضافية المنسدلة (⋯) -->
+    <div class="date-overflow-wrapper" style="position:relative;">
+        <button type="button" id="studentDateOverflowBtn" class="icon-btn" onclick="toggleStudentDateOverflow(event)" title="خيارات إضافية للتاريخ" aria-label="المزيد من خيارات التاريخ">
+            <i class="fa-solid fa-ellipsis"></i>
+        </button>
+        <div id="studentDateOverflowMenu" class="header-dropdown-menu date-dropdown" style="display:none; position:absolute; top:calc(100% + 6px); left:0; min-width:230px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.5); z-index:9999; padding:6px; direction:rtl;">
+            <button type="button" onclick="closeAllHeaderDropdowns(); syncWithServantAttendanceDate();" style="width:100%; text-align:right; background:transparent; border:none; color:#ffffff; padding:8px 12px; border-radius:8px; font-size:0.83rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-arrows-rotate" style="color:var(--accent);"></i> نفس يوم الخدام
+            </button>
+            <button type="button" onclick="closeAllHeaderDropdowns(); openAttendanceCalendarModal();" style="width:100%; text-align:right; background:transparent; border:none; color:#ffffff; padding:8px 12px; border-radius:8px; font-size:0.83rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px;">
+                <i class="fa-solid fa-calendar-days" style="color:var(--accent);"></i> بانوراما الشهر والأرشيف
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function triggerStudentDatePicker() {
+    const picker = document.getElementById('studentAttendanceDatePicker');
+    if (!picker) return;
+    if (typeof picker.showPicker === 'function') {
+        try { picker.showPicker(); return; } catch(e) {}
+    }
+    picker.focus();
+    picker.click();
+}
+function toggleStudentDateOverflow(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('studentDateOverflowMenu');
+    if (!menu) return;
+    const isShown = menu.style.display === 'block';
+    closeAllHeaderDropdowns();
+    if (!isShown) menu.style.display = 'block';
+}
+</script>
 
 <div class="can-attend">
 
-<div class="live-scanner-container">
+<!-- كارد تسجيل الحضور الرئيسي وإدخال الكود السريع -->
+<div class="primary-checkin-card">
+    <div class="checkin-primary-row">
+        <!-- 1. حقل البحث الكبير مع الإكمال التلقائي الفوري -->
+        <div class="checkin-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="manualAttendInput" autofocus placeholder="أدخل كود الامتحان أو الاسم…" autocomplete="off" oninput="handleManualAttendSearch(this.value)" onkeydown="handleManualAttendKeyDown(event)">
+            <!-- قائمة الإكمال التلقائي الذكية -->
+            <div id="manualAttendAutocomplete" class="autocomplete-dropdown" style="display:none;"></div>
+        </div>
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+        <!-- 2. زر واحد فقط للمسح بالكاميرا -->
+        <button type="button" id="btnSingleCameraScan" class="btn-camera-scan" onclick="openFastScannerModal()" title="فتح كاميرا المسح الفوري">
+            <i class="fa-solid fa-camera"></i> <span>مسح بالكاميرا</span>
+        </button>
 
-<h3 style="margin:0; border:none; display:flex; align-items:center; gap:8px;">
-  <span>📷</span>
-  <span>الماسح الضوئي الذكي (Live Fast Scanner)</span>
-</h3>
-
-<div style="display:flex; gap:6px;">
-
-<button id="startCameraBtn" class="btn-success btn-mini" onclick="openFastScannerModal()">فتح الكاميرا 📹</button>
-
-<button id="stopCameraBtn" class="btn-danger btn-mini" style="display:none;" onclick="stopCamera()">إغلاق ⏹️</button>
-
+        <!-- 3. زر Walk-in الثانوي (Outline Button) -->
+        <button type="button" id="btnWalkinSecondary" class="btn-walkin-outline" onclick="openQuickWalkinModal()" title="استيعاب مخدوم جديد على الباب">
+            <i class="fa-solid fa-user-plus"></i> <span>+ مخدوم جديد (Walk-in)</span>
+        </button>
+    </div>
 </div>
 
+<!-- 4. ترويسة التسجيل اليدوي ككارد قابل للطي -->
+<div class="manual-roster-collapse-card">
+    <div id="manualAttendanceCollapsibleHeader" class="collapsible-card-header" onclick="openManualAttendanceModal()">
+        <div class="header-title-group">
+            <i class="fa-solid fa-users-viewfinder header-icon"></i>
+            <span class="header-text">تسجيل حضور يدوي من قائمة الأسماء (حضور - تناول 🕊️ - مشاركة 💡 - نقاط ⭐)</span>
+        </div>
+        <i class="fa-solid fa-chevron-left chevron-icon"></i>
+    </div>
 </div>
 
-<div style="margin-bottom:12px;">
-
-<select id="cameraSelectionDropdown" style="padding:7px 12px; font-size:12px; border-radius:10px; width:100%; max-width:320px;">
-
-<option value="">تحديد الكاميرا الخلفية تلقائياً...</option>
-
-</select>
-
-</div>
-
-<div style="text-align: center; padding: 26px 16px; background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); border-radius: 16px; border: 1.5px dashed #cbd5e1; margin-top: 6px;">
-
-<div style="font-size: 46px; margin-bottom: 8px;">📷</div>
-
-<h4 style="margin: 0 0 6px 0; font-weight: 800; color: #1e293b; font-size: 17px;">الماسح الضوئي المباشر فائق السرعة</h4>
-
-<p style="font-size: 13px; color: #64748b; margin-bottom: 16px; max-width: 380px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-تسجيل فوري بدون أي تأخير، تظهر فيه الأسماء مباشرة تحت الكاميرا مع المزامنة السحابية ودعم الأوفلاين.
-</p>
-
-<button type="button" class="btn-primary" style="padding: 12px 28px; font-size: 15px; font-weight: 700; border-radius: 14px; box-shadow: 0 6px 18px rgba(30, 55, 153, 0.22); cursor: pointer;" onclick="openFastScannerModal()">
-تشغيل الماسح بالكاميرا 📹
-</button>
-
-</div>
-
-</div>
-
-<!-- نافذة الماسح الضوئي فائق السرعة المطابقة للصورة 100% -->
+<!-- نافذة الماسح الضوئي فائق السرعة -->
 <div id="fastScannerModal" class="fast-scanner-backdrop" onclick="if(event.target===this) closeFastScannerModal()">
   <div class="fast-scanner-sheet">
-    <!-- رأس الماسح الضوئي: الماسح الضوئي يساراً و ✕ يميناً -->
     <div class="fast-scanner-header">
-      <h2 class="fast-scanner-title">الماسح الضوئي</h2>
+      <h2 class="fast-scanner-title">الماسح الضوئي الذكي</h2>
       <button type="button" class="fast-scanner-close-btn" onclick="closeFastScannerModal()" title="إغلاق">✕</button>
     </div>
 
-    <!-- شريط تنبيه المسح الفوري الذكي HUD Toast لتأكيد التسجيل في ثوانٍ -->
+    <!-- قائمة اختيار الكاميرا - تظهر فقط داخل نافذة الكاميرا -->
+    <div style="padding: 6px 14px 0 14px;">
+        <select id="cameraSelectionDropdown" style="padding:7px 12px; font-size:12px; border-radius:10px; width:100%; border:1px solid #cbd5e1; background:#ffffff;">
+            <option value="">تحديد الكاميرا الخلفية تلقائياً...</option>
+        </select>
+    </div>
+
     <div id="scannerHUDAlert" class="scanner-hud-alert" style="display:none;"></div>
 
-    <!-- المحتوى الداخلي للماسح -->
     <div class="fast-scanner-body">
-      <!-- نافذة الكاميرا الدائرية 24px -->
       <div class="fast-scanner-camera-box" id="scannerCameraBox">
         <div id="reader"></div>
-        <!-- نافذة التأكيد المرئي الفوري في مركز الكاميرا طِبق الأصل -->
         <div id="scannerFeedbackOverlay" class="scanner-feedback-overlay" style="display:none;">
           <div class="scanner-feedback-card" id="scannerFeedbackCard">
             <div class="feedback-icon-wrapper" id="feedbackIconWrapper">
@@ -3351,12 +3425,11 @@ window.switchTab = window.switchTab || function(tabId, btn) {
         </div>
       </div>
 
-      <!-- شارة التاريخ الزرقاء البيضاوية (طِبق الصورة المرفقة) -->
       <div class="fast-scanner-date-pill" id="fastScannerDatePill">
         حضور يوم --
       </div>
 
-      <!-- قائمة المخدومين المسجلين مباشرة تحت الكاميرا -->
+      <!-- آخر 5 أسماء مسجلة تظهر تحت الكاميرا مباشرة -->
       <div class="fast-scanner-feed" id="liveCardsFeed">
         <div style="text-align:center; color:#94a3b8; padding:20px; font-size:13px; font-weight:600;">
           وجّه الكاميرا نحو باركود الكارنيه لبدء التسجيل السريع...
@@ -3364,7 +3437,6 @@ window.switchTab = window.switchTab || function(tabId, btn) {
       </div>
     </div>
 
-    <!-- شريط سفلي لحالة السحابة والأوفلاين وإجمالي المسجلين -->
     <div class="fast-scanner-footer">
       <span id="fastScannerSyncStatusBadge" class="fast-scanner-sync-badge sync-online">☁️ مزامنة سحابية لحظية</span>
       <span id="liveScanDate" style="display:none;"></span>
@@ -3373,86 +3445,155 @@ window.switchTab = window.switchTab || function(tabId, btn) {
   </div>
 </div>
 
-<div style="background:#fff; border:1px solid #dfe6e9; padding:12px; border-radius:8px; margin-top:15px;">
-
-<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-    <label style="font-size:13px; font-weight:bold;">بحث وتسجيل سريع في اليوم المحدد (<span id="searchActiveDateBadge"></span>):</label>
-    <button type="button" class="btn-custom" onclick="openQuickWalkinModal()" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); color:#ffffff; border:none; padding:7px 14px; border-radius:8px; font-weight:800; font-size:0.83rem; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 3px 8px rgba(5,150,105,0.25);">
-        <i class="fa-solid fa-user-plus"></i> 🚪 استيعاب مخدوم جديد على الباب (Walk-in)
-    </button>
-</div>
-
-<div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
-
-<input type="text" id="manualAttendInput" placeholder="أدخل كود الامتحان أو الاسم..." style="flex:1; min-width:180px; margin:0;" onkeypress="if(event.key==='Enter') manualMarkMemberFromInput()">
-
-<button class="btn-primary" onclick="manualMarkMemberFromInput()" style="width:auto; margin:0; padding:10px 18px;">تسجيل ✔️</button>
+<!-- عناصر حفظ التوافق مع السكربتات السابقة -->
+<span id="searchActiveDateBadge" style="display:none;"></span>
+<button id="startCameraBtn" style="display:none;" onclick="openFastScannerModal()"></button>
+<button id="stopCameraBtn" style="display:none;" onclick="stopCamera()"></button>
 
 </div>
 
+<!-- شريط شرائح الإحصائيات الذكية القابلة للفلترة (Stat Chips) -->
+<div id="attendanceStatChips" class="stat-chips-row">
+    <div class="stat-chip active" onclick="filterAttendanceByChip('all')" data-chip="all">
+        <span>إجمالي الحضور:</span>
+        <span class="stat-chip-count" id="statChipAll"><span id="todayAttendanceCount">0</span></span>
+    </div>
+    <div class="stat-chip" onclick="filterAttendanceByChip('ontime')" data-chip="ontime">
+        <span>في الموعد</span>
+        <span class="stat-chip-count" id="statChipOnTime">0</span>
+    </div>
+    <div class="stat-chip" onclick="filterAttendanceByChip('late')" data-chip="late">
+        <span>متأخر</span>
+        <span class="stat-chip-count" id="statChipLate">0</span>
+    </div>
+    <div class="stat-chip" onclick="filterAttendanceByChip('severe')" data-chip="severe">
+        <span>تأخير شديد</span>
+        <span class="stat-chip-count" id="statChipSevere">0</span>
+    </div>
+    <div class="stat-chip" onclick="filterAttendanceByChip('communion')" data-chip="communion">
+        <span>تناول 🕊️</span>
+        <span class="stat-chip-count" id="statChipCommunion">0</span>
+    </div>
+    <div class="stat-chip" onclick="filterAttendanceByChip('participation')" data-chip="participation">
+        <span>مشاركة 💡</span>
+        <span class="stat-chip-count" id="statChipParticipation">0</span>
+    </div>
 </div>
 
-<div style="margin-top:15px;">
+<!-- شريط أدوات الجدول (Toolbar) -->
+<div id="attendanceTableToolbar" class="attendance-table-toolbar">
+    <div class="toolbar-filters-group">
+        <input type="text" id="attSearchInput" class="toolbar-input" placeholder="🔍 بحث في الكشف..." oninput="applyAttendanceTableFilters()" style="width: 160px;">
+        <select id="attFilterStage" class="toolbar-select" onchange="applyAttendanceTableFilters()">
+            <option value="">كل المراحل</option>
+            <option value="الفرقة الأولى">الفرقة الأولى</option>
+            <option value="الفرقة الثانية">الفرقة الثانية</option>
+            <option value="الفرقة الثالثة">الفرقة الثالثة</option>
+            <option value="الفرقة الرابعة">الفرقة الرابعة</option>
+        </select>
+        <select id="attFilterStatus" class="toolbar-select" onchange="applyAttendanceTableFilters()">
+            <option value="">كل الحالات</option>
+            <option value="حاضر">حاضر</option>
+            <option value="متأخر">متأخر</option>
+            <option value="تأخير شديد">تأخير شديد</option>
+        </select>
+        <select id="attFilterRecorder" class="toolbar-select" onchange="applyAttendanceTableFilters()">
+            <option value="">كل المسجلين</option>
+        </select>
+        <select id="attSortSelect" class="toolbar-select" onchange="applyAttendanceTableFilters()">
+            <option value="time_desc">الأحدث وقتاً (افتراضي)</option>
+            <option value="time_asc">الأقدم وقتاً</option>
+            <option value="name_asc">الاسم أ - ي</option>
+            <option value="code_asc">كود الامتحان</option>
+        </select>
+    </div>
+    <div class="toolbar-actions-group">
+        <button type="button" id="btnAttendanceExportExcel" class="btn-toolbar-excel" onclick="openAttendanceExportModal()" title="تصدير كشف الحضور إلى إكسل">
+            <i class="fa-solid fa-file-excel"></i> <span>تصدير Excel</span>
+        </button>
+        <div style="position:relative;">
+            <button type="button" id="btnAttendanceToolbarOverflow" class="icon-btn" onclick="toggleAttendanceToolbarOverflow(event)" title="خيارات إضافية" aria-label="خيارات إضافية">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div id="attendanceToolbarOverflowMenu" class="header-dropdown-menu" style="display:none; position:absolute; top:calc(100% + 4px); left:0; min-width:210px; background:#071A38; border:1.5px solid rgba(212,175,55,0.45); border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,0.5); z-index:500; padding:6px; direction:rtl;">
+                <button type="button" class="admin-only row-dropdown-item item-danger" onclick="closeAllHeaderDropdowns(); promptDeleteEntireAttendance();">
+                    <i class="fa-solid fa-trash-can"></i> حذف كشف هذا اليوم بالكامل
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-<button class="btn-purple" onclick="openManualAttendanceModal()" style="padding:14px; font-size:15px;">👥 تسجيل حضور يدوي من قائمة الأسماء (حضور - تناول 🕊️ - مشاركة 💡 - نقاط ⭐)</button>
+<div class="table-responsive" style="border-radius: 0 0 12px 12px;">
+    <table id="attendanceTable" class="attendance-modern-table adaptive-card-table">
+        <thead>
+            <tr>
+                <th style="width: 100px;">الكود</th>
+                <th>الاسم والمرحلة</th>
+                <th style="width: 110px;">الوقت</th>
+                <th style="width: 100px;">الحالة</th>
+                <th style="width: 70px; text-align:center;">تناول 🕊️</th>
+                <th style="width: 70px; text-align:center;">مشاركة 💡</th>
+                <th style="width: 70px; text-align:center;">النقاط ⭐</th>
+                <th style="width: 100px;">المسجِّل</th>
+                <th class="can-attend" style="width: 50px; text-align:center;">⋯</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<!-- حاوية التنبيه مع خيار التراجع خلال 5 ثوانٍ (Undo Toast) -->
+<div id="attendanceUndoToast" class="undo-toast" style="display:none;"></div>
+
+<!-- نافذة تأكيد حذف كشف اليوم بالكامل مع كتابة الكلمة للتأكيد -->
+<div id="modalConfirmDeleteDay" class="modal" style="display:none; z-index:9999;">
+    <div class="modal-content" style="max-width:440px; text-align:right;">
+        <span class="close-btn" onclick="closeConfirmDeleteDayModal()">&times;</span>
+        <div style="font-size:40px; text-align:center; color:#ef4444; margin-bottom:6px;">⚠️</div>
+        <h3 style="margin:0 0 10px 0; color:#ef4444; border:none; text-align:center;">حذف كشف الحضور بالكامل</h3>
+        <p style="font-size:0.86rem; color:#475569; line-height:1.6; margin-bottom:12px;">
+            أنت على وشك حذف كشف حضور هذا اليوم بالكامل! لتأكيد الحذف نهائياً، يرجى كتابة التاريخ المحدد (<strong id="confirmDeleteDayDateLabel"></strong>) أو كلمة <strong style="color:#ef4444;">حذف</strong>:
+        </p>
+        <input type="text" id="confirmDeleteInput" placeholder="اكتب 'حذف' أو التاريخ..." autocomplete="off" oninput="checkConfirmDeleteButtonState()" style="width:100%; height:40px; border-radius:8px; border:1.5px solid #ef4444; padding:0 12px; font-weight:700; margin-bottom:14px; box-sizing:border-box;">
+        <div style="display:flex; gap:8px;">
+            <button type="button" id="btnExecuteDeleteDay" class="btn-danger" disabled onclick="executeConfirmedDeleteDay()" style="flex:1; opacity:0.5; cursor:not-allowed;">حذف الكشف نهائياً 🗑️</button>
+            <button type="button" class="btn-mini" onclick="closeConfirmDeleteDayModal()" style="background:#cbd5e1; color:#0f172a; width:90px;">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleAttendanceToolbarOverflow(e) {
+    if (e) e.stopPropagation();
+    const menu = document.getElementById('attendanceToolbarOverflowMenu');
+    if (!menu) return;
+    const isShown = menu.style.display === 'block';
+    closeAllHeaderDropdowns();
+    if (!isShown) menu.style.display = 'block';
+}
+</script>
 
 </div>
 
-</div>
-
-<div style="background:#eaf2f8; padding:12px; border-radius:8px; margin-top:20px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border: 1px solid #b8d5e5; flex-wrap:wrap; gap:10px;">
-
-<h3 style="margin:0; border:none; color:var(--primary); font-size:16px;">سجل الحضور لتاريخ: (<span id="todayDate"></span>)</h3>
-
-<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-
-<button class="btn-success btn-mini" onclick="openAttendanceExportModal()" style="padding:6px 14px; font-size:13px; margin:0; font-weight:bold; box-shadow:0 2px 4px rgba(46,204,113,0.3);">
-
-<i class="fa-solid fa-file-excel me-1"></i> 📊 تصدير كشف الحضور (Excel) 📥
-
-</button>
-
-<button class="btn-danger admin-only" onclick="clearEntireTodayAttendance()" style="padding:6px 12px; font-size:12px; margin:0;">🗑️ حذف كشف هذا اليوم بالكامل</button>
-
-<span style="background:var(--primary); color:white; padding:6px 12px; border-radius:20px; font-weight:bold; font-size:14px;">
-
-العدد: <span id="todayAttendanceCount" style="font-size:16px;">0</span>
-
-</span>
-
-</div>
-
-</div>
-
-<div class="table-responsive">
-
-<table id="attendanceTable" class="adaptive-card-table">
-
-<thead>
-
-<tr>
-
-<th>كود الامتحان</th><th>الاسم</th><th>المرحلة</th><th>وقت المسح</th>
-
-<th>حضور</th><th>تناول 🕊️</th><th>مشاركة 💡</th><th>النقاط ⭐</th>
-
-<th>المسجِّل</th><th class="can-attend">إجراء</th>
-
-</tr>
-
-</thead>
-
-<tbody></tbody>
-
-</table>
-
-</div>
-
-</div>
+div>
 
 <!-- 4. سجل الخدام -->
 
 <div id="servantsAttendanceTab" class="tab-content">
+
+<!-- رأس صفحة سجل الخدام والتحكم الجزئي (Segmented Control) -->
+<div class="attendance-page-header">
+    <h2 class="attendance-page-title">سجل حضور وافتقاد الخدام</h2>
+    <div class="attendance-segmented-control" role="tablist" aria-label="أقسام الحضور">
+        <button type="button" class="tab-btn can-attend" onclick="switchTab('attendanceTab', this)" role="tab" aria-selected="false">
+            <i class="fa-solid fa-camera"></i> تسجيل الحضور
+        </button>
+        <button type="button" class="tab-btn active" onclick="switchTab('servantsAttendanceTab', this)" role="tab" aria-selected="true">
+            <i class="fa-solid fa-clipboard-user"></i> سجل الخدام
+        </button>
+    </div>
+</div>
 
 <h2>متابعة التزام ونشاط خدام الاجتماع</h2>
 
