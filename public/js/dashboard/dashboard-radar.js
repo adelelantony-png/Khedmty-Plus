@@ -2328,7 +2328,14 @@ function previewFullExcuseModal(excuseId) {
         }
     }
 
-    if (elFriday) elFriday.innerText = excuse.friday_date || '-';
+    if (elFriday) {
+        elFriday.innerHTML = `
+            <span style="font-weight:900; color:#0c2461;">${safeRadarEscape(excuse.friday_date || '-')}</span>
+            <button type="button" onclick="promptChangeExcuseFridayDate('${excuse.id}')" style="background:#f1f5f9; color:#0284c7; border:1px solid #cbd5e1; border-radius:6px; padding:2px 8px; font-size:0.75rem; font-weight:bold; cursor:pointer; margin-right:6px;" title="تعديل وتحديد تاريخ جمعة الغياب يدوياً">
+                ✏️ تعديل تاريخ الجمعة
+            </button>
+        `;
+    }
     if (elReason) elReason.innerText = excuse.reason_category || 'اعتذار عام 🕊️';
 
     if (elTiming) {
@@ -2523,6 +2530,69 @@ function safeRadarEscape(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+async function promptChangeExcuseFridayDate(excuseId) {
+    const list = window.lastRadarExcusesList || [];
+    const excuse = list.find(e => String(e.id) === String(excuseId));
+    if (!excuse) return;
+
+    const currentFriday = excuse.friday_date || (typeof getUpcomingFriday === 'function' ? getUpcomingFriday() : '');
+    const newFriday = prompt(`🗓️ تعديل تاريخ جمعة الغياب للمخدوم [${excuse.student_name}]:\nأدخل تاريخ الجمعة الصحيح بصيغة YYYY-MM-DD (مثال: 2026-11-06 للأسبوع السابق أو 2026-11-13 للأسبوع الحالي):`, currentFriday);
+    if (!newFriday || newFriday.trim() === currentFriday) return;
+
+    const trimmedFriday = newFriday.trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmedFriday)) {
+        alert('يرجى إدخال التاريخ بالصيغة الصحيحة: YYYY-MM-DD (مثال: 2026-11-06)');
+        return;
+    }
+
+    const oldFriday = excuse.friday_date;
+    excuse.friday_date = trimmedFriday;
+
+    // نقل العذر في كشف الحضور من الجمعة القديمة إلى الجمعة الجديدة
+    if (typeof attendanceRecord !== 'undefined' && attendanceRecord) {
+        const studentCode = String(excuse.student_code || '');
+        const studentPhone = String(excuse.student_phone || '');
+
+        // حذف من الجمعة القديمة
+        if (oldFriday && attendanceRecord[oldFriday]) {
+            attendanceRecord[oldFriday] = attendanceRecord[oldFriday].filter(r => {
+                const matchCode = studentCode && String(r.code) === studentCode;
+                const matchPhone = studentPhone && String(r.phone).includes(studentPhone.slice(-9));
+                if ((matchCode || matchPhone) && r.isExcused) return false;
+                return true;
+            });
+        }
+
+        // إضافة للجمعة الجديدة إذا كان العذر معتمداً
+        if (excuse.status === 'accepted') {
+            markStudentExcusedInAttendance(excuse);
+        }
+
+        if (typeof saveAttendanceRecord === 'function') {
+            saveAttendanceRecord();
+        } else {
+            try {
+                localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord));
+            } catch(e){}
+        }
+    }
+
+    // مزامنة سحابية إذا كانت مفعلة
+    if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+        try {
+            await fsdb.collection('excuses').doc(String(excuseId)).set({ friday_date: trimmedFriday }, { merge: true });
+        } catch(e) {}
+    }
+
+    renderRadarExcusesTable();
+    previewFullExcuseModal(excuseId);
+    if (typeof showToast === 'function') {
+        showToast(`✅ تم تعديل ربط العذر لجمعة [${trimmedFriday}] بنجاح!`);
+    } else {
+        alert(`✅ تم تعديل ربط العذر لجمعة [${trimmedFriday}] بنجاح!`);
+    }
 }
 
 async function cancelStudentExcuse(excuseId) {
@@ -2870,6 +2940,7 @@ if (typeof window !== 'undefined') {
     window.closeExcuseDetailModal = closeExcuseDetailModal;
     window.renderStudentExcuseHistoryInModal = renderStudentExcuseHistoryInModal;
     window.cancelStudentExcuse = cancelStudentExcuse;
+    window.promptChangeExcuseFridayDate = promptChangeExcuseFridayDate;
     window.openManualExcuseModal = openManualExcuseModal;
     window.closeManualExcuseModal = closeManualExcuseModal;
     window.renderManualExcuseModalList = renderManualExcuseModalList;
@@ -3137,7 +3208,7 @@ function renderAttendanceExportReport() {
         if (!attRecord || (!attRecord.attended && !attRecord.time)) {
             matchedExcuse = excusesList.find(ex => {
                 if (!ex) return false;
-                if (ex.friday_date && ex.friday_date !== selectedDate) return false;
+                if (!ex.friday_date || ex.friday_date !== selectedDate) return false;
                 const exName = (ex.student_name || '').trim();
                 const exPhone = (ex.student_phone || '').trim().replace(/\D/g, '');
                 return (exName && mName && (exName === mName || exName.includes(mName) || mName.includes(exName))) ||
@@ -3478,7 +3549,7 @@ function buildAttendanceWhatsAppReportText() {
         if (!attRecord || (!attRecord.attended && !attRecord.time)) {
             matchedExcuse = excusesList.find(ex => {
                 if (!ex) return false;
-                if (ex.friday_date && ex.friday_date !== selectedDate) return false;
+                if (!ex.friday_date || ex.friday_date !== selectedDate) return false;
                 const exName = (ex.student_name || '').trim();
                 const exPhone = (ex.student_phone || '').trim().replace(/\D/g, '');
                 return (exName && mName && (exName === mName || exName.includes(mName) || mName.includes(exName))) ||
