@@ -1,3 +1,144 @@
+// =========================================================================
+// ⏱️ محرك استخراج موعد الاجتماع الذكي من رسائل الواتساب وقواعد التأخير
+// مطابق 100% لقواعد شيت الإكسيل (تأخير بسيط < 15 د، تأخير كبير >= 15 د غائب)
+// =========================================================================
+
+function extractMeetingTimeFromMessage(messageText) {
+    if (!messageText || typeof messageText !== 'string') return null;
+    const text = messageText.trim();
+    
+    // 1. كسور الساعات مثل "12 ونص" أو "1 ونص"
+    const halfMatch = text.match(/(?:ميعاد|موعد|الساعة|التجمع|حضور|بدء|يبدأ|نلتقي|مستنيينكم)[^\d\n]*?(\d{1,2})\s*(?:و|\+)\s*(?:نص|نصف)/i);
+    if (halfMatch) {
+        let hour = parseInt(halfMatch[1], 10);
+        if (hour >= 1 && hour <= 6) hour += 12;
+        return `${String(hour).padStart(2, '0')}:30`;
+    }
+
+    const quarterMatch = text.match(/(?:ميعاد|موعد|الساعة|التجمع|حضور|بدء|يبدأ|نلتقي|مستنيينكم)[^\d\n]*?(\d{1,2})\s*(?:و|\+)\s*(?:ربع)/i);
+    if (quarterMatch) {
+        let hour = parseInt(quarterMatch[1], 10);
+        if (hour >= 1 && hour <= 6) hour += 12;
+        return `${String(hour).padStart(2, '0')}:15`;
+    }
+
+    // 2. فحص الأرقام الصريحة مثل "الساعة 12:30 ظهراً" أو "الساعة 1:00 م"
+    const digitMatch = text.match(/(?:ميعاد|موعد|الساعة|التجمع|حضور|بدء|يبدأ|نلتقي|مستنيينكم)[^\d\n]*?(\d{1,2})(?:[:.](\d{2}))?\s*(ظهراً|صباحاً|م|ص|الظهر|العصر)?/i);
+    if (digitMatch) {
+        let hour = parseInt(digitMatch[1], 10);
+        let minute = digitMatch[2] ? parseInt(digitMatch[2], 10) : 0;
+        const period = digitMatch[3] || '';
+        
+        if (period.includes('م') || period.includes('ظهر') || period.includes('عصر')) {
+            if (hour < 12) hour += 12;
+        } else if (period.includes('ص') || period.includes('صباح')) {
+            if (hour === 12) hour = 0;
+        } else {
+            if (hour >= 1 && hour <= 6) hour += 12;
+        }
+        
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${pad(hour)}:${pad(minute)}`;
+    }
+    
+    // 3. الألفاظ العربية: "الساعة الواحدة" أو "الساعة الثانية عشرة"
+    if (/الساعة\s*(?:ال)?واحدة/i.test(text)) {
+        if (/نص|نصف/.test(text)) return "13:30";
+        if (/ربع/.test(text)) return "13:15";
+        return "13:00";
+    }
+    if (/الساعة\s*(?:ال)?ثانية\s*عشر/i.test(text)) {
+        if (/نص|نصف/.test(text)) return "12:30";
+        if (/ربع/.test(text)) return "12:15";
+        return "12:00";
+    }
+    
+    return null;
+}
+window.extractMeetingTimeFromMessage = extractMeetingTimeFromMessage;
+
+function getEffectiveMeetingStartTime(targetDate) {
+    if (typeof settings === 'object' && settings?.dateSpecificStartTimes && settings.dateSpecificStartTimes[targetDate]) {
+        return settings.dateSpecificStartTimes[targetDate];
+    }
+    try {
+        const announcement = localStorage.getItem('khedmety_whatsapp_announcement') || localStorage.getItem('khedmety_broadcast_msg');
+        if (announcement) {
+            const parsed = extractMeetingTimeFromMessage(announcement);
+            if (parsed) return parsed;
+        }
+    } catch(e) {}
+    if (typeof settings === 'object' && settings?.startTime) {
+        return settings.startTime;
+    }
+    return "13:00";
+}
+window.getEffectiveMeetingStartTime = getEffectiveMeetingStartTime;
+
+function isMeetingTimeFromWhatsApp(targetDate) {
+    try {
+        const announcement = localStorage.getItem('khedmety_whatsapp_announcement') || localStorage.getItem('khedmety_broadcast_msg');
+        if (announcement) {
+            const detected = extractMeetingTimeFromMessage(announcement);
+            if (detected) return true;
+        }
+    } catch(e) {}
+    return false;
+}
+window.isMeetingTimeFromWhatsApp = isMeetingTimeFromWhatsApp;
+
+function formatPresetTimeLabel(h, m) {
+    const isPM = h >= 12;
+    let h12 = h % 12;
+    if (h12 === 0) h12 = 12;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(h12)}:${pad(m)} ${isPM ? 'م' : 'ص'}`;
+}
+window.formatPresetTimeLabel = formatPresetTimeLabel;
+
+function evaluateAttendanceDelayStatus(timeStr, targetDate) {
+    const startTimeStr = getEffectiveMeetingStartTime(targetDate);
+    const [startH, startM] = startTimeStr.split(':').map(Number);
+    
+    const parsed24 = (typeof parseAnyTimeTo24h === 'function') ? parseAnyTimeTo24h(timeStr) : timeStr;
+    if (!parsed24 || !parsed24.includes(':')) {
+        return { isLate: false, isAbsentDueToDelay: false, diffMinutes: 0, status: 'ontime', label: 'في الموعد', color: '#16a34a' };
+    }
+    
+    const [h, m] = parsed24.split(':').map(Number);
+    const diffMinutes = (h * 60 + m) - (startH * 60 + startM);
+    
+    if (diffMinutes <= 0) {
+        return { isLate: false, isAbsentDueToDelay: false, diffMinutes, status: 'ontime', label: 'في الموعد', color: '#16a34a' };
+    } else if (diffMinutes <= 14) {
+        return { isLate: true, isAbsentDueToDelay: false, diffMinutes, status: 'late', label: `متأخر (${diffMinutes} د)`, color: '#d97706' };
+    } else {
+        return { isLate: false, isAbsentDueToDelay: true, diffMinutes, status: 'severe', label: `تأخير كبير (${diffMinutes} د - غائب)`, color: '#dc2626' };
+    }
+}
+window.evaluateAttendanceDelayStatus = evaluateAttendanceDelayStatus;
+
+async function syncWhatsAppAnnouncement() {
+    try {
+        if (typeof isLocalNodeAvailable === 'function' && !isLocalNodeAvailable()) return;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1600);
+        const res = await fetch('http://127.0.0.1:3000/api/meeting-announcement', {
+            headers: { 'x-api-key': 'khedmety-servant-key-2026' },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+            const data = await res.json();
+            if (data && data.success && data.messageText) {
+                localStorage.setItem('khedmety_whatsapp_announcement', data.messageText);
+                console.log('✅ [WhatsApp Time Sync] تم استلام نص إعلان الجمعة واستخراج موعد الاجتماع بنجاح.');
+            }
+        }
+    } catch(e) {}
+}
+window.syncWhatsAppAnnouncement = syncWhatsAppAnnouncement;
+
 /**
  * Khedmty-Plus Dashboard - Attendance Management Module
  * Extracted for offline PWA performance & modular maintainability.
@@ -161,8 +302,8 @@ let currentAttendanceChipFilter = 'all';
 let pendingUndoDeleteTimer = null;
 let lastDeletedAttendanceRecord = null;
 
-function filterAttendanceByChip(chipType) {
-    if (currentAttendanceChipFilter === chipType && chipType !== 'all') {
+function filterAttendanceByChip(chipType, forceSet = false) {
+    if (!forceSet && currentAttendanceChipFilter === chipType && chipType !== 'all') {
         currentAttendanceChipFilter = 'all';
     } else {
         currentAttendanceChipFilter = chipType;
@@ -561,13 +702,9 @@ isAbsent = false;
 
 } else {
 
-let startTimeStr = settings.startTime || "13:00";
-
-let [startH, startM] = startTimeStr.split(':').map(Number);
-
-let diffMinutes = (now.getHours() * 60 + now.getMinutes()) - (startH * 60 + startM);
-
-isAbsent = diffMinutes >= (settings.absentAfter || 75);
+let curTime24 = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+let evalRes = evaluateAttendanceDelayStatus(curTime24, activeSelectedDate);
+isAbsent = evalRes.isAbsentDueToDelay;
 
 }
 
@@ -590,6 +727,8 @@ gender: member.gender || 'بنين',
 time: now.toLocaleTimeString('ar-EG'),
 
 isAbsentDueToDelay: isAbsent,
+
+isLate: (!isAbsent && !approvedDelayExcuse && evaluateAttendanceDelayStatus(now.toLocaleTimeString('ar-EG'), activeSelectedDate).isLate),
 
 hasApprovedDelay: !!approvedDelayExcuse,
 
@@ -882,6 +1021,15 @@ function renderAttendanceTable() {
     if (!tbody) return;
     tbody.innerHTML = '';
 
+    // تحديث شارة موعد بداية اللقاء في شريط التاريخ
+    const attBadge = document.getElementById('attMeetingStartTimeBadge');
+    if (attBadge) {
+        const effStart = getEffectiveMeetingStartTime(activeSelectedDate);
+        const [bH, bM] = effStart.split(':').map(Number);
+        const isFromWA = isMeetingTimeFromWhatsApp(activeSelectedDate);
+        attBadge.innerHTML = `⏰ موعد الحضور: <b>${formatPresetTimeLabel(bH, bM)}</b> <small style="opacity:0.85;">(${isFromWA ? 'رسالة الواتساب ⚡' : 'الأساسي 1:00 م'})</small>`;
+    }
+
     const list = attendanceRecord[activeSelectedDate] || [];
     updateAttendanceStatChips(list);
 
@@ -904,7 +1052,7 @@ function renderAttendanceTable() {
     let filtered = list.filter(a => {
         // Chip filter
         if (currentAttendanceChipFilter === 'ontime' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
-        if (currentAttendanceChipFilter === 'late' && !a.hasApprovedDelay) return false;
+        if (currentAttendanceChipFilter === 'late' && !(a.hasApprovedDelay || a.isLate)) return false;
         if (currentAttendanceChipFilter === 'severe' && !a.isAbsentDueToDelay) return false;
         if (currentAttendanceChipFilter === 'communion' && !a.communion) return false;
         if (currentAttendanceChipFilter === 'participation' && !a.participation) return false;
@@ -922,7 +1070,7 @@ function renderAttendanceTable() {
         // Toolbar Status
         if (statusVal) {
             if (statusVal === 'حاضر' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
-            if (statusVal === 'متأخر' && !a.hasApprovedDelay) return false;
+            if (statusVal === 'متأخر' && !(a.hasApprovedDelay || a.isLate)) return false;
             if (statusVal === 'تأخير شديد' && !a.isAbsentDueToDelay) return false;
         }
 
@@ -959,12 +1107,14 @@ function renderAttendanceTable() {
     filtered.forEach(a => {
         const tr = document.createElement('tr');
 
-        // Status pill
+        // Status pill وفق قواعد شيت الإكسيل
         let statusBadge = '<span class="status-pill status-present">حاضر</span>';
         if (a.hasApprovedDelay) {
-            statusBadge = '<span class="status-pill status-late">متأخر (بعذر)</span>';
+            statusBadge = '<span class="status-pill status-late" style="background:#f5f3ff; color:#6d28d9; border:1px solid #ddd6fe;">⏰ متأخر (بإذن)</span>';
         } else if (a.isAbsentDueToDelay) {
-            statusBadge = '<span class="status-pill status-severe">تأخير شديد</span>';
+            statusBadge = '<span class="status-pill status-severe" style="background:#fef2f2; color:#be123c; border:1px solid #fecdd3;">🔴 تأخير كبير (غائب)</span>';
+        } else if (a.isLate) {
+            statusBadge = '<span class="status-pill status-late" style="background:#fefce8; color:#854d0e; border:1px solid #fde047;">🟡 تأخير بسيط (&lt; 15 د)</span>';
         } else if (a.isBonusEvent) {
             statusBadge = '<span class="status-pill status-bonus">⭐ بونص</span>';
         }
@@ -1396,6 +1546,79 @@ function openEditAttendanceTimeModal(memberId) {
     const input = document.getElementById('modalTimePickerInput');
     if (input) input.value = time24;
 
+    // استخراج موعد اللقاء المعتمد وتوليد أزرار التوقيت وفق قواعد شيت الإكسيل
+    const effectiveStart = getEffectiveMeetingStartTime(activeSelectedDate);
+    const [startH, startM] = effectiveStart.split(':').map(Number);
+
+    let earlyM = startM - 15;
+    let earlyH = startH;
+    if (earlyM < 0) { earlyM += 60; earlyH -= 1; }
+    const earlyVal = `${String(earlyH).padStart(2, '0')}:${String(earlyM).padStart(2, '0')}`;
+    const earlyLabel = formatPresetTimeLabel(earlyH, earlyM);
+
+    const onTimeVal = `${String(startH).padStart(2, '0')}:${String(startM).padStart(2, '0')}`;
+    const onTimeLabel = formatPresetTimeLabel(startH, startM);
+
+    let minorM = startM + 10;
+    let minorH = startH;
+    if (minorM >= 60) { minorM -= 60; minorH += 1; }
+    const minorVal = `${String(minorH).padStart(2, '0')}:${String(minorM).padStart(2, '0')}`;
+    const minorLabel = formatPresetTimeLabel(minorH, minorM);
+
+    let majorM = startM + 15;
+    let majorH = startH;
+    if (majorM >= 60) { majorM -= 60; majorH += 1; }
+    const majorVal = `${String(majorH).padStart(2, '0')}:${String(majorM).padStart(2, '0')}`;
+    const majorLabel = formatPresetTimeLabel(majorH, majorM);
+
+    let severeM = startM + 30;
+    let severeH = startH;
+    if (severeM >= 60) { severeM -= 60; severeH += 1; }
+    const severeVal = `${String(severeH).padStart(2, '0')}:${String(severeM).padStart(2, '0')}`;
+    const severeLabel = formatPresetTimeLabel(severeH, severeM);
+
+    const presetGrid = document.getElementById('modalTimePresetButtonsGrid');
+    if (presetGrid) {
+        presetGrid.innerHTML = `
+            <button type="button" class="btn-mini" onclick="setModalTimePreset('${earlyVal}')" style="background:#f0fdf4; color:#166534; border:1px solid #86efac; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="حضور مبكر في الميعاد">
+                🟢 ${earlyLabel} (في الميعاد)
+            </button>
+            <button type="button" class="btn-mini" onclick="setModalTimePreset('${onTimeVal}')" style="background:#eff6ff; color:#1e40af; border:1px solid #93c5fd; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="موعد بداية اللقاء الرسمي">
+                🔵 ${onTimeLabel} (بداية اللقاء)
+            </button>
+            <button type="button" class="btn-mini" onclick="setModalTimePreset('${minorVal}')" style="background:#fefce8; color:#854d0e; border:1px solid #fde047; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير بسيط أقل من 15 دقيقة - يُحسب حاضر طبقاً لشيت الإكسيل">
+                🟡 ${minorLabel} (تأخير 10 د • حاضر)
+            </button>
+            <button type="button" class="btn-mini" onclick="setModalTimePreset('${majorVal}')" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير 15 دقيقة - يُعتبر غائب طبقاً لشيت الإكسيل">
+                🔴 ${majorLabel} (تأخير 15 د • غائب)
+            </button>
+            <button type="button" class="btn-mini" onclick="setModalTimePreset('${severeVal}')" style="background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير كبير تجاوز 15 دقيقة - يُعتبر غائب">
+                🔴 ${severeLabel} (تأخير 30 د • غائب)
+            </button>
+            <button type="button" class="btn-mini" onclick="setModalTimeToNow()" style="background:#FAF7F2; color:#874F19; border:1.5px solid #D4AF37; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="ضبط على توقيت الساعة الآن">
+                ⏱️ الوقت الحالي الآن
+            </button>
+        `;
+    }
+
+    const ruleBanner = document.getElementById('modalTimeRuleBanner');
+    if (ruleBanner) {
+        const isFromWA = isMeetingTimeFromWhatsApp(activeSelectedDate);
+        ruleBanner.innerHTML = `
+            <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:8px; padding:6px 10px; font-size:0.75rem; color:#1e293b; font-weight:700; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <span style="color:#0c2461; font-weight:800;">⏰ موعد بداية اللقاء: <b>${onTimeLabel}</b></span>
+                    <span style="font-size:0.68rem; padding:1px 6px; border-radius:4px; font-weight:800; ${isFromWA ? 'background:#dcfce7; color:#166534;' : 'background:#e0f2fe; color:#0369a1;'}">
+                        ${isFromWA ? '⚡ مستنتج من رسالة الواتساب' : '📌 الأساسي (1:00 م)'}
+                    </span>
+                </div>
+                <div style="font-size:0.72rem; color:#64748b;">
+                    📋 <b>قواعد شيت الإكسيل:</b> التأخير البسيط (&lt; 15 دقيقة) يُحسب حاضر • التأخير الكبير (≥ 15 دقيقة) يُعتبر غائباً.
+                </div>
+            </div>
+        `;
+    }
+
     modal.style.display = 'flex';
 }
 
@@ -1454,10 +1677,10 @@ async function applyAttendanceTimeChange(memberId, h, m, formattedDisplayTime) {
     if (!isFri || (isSummerDay && settings.ignoreSummerDelay) || rec.hasApprovedDelay) {
         rec.isAbsentDueToDelay = false;
     } else {
-        let startTimeStr = settings.startTime || "13:00";
-        let [startH, startM] = startTimeStr.split(':').map(Number);
-        let diffMinutes = (h * 60 + m) - (startH * 60 + startM);
-        rec.isAbsentDueToDelay = diffMinutes >= (settings.absentAfter || 75);
+        const timeVal24 = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        const evalRes = evaluateAttendanceDelayStatus(timeVal24, activeSelectedDate);
+        rec.isAbsentDueToDelay = evalRes.isAbsentDueToDelay;
+        rec.isLate = evalRes.isLate;
     }
 
     localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));

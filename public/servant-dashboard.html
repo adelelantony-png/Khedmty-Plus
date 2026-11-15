@@ -1992,6 +1992,37 @@ window.switchTab = window.switchTab || function(tabId, btn) {
         }
     } catch(e){}
 };
+window.openAttendanceWithFilter = function(filterKey) {
+    if (filterKey === 'excuses') {
+        if (typeof switchTab === 'function') switchTab('radarTab');
+        if (typeof switchRadarSection === 'function') switchRadarSection('excuses');
+        if (typeof filterRadarExcuses === 'function') filterRadarExcuses('absence');
+        if (typeof showToast === 'function') showToast('🕊️ تم الانتقال لرادار الأعذار والاستئذانات');
+        return;
+    }
+    if (typeof switchTab === 'function') switchTab('attendanceTab');
+    if (window.activeDashboardDate && typeof activeSelectedDate !== 'undefined') {
+        activeSelectedDate = window.activeDashboardDate;
+        var elDate = document.getElementById('selectedDateInput');
+        if (elDate) elDate.value = activeSelectedDate;
+        var elDisplay = document.getElementById('attendanceDateDisplay');
+        if (elDisplay && typeof toArabicLongDate === 'function') elDisplay.innerText = toArabicLongDate(activeSelectedDate);
+    }
+    setTimeout(function() {
+        if (typeof filterAttendanceByChip === 'function') {
+            filterAttendanceByChip(filterKey, true);
+        }
+        var chipNames = {
+            'all': 'عرض الكل',
+            'late': 'حالات التأخير البسيط 🟡',
+            'severe': 'حالات التأخير الشديد 🔴',
+            'communion': 'المتناولين بالقداس 🕊️'
+        };
+        if (typeof showToast === 'function') {
+            showToast('🔍 تم تصفية كشف الحضور: ' + (chipNames[filterKey] || filterKey));
+        }
+    }, 120);
+};
 </script>
 <div class="tabs">
 
@@ -2437,6 +2468,16 @@ window.switchTab = window.switchTab || function(tabId, btn) {
                 </div>
             </div>
 
+            <!-- أزرار سريعة للوصول لشاشات التأخير البسيط والشديد مباشرة من الرادار -->
+            <div style="display: flex; gap: 10px; margin-top: -10px; margin-bottom: 22px; flex-wrap: wrap;">
+                <button type="button" class="btn" onclick="openAttendanceWithFilter('late')" style="background: #fffbeb; color: #92400e; border: 1.5px solid #fde68a; font-weight: 800; font-size: 0.82rem; padding: 7px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.15s;">
+                    <span>🟡</span> عرض حالات التأخير البسيط (متأخر) ⚡
+                </button>
+                <button type="button" class="btn" onclick="openAttendanceWithFilter('severe')" style="background: #fff1f2; color: #be123c; border: 1.5px solid #fecdd3; font-weight: 800; font-size: 0.82rem; padding: 7px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: transform 0.15s;">
+                    <span>🔴</span> عرض حالات التأخير الشديد (تجاوز المهلة) ⚡
+                </button>
+            </div>
+
             
             <!-- أزرار التصفح السريع للرادار (Radar Segmented Pills) -->
             <div class="radar-pill-bar" style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; background:#f1f5f9; padding:6px; border-radius:12px; border:1px solid #cbd5e1;">
@@ -2810,6 +2851,16 @@ window.switchTab = window.switchTab || function(tabId, btn) {
                 <!-- شريط الأدوات المنظم: تبديل العرض + زر التسجيل اليدوي الذكي -->
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; padding: 8px 12px; background: rgba(254, 243, 199, 0.45); border-radius: 10px; border: 1px solid #fde68a;">
                     <!-- الفلاتر كأزرار متلاصقة أنيقة -->
+                    <!-- فلترة حسب تاريخ الجمعة لمنع التداخل بين الجمعة السابقة والحالية -->
+                    <div style="display: flex; align-items: center; gap: 6px; background: #ffffff; padding: 4px 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <label for="radarExcuseFridayFilterSelect" style="font-size: 0.8rem; font-weight: 800; color: #1e3a8a; margin: 0; white-space: nowrap;">
+                            🗓️ تاريخ الجمعة:
+                        </label>
+                        <select id="radarExcuseFridayFilterSelect" onchange="filterRadarExcusesByDate(this.value)" style="padding: 5px 10px; font-size: 0.82rem; font-weight: 700; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; cursor: pointer; outline: none;">
+                            <option value="all">🎯 كل لقاءات الجمعة (عرض شامل)</option>
+                        </select>
+                    </div>
+
                     <div style="display: inline-flex; background: #ffffff; padding: 3px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 2px rgba(0,0,0,0.04); flex-wrap: wrap; gap: 2px;">
                         <button type="button" onclick="filterRadarExcuses('pending')" id="btnRadarExcusePending" style="width: auto !important; margin: 0 !important; background: #b45309; color: #ffffff; border: none; padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; font-weight: 800; cursor: pointer; transition: all 0.15s;">
                             ⏳ كل المعلق (<span id="radar_tabPendingCount">0</span>)
@@ -3045,20 +3096,77 @@ window.switchTab = window.switchTab || function(tabId, btn) {
     <span style="font-size:0.8rem; color:#64748b; font-weight:bold;">محدث لحظياً مع قاعدة البيانات السحابية ☁️</span>
 </div>
 
-<!-- 👥 إحصائيات المخدومين والدارسين -->
+<!-- 👥 إحصائيات المخدومين ونبض الحضور (أزرار تفاعلية للانتقال الفوري) -->
 <div class="stat-grid" style="margin-bottom:10px;">
-    <div class="stat-card"><div>إجمالي المخدومين</div><div class="num" id="statTotalMembers">0</div></div>
-    <div class="stat-card"><div>حضور المخدومين اليوم</div><div class="num" id="statTodayMembersCount">0</div></div>
-    <div class="stat-card"><div>نسبة حضور المخدومين</div><div class="num" id="statMembersPercent">0%</div></div>
-    <div class="stat-card"><div>المتناولون اليوم 🕊️</div><div class="num" id="statTodayCommunion" style="color:var(--success);">0</div></div>
-    <div class="stat-card"><div>المؤهلون للتخرج (≥75%)</div><div class="num" id="statQualifiedGraduates" style="color:var(--purple);">0</div></div>
+    <div class="stat-card">
+        <div style="font-weight:700; color:#475569;">إجمالي المخدومين</div>
+        <div class="num" id="statTotalMembers">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">قاعدة البيانات</div>
+    </div>
+    <div class="stat-card" onclick="openAttendanceWithFilter('all')" style="cursor:pointer; border:1.5px solid #bbf7d0; background:linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="انقر لعرض كشف الحضور الكامل">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; color:#166534;">حضور المخدومين</span>
+            <span style="font-size:0.68rem; background:#dcfce7; color:#15803d; border:1px solid #86efac; border-radius:999px; padding:1px 6px; font-weight:800;">كشف اللقاء ⚡</span>
+        </div>
+        <div class="num" id="statTodayMembersCount" style="color:#15803d;">0</div>
+        <div style="font-size:0.75rem; color:#64748b; font-weight:600;" id="statDashDateLabel">الجمعة ١٣ نوفمبر</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-weight:700; color:#475569;">نسبة الحضور</div>
+        <div class="num" id="statMembersPercent">0%</div>
+        <div style="font-size:0.75rem; color:#64748b;">من إجمالي الدارسين</div>
+    </div>
+    <div class="stat-card" onclick="openAttendanceWithFilter('communion')" style="cursor:pointer; border:1.5px solid #cbd5e1; transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="انقر لفلترة وعرض المتناولين بكشف الحضور">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; color:var(--primary);">المتناولون بالقداس 🕊️</span>
+            <span style="font-size:0.68rem; background:#ecfdf5; color:#065f46; border-radius:999px; padding:1px 6px; font-weight:bold;">فلترة ⚡</span>
+        </div>
+        <div class="num" id="statTodayCommunion" style="color:var(--success);">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">انقر للفلترة بالجدول</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-weight:700; color:#475569;">المؤهلون للتخرج (≥75%)</div>
+        <div class="num" id="statQualifiedGraduates" style="color:var(--purple);">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">وفق معيار الالتزام</div>
+    </div>
 </div>
 
-<!-- 👔 إحصائيات الخدام والمحاضرين -->
+<!-- ⚡ كروت التأخيرات والأعذار التفاعلية المباشرة (استجابة فورية) -->
 <div class="stat-grid" style="margin-bottom:14px;">
-    <div class="stat-card"><div>إجمالي الخدام</div><div class="num" id="statTotalServantsDash">0</div></div>
-    <div class="stat-card"><div>حضور الخدام اليوم</div><div class="num" id="statTodayServantsCount" style="color:var(--success);">0</div></div>
-    <div class="stat-card"><div>نسبة حضور الخدام</div><div class="num" id="statServantsPercent" style="color:var(--success);">0%</div></div>
+    <div class="stat-card" onclick="openAttendanceWithFilter('late')" style="cursor:pointer; border:1.5px solid #fde68a; background:linear-gradient(180deg, #fffbeb 0%, #ffffff 100%); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="انقر لفلترة وعرض حالات التأخير البسيط بالجدول فوراً">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; color:#92400e;">🟡 تأخير بسيط (&lt; 15 د)</span>
+            <span style="font-size:0.68rem; background:#fef3c7; color:#b45309; border-radius:999px; padding:1px 6px; font-weight:bold;">فلترة الكشف ⚡</span>
+        </div>
+        <div class="num" id="statTodayMinorDelay" style="color:#b45309;">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">أقل من 15 دقيقة • يُحسب حاضر</div>
+    </div>
+    <div class="stat-card" onclick="openAttendanceWithFilter('severe')" style="cursor:pointer; border:1.5px solid #fecdd3; background:linear-gradient(180deg, #fff1f2 0%, #ffffff 100%); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="انقر لفلترة وعرض حالات التأخير الشديد بالجدول فوراً">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; color:#be123c;">🔴 تأخير كبير (≥ 15 د غائب)</span>
+            <span style="font-size:0.68rem; background:#ffe4e6; color:#e11d48; border-radius:999px; padding:1px 6px; font-weight:bold;">فلترة الكشف ⚡</span>
+        </div>
+        <div class="num" id="statTodaySevereDelay" style="color:#e11d48;">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">15 دقيقة فأكثر • يُعتبر غائباً</div>
+    </div>
+    <div class="stat-card" onclick="openAttendanceWithFilter('excuses')" style="cursor:pointer; border:1.5px solid #bae6fd; background:linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%); transition:transform 0.15s, box-shadow 0.15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'" title="انقر للانتقال الفوري لقسم الأعذار برادار أمين الخدمة">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; color:#0369a1;">🕊️ غياب بعذر معتمد</span>
+            <span style="font-size:0.68rem; background:#e0f2fe; color:#0284c7; border-radius:999px; padding:1px 6px; font-weight:bold;">رادار الأعذار 🎯</span>
+        </div>
+        <div class="num" id="statTodayExcused" style="color:#0284c7;">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">أعذار موثقة ومعتمدة</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-weight:700; color:#475569;">إجمالي الخدام</div>
+        <div class="num" id="statTotalServantsDash">0</div>
+        <div style="font-size:0.75rem; color:#64748b;">فريق الخدمة</div>
+    </div>
+    <div class="stat-card">
+        <div style="font-weight:700; color:#475569;">حضور الخدام باللقاء</div>
+        <div class="num" id="statTodayServantsCount" style="color:var(--success);">0</div>
+        <div style="font-size:0.75rem; color:#64748b;"><span id="statServantsPercent">0%</span> نسبة حضور الخدام</div>
+    </div>
 </div>
 
 <!-- 2. Compact Smart Prep Ribbon (Single sleek row) -->
@@ -3319,6 +3427,9 @@ window.switchTab = window.switchTab || function(tabId, btn) {
         <button type="button" class="btn-date-today" onclick="selectAttendanceDate(today)" title="العودة لتاريخ اليوم الحالي">
             اليوم
         </button>
+
+        <!-- شارة موعد بداية اللقاء المعتمد / رسالة الواتساب -->
+        <span id="attMeetingStartTimeBadge" style="font-size:0.78rem; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:999px; padding:3px 10px; font-weight:800; margin-right:6px; display:inline-flex; align-items:center; gap:4px;" title="موعد بداية اللقاء المعتمد">⏰ موعد الحضور: 01:00 م</span>
     </div>
 
     <!-- قائمة الخيارات الإضافية المنسدلة (⋯) -->
@@ -8345,60 +8456,84 @@ async function clearAuditLogs() {
 // ==========================================
 
 function renderDashboard() {
+    const totalMembers = members.length;
+    const elTotalMembers = document.getElementById('statTotalMembers');
+    if (elTotalMembers) elTotalMembers.innerText = totalMembers;
 
-const totalMembers = members.length;
+    const servantIds = new Set(servants.map(s => s.id.toString()));
 
-const elTotalMembers = document.getElementById('statTotalMembers');
+    // تحديد تاريخ الاجتماع الأنسب للعرض (تاريخ اليوم إذا كان به حضور أو آخر جمعة بها كشف مسجل)
+    let activeDashDate = (typeof today === 'string' && today) ? today : new Date().toISOString().split('T')[0];
+    const todayRecords = (attendanceRecord && attendanceRecord[activeDashDate]) ? attendanceRecord[activeDashDate] : [];
+    
+    if (todayRecords.length === 0) {
+        const availableDates = Object.keys(attendanceRecord || {}).filter(d => {
+            const arr = attendanceRecord[d];
+            return Array.isArray(arr) && arr.length > 0;
+        }).sort().reverse();
+        if (availableDates.length > 0) {
+            activeDashDate = availableDates[0];
+        }
+    }
+    window.activeDashboardDate = activeDashDate;
 
-if (elTotalMembers) elTotalMembers.innerText = totalMembers;
+    const currentRecords = attendanceRecord[activeDashDate] || [];
+    const todayMemberRecords = currentRecords.filter(a => !servantIds.has(a.id.toString()) && !a.isAbsentDueToDelay && !a.isExcused);
+    const todayMembersCount = todayMemberRecords.length;
 
-const servantIds = new Set(servants.map(s => s.id.toString()));
+    const elTodayMembersCount = document.getElementById('statTodayMembersCount');
+    if (elTodayMembersCount) elTodayMembersCount.innerText = todayMembersCount;
 
-const todayMemberRecords = (attendanceRecord[today] || []).filter(a => !servantIds.has(a.id.toString()) && !a.isAbsentDueToDelay);
+    const elDashDateLabel = document.getElementById('statDashDateLabel');
+    if (elDashDateLabel && typeof formatMeetingDateArabicLabel === 'function') {
+        elDashDateLabel.innerText = formatMeetingDateArabicLabel(activeDashDate);
+    }
 
-const todayMembersCount = todayMemberRecords.length;
+    const memberPercent = totalMembers > 0 ? Math.round((todayMembersCount / totalMembers) * 100) : 0;
+    const elMembersPercent = document.getElementById('statMembersPercent');
+    if (elMembersPercent) elMembersPercent.innerText = memberPercent + "%";
 
-const elTodayMembersCount = document.getElementById('statTodayMembersCount');
+    let qualifiedCount = members.filter(m => calculateGraduationStatus(m.id).qualified).length;
+    const elQualifiedGraduates = document.getElementById('statQualifiedGraduates');
+    if (elQualifiedGraduates) elQualifiedGraduates.innerText = qualifiedCount;
 
-if (elTodayMembersCount) elTodayMembersCount.innerText = todayMembersCount;
+    let communionCount = currentRecords.filter(a => a.communion || a.liturgy).length;
+    const commEl = document.getElementById('statTodayCommunion');
+    if (commEl) commEl.innerText = communionCount;
 
-const memberPercent = totalMembers > 0 ? Math.round((todayMembersCount / totalMembers) * 100) : 0;
+    // حساب حالات التأخير البسيط والتأخير الشديد والأعذار المعتمدة للكروت التفاعلية
+    const minorDelayCount = currentRecords.filter(a => (a.hasApprovedDelay || a.isLate) && !a.isAbsentDueToDelay).length;
+    const elMinorDelay = document.getElementById('statTodayMinorDelay');
+    if (elMinorDelay) elMinorDelay.innerText = minorDelayCount;
 
-const elMembersPercent = document.getElementById('statMembersPercent');
+    const severeDelayCount = currentRecords.filter(a => a.isAbsentDueToDelay).length;
+    const elSevereDelay = document.getElementById('statTodaySevereDelay');
+    if (elSevereDelay) elSevereDelay.innerText = severeDelayCount;
 
-if (elMembersPercent) elMembersPercent.innerText = memberPercent + "%";
+    let excusedCount = currentRecords.filter(a => a.isExcused).length;
+    if (window.lastRadarExcusesList && Array.isArray(window.lastRadarExcusesList)) {
+        const radarExcused = window.lastRadarExcusesList.filter(e => {
+            const ed = e.friday_date || e.session_date;
+            return ed === activeDashDate && e.status === 'accepted' && (typeof isDelayExcuse === 'function' ? !isDelayExcuse(e) : true);
+        }).length;
+        if (radarExcused > excusedCount) excusedCount = radarExcused;
+    }
+    const elExcused = document.getElementById('statTodayExcused');
+    if (elExcused) elExcused.innerText = excusedCount;
 
-let qualifiedCount = members.filter(m => calculateGraduationStatus(m.id).qualified).length;
+    const totalServants = servants.length;
+    const elTotalServantsDash = document.getElementById('statTotalServantsDash');
+    if (elTotalServantsDash) elTotalServantsDash.innerText = totalServants;
 
-const elQualifiedGraduates = document.getElementById('statQualifiedGraduates');
+    const todayServantsCount = (servantsAttendance[activeDashDate] || servantsAttendance[today] || []).length;
+    const elTodayServantsCount = document.getElementById('statTodayServantsCount');
+    if (elTodayServantsCount) elTodayServantsCount.innerText = todayServantsCount;
 
-if (elQualifiedGraduates) elQualifiedGraduates.innerText = qualifiedCount;
+    const servantPercent = totalServants > 0 ? Math.round((todayServantsCount / totalServants) * 100) : 0;
+    const elServantsPercent = document.getElementById('statServantsPercent');
+    if (elServantsPercent) elServantsPercent.innerText = servantPercent + "%";
 
-let communionCount = (attendanceRecord[today] || []).filter(a => a.communion).length;
-
-const commEl = document.getElementById('statTodayCommunion');
-
-if (commEl) commEl.innerText = communionCount;
-
-const totalServants = servants.length;
-
-const elTotalServantsDash = document.getElementById('statTotalServantsDash');
-
-if (elTotalServantsDash) elTotalServantsDash.innerText = totalServants;
-
-const todayServantsCount = (servantsAttendance[today] || []).length;
-
-const elTodayServantsCount = document.getElementById('statTodayServantsCount');
-
-if (elTodayServantsCount) elTodayServantsCount.innerText = todayServantsCount;
-
-const servantPercent = totalServants > 0 ? Math.round((todayServantsCount / totalServants) * 100) : 0;
-
-const elServantsPercent = document.getElementById('statServantsPercent');
-
-if (elServantsPercent) elServantsPercent.innerText = servantPercent + "%";
-
-const todayFridayStr = (typeof today !== 'undefined' && today) ? today : new Date().toISOString().split('T')[0];
+    const todayFridayStr = (typeof today !== 'undefined' && today) ? today : new Date().toISOString().split('T')[0];
 let fridayDates = Object.keys(attendanceRecord || {}).filter(d => isFridaySession(d) && d <= todayFridayStr && Array.isArray(attendanceRecord[d]) && attendanceRecord[d].length > 0).sort().reverse();
 
 let alertBox = document.getElementById('absentAlertList');
@@ -11965,25 +12100,29 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <!-- أزرار الاختيار السريع للنماذج الشائعة -->
+    <!-- بانر موعد اللقاء وقواعد شيت الإكسيل للتأخير -->
+    <div id="modalTimeRuleBanner"></div>
+
+    <!-- أزرار الاختيار السريع للنماذج الشائعة المتوافقة ديناميكياً مع موعد اللقاء وقواعد شيت الإكسيل -->
     <div style="margin-bottom:18px;">
       <div style="font-size:0.78rem; font-weight:800; color:#64748b; margin-bottom:6px;">
-        ⚡ خيارات سريعة بنقرة واحدة:
+        ⚡ خيارات سريعة بنقرة واحدة (وفق قواعد شيت الإكسيل):
       </div>
-      <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
+      <div id="modalTimePresetButtonsGrid" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:6px;">
         <button type="button" class="btn-mini" onclick="setModalTimePreset('12:30')" style="background:#f0fdf4; color:#166534; border:1px solid #86efac; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="حضور في الموعد المبكر">
           🟢 12:30 م (في الميعاد)
         </button>
         <button type="button" class="btn-mini" onclick="setModalTimePreset('13:00')" style="background:#eff6ff; color:#1e40af; border:1px solid #93c5fd; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="موعد بداية اللقاء">
           🔵 01:00 م (بداية اللقاء)
         </button>
-        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:15')" style="background:#fefce8; color:#854d0e; border:1px solid #fde047; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير خفيف مقبول">
-          🟡 01:15 م (تأخير خفيف)
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:10')" style="background:#fefce8; color:#854d0e; border:1px solid #fde047; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير بسيط (< 15 دقيقة) - يُحسب حاضر">
+          🟡 01:10 م (تأخير 10 د • حاضر)
         </button>
-        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:30')" style="background:#fff7ed; color:#9a3412; border:1px solid #fed7aa; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير نصف ساعة">
-          🟠 01:30 م (تأخير 30 د)
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:15')" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير 15 دقيقة - يُعتبر غائب طبقاً لشيت الإكسيل">
+          🔴 01:15 م (تأخير 15 د • غائب)
         </button>
-        <button type="button" class="btn-mini" onclick="setModalTimePreset('14:15')" style="background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير شديد">
-          🔴 02:15 م (تأخير شديد)
+        <button type="button" class="btn-mini" onclick="setModalTimePreset('13:30')" style="background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="تأخير كبير تجاوز 15 دقيقة - يُعتبر غائب">
+          🔴 01:30 م (تأخير 30 د • غائب)
         </button>
         <button type="button" class="btn-mini" onclick="setModalTimeToNow()" style="background:#FAF7F2; color:#874F19; border:1.5px solid #D4AF37; border-radius:8px; padding:7px; font-weight:800; font-size:0.78rem; cursor:pointer;" title="ضبط على توقيت الساعة الآن">
           ⏱️ الوقت الحالي الآن

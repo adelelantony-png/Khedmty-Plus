@@ -1048,71 +1048,115 @@ if (atb) {
 
 atb.innerHTML = '';
 
-let dates = Object.keys(attendanceRecord).sort().reverse();
+// 🗓️ تجميع كافة الجمعات الرسمية للخدمة لضمان شمولية سجل الحضور والغياب (لا يسقط أي يوم غياب)
+const officialFridays = new Set();
 
-let hasAtt = false;
+// 1. الجمعات المسجلة في سجل الحضور
+if (typeof attendanceRecord === 'object' && attendanceRecord) {
+    Object.keys(attendanceRecord).forEach(d => {
+        try {
+            const dt = new Date(d);
+            if (!isNaN(dt.getTime()) && dt.getDay() === 5) {
+                officialFridays.add(d);
+            }
+        } catch(e){}
+    });
+}
+
+// 2. جمعات الخدمة الرسمية من جمعة الانطلاق حتى الجمعة الحالية المعروضة
+const startServiceStr = (typeof settings === 'object' && settings.serviceStart) ? settings.serviceStart : '2026-11-06';
+const currentFridayRef = (typeof activeSelectedDate === 'string' && activeSelectedDate) ? activeSelectedDate : (typeof today === 'string' ? today : new Date().toISOString().split('T')[0]);
+
+try {
+    let cur = new Date(startServiceStr);
+    const endDt = new Date(currentFridayRef);
+    while (cur <= endDt) {
+        if (cur.getDay() === 5) {
+            const iso = cur.toISOString().split('T')[0];
+            officialFridays.add(iso);
+        }
+        cur.setDate(cur.getDate() + 1);
+    }
+} catch(e){}
+
+// ضمان إضافة جمعة الانطلاق 2026-11-06 دائماً
+officialFridays.add('2026-11-06');
+if (typeof activeSelectedDate === 'string' && activeSelectedDate) {
+    try {
+        const adt = new Date(activeSelectedDate);
+        if (adt.getDay() === 5) officialFridays.add(activeSelectedDate);
+    } catch(e){}
+}
+
+// 3. أي جمعة بها اعتذارات في الرادار أو الكاش
+const rawCachedExcuses = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList) && window.lastRadarExcusesList.length > 0)
+    ? window.lastRadarExcusesList
+    : JSON.parse(localStorage.getItem('khedmty_cached_excuses') || '[]');
+
+rawCachedExcuses.forEach(ex => {
+    const fd = ex.friday_date || ex.session_date;
+    if (fd && /^\d{4}-\d{2}-\d{2}$/.test(fd)) officialFridays.add(fd);
+});
 
 // دمج سجل اعتذارات المخدوم الرسمية طوال العام
 const mPhoneClean = String(m.phone || '').replace(/\D/g, '');
-const mExcusesList = (typeof window !== 'undefined' && Array.isArray(window.lastRadarExcusesList)) 
-    ? window.lastRadarExcusesList.filter(ex => {
-        if (m.code && ex.student_code && String(m.code) === String(ex.student_code)) return true;
-        if (mPhoneClean && ex.student_phone) {
-            const ep = String(ex.student_phone).replace(/\D/g, '');
-            if (mPhoneClean.slice(-8) === ep.slice(-8)) return true;
-        }
-        return m.name && ex.student_name === m.name;
-    }) 
-    : [];
+const mExcusesList = rawCachedExcuses.filter(ex => {
+    if (m.code && ex.student_code && String(m.code) === String(ex.student_code)) return true;
+    if (mPhoneClean && ex.student_phone) {
+        const ep = String(ex.student_phone).replace(/\D/g, '');
+        if (mPhoneClean.slice(-8) === ep.slice(-8)) return true;
+    }
+    return m.name && ex.student_name && ex.student_name.trim() === m.name.trim();
+});
 
-dates.forEach(d => {
+const sortedFridays = Array.from(officialFridays).sort().reverse();
+let hasAnyRow = false;
+
+sortedFridays.forEach(d => {
+    hasAnyRow = true;
     let rec = (attendanceRecord[d] || []).find(a => a.id.toString() === m.id.toString());
-    const matchedExcuse = mExcusesList.find(ex => ex.friday_date === d);
+    const matchedExcuse = mExcusesList.find(ex => (ex.friday_date || ex.session_date) === d);
 
-    if (rec || matchedExcuse) {
-        hasAtt = true;
-        let stat = '';
-        let displayTime = rec ? rec.time : '--:--';
+    let stat = '';
+    let displayTime = rec ? rec.time : '--:--';
+    let cancelBtn = '';
 
-        if (rec && rec.isAbsentDueToDelay) {
-            stat = '<span style="color:red; font-weight:bold;">تأخير شديد</span>';
-        } else if (rec && rec.isBonusEvent) {
+    if (rec) {
+        if (rec.isAbsentDueToDelay) {
+            stat = '<span style="color:#dc2626; font-weight:bold;">🔴 تأخير كبير (غائب)</span>';
+        } else if (rec.isBonusEvent) {
             stat = '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>';
-        } else if ((rec && rec.isExcused) || (matchedExcuse && matchedExcuse.status === 'accepted')) {
-            const reason = (rec && rec.excuseReason) || (matchedExcuse && matchedExcuse.reason_category) || 'عذر مقبول';
-            const timing = matchedExcuse && typeof evaluateExcuseTiming === 'function' ? evaluateExcuseTiming(matchedExcuse.created_at, matchedExcuse.friday_date) : null;
-            const timeTag = timing ? ` <small style="font-size:0.75rem; color:${timing.badgeColor};">(${timing.shortLabel})</small>` : '';
-            stat = `<span style="color:#0284c7; font-weight:bold;">🕊️ غياب بعذر: ${escapeHtml(reason)}${timeTag}</span>`;
-            if (matchedExcuse && timing && timing.timeStr) displayTime = timing.timeStr;
-        } else if (matchedExcuse && matchedExcuse.status === 'pending') {
-            stat = '<span style="color:#b45309; font-weight:bold;">⏳ اعتذار قيد المراجعة</span>';
-        } else if (matchedExcuse && matchedExcuse.status === 'rejected') {
-            stat = '<span style="color:#b91c1c; font-weight:bold;">❌ اعتذار غير مقبول</span>';
+        } else if (rec.isExcused) {
+            stat = `<span style="color:#0284c7; font-weight:bold;">🕊️ غياب بعذر: ${escapeHtml(rec.excuseReason || 'عذر مقبول')}</span>`;
+            cancelBtn = `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(d)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>`;
+        } else if (rec.isLate) {
+            stat = '<span style="color:#d97706; font-weight:bold;">🟡 تأخير بسيط (< 15 د)</span>';
         } else {
-            stat = '<span style="color:green; font-weight:bold;">حاضر جمعة</span>';
+            stat = '<span style="color:#16a34a; font-weight:bold;">🟢 حاضر جمعة</span>';
         }
-
-        const isExcusedRow = (rec && rec.isExcused) || !!matchedExcuse;
-const cancelBtn = isExcusedRow ? `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(d)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>` : '';
-atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${displayTime}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><span>${stat}</span>${cancelBtn}</div></td></tr>`;
-    }
-});
-
-// فحص أي جمعة بها اعتذار معتمد للمخدوم لكن اليوم غير مضاف في attendanceRecord
-mExcusesList.forEach(ex => {
-    if (!dates.includes(ex.friday_date)) {
-        hasAtt = true;
-        const timing = typeof evaluateExcuseTiming === 'function' ? evaluateExcuseTiming(ex.created_at, ex.friday_date) : null;
+    } else if (matchedExcuse) {
+        const timing = typeof evaluateExcuseTiming === 'function' ? evaluateExcuseTiming(matchedExcuse.created_at, matchedExcuse.friday_date) : null;
         const timeTag = timing ? ` <small style="font-size:0.75rem; color:${timing.badgeColor};">(${timing.shortLabel})</small>` : '';
-        const stLabel = ex.status === 'accepted' ? '🕊️ غياب بعذر' : (ex.status === 'pending' ? '⏳ عذر قيد المراجعة' : '❌ عذر غير مقبول');
-        const stColor = ex.status === 'accepted' ? '#0284c7' : (ex.status === 'pending' ? '#b45309' : '#b91c1c');
-        const stat = `<span style="color:${stColor}; font-weight:bold;">${stLabel}: ${escapeHtml(ex.reason_category || 'عذر')}${timeTag}</span>`;
-        const cancelBtn2 = `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(ex.friday_date)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>`;
-atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${escapeHtml(ex.friday_date)}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${(timing && timing.timeStr) || '--:--'}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><span>${stat}</span>${cancelBtn2}</div></td></tr>`;
+        const reason = matchedExcuse.reason_category || 'عذر';
+        if (matchedExcuse.status === 'accepted') {
+            stat = `<span style="color:#0284c7; font-weight:bold;">🕊️ غياب بعذر معتمد: ${escapeHtml(reason)}${timeTag}</span>`;
+            cancelBtn = `<button type="button" onclick="cancelExcuseFromProfile('${escapeHtml(d)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#fee2e2; color:#b91c1c; border:1px solid #f87171; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="إلغاء هذا العذر"><i class="fa-solid fa-trash-can"></i> إلغاء</button>`;
+        } else if (matchedExcuse.status === 'pending') {
+            stat = `<span style="color:#b45309; font-weight:bold;">⏳ اعتذار قيد المراجعة: ${escapeHtml(reason)}${timeTag}</span>`;
+        } else {
+            stat = `<span style="color:#b91c1c; font-weight:bold;">❌ اعتذار غير مقبول: ${escapeHtml(reason)}${timeTag}</span>`;
+        }
+        if (timing && timing.timeStr) displayTime = timing.timeStr;
+    } else {
+        // غياب بدون عذر صريح
+        stat = '<span style="color:#dc2626; font-weight:bold;">🔴 غياب بدون عذر</span>';
+        cancelBtn = `<button type="button" onclick="quickRegisterExcuseFromProfile('${escapeHtml(d)}', '${m.id}')" style="width:auto !important; margin:0 !important; background:#f0f9ff; color:#0369a1; border:1px solid #7dd3fc; border-radius:5px; padding:2px 7px; font-size:0.72rem; font-weight:bold; cursor:pointer;" title="تسجيل عذر لهذا اليوم">+ تسجيل عذر</button>`;
     }
+
+    atb.innerHTML += `<tr><td data-label="التاريخ" style="padding:8px; border:1px solid #eee;"><strong>${d}</strong></td><td data-label="الوقت" dir="ltr" style="padding:8px; border:1px solid #eee; color:var(--accent); font-weight:bold;">${displayTime}</td><td data-label="الحالة" style="padding:8px; border:1px solid #eee;"><div style="display:flex; justify-content:space-between; align-items:center; gap:6px;"><span>${stat}</span>${cancelBtn}</div></td></tr>`;
 });
 
-if (!hasAtt) atb.innerHTML = '<tr><td colspan="3" class="empty-state">لم يحضر أي اجتماع حتى الآن</td></tr>';
+if (!hasAnyRow) atb.innerHTML = '<tr><td colspan="3" class="empty-state">لا توجد لقاءات جمعة مسجلة بعد</td></tr>';
 
 }
 
@@ -2018,18 +2062,82 @@ window.cancelExcuseFromProfile = async function(date, memberId) {
         if (typeof cancelStudentExcuse === 'function') {
             await cancelStudentExcuse(matchedExcuse.id);
         }
-    } else {
-        if (confirm(`هل تريد بالتأكيد إلغاء عذر المخدوم [${m.name}] لتاريخ [${date}]؟`)) {
-            if (typeof attendanceRecord !== 'undefined' && attendanceRecord[date]) {
-                attendanceRecord[date] = attendanceRecord[date].filter(a => {
-                    if (a.id.toString() === m.id.toString() && a.isExcused) return false;
-                    return true;
-                });
-                try {
-                    localStorage.setItem('attendanceRecord', JSON.stringify(attendanceRecord));
-                } catch(e) {}
-            }
-            openProfile(memberId);
-        }
     }
+
+    // إزالة وسم العذر نهائياً من كشف الحضور لتاريخ هذه الجمعة وحفظه بالمفتاح الرسمي
+    if (typeof attendanceRecord !== 'undefined' && attendanceRecord[date]) {
+        attendanceRecord[date] = attendanceRecord[date].filter(a => {
+            if (a.id.toString() === m.id.toString() && a.isExcused) return false;
+            return true;
+        });
+        try {
+            localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord));
+            if (typeof syncToCloud === 'function') syncToCloud('attendance', attendanceRecord);
+        } catch(e) {}
+    }
+    openProfile(memberId);
+};
+
+window.quickRegisterExcuseFromProfile = async function(date, memberId) {
+    const studentList = (typeof members !== 'undefined' && Array.isArray(members)) ? members : [];
+    const m = studentList.find(x => String(x.id) === String(memberId));
+    if (!m) return;
+    
+    const reason = prompt(`✍️ تسجيل عذر غياب للمخدوم [${m.name}] لتاريخ الجمعة [${date}]:\n(مثال: مرض / ظروف عائلية / سفر / مذاكرة وإمتحانات / عمل)`, 'ظروف عائلية');
+    if (!reason || !reason.trim()) return;
+    
+    const trimmedReason = reason.trim();
+    
+    // 1. تسجيل العذر في attendanceRecord
+    if (typeof attendanceRecord !== 'undefined') {
+        if (!attendanceRecord[date]) attendanceRecord[date] = [];
+        let existing = attendanceRecord[date].find(a => a.id.toString() === m.id.toString());
+        if (existing) {
+            existing.isExcused = true;
+            existing.excuseReason = trimmedReason;
+        } else {
+            attendanceRecord[date].push({
+                id: m.id,
+                code: m.code || '',
+                name: m.name,
+                stage: m.stage || '',
+                phone: m.phone || '',
+                time: '--:--',
+                isExcused: true,
+                excuseReason: trimmedReason,
+                status: 'excused',
+                scannedBy: 'الخادم (يدوي من الملف)'
+            });
+        }
+        try {
+            localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord));
+            if (typeof syncToCloud === 'function') syncToCloud('attendance', attendanceRecord);
+        } catch(e){}
+    }
+    
+    // 2. إضافة العذر في رادار الأعذار والكاش ليظهر موثقاً في التقارير
+    const newExcuse = {
+        id: Date.now(),
+        student_id: m.id,
+        student_code: m.code || '',
+        student_name: m.name,
+        student_phone: m.phone || '',
+        stage: m.stage || '',
+        message_text: `عذر يدوي مسجل من ملف المخدوم: ${trimmedReason}`,
+        reason_category: trimmedReason,
+        friday_date: date,
+        status: 'accepted',
+        servant_notes: 'تم تسجيله واعتماده يدوياً من ملف المخدوم',
+        resolved_by: 'manual_servant',
+        created_at: Date.now()
+    };
+    if (typeof window !== 'undefined') {
+        if (!window.lastRadarExcusesList) window.lastRadarExcusesList = [];
+        window.lastRadarExcusesList.unshift(newExcuse);
+        try {
+            localStorage.setItem('khedmty_cached_excuses', JSON.stringify(window.lastRadarExcusesList));
+        } catch(e){}
+    }
+    
+    openProfile(memberId);
 };
