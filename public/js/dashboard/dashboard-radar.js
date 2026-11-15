@@ -1969,14 +1969,38 @@ async function loadRadarExcuses() {
 
     const allDelays = window.lastRadarExcusesList.filter(e => isDelayExcuse(e));
     const allAbsence = window.lastRadarExcusesList.filter(e => !isDelayExcuse(e));
+    const acceptedAbsence = allAbsence.filter(e => e.status === 'accepted');
+    const delaysApproved = window.lastRadarExcusesList.filter(e => isDelayExcuse(e) && e.status === 'accepted');
 
     // تحديث بطاقة استئذانات التأخير وبطاقة الاعتذارات العلوية
     const delaysKpiCount = document.getElementById('radar_kpiDelaysPendingCount');
     const delaysKpiSub = document.getElementById('radar_kpiDelaysPendingSub');
-    if (delaysKpiCount) delaysKpiCount.textContent = delaysPending.length;
-    if (delaysKpiSub) delaysKpiSub.textContent = delaysPending.length === 1 ? 'طلب استئذان تأخير معلق' : `${delaysPending.length} طلبات حضور متأخر بإذن`;
+    if (delaysKpiCount) {
+        delaysKpiCount.textContent = delaysPending.length > 0 ? delaysPending.length : delaysApproved.length;
+    }
+    if (delaysKpiSub) {
+        if (delaysPending.length > 0) {
+            delaysKpiSub.textContent = delaysPending.length === 1 ? 'طلب استئذان تأخير معلق' : `${delaysPending.length} طلبات حضور متأخر بإذن`;
+        } else if (delaysApproved.length > 0) {
+            delaysKpiSub.textContent = `${delaysApproved.length} طلب استئذان معتمد ✅`;
+        } else {
+            delaysKpiSub.textContent = 'لا توجد طلبات تأخير معلقة';
+        }
+    }
 
-    if (kpiCount) kpiCount.textContent = absencePending.length;
+    if (kpiCount) {
+        kpiCount.textContent = absencePending.length > 0 ? absencePending.length : acceptedAbsence.length;
+    }
+    const kpiExcusesSub = document.getElementById('radar_kpiExcusesSub');
+    if (kpiExcusesSub) {
+        if (absencePending.length > 0) {
+            kpiExcusesSub.textContent = `${absencePending.length} قيد المراجعة • ${acceptedAbsence.length} معتمد`;
+        } else if (acceptedAbsence.length > 0) {
+            kpiExcusesSub.textContent = `جميع الأعذار معتمدة (${acceptedAbsence.length}) ✅`;
+        } else {
+            kpiExcusesSub.textContent = 'واردة لحظياً عبر واتساب';
+        }
+    }
 
     if (badge) {
         badge.innerHTML = `⏳ <b>${allPending.length}</b> طلب قيد المراجعة (<span style="color:#7c3aed; font-weight:800;">⏰ ${delaysPending.length} تأخير بإذن</span> + <span style="color:#b45309; font-weight:800;">🕊️ ${absencePending.length} غياب</span>)`;
@@ -1993,12 +2017,37 @@ async function loadRadarExcuses() {
     if (tabAbsenceCount) tabAbsenceCount.textContent = absencePending.length;
     if (tabAllCount) tabAllCount.textContent = window.lastRadarExcusesList.length;
 
+    // تحديث قائمة فلترة الجمعة في رادار الأعذار لمنع التداخل بين الأسابيع
+    const fridaySelect = document.getElementById('radarExcuseFridayFilterSelect');
+    if (fridaySelect) {
+        const currentVal = fridaySelect.value || window.currentRadarExcuseDateFilter || 'all';
+        const uniqueFridays = Array.from(new Set(window.lastRadarExcusesList.map(e => e.friday_date || e.session_date).filter(Boolean))).sort().reverse();
+        
+        fridaySelect.innerHTML = `<option value="all">🎯 كل لقاءات الجمعة (عرض شامل - ${window.lastRadarExcusesList.length})</option>` + 
+            uniqueFridays.map(f => {
+                const count = window.lastRadarExcusesList.filter(e => (e.friday_date || e.session_date) === f).length;
+                const label = typeof formatMeetingDateArabicLabel === 'function' ? formatMeetingDateArabicLabel(f) : f;
+                return `<option value="${f}">${label} (${count} أعذار)</option>`;
+            }).join('');
+        
+        if (uniqueFridays.includes(currentVal) || currentVal === 'all') {
+            fridaySelect.value = currentVal;
+            window.currentRadarExcuseDateFilter = currentVal;
+        }
+    }
+
     renderRadarExcusesTable();
 
     if (typeof renderRadarPulseChart === 'function') {
         renderRadarPulseChart(window.lastValidMeetingDates || []);
     }
 }
+
+function filterRadarExcusesByDate(fridayDate) {
+    window.currentRadarExcuseDateFilter = fridayDate || 'all';
+    renderRadarExcusesTable();
+}
+window.filterRadarExcusesByDate = filterRadarExcusesByDate;
 
 function filterRadarExcuses(filterMode = 'pending') {
     window.currentRadarExcuseFilter = filterMode;
@@ -2035,6 +2084,13 @@ function renderRadarExcusesTable() {
     if (!tbody) return;
 
     let list = window.lastRadarExcusesList || [];
+    
+    // فلترة حسب تاريخ الجمعة المحدد
+    const dateFilter = window.currentRadarExcuseDateFilter || 'all';
+    if (dateFilter && dateFilter !== 'all') {
+        list = list.filter(e => (e.friday_date || e.session_date) === dateFilter);
+    }
+
     const filter = window.currentRadarExcuseFilter || 'pending';
 
     if (filter === 'pending') {
@@ -2156,6 +2212,11 @@ function renderRadarExcusesTable() {
                         <span style="display: inline-block; font-size: 0.72rem; font-weight: 800; color: ${timing.badgeColor}; background: ${timing.bgColor}; border-radius: 6px; padding: 2px 8px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 2px rgba(0,0,0,0.03);">
                             ${timing.shortLabel}
                         </span>
+                    </div>
+                    <div style="margin-top: 5px;">
+                        <button type="button" onclick="promptChangeExcuseFridayDate(${e.id})" style="background:#f1f5f9; color:#0369a1; border:1px solid #cbd5e1; border-radius:6px; padding:2px 8px; font-size:0.72rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.15s;" onmouseover="this.style.background='#e0f2fe'" onmouseout="this.style.background='#f1f5f9'" title="تعديل وتحديد تاريخ جمعة الغياب لهذا العذر">
+                            <i class="fa-solid fa-calendar-day"></i> 📅 تعديل الجمعة
+                        </button>
                     </div>
                 </td>
 

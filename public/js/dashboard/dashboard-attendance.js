@@ -161,8 +161,8 @@ let currentAttendanceChipFilter = 'all';
 let pendingUndoDeleteTimer = null;
 let lastDeletedAttendanceRecord = null;
 
-function filterAttendanceByChip(chipType) {
-    if (currentAttendanceChipFilter === chipType && chipType !== 'all') {
+function filterAttendanceByChip(chipType, forceSet = false) {
+    if (!forceSet && currentAttendanceChipFilter === chipType && chipType !== 'all') {
         currentAttendanceChipFilter = 'all';
     } else {
         currentAttendanceChipFilter = chipType;
@@ -904,7 +904,7 @@ function renderAttendanceTable() {
     let filtered = list.filter(a => {
         // Chip filter
         if (currentAttendanceChipFilter === 'ontime' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
-        if (currentAttendanceChipFilter === 'late' && !a.hasApprovedDelay) return false;
+        if (currentAttendanceChipFilter === 'late' && !(a.hasApprovedDelay || a.isLate)) return false;
         if (currentAttendanceChipFilter === 'severe' && !a.isAbsentDueToDelay) return false;
         if (currentAttendanceChipFilter === 'communion' && !a.communion) return false;
         if (currentAttendanceChipFilter === 'participation' && !a.participation) return false;
@@ -922,7 +922,7 @@ function renderAttendanceTable() {
         // Toolbar Status
         if (statusVal) {
             if (statusVal === 'حاضر' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
-            if (statusVal === 'متأخر' && !a.hasApprovedDelay) return false;
+            if (statusVal === 'متأخر' && !(a.hasApprovedDelay || a.isLate)) return false;
             if (statusVal === 'تأخير شديد' && !a.isAbsentDueToDelay) return false;
         }
 

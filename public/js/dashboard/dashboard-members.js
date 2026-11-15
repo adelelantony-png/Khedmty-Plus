@@ -2018,18 +2018,18 @@ window.cancelExcuseFromProfile = async function(date, memberId) {
         if (typeof cancelStudentExcuse === 'function') {
             await cancelStudentExcuse(matchedExcuse.id);
         }
-    } else {
-        if (confirm(`هل تريد بالتأكيد إلغاء عذر المخدوم [${m.name}] لتاريخ [${date}]؟`)) {
-            if (typeof attendanceRecord !== 'undefined' && attendanceRecord[date]) {
-                attendanceRecord[date] = attendanceRecord[date].filter(a => {
-                    if (a.id.toString() === m.id.toString() && a.isExcused) return false;
-                    return true;
-                });
-                try {
-                    localStorage.setItem('attendanceRecord', JSON.stringify(attendanceRecord));
-                } catch(e) {}
-            }
-            openProfile(memberId);
-        }
     }
+
+    // إزالة وسم العذر نهائياً من كشف الحضور لتاريخ هذه الجمعة وحفظه بالمفتاح الرسمي
+    if (typeof attendanceRecord !== 'undefined' && attendanceRecord[date]) {
+        attendanceRecord[date] = attendanceRecord[date].filter(a => {
+            if (a.id.toString() === m.id.toString() && a.isExcused) return false;
+            return true;
+        });
+        try {
+            localStorage.setItem('my_church_attendance', JSON.stringify(attendanceRecord));
+            if (typeof syncToCloud === 'function') syncToCloud('attendance', attendanceRecord);
+        } catch(e) {}
+    }
+    openProfile(memberId);
 };
