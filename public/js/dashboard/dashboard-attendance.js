@@ -7,6 +7,331 @@
 // ==========================================
 // وظائف الماسح الضوئي فائق السرعة طِبق الأصل من الصورة المرفقة
 // ==========================================
+// ==========================================
+// 🌐 Unified Arabic Formatting Utilities (UX 2026)
+// ==========================================
+function toArabicIndic(val) {
+    if (val === null || val === undefined) return '';
+    const digits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    return String(val).replace(/[0-9]/g, d => digits[d]);
+}
+if (typeof window !== 'undefined') window.toArabicIndic = toArabicIndic;
+
+function formatArabicLongDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const parts = String(dateStr).split('-');
+        if (parts.length === 3) {
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10) - 1;
+            const d = parseInt(parts[2], 10);
+            const dt = new Date(y, m, d);
+            const dayNames = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+            const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            const dayName = dayNames[dt.getDay()];
+            const monthName = monthNames[m];
+            return `${dayName}، ${toArabicIndic(d)} ${monthName} ${toArabicIndic(y)}`;
+        }
+    } catch(e) {}
+    return toArabicIndic(dateStr);
+}
+if (typeof window !== 'undefined') window.formatArabicLongDate = formatArabicLongDate;
+
+
+function updatePastDateNotice(selectedDate) {
+    const notice = document.getElementById('pastDateNotice');
+    const noticeText = document.getElementById('pastDateNoticeText');
+    const curToday = (typeof today !== 'undefined' && today) ? today : new Date().toLocaleDateString('en-CA');
+    if (!notice) return;
+    if (selectedDate && selectedDate !== curToday) {
+        notice.style.display = 'flex';
+        if (noticeText) noticeText.innerText = 'أنت تعرض/تسجل ليوم سابق (' + formatArabicLongDate(selectedDate) + ')';
+    } else {
+        notice.style.display = 'none';
+    }
+}
+
+
+// ==========================================
+// 🔍 Live Autocomplete & Smart Check-in Engine
+// ==========================================
+function handleManualAttendSearch(query) {
+    const dropdown = document.getElementById('manualAttendAutocomplete');
+    if (!dropdown) return;
+    const q = (query || '').trim().toLowerCase();
+    if (!q || q.length < 1) {
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
+        return;
+    }
+
+    const westernQ = q.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d));
+    const todayAttended = (attendanceRecord[activeSelectedDate] || []);
+
+    const matches = (typeof members !== 'undefined' ? members : []).filter(m => {
+        const name = (m.name || '').toLowerCase();
+        const code = String(m.code || m.id || '').toLowerCase();
+        return name.includes(q) || code.includes(q) || code.includes(westernQ);
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-empty">لا يوجد مخدوم مطابق لهذا الاسم أو الكود</div>';
+        dropdown.style.display = 'block';
+        return;
+    }
+
+    dropdown.innerHTML = matches.map((m, idx) => {
+        const isAttended = todayAttended.some(a => String(a.id) === String(m.id) || (m.code && String(a.code) === String(m.code)));
+        const statusBadge = isAttended ? '<span class="badge-already-attended">مسجّل بالفعل</span>' : '';
+        return `
+            <div class="autocomplete-item ${idx === 0 ? 'selected' : ''}" onclick="selectAutocompleteMember('${m.id}')" data-id="${m.id}">
+                <div class="item-info">
+                    <span class="item-name">${escapeHtml(m.name)}</span>
+                    <span class="item-meta">كود: ${toArabicIndic(m.code || m.id)} • ${escapeHtml(m.stage || 'سنة أولى')}</span>
+                </div>
+                ${statusBadge}
+            </div>
+        `;
+    }).join('');
+    dropdown.style.display = 'block';
+}
+
+function selectAutocompleteMember(memberId) {
+    const member = (typeof members !== 'undefined' ? members : []).find(m => String(m.id) === String(memberId));
+    if (!member) return;
+    registerMemberWithFeedback(member);
+}
+
+function handleManualAttendKeyDown(event) {
+    const dropdown = document.getElementById('manualAttendAutocomplete');
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        const selected = dropdown ? dropdown.querySelector('.autocomplete-item.selected') : null;
+        if (selected && dropdown.style.display !== 'none') {
+            const mId = selected.dataset.id;
+            selectAutocompleteMember(mId);
+        } else {
+            manualMarkMemberFromInput();
+        }
+    } else if (event.key === 'Escape') {
+        if (dropdown) dropdown.style.display = 'none';
+    }
+}
+
+function registerMemberWithFeedback(member) {
+    const input = document.getElementById('manualAttendInput');
+    const dropdown = document.getElementById('manualAttendAutocomplete');
+    if (dropdown) dropdown.style.display = 'none';
+
+    if (!attendanceRecord[activeSelectedDate]) attendanceRecord[activeSelectedDate] = [];
+    const localExisting = attendanceRecord[activeSelectedDate].find(a => String(a.id) === String(member.id) || (member.code && String(a.code) === String(member.code)));
+
+    if (localExisting) {
+        playBeepSound('error');
+        if (typeof showToast === 'function') {
+            showToast(`⚠️ مسجّل بالفعل: ${member.name}`, true);
+        }
+    } else {
+        registerMemberWithFeedback(member); return;
+        const newRecord = (attendanceRecord[activeSelectedDate] || [])[0];
+        const timeStr = newRecord ? toArabicIndic(newRecord.time) : '';
+        if (typeof showToast === 'function') {
+            showToast(`✅ تم تسجيل حضور ${member.name} (${timeStr})`);
+        }
+    }
+
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('manualAttendAutocomplete');
+    if (dropdown && !e.target.closest('.checkin-search-wrapper')) {
+        dropdown.style.display = 'none';
+    }
+});
+
+
+// ==========================================
+// 📊 Stat Chips, Table Filters & Row Menu with 5s Undo Toast
+// ==========================================
+let currentAttendanceChipFilter = 'all';
+let pendingUndoDeleteTimer = null;
+let lastDeletedAttendanceRecord = null;
+
+function filterAttendanceByChip(chipType) {
+    if (currentAttendanceChipFilter === chipType && chipType !== 'all') {
+        currentAttendanceChipFilter = 'all';
+    } else {
+        currentAttendanceChipFilter = chipType;
+    }
+    document.querySelectorAll('.stat-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.chip === currentAttendanceChipFilter);
+    });
+    applyAttendanceTableFilters();
+}
+
+function applyAttendanceTableFilters() {
+    renderAttendanceTable();
+}
+
+function updateAttendanceStatChips(list) {
+    const total = list.length;
+    const ontime = list.filter(a => !a.isAbsentDueToDelay && !a.hasApprovedDelay).length;
+    const late = list.filter(a => a.hasApprovedDelay).length;
+    const severe = list.filter(a => a.isAbsentDueToDelay).length;
+    const communion = list.filter(a => a.communion).length;
+    const participation = list.filter(a => a.participation).length;
+
+    const elAll = document.getElementById('statChipAll');
+    if (elAll) elAll.innerText = toArabicIndic(total);
+    const elOnTime = document.getElementById('statChipOnTime');
+    if (elOnTime) elOnTime.innerText = toArabicIndic(ontime);
+    const elLate = document.getElementById('statChipLate');
+    if (elLate) elLate.innerText = toArabicIndic(late);
+    const elSevere = document.getElementById('statChipSevere');
+    if (elSevere) elSevere.innerText = toArabicIndic(severe);
+    const elComm = document.getElementById('statChipCommunion');
+    if (elComm) elComm.innerText = toArabicIndic(communion);
+    const elPart = document.getElementById('statChipParticipation');
+    if (elPart) elPart.innerText = toArabicIndic(participation);
+
+    const oldCnt = document.getElementById('todayAttendanceCount');
+    if (oldCnt) oldCnt.innerText = toArabicIndic(total);
+}
+
+function promptDeleteEntireAttendance() {
+    const modal = document.getElementById('modalConfirmDeleteDay');
+    const label = document.getElementById('confirmDeleteDayDateLabel');
+    const input = document.getElementById('confirmDeleteInput');
+    const btn = document.getElementById('btnExecuteDeleteDay');
+    if (label) label.innerText = activeSelectedDate;
+    if (input) input.value = '';
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    }
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeConfirmDeleteDayModal() {
+    const modal = document.getElementById('modalConfirmDeleteDay');
+    if (modal) modal.style.display = 'none';
+}
+
+function checkConfirmDeleteButtonState() {
+    const input = document.getElementById('confirmDeleteInput');
+    const btn = document.getElementById('btnExecuteDeleteDay');
+    if (!input || !btn) return;
+    const val = input.value.trim().toLowerCase();
+    const matches = (val === 'حذف' || val === activeSelectedDate);
+    btn.disabled = !matches;
+    btn.style.opacity = matches ? '1' : '0.5';
+    btn.style.cursor = matches ? 'pointer' : 'not-allowed';
+}
+
+function executeConfirmedDeleteDay() {
+    closeConfirmDeleteDayModal();
+    if (typeof clearEntireTodayAttendance === 'function') {
+        clearEntireTodayAttendance();
+    }
+}
+
+function cancelAttendanceWithUndo(memberId) {
+    closeAllHeaderDropdowns();
+    const list = attendanceRecord[activeSelectedDate] || [];
+    const idx = list.findIndex(a => String(a.id) === String(memberId));
+    if (idx === -1) return;
+
+    const [deletedItem] = list.splice(idx, 1);
+    lastDeletedAttendanceRecord = { item: deletedItem, index: idx, date: activeSelectedDate };
+
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+    renderAttendanceTable();
+    renderLiveCardsFeed();
+
+    // Show 5-second undo toast
+    const toast = document.getElementById('attendanceUndoToast');
+    if (toast) {
+        toast.innerHTML = `
+            <span>تم إلغاء حضور (${escapeHtml(deletedItem.name)})</span>
+            <button type="button" class="undo-toast-btn" onclick="undoCancelAttendance()">تراجع ↩️</button>
+        `;
+        toast.style.display = 'flex';
+    }
+
+    if (pendingUndoDeleteTimer) clearTimeout(pendingUndoDeleteTimer);
+    pendingUndoDeleteTimer = setTimeout(() => {
+        finalizeAttendanceDeletion(deletedItem, activeSelectedDate);
+        if (toast) toast.style.display = 'none';
+        lastDeletedAttendanceRecord = null;
+        pendingUndoDeleteTimer = null;
+    }, 5000);
+}
+
+function undoCancelAttendance() {
+    if (pendingUndoDeleteTimer) {
+        clearTimeout(pendingUndoDeleteTimer);
+        pendingUndoDeleteTimer = null;
+    }
+    const toast = document.getElementById('attendanceUndoToast');
+    if (toast) toast.style.display = 'none';
+
+    if (lastDeletedAttendanceRecord) {
+        const { item, index, date } = lastDeletedAttendanceRecord;
+        if (!attendanceRecord[date]) attendanceRecord[date] = [];
+        attendanceRecord[date].splice(index, 0, item);
+        localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+        renderAttendanceTable();
+        renderLiveCardsFeed();
+        lastDeletedAttendanceRecord = null;
+        if (typeof showToast === 'function') {
+            showToast(`↩️ تم التراجع واستعادة حضور (${item.name})`);
+        }
+    }
+}
+
+function finalizeAttendanceDeletion(item, date) {
+    if (typeof cancelMemberAttendance === 'function') {
+        cancelMemberAttendance(item.id, true);
+    }
+}
+
+function editAttendancePoints(memberId) {
+    closeAllHeaderDropdowns();
+    const list = attendanceRecord[activeSelectedDate] || [];
+    const item = list.find(a => String(a.id) === String(memberId));
+    if (!item) return;
+
+    const currentPoints = item.points || 5;
+    const input = prompt(`تعديل نقاط الدارس (${item.name}):`, currentPoints);
+    if (input === null) return;
+    const pts = parseInt(input, 10);
+    if (isNaN(pts)) return alert("يرجى إدخال رقم صحيح للنقاط!");
+
+    item.points = pts;
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+    if (isFirebaseActive && fsdb && navigator.onLine) {
+        syncToCloud('attendance', attendanceRecord);
+    }
+    renderAttendanceTable();
+    if (typeof showToast === 'function') {
+        showToast(`⭐ تم تعديل نقاط (${item.name}) إلى ${toArabicIndic(pts)} نقطة`);
+    }
+}
+
+function toggleRowDropdown(event, memberId) {
+    if (event) event.stopPropagation();
+    const menuId = 'rowDropdown_' + memberId;
+    const menu = document.getElementById(menuId);
+    const isShown = menu && menu.style.display === 'block';
+    closeAllHeaderDropdowns();
+    if (menu && !isShown) menu.style.display = 'block';
+}
+
 function openFastScannerModal() {
     const modal = document.getElementById('fastScannerModal');
     if (modal) {
@@ -533,104 +858,180 @@ function renderAttendanceHeatmap() {
 
 // ==========================================
 
+
+function renderAttendanceTableSkeleton() {
+    const tbody = document.querySelector('#attendanceTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = Array.from({ length: 4 }).map(() => `
+        <tr class="table-skeleton-row">
+            <td><div class="skeleton-bar" style="width: 50px;"></div></td>
+            <td><div class="skeleton-bar" style="width: 130px; margin-bottom: 4px;"></div><div class="skeleton-bar" style="width: 70px; height: 8px;"></div></td>
+            <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+            <td><div class="skeleton-bar" style="width: 50px; border-radius: 999px;"></div></td>
+            <td style="text-align:center;"><div class="skeleton-bar" style="width: 18px; height: 18px; margin: 0 auto;"></div></td>
+            <td style="text-align:center;"><div class="skeleton-bar" style="width: 18px; height: 18px; margin: 0 auto;"></div></td>
+            <td style="text-align:center;"><div class="skeleton-bar" style="width: 24px; margin: 0 auto;"></div></td>
+            <td><div class="skeleton-bar" style="width: 60px;"></div></td>
+            <td style="text-align:center;"><div class="skeleton-bar" style="width: 24px; margin: 0 auto;"></div></td>
+        </tr>
+    `).join('');
+}
+
 function renderAttendanceTable() {
+    const tbody = document.querySelector('#attendanceTable tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
 
-const tbody = document.querySelector('#attendanceTable tbody');
+    const list = attendanceRecord[activeSelectedDate] || [];
+    updateAttendanceStatChips(list);
 
-if (!tbody) return;
+    // Sync recorder filter options
+    const recSelect = document.getElementById('attFilterRecorder');
+    if (recSelect) {
+        const curVal = recSelect.value;
+        const recorders = [...new Set(list.map(a => a.scannedBy).filter(Boolean))];
+        recSelect.innerHTML = '<option value="">كل المسجلين</option>' + recorders.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+        recSelect.value = curVal;
+    }
 
-tbody.innerHTML = '';
+    // Filter criteria
+    const searchVal = (document.getElementById('attSearchInput') ? document.getElementById('attSearchInput').value : '').trim().toLowerCase();
+    const stageVal = document.getElementById('attFilterStage') ? document.getElementById('attFilterStage').value : '';
+    const statusVal = document.getElementById('attFilterStatus') ? document.getElementById('attFilterStatus').value : '';
+    const recorderVal = document.getElementById('attFilterRecorder') ? document.getElementById('attFilterRecorder').value : '';
+    const sortVal = document.getElementById('attSortSelect') ? document.getElementById('attSortSelect').value : 'time_desc';
 
-let count = 0;
+    let filtered = list.filter(a => {
+        // Chip filter
+        if (currentAttendanceChipFilter === 'ontime' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
+        if (currentAttendanceChipFilter === 'late' && !a.hasApprovedDelay) return false;
+        if (currentAttendanceChipFilter === 'severe' && !a.isAbsentDueToDelay) return false;
+        if (currentAttendanceChipFilter === 'communion' && !a.communion) return false;
+        if (currentAttendanceChipFilter === 'participation' && !a.participation) return false;
 
-let list = attendanceRecord[activeSelectedDate] || [];
+        // Toolbar search
+        if (searchVal) {
+            const name = (a.name || '').toLowerCase();
+            const code = String(a.code || a.id || '').toLowerCase();
+            if (!name.includes(searchVal) && !code.includes(searchVal)) return false;
+        }
 
-if (list.length === 0) {
+        // Toolbar Stage
+        if (stageVal && a.stage !== stageVal) return false;
 
-tbody.innerHTML = '<tr><td colspan="10" class="empty-state">لا توجد أي حركات حضور مسجلة لهذا التاريخ.</td></tr>';
+        // Toolbar Status
+        if (statusVal) {
+            if (statusVal === 'حاضر' && (a.isAbsentDueToDelay || a.hasApprovedDelay)) return false;
+            if (statusVal === 'متأخر' && !a.hasApprovedDelay) return false;
+            if (statusVal === 'تأخير شديد' && !a.isAbsentDueToDelay) return false;
+        }
 
-}
+        // Toolbar Recorder
+        if (recorderVal && a.scannedBy !== recorderVal) return false;
 
-list.forEach(a => {
+        return true;
+    });
 
-count++;
+    // Sorting
+    filtered.sort((x, y) => {
+        if (sortVal === 'time_asc') return (x.time || '').localeCompare(y.time || '');
+        if (sortVal === 'name_asc') return (x.name || '').localeCompare(y.name || '', 'ar');
+        if (sortVal === 'code_asc') return String(x.code || x.id || '').localeCompare(String(y.code || y.id || ''));
+        return (y.time || '').localeCompare(x.time || ''); // time_desc default
+    });
 
-let tr = document.createElement('tr');
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="9" style="text-align:center; padding:32px 16px; color:#64748b;">
+                    <div style="font-size:36px; margin-bottom:8px;">📋</div>
+                    <div style="font-size:1rem; font-weight:800; color:#1e293b; margin-bottom:6px;">لا يوجد حضور مسجل لهذا اليوم بعد</div>
+                    <div style="font-size:0.82rem; margin-bottom:12px;">يمكنك البدء بمسح الكارنيهات أو إدخال كود الامتحان بالأعلى.</div>
+                    <button type="button" class="btn-primary btn-mini" onclick="document.getElementById('manualAttendInput').focus()" style="padding:7px 18px; font-size:0.84rem; font-weight:800; border-radius:8px;">
+                        بدء تسجيل الحضور الآن 🔍
+                    </button>
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
-let status = a.hasApprovedDelay
-    ? '<span style="color:#d97706; font-weight:bold;">⏰ حاضر (بإذن تأخير)</span>'
-    : (a.isAbsentDueToDelay ? '<span style="color:red">تأخير شديد</span>' : (a.isBonusEvent ? '<span style="color:var(--purple); font-weight:bold;">⭐ بونص فعالية</span>' : '<span style="color:green">حاضر</span>'));
+    filtered.forEach(a => {
+        const tr = document.createElement('tr');
 
-let editTimeBtn = (currentPermission === 'admin')
+        // Status pill
+        let statusBadge = '<span class="status-pill status-present">حاضر</span>';
+        if (a.hasApprovedDelay) {
+            statusBadge = '<span class="status-pill status-late">متأخر (بعذر)</span>';
+        } else if (a.isAbsentDueToDelay) {
+            statusBadge = '<span class="status-pill status-severe">تأخير شديد</span>';
+        } else if (a.isBonusEvent) {
+            statusBadge = '<span class="status-pill status-bonus">⭐ بونص</span>';
+        }
 
-? `<button class="btn-mini btn-warning" onclick="editAttendanceTime('${a.id}')" style="padding:2px 5px; font-size:10px; margin-right:4px;">✏️</button>`
+        tr.innerHTML = `
+            <td data-label="الكود">
+                <strong style="color:var(--primary); font-size:0.9rem;">${toArabicIndic(a.code || a.id)}</strong>
+            </td>
+            <td data-label="الاسم والمرحلة">
+                <div class="attendance-card-name-block">
+                    <span class="attendance-card-name">${escapeHtml(a.name)}</span>
+                    <span class="attendance-card-meta">${escapeHtml(a.stage || 'سنة أولى')}</span>
+                </div>
+            </td>
+            <td data-label="الوقت" dir="ltr" style="font-weight:700; color:#334155;">
+                ${toArabicIndic(a.time)}
+            </td>
+            <td data-label="الحالة">
+                ${statusBadge}
+            </td>
+            <td data-label="تناول 🕊️" style="text-align:center;">
+                <label class="quick-toggle-label" title="تناول 🕊️">
+                    <input type="checkbox" class="quick-toggle-input" ${a.communion ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${a.id}', 'communion', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
+                </label>
+            </td>
+            <td data-label="مشاركة 💡" style="text-align:center;">
+                <label class="quick-toggle-label" title="مشاركة 💡">
+                    <input type="checkbox" class="quick-toggle-input" style="accent-color:#d97706;" ${a.participation ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${a.id}', 'participation', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
+                </label>
+            </td>
+            <td data-label="النقاط ⭐" style="text-align:center;">
+                <strong style="color:var(--accent); font-size:0.95rem;">${toArabicIndic(a.points || 5)}</strong>
+            </td>
+            <td data-label="المسجِّل" style="font-size:0.8rem; color:#64748b;">
+                ${escapeHtml(a.scannedBy || '-')}
+            </td>
+            <td data-label="إجراء" class="can-attend" style="text-align:center;">
+                <div class="row-action-wrapper">
+                    <button type="button" class="btn-row-menu" onclick="toggleRowDropdown(event, '${a.id}')" title="خيارات إضافية" aria-label="خيارات">
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </button>
+                    <div id="rowDropdown_${a.id}" class="row-dropdown-menu header-dropdown-menu" style="display:none;">
+                        <button type="button" class="row-dropdown-item" onclick="closeAllHeaderDropdowns(); editAttendanceTime('${a.id}')">
+                            <i class="fa-solid fa-clock" style="color:var(--accent);"></i> تعديل الوقت
+                        </button>
+                        <button type="button" class="row-dropdown-item" onclick="closeAllHeaderDropdowns(); editAttendancePoints('${a.id}')">
+                            <i class="fa-solid fa-star" style="color:var(--accent);"></i> تعديل النقاط
+                        </button>
+                        <div class="dropdown-divider"></div>
+                        <button type="button" class="row-dropdown-item item-danger" onclick="cancelAttendanceWithUndo('${a.id}')">
+                            <i class="fa-solid fa-user-xmark"></i> إلغاء الحضور
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-: '';
-
-tr.innerHTML = `
-
-<td data-label="كود الامتحان"><strong style="color:var(--primary); font-size:14px;">${escapeHtml(a.code) || escapeHtml(a.id)}</strong></td>
-
-<td data-label="الاسم">${escapeHtml(a.name)}</td>
-
-<td data-label="المرحلة">${escapeHtml(a.stage) || '-'}</td>
-
-<td data-label="وقت المسح" dir="ltr">${escapeHtml(a.time)} ${editTimeBtn}</td>
-
-<td data-label="حضور">${status}</td>
-
-<td data-label="تناول 🕊️">
-    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:#059669; justify-content:center;">
-        <input type="checkbox" ${a.communion ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'communion', this.checked)" style="width:18px; height:18px; cursor:pointer; accent-color:#059669;">
-        <span>تناول</span>
-    </label>
-</td>
-
-<td data-label="مشاركة 💡">
-    <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:bold; color:#d97706; justify-content:center;">
-        <input type="checkbox" ${a.participation ? 'checked' : ''} onchange="toggleSpiritualStatus('${a.id}', 'participation', this.checked)" style="width:18px; height:18px; cursor:pointer; accent-color:#d97706;">
-        <span>مشاركة</span>
-    </label>
-</td>
-
-<td data-label="النقاط ⭐"><strong style="color:var(--accent);">${a.points || 5}</strong></td>
-
-<td data-label="المسجِّل">${escapeHtml(a.scannedBy) || '-'}</td>
-
-<td data-label="إجراء" class="can-attend"><button class="btn-mini btn-danger" onclick="cancelMemberAttendance('${a.id}')">إلغاء ❌</button></td>
-
-`;
-
-tbody.insertBefore(tr, tbody.firstChild);
-
-});
-
-const elCount = document.getElementById('todayAttendanceCount');
-
-if (elCount) elCount.innerText = count;
-
-let todayDateEl = document.getElementById('todayDate');
-
-if (todayDateEl) {
-
-let isFri = isFridaySession(activeSelectedDate);
-
-let label = isFri ? "(اجتماع الجمعة)" : "(نشاط إضافي / بونص ⭐)";
-
-todayDateEl.innerText = `${activeSelectedDate} ${label} ${activeSelectedDate === today ? '• اليوم' : ''}`;
-
-}
-
-let searchActiveBadge = document.getElementById('searchActiveDateBadge');
-
-if (searchActiveBadge) searchActiveBadge.innerText = activeSelectedDate;
-
-updateRoleUI();
-
+    updatePastDateNotice(activeSelectedDate);
+    const dateLabel = document.getElementById('studentAttendanceSelectedDateLabel');
+    if (dateLabel) dateLabel.innerText = formatArabicLongDate(activeSelectedDate);
+    const datePicker = document.getElementById('studentAttendanceDatePicker');
+    if (datePicker) datePicker.value = activeSelectedDate;
 }
 
 // ==========================================
-
 // 15. التقويم التفاعلي
 
 // ==========================================
@@ -746,6 +1147,9 @@ renderAttendanceCalendar();
 }
 
 function formatStudentArabicDate(dateStr) {
+    return formatArabicLongDate(dateStr);
+}
+function _old_formatStudentArabicDate(dateStr) {
     if (!dateStr) return '';
     try {
         const parts = dateStr.split('-');
@@ -1885,7 +2289,7 @@ function renderLiveCardsFeed() {
     feed.innerHTML = '';
     const totalCount = todayList.length;
 
-    todayList.forEach((item, index) => {
+    todayList.slice(0, 5).forEach((item, index) => {
         let tagHtml = '';
         if (item.hasApprovedDelay) {
             tagHtml = '<span style="font-size:0.7rem; background:#fffbeb; color:#b45309; border:1px solid #fde68a; padding:1px 6px; border-radius:4px; font-weight:800; margin-right:6px;">⏰ بإذن تأخير</span>';
