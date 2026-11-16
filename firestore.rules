@@ -165,6 +165,13 @@ service cloud.firestore {
       allow update, delete: if isFull();
     }
 
+    // ---- 12. رادار الاعتذارات والاستئذانات اللحظية الواردة عبر واتساب وموقع الخدمة ----
+    match /excuses/{excuseId} {
+      allow read: if isStaff();
+      allow create, update: if isStaff();
+      allow delete: if isFull();
+    }
+
     // منع أي مسار خارجي غير مصرح به
     match /{document=**} {
       allow read, write: if false;

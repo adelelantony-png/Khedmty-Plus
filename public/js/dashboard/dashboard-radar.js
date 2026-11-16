@@ -2574,6 +2574,31 @@ function markStudentExcusedInAttendance(excuse) {
         } else {
             localStorage.setItem('my_church_attendance', JSON.stringify(record));
         }
+
+        // المزامنة السحابية اللحظية مع كشف الحضور السحابي
+        if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+            try {
+                const pKey = studentCode || studentPhone || String(excuse.student_id || Date.now());
+                const cloudRecord = {
+                    id: excuse.student_id || pKey,
+                    code: studentCode,
+                    name: excuse.student_name,
+                    phone: studentPhone,
+                    stage: excuse.stage || 'سنة أولى',
+                    attended: false,
+                    isAbsentDueToDelay: false,
+                    isExcused: true,
+                    isAbsent: !isDelay,
+                    hasApprovedDelay: isDelay,
+                    excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (excuse.reason_category || 'عذر غياب مقبول')
+                };
+                fsdb.collection('attendance').doc(friday).set({ [pKey]: cloudRecord }, { merge: true }).catch(err => {
+                    console.warn('[Attendance Cloud Sync Error]', err);
+                });
+            } catch(cloudErr) {
+                console.warn('[Attendance Cloud Sync Exception]', cloudErr);
+            }
+        }
         console.log(`✅ [Attendance Sync] تم تسجيل ${isDelay ? 'استئذان تأخير مسبق' : 'غياب بعذر مقبول'} للمخدوم [${excuse.student_name}] في جلسة [${friday}]`);
     } catch(err) {
         console.warn('[Attendance Sync] تعذر تحديث كشف الحضور تلقائياً:', err);
