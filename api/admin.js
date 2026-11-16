@@ -464,11 +464,84 @@ module.exports = async (req, res) => {
             }
         }
 
+        // 4c. إدارة واسترجاع رادار الأعذار والاستئذانات السحابي الموحد (Cloud Excuses Radar)
+        if (action === 'get_excuses') {
+            try {
+                let eSnap;
+                try {
+                    eSnap = await db.collection('excuses').orderBy('created_at', 'desc').limit(150).get();
+                } catch(e) {
+                    eSnap = await db.collection('excuses').limit(150).get();
+                }
+                const excuses = [];
+                eSnap.forEach(doc => {
+                    excuses.push(Object.assign({ id: doc.id }, doc.data() || {}));
+                });
+                return res.status(200).json({ success: true, excuses });
+            } catch (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+        }
+
+        if (action === 'resolve_excuse') {
+            const { id, status, servant_notes, resolved_by, friday_date, student_code, student_phone, student_name, stage } = payload || {};
+            if (!id || !status) {
+                return res.status(400).json({ success: false, error: 'id and status required' });
+            }
+            try {
+                await db.collection('excuses').doc(String(id)).set({
+                    status,
+                    servant_notes: servant_notes || '',
+                    resolved_by: resolved_by || 'أمين الخدمة',
+                    resolved_at: Date.now()
+                }, { merge: true });
+
+                // إذا تم قبول العذر، تحديث كشف الحضور السحابي للجمعة المعنية
+                if (status === 'accepted' && friday_date) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    if (friday_date <= todayStr) {
+                        const attDocRef = db.collection('attendance').doc(friday_date);
+                        const attDoc = await attDocRef.get();
+                        const attData = attDoc.exists ? (attDoc.data() || {}) : {};
+                        const codeKey = String(student_code || id);
+                        attData[codeKey] = {
+                            attended: false,
+                            isAbsentDueToDelay: false,
+                            isExcused: true,
+                            isAbsent: true,
+                            code: student_code || '',
+                            name: student_name || '',
+                            phone: student_phone || '',
+                            stage: stage || '',
+                            excuseReason: servant_notes || 'عذر غياب مقبول'
+                        };
+                        await attDocRef.set(attData, { merge: true });
+                    }
+                }
+
+                return res.status(200).json({ success: true, message: 'تم تحديث حالة العذر سحابياً بنجاح' });
+            } catch (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+        }
+
+        if (action === 'delete_excuse') {
+            const { id } = payload || {};
+            if (!id) return res.status(400).json({ success: false, error: 'id required' });
+            try {
+                await db.collection('excuses').doc(String(id)).delete();
+                return res.status(200).json({ success: true, message: 'تم حذف العذر سحابياً بنجاح' });
+            } catch (err) {
+                return res.status(500).json({ success: false, error: err.message });
+            }
+        }
+
         // 5. جلب بيانات المخدومين والحضور والخدام والخطة والآراء والإعدادات لمزامنة الإكسيل الشاملة
         if (action === 'get_sync_data') {
             const members = {};
             const attendance = {};
             const servants = {};
+            const excuses = [];
             let plan = [];
             let settings = {};
             const feedback = [];
@@ -484,6 +557,17 @@ module.exports = async (req, res) => {
                 });
             } catch (err) {
                 console.error("attendance fetch error:", err.message);
+            }
+
+            // 1b. Excuses (رادار الأعذار السحابي)
+            try {
+                const eSnap = await db.collection('excuses').limit(150).get();
+                eSnap.forEach(doc => {
+                    const data = doc.data() || {};
+                    excuses.push(Object.assign({ id: doc.id }, data));
+                });
+            } catch (err) {
+                console.error("excuses fetch error:", err.message);
             }
 
             // 2. Members
@@ -503,6 +587,7 @@ module.exports = async (req, res) => {
                     success: true,
                     members,
                     attendance,
+                    excuses,
                     servants,
                     plan,
                     feedback,
@@ -806,6 +891,8 @@ module.exports = async (req, res) => {
                 members: members,
 
                 attendance: attendance,
+
+                excuses: excuses,
 
                 servants: servants,
 

@@ -2302,6 +2302,17 @@ async function resolveExcuseAction(id, action, btn) {
             }
         }
 
+        // إدراج العملية في طابور الحفظ المحلي والمزامنة السحابية (Offline-First Queue)
+        if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+            KhedmtyOfflineSync.enqueue('EXCUSE_RESOLVE', {
+                id: String(id),
+                newStatus,
+                servantNote,
+                resolverName,
+                targetExcuse: targetExcuse || null
+            }, { dedupKey: `excuse_${id}` });
+        }
+
         // 2. المزامنة السحابية المباشرة مع Firestore
         if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
             try {
@@ -2574,6 +2585,31 @@ function markStudentExcusedInAttendance(excuse) {
         } else {
             localStorage.setItem('my_church_attendance', JSON.stringify(record));
         }
+
+        // المزامنة السحابية اللحظية مع كشف الحضور السحابي
+        if (typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
+            try {
+                const pKey = studentCode || studentPhone || String(excuse.student_id || Date.now());
+                const cloudRecord = {
+                    id: excuse.student_id || pKey,
+                    code: studentCode,
+                    name: excuse.student_name,
+                    phone: studentPhone,
+                    stage: excuse.stage || 'سنة أولى',
+                    attended: false,
+                    isAbsentDueToDelay: false,
+                    isExcused: true,
+                    isAbsent: !isDelay,
+                    hasApprovedDelay: isDelay,
+                    excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (excuse.reason_category || 'عذر غياب مقبول')
+                };
+                fsdb.collection('attendance').doc(friday).set({ [pKey]: cloudRecord }, { merge: true }).catch(err => {
+                    console.warn('[Attendance Cloud Sync Error]', err);
+                });
+            } catch(cloudErr) {
+                console.warn('[Attendance Cloud Sync Exception]', cloudErr);
+            }
+        }
         console.log(`✅ [Attendance Sync] تم تسجيل ${isDelay ? 'استئذان تأخير مسبق' : 'غياب بعذر مقبول'} للمخدوم [${excuse.student_name}] في جلسة [${friday}]`);
     } catch(err) {
         console.warn('[Attendance Sync] تعذر تحديث كشف الحضور تلقائياً:', err);
@@ -2653,6 +2689,13 @@ async function promptChangeExcuseFridayDate(excuseId) {
         } catch(e) {}
     }
 
+    if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+        KhedmtyOfflineSync.enqueue('EXCUSE_DATE_CHANGE', {
+            id: String(excuseId),
+            newFriday: trimmedFriday
+        });
+    }
+
     renderRadarExcusesTable();
     previewFullExcuseModal(excuseId);
     if (typeof showToast === 'function') {
@@ -2692,6 +2735,14 @@ async function cancelStudentExcuse(excuseId) {
             } catch(cloudErr) {
                 console.warn('[Cancel Excuse Firestore Error]', cloudErr.message);
             }
+        }
+
+        if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+            KhedmtyOfflineSync.enqueue('EXCUSE_DELETE', {
+                id: String(excuseId),
+                friday_date: deletedExcuse ? deletedExcuse.friday_date : '',
+                student_code: deletedExcuse ? deletedExcuse.student_code : ''
+            });
         }
 
                 // إضافة العذر لقائمة المحذوفات الدائمة في المتصفح لمنع ظهوره مجدداً عند عمل Refresh
@@ -2967,6 +3018,14 @@ async function submitManualExcuseFromModal(memberId, studentCode, studentName, s
         // تحديث القائمة العامة
         if (!window.lastRadarExcusesList) window.lastRadarExcusesList = [];
         window.lastRadarExcusesList.unshift(newExcuseObj);
+
+        // إدراج العذر اليدوي في طابور المزامنة السحابية الفوري
+        if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+            KhedmtyOfflineSync.enqueue('EXCUSE_CREATE', {
+                id: String(newExcuseObj.id),
+                excuseData: newExcuseObj
+            }, { dedupKey: `excuse_create_${newExcuseObj.id}` });
+        }
 
         // حفظ في كشف الحضور
         markStudentExcusedInAttendance(newExcuseObj);

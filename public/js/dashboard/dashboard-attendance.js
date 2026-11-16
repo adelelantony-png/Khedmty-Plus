@@ -1693,6 +1693,14 @@ async function applyAttendanceTimeChange(memberId, h, m, formattedDisplayTime) {
         }).catch(() => {});
     }
 
+    if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+        KhedmtyOfflineSync.enqueue('ATTENDANCE_TIME_EDIT', {
+            date: activeSelectedDate,
+            pKey,
+            updatedRecord: rec
+        }, { dedupKey: `time_edit_${activeSelectedDate}_${pKey}` });
+    }
+
     logActivity("تعديل وقت حضور", rec.name, `تاريخ: ${activeSelectedDate} من ${oldTime} إلى ${formattedDisplayTime}`);
 
     renderAttendanceTable();

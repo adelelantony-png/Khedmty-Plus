@@ -274,6 +274,111 @@
             return true;
         }
 
+        // 9. مزامنة حسم واعتماد عذر أو استئذان مسجل أوفلاين (EXCUSE_RESOLVE)
+        if (action === 'EXCUSE_RESOLVE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { id, newStatus, servantNote, resolverName, targetExcuse } = payload;
+            if (!id) return true;
+
+            await fsdb.collection('excuses').doc(String(id)).set({
+                status: newStatus,
+                servant_notes: servantNote || '',
+                resolved_by: resolverName || 'الخادم',
+                resolved_at: Date.now()
+            }, { merge: true });
+
+            if (newStatus === 'accepted' && targetExcuse && targetExcuse.friday_date) {
+                const friday = targetExcuse.friday_date;
+                const isDelay = (targetExcuse.timingNote && targetExcuse.timingNote.includes('تأخير')) || (targetExcuse.servant_notes && targetExcuse.servant_notes.includes('تأخير'));
+                const studentCode = String(targetExcuse.student_code || '');
+                const studentPhone = String(targetExcuse.student_phone || '');
+                const pKey = studentCode || studentPhone || String(targetExcuse.student_id || id);
+                const cloudRecord = {
+                    id: targetExcuse.student_id || pKey,
+                    code: studentCode,
+                    name: targetExcuse.student_name,
+                    phone: studentPhone,
+                    stage: targetExcuse.stage || 'سنة أولى',
+                    attended: false,
+                    isAbsentDueToDelay: false,
+                    isExcused: true,
+                    isAbsent: !isDelay,
+                    hasApprovedDelay: isDelay,
+                    excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (targetExcuse.reason_category || 'عذر غياب مقبول')
+                };
+                await fsdb.collection('attendance').doc(String(friday)).set({ [pKey]: cloudRecord }, { merge: true });
+            }
+            return true;
+        }
+
+        // 10. مزامنة تسجيل عذر أو استئذان يدوي جديد أوفلاين (EXCUSE_CREATE)
+        if (action === 'EXCUSE_CREATE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { id, excuseData } = payload;
+            if (!id || !excuseData) return true;
+            await fsdb.collection('excuses').doc(String(id)).set(excuseData, { merge: true });
+
+            if (excuseData.status === 'accepted' && excuseData.friday_date) {
+                const friday = excuseData.friday_date;
+                const isDelay = (excuseData.timingNote && excuseData.timingNote.includes('تأخير')) || (excuseData.servant_notes && excuseData.servant_notes.includes('تأخير'));
+                const studentCode = String(excuseData.student_code || '');
+                const studentPhone = String(excuseData.student_phone || '');
+                const pKey = studentCode || studentPhone || String(excuseData.student_id || id);
+                const cloudRecord = {
+                    id: excuseData.student_id || pKey,
+                    code: studentCode,
+                    name: excuseData.student_name,
+                    phone: studentPhone,
+                    stage: excuseData.stage || 'سنة أولى',
+                    attended: false,
+                    isAbsentDueToDelay: false,
+                    isExcused: true,
+                    isAbsent: !isDelay,
+                    hasApprovedDelay: isDelay,
+                    excuseReason: isDelay ? 'استئذان تأخير مسبق ⏰' : (excuseData.reason_category || 'عذر غياب مقبول')
+                };
+                await fsdb.collection('attendance').doc(String(friday)).set({ [pKey]: cloudRecord }, { merge: true });
+            }
+            return true;
+        }
+
+        // 11. مزامنة حذف أو إلغاء عذر أوفلاين (EXCUSE_DELETE)
+        if (action === 'EXCUSE_DELETE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { id } = payload;
+            if (!id) return true;
+            await fsdb.collection('excuses').doc(String(id)).delete();
+            return true;
+        }
+
+        // 12. مزامنة تعديل تاريخ جمعة العذر أوفلاين (EXCUSE_DATE_CHANGE)
+        if (action === 'EXCUSE_DATE_CHANGE') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { id, newFriday } = payload;
+            if (!id || !newFriday) return true;
+            await fsdb.collection('excuses').doc(String(id)).set({ friday_date: newFriday }, { merge: true });
+            return true;
+        }
+
+        // 13. مزامنة تعديل وقت مسح الحضور أوفلاين (ATTENDANCE_TIME_EDIT)
+        if (action === 'ATTENDANCE_TIME_EDIT') {
+            const fsdb = (window.initKhedmtyFirestore ? window.initKhedmtyFirestore() : (window.firebase && firebase.firestore && firebase.firestore()));
+            if (!fsdb) return false;
+
+            const { date, pKey, updatedRecord } = payload;
+            if (!date || !pKey || !updatedRecord) return true;
+            await fsdb.collection('attendance').doc(String(date)).set({ [String(pKey)]: updatedRecord }, { merge: true });
+            return true;
+        }
+
         return true;
     }
 

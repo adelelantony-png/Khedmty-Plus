@@ -39,7 +39,8 @@ const tests = [
   'tests/test_servant_followup_robustness.js',
   'tests/test_servant_attendance_ux.js',
   'tests/test_dashboard_delay_and_excuse_kpis.js',
-  'tests/test_student_profile_absent_dates.js'
+  'tests/test_student_profile_absent_dates.js',
+  'tests/test_full_offline_movement_sync.js'
 ];
 
 console.log('================================================================');
