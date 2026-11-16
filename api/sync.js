@@ -13,7 +13,10 @@ module.exports = async (req, res) => {
     try {
         const db = getDb();
         const admin = getAdmin();
-        const body = req.body || {};
+        let body = req.body || {};
+        if (typeof body === 'string') {
+            try { body = JSON.parse(body); } catch(e) { body = {}; }
+        }
 
         // دعم استقبال دفعة عمليات (items array) أو عملية فردية واحدة
         const items = Array.isArray(body.items) ? body.items : (body.action ? [body] : []);
