@@ -97,14 +97,64 @@
      * معالجة طابور العمليات ومزامنتها مع الخادم وسحابة Firestore
      */
     async function processQueue() {
-        if (!navigator.onLine || isProcessing) return;
+        if (!navigator.onLine) {
+            updateStatusBadge();
+            return;
+        }
+        if (isProcessing) {
+            // إذا كان المعالج معلقاً لأكثر من 8 ثوانٍ، يتم فك التعليق تلقائياً
+            if (Date.now() - (window._lastSyncProcessStartTime || 0) > 8000) {
+                isProcessing = false;
+            } else {
+                return;
+            }
+        }
         const queue = getQueue();
-        if (queue.length === 0) return;
+        if (queue.length === 0) {
+            updateStatusBadge();
+            return;
+        }
 
         isProcessing = true;
+        window._lastSyncProcessStartTime = Date.now();
         updateStatusBadge();
         console.log(`[OfflineSync] بدء معالجة ${queue.length} عملية معلقة...`);
 
+        // 1. محاولة إرسال دفعة العمليات بالكامل دفعة واحدة عبر واجهة السيرفر السحابية الموثوقة /api/sync
+        try {
+            const fetchFn = (window.AuthClient && AuthClient.fetch) ? AuthClient.fetch.bind(AuthClient) : fetch;
+            const token = (window.AuthClient && typeof AuthClient.getToken === 'function') ? AuthClient.getToken() : '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+            const batchRes = await fetchFn('/api/sync', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ items: queue }),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (batchRes && batchRes.ok) {
+                const batchData = await batchRes.json().catch(() => ({ success: true }));
+                if (batchData.success) {
+                    console.log(`[OfflineSync] تمت مزامنة جميع العمليات (${queue.length}) دفعة واحدة عبر السيرفر بنجاح!`);
+                    saveQueue([]);
+                    isProcessing = false;
+                    updateStatusBadge();
+                    showToast(`✅ تمت مزامنة العمليات المعلقة بنجاح مع السحابة!`);
+                    notifyListeners('SYNC_COMPLETED', { successCount: queue.length, remainingCount: 0 });
+                    return;
+                }
+            }
+        } catch (batchErr) {
+            console.warn('[OfflineSync] تعذر الإرسال الجماعي عبر /api/sync، سيتم المعالجة الفردية:', batchErr.message);
+        }
+
+        // 2. إذا تعذر الإرسال الجماعي، يتم الانتقال إلى المعالجة الفردية لكل عنصر
         const remainingQueue = [];
         let successCount = 0;
 
@@ -121,10 +171,15 @@
                 successCount++;
             } else {
                 item.retries = (item.retries || 0) + 1;
-                if (item.retries < 10) {
+                if (item.retries < 4) {
                     remainingQueue.push(item);
                 } else {
-                    console.error(`[OfflineSync] تم استنفاد محاولات المزامنة للعنصر:`, item);
+                    console.warn(`[OfflineSync] تم أرشفة العملية بعد ${item.retries} محاولات لمنع تعليق الواجهة:`, item);
+                    try {
+                        const failedArchive = JSON.parse(localStorage.getItem('khedmty_failed_sync_archive') || '[]');
+                        failedArchive.push(item);
+                        localStorage.setItem('khedmty_failed_sync_archive', JSON.stringify(failedArchive.slice(-50)));
+                    } catch(e){}
                 }
             }
         }
@@ -143,6 +198,32 @@
      * مزامنة عنصر واحد بناءً على نوع العملية
      */
     async function syncSingleItem(item) {
+        // محاولة الإرسال الفردي عبر /api/sync أولاً
+        try {
+            const fetchFn = (window.AuthClient && AuthClient.fetch) ? AuthClient.fetch.bind(AuthClient) : fetch;
+            const token = (window.AuthClient && typeof AuthClient.getToken === 'function') ? AuthClient.getToken() : '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+            const res = await fetchFn('/api/sync', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(item),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (res && res.ok) {
+                const data = await res.json().catch(() => ({ success: true }));
+                if (data.success) return true;
+            }
+        } catch (apiErr) {
+            console.warn('[OfflineSync] تعذر المزامنة الفردية عبر /api/sync:', apiErr.message);
+        }
+
         const { action, payload } = item;
 
         // 1. مزامنة قراءة الكتاب المقدس (mark_plan_read)
@@ -448,6 +529,7 @@
                 <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
                 <span>متصل بالإنترنت (${pendingCount} في انتظار المزامنة)</span>
                 <button type="button" onclick="window.KhedmtyOfflineSync && KhedmtyOfflineSync.syncNow()" style="background:#c59b27; color:#0f2744; border:none; padding:3px 10px; border-radius:8px; font-weight:800; cursor:pointer; font-size:11px; margin-right:4px;">زامن الآن</button>
+                <button type="button" onclick="window.KhedmtyOfflineSync && KhedmtyOfflineSync.clearQueue()" style="background:transparent; color:#94a3b8; border:none; cursor:pointer; font-size:14px; padding:0 6px; line-height:1; opacity:0.8;" title="إغلاق وإخفاء التنبيه">✕</button>
             `;
         } else {
             badge.style.display = 'none';
@@ -538,7 +620,15 @@
     return {
         enqueue: enqueue,
         processQueue: processQueue,
-        syncNow: processQueue,
+        syncNow: async function() {
+            isProcessing = false; // فك أي تعليق سابق فوراً
+            await processQueue();
+        },
+        clearQueue: function() {
+            saveQueue([]);
+            updateStatusBadge();
+            showToast('تم إغلاق وإفراغ طابور المزامنة');
+        },
         getQueue: getQueue,
         isOnline: () => (typeof navigator !== 'undefined' ? navigator.onLine : true),
         onSync: addListener

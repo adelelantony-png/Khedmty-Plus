@@ -53,8 +53,17 @@ assert.ok(rules.includes("match /excuses/{excuseId}"), "firestore.rules must all
 assert.ok(rules.includes("allow read: if isStaff()"), "Staff must have read permission on excuses");
 console.log("✅ firestore.rules properly configured for excuses collection.");
 
-// 6. Verify Service Worker cache incremented to v9.6
-assert.ok(sw.includes("v9.6"), "Service Worker cache name must be updated to v9.6");
-console.log("✅ Service Worker cache updated to v9.6.");
+// 6. Verify Service Worker cache incremented to v9.7
+assert.ok(sw.includes("v9.7"), "Service Worker cache name must be updated to v9.7");
+console.log("✅ Service Worker cache updated to v9.7.");
+
+// 7. Verify api/sync.js endpoint exists and handles batch and single sync
+const apiSyncPath = path.join(rootDir, 'api', 'sync.js');
+assert.ok(fs.existsSync(apiSyncPath), "api/sync.js must exist");
+const apiSyncCode = fs.readFileSync(apiSyncPath, 'utf8');
+assert.ok(apiSyncCode.includes("EXCUSE_RESOLVE"), "api/sync.js must handle EXCUSE_RESOLVE");
+assert.ok(apiSyncCode.includes("ATTENDANCE"), "api/sync.js must handle ATTENDANCE");
+assert.ok(syncJs.includes("clearQueue"), "khedmty-offline-sync.js must provide clearQueue");
+console.log("✅ api/sync.js and dismissible offline queue verified.");
 
 console.log("🎉 ALL FULL OFFLINE MOVEMENT SYNC TESTS PASSED (100%)!");

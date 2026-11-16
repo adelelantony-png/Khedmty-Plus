@@ -10,7 +10,7 @@
  * 5. طابور مزامنة خلفي ذكي يدعم الانتقال السلس بين الأونلاين والأوفلاين.
  */
 
-const CACHE_NAME = 'khedmety-ultra-v9.6'; // Enhanced full offline engine with movement queue and true cloud sync
+const CACHE_NAME = 'khedmety-ultra-v9.7'; // Server sync endpoint fallback and instant dismissible offline queue
 
 // قائمة الأصول الأساسية للتثبيت المسبق (App Shell & Static Assets)
 const PRECACHE_ASSETS = [
