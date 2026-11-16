@@ -1137,12 +1137,12 @@ function renderAttendanceTable() {
             </td>
             <td data-label="تناول 🕊️" style="text-align:center;">
                 <label class="quick-toggle-label" title="تناول 🕊️">
-                    <input type="checkbox" class="quick-toggle-input" ${a.communion ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${a.id}', 'communion', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
+                    <input type="checkbox" class="quick-toggle-input" ${a.communion ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${escapeHtml(String(a.id || a.code || ''))}', 'communion', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
                 </label>
             </td>
             <td data-label="مشاركة 💡" style="text-align:center;">
                 <label class="quick-toggle-label" title="مشاركة 💡">
-                    <input type="checkbox" class="quick-toggle-input" style="accent-color:#d97706;" ${a.participation ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${a.id}', 'participation', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
+                    <input type="checkbox" class="quick-toggle-input" style="accent-color:#d97706;" ${a.participation ? 'checked' : ''} onchange="this.classList.add('saved-anim'); toggleSpiritualStatus('${escapeHtml(String(a.id || a.code || ''))}', 'participation', this.checked); setTimeout(() => this.classList.remove('saved-anim'), 400);">
                 </label>
             </td>
             <td data-label="النقاط ⭐" style="text-align:center;">
@@ -2862,13 +2862,13 @@ tr.innerHTML = `
 <td data-label="التناول بالقداس" class="modal-col-check">
     <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isCom ? '#e0f2fe' : '#f8fafc'}; border:1.5px solid ${isCom ? '#0284c7' : '#cbd5e1'}; font-weight:bold; color:${isCom ? '#0369a1' : '#64748b'}; opacity:${!isAtt ? '0.45' : '1'}; transition:0.2s;">
         <span style="font-size:12px;">🕊️ تناول بالقداس (+10)</span>
-        <input type="checkbox" ${isCom ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'communion', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#0284c7;">
+        <input type="checkbox" ${isCom ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${escapeHtml(String(m.id || m.code || ''))}', 'communion', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#0284c7;">
     </label>
 </td>
 <td data-label="مشاركة بالدرس" class="modal-col-check">
     <label style="display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; cursor:pointer; padding:7px 10px; border-radius:8px; background:${isPart ? '#fef3c7' : '#f8fafc'}; border:1.5px solid ${isPart ? '#f59e0b' : '#cbd5e1'}; font-weight:bold; color:${isPart ? '#b45309' : '#64748b'}; opacity:${!isAtt ? '0.45' : '1'}; transition:0.2s;">
         <span style="font-size:12px;">💡 تفاعل ومشاركة (+5)</span>
-        <input type="checkbox" ${isPart ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${m.id}', 'participation', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#f59e0b;">
+        <input type="checkbox" ${isPart ? 'checked' : ''} ${!isAtt ? 'disabled' : ''} onchange="toggleSpiritualStatus('${escapeHtml(String(m.id || m.code || ''))}', 'participation', this.checked)" style="width:20px; height:20px; cursor:pointer; accent-color:#f59e0b;">
     </label>
 </td>
 `;

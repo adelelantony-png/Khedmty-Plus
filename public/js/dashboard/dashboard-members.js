@@ -857,53 +857,67 @@ alert(`✅ تم حذف سجل حضور يوم (${activeSelectedDate}) بالكا
 // ==========================================
 
 function toggleSpiritualStatus(memberId, field, isChecked) {
+    const sId = String(memberId || '').trim();
+    if (!sId) return;
 
-let rec = (attendanceRecord[activeSelectedDate] || []).find(a => a.id.toString() === memberId.toString());
+    let rec = (attendanceRecord[activeSelectedDate] || []).find(a => {
+        if (!a) return false;
+        const aId = String(a.id ?? '').trim();
+        const aCode = String(a.code ?? '').trim();
+        return (aId && aId === sId) || (aCode && aCode === sId);
+    });
 
-if (!rec) return;
+    if (!rec) return;
 
-let pts = field === 'communion' ? 10 : 5;
+    let pts = field === 'communion' ? 10 : 5;
 
-if (isChecked) {
+    if (isChecked) {
+        rec[field] = true;
+        rec.points = (rec.points || 5) + pts;
+        showToast(`🕊️ تم رصد ${field === 'communion' ? 'التناول' : 'المشاركة'} (+${pts} بونص ⭐)`);
+    } else {
+        rec[field] = false;
+        rec.points = Math.max(5, (rec.points || 5) - pts);
+        showToast(`🕊️ تم إلغاء ${field === 'communion' ? 'التناول' : 'المشاركة'} (-${pts} بونص)`);
+    }
 
-rec[field] = true;
+    localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
+    if (typeof syncToCloud === 'function') syncToCloud('attendance', attendanceRecord);
 
-rec.points = (rec.points || 5) + pts;
+    let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '') || String(rec.id || rec.code || sId);
 
-showToast(`🕊️ تم رصد ${field === 'communion' ? 'التناول' : 'المشاركة'} (+${pts} بونص ⭐)`);
+    if (isFirebaseActive && fsdb && pKey) {
+        fsdb.collection('attendance').doc(activeSelectedDate).update({
+            [`${pKey}.${field}`]: isChecked,
+            [`${pKey}.points`]: rec.points
+        }).catch(() => {});
+    }
 
-} else {
+    // مزامنة سحابية فورية وموثوقة عبر /api/sync وطابور الحفظ لضمان عدم عودة العلامة إطلاقاً
+    if (window.KhedmtyOfflineSync && typeof KhedmtyOfflineSync.enqueue === 'function') {
+        KhedmtyOfflineSync.enqueue('ATTENDANCE', {
+            date: activeSelectedDate,
+            record: rec
+        }, { dedupKey: `att_${rec.id || rec.code}_${activeSelectedDate}` });
+    }
 
-rec[field] = false;
+    fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'ATTENDANCE',
+            payload: { date: activeSelectedDate, record: rec }
+        })
+    }).catch(() => {});
 
-rec.points = Math.max(5, (rec.points || 5) - pts);
+    logActivity(`تحديث سر ${field === 'communion' ? 'التناول' : 'المشاركة'}`, rec.name, `${activeSelectedDate} - ${isChecked ? "تم الرصد" : "إلغاء"}`);
 
-}
-
-localStorage.setItem(STORAGE_KEYS.ATTENDANCE, JSON.stringify(attendanceRecord));
-
-let pKey = (rec.code || rec.id || '').toString().replace(/\D/g, '');
-
-if (isFirebaseActive && fsdb) {
-
-fsdb.collection('attendance').doc(activeSelectedDate).update({
-
-[`${pKey}.${field}`]: isChecked,
-
-[`${pKey}.points`]: rec.points
-
-}).catch(() => {});
-
-}
-
-logActivity(`تحديث سر ${field === ' communion' ? 'التناول' : 'المشاركة'}`.replace(' communion', ' communion').replace(' communion', 'التناول'), rec.name, `${activeSelectedDate} - ${isChecked ? "تم الرصد" : "إلغاء"}`);
-
-renderAttendanceTable();
-
-renderDashboard();
-
-renderMembersList();
-
+    renderAttendanceTable();
+    renderDashboard();
+    renderMembersList();
+    if (typeof renderManualAttendanceModalList === 'function') {
+        renderManualAttendanceModalList();
+    }
 }
 
 // ==========================================
