@@ -5,7 +5,27 @@
 const { getAdmin, getDb } = require('./_lib/firebase');
 
 module.exports = async (req, res) => {
-    // قبول طلبات POST فقط
+    // 0. دعم استرجاع الأعذار السحابية بصلاحيات الأدمن الكاملة (GET أو get_excuses)
+    if (req.method === 'GET' || req.query?.action === 'get_excuses') {
+        try {
+            const db = getDb();
+            let eSnap;
+            try {
+                eSnap = await db.collection('excuses').orderBy('created_at', 'desc').limit(150).get();
+            } catch(e) {
+                eSnap = await db.collection('excuses').limit(150).get();
+            }
+            const excuses = [];
+            eSnap.forEach(doc => {
+                excuses.push(Object.assign({ id: doc.id }, doc.data() || {}));
+            });
+            return res.status(200).json({ success: true, excuses });
+        } catch (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+    }
+
+    // قبول طلبات POST فقط لباقي العمليات
     if (req.method !== 'POST') {
         return res.status(405).json({ success: false, message: 'طريقة الطلب غير مسموحة' });
     }
@@ -16,6 +36,21 @@ module.exports = async (req, res) => {
         let body = req.body || {};
         if (typeof body === 'string') {
             try { body = JSON.parse(body); } catch(e) { body = {}; }
+        }
+
+        // دعم طلب جلب الأعذار عبر POST
+        if (body.action === 'GET_EXCUSES') {
+            let eSnap;
+            try {
+                eSnap = await db.collection('excuses').orderBy('created_at', 'desc').limit(150).get();
+            } catch(e) {
+                eSnap = await db.collection('excuses').limit(150).get();
+            }
+            const excuses = [];
+            eSnap.forEach(doc => {
+                excuses.push(Object.assign({ id: doc.id }, doc.data() || {}));
+            });
+            return res.status(200).json({ success: true, excuses });
         }
 
         // دعم استقبال دفعة عمليات (items array) أو عملية فردية واحدة

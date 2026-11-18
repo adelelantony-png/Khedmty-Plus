@@ -1722,9 +1722,9 @@ const KHEDMETY_SEED_EXCUSES = [
         "message_text": "مساء الخير يا أستاذ عادل \nبعتذر عن عدم حضوري النهارده كان عندي امتحان امبارح و عندي امتحان الصبح معرفتش انزل من الاسماعيليه و فضلت في السكن هنا ❤️",
         "reason_category": "امتحانات ومذاكرة 📚",
         "friday_date": "2026-11-06",
-        "status": "pending",
-        "servant_notes": "اعتذار لاحق (متأخر بعد الاجتماع)",
-        "resolved_by": "late_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أمين الخدمة",
         "created_at": 1794001329396
     },
     {
@@ -1734,12 +1734,12 @@ const KHEDMETY_SEED_EXCUSES = [
         "student_name": "بيشوي جرجس خيري",
         "student_phone": "201550208665",
         "stage": "سنة أولى",
-        "message_text": "صباح الخير، أنا بعتذر جدًا عن عدم حضوري أول يوم في الخدمة، للأسف كنت تعبان وعندي نزله معويه ، وده خلاني مش قادر أحضر. كان نفسي أكون موجود معاكم من أول يوم بس بامانه مقدرتش اجي من التعب . بعتذر مرة تانية،باذن ربنا هكون معاكم في المرات الجاية.",
+        "message_text": "صباح الخير، أنا بعتذر جدًا عن عدم حضوري أول يوم في الخدمة، للأسف كنت تعبان وعندي نزله معويه ، وده خلاني مش قادر أحضر. كان نفسي أكون موجود معاكم من أول يوم بس بامانه مقدرتش اجي من التعب . بعتذر مرة تانية،باذن ربنا   هكون معاكم في المرات الجاية.",
         "reason_category": "ظروف صحية 🩺",
         "friday_date": "2026-11-06",
-        "status": "pending",
-        "servant_notes": "اعتذار لاحق (متأخر بعد الاجتماع)",
-        "resolved_by": "late_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أمين الخدمة",
         "created_at": 1794024577947
     },
     {
@@ -1752,9 +1752,9 @@ const KHEDMETY_SEED_EXCUSES = [
         "message_text": "اعتذار",
         "reason_category": "اعتذار عام 🕊️",
         "friday_date": "2026-11-06",
-        "status": "pending",
-        "servant_notes": "اعتذار مسبق (قبل الاجتماع)",
-        "resolved_by": "prior_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أمين الخدمة",
         "created_at": 1793897506884
     },
     {
@@ -1767,9 +1767,9 @@ const KHEDMETY_SEED_EXCUSES = [
         "message_text": "ايه الاخبار ي استاذ عادل امتحان الميدترم عندي بكرا مسائي ف الدكتور عملت مراجعه انهاردا وهتعمل تاني بكرا هتبداء الساعه 12 ف هحاول اخلص واجي احضر اي حاجه",
         "reason_category": "امتحانات ومذاكرة 📚",
         "friday_date": "2026-11-06",
-        "status": "pending",
-        "servant_notes": "اعتذار مسبق (قبل الاجتماع)",
-        "resolved_by": "prior_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أمين الخدمة",
         "created_at": 1793921847075
     },
     {
@@ -1782,55 +1782,115 @@ const KHEDMETY_SEED_EXCUSES = [
         "message_text": "كنت عايز اعتذر اني معرفتش اجي امبارح عشان كنت مشغول وبعمل حجات مع بابا مع شغلوا لحد الفجر ف صحيت متاخر",
         "reason_category": "اعتذار عام 🕊️",
         "friday_date": "2026-11-06",
-        "status": "pending",
-        "servant_notes": "اعتذار لاحق (متأخر ورد السبت بعد الاجتماع)",
-        "resolved_by": "late_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أمين الخدمة",
         "created_at": 1794052415669
     },
     {
-        "id": 9,
-        "student_id": 93,
-        "student_code": "802",
-        "student_name": "سانتي عوني عطالله",
-        "student_phone": "201289505575",
-        "stage": "سنة أولى",
-        "message_text": "الشهر دي البلاك فرايدي و عندي كل جمعه حاجه في الشغل الجمعه الجايه هيكون عندي حاجه الصبح و مش عارفه هخلص الساعه كام فب ممكن بس اتاخر شويه ... ف ممكن اجي الخدمه الساعه ١.٣٠",
-        "reason_category": "طلب تأخير مسبق بعذر (استئذان تأخير) ⏰",
-        "friday_date": "2026-11-13",
-        "status": "pending",
-        "servant_notes": "استئذان تأخير مسبق - شفت عمل (بلاك فرايدي) - الحضور المتوقع 1:30 م",
-        "resolved_by": "prior_submission",
-        "created_at": 1794064022000
-    },
-    {
-        "id": 10,
-        "student_id": 93,
-        "student_code": "802",
-        "student_name": "سانتي عوني عطالله",
-        "student_phone": "201289505575",
-        "stage": "سنة أولى",
-        "message_text": "و للأسف الجمعه الي بعدها عندي ايڤنت في لو هقدار امشي بدري من الخدمه ... اعتقد ممكن امشي من الخدمه ٢.٣٠",
-        "reason_category": "طلب انصراف مبكر بإذن 🏃‍♂️",
-        "friday_date": "2026-11-20",
-        "status": "pending",
-        "servant_notes": "طلب انصراف مبكر مسبق - ارتباط عمل (إيفنت) - الانصراف المتوقع 2:30 م",
-        "resolved_by": "prior_submission",
-        "created_at": 1794064047000
-    },
-        {
         "id": 12,
-        "student_id": 89,
+        "student_id": 10,
         "student_code": "1272",
         "student_name": "جومانا رضا نعيم",
         "student_phone": "201507713029",
         "stage": "سنة ثانية",
-        "message_text": "صباح الخير يا أستاذ عادل بعتزر عن يوم الجمعة مش هقدر اجي هيبقا عندي شغل",
+        "message_text": "صباح الخير يا أستاذ عادل بعتزر عن يوم الجمعة مش هقدر اجي هيبقا  عندي شغل",
         "reason_category": "عمل وشفت 💼",
         "friday_date": "2026-11-13",
-        "status": "pending",
-        "servant_notes": "اعتذار مسبق وارد عبر واتساب (ارتباط عمل)",
-        "resolved_by": "prior_submission",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "عادل جورج",
         "created_at": 1794306017000
+    },
+    {
+        "id": 13,
+        "student_id": 23,
+        "student_code": "1024",
+        "student_name": "مريم أسامة كامل منان",
+        "student_phone": "201208629587",
+        "stage": "سنة ثانية",
+        "message_text": "و أنا بعتذر اني معتدرتش المره الي فاتت",
+        "reason_category": "اعتذار عام 🕊️",
+        "friday_date": "2026-11-13",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "عادل جورج",
+        "created_at": 1794380993165
+    },
+    {
+        "id": 14,
+        "student_id": 70,
+        "student_code": "1581",
+        "student_name": "ارتين ابراهيم ارتين",
+        "student_phone": "201226855500",
+        "stage": "سنة أولى",
+        "message_text": "مساء الخير  انا بستاذن بكرا علشان مش هقدر اجي بكرا",
+        "reason_category": "اعتذار عام 🕊️",
+        "friday_date": "2026-11-13",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "عادل جورج",
+        "created_at": 1794490891285
+    },
+    {
+        "id": 15,
+        "student_id": 88,
+        "student_code": "669",
+        "student_name": "كيرمينا جرجس بسطا",
+        "student_phone": "201062584324",
+        "stage": "سنة أولى",
+        "message_text": "استاذ عادل أنا الفاتره دي مش هقدر احضر أعداد خدام جدو بيعمل عمليه ف مش هقدر احضر معلش",
+        "reason_category": "ظروف صحية 🩺",
+        "friday_date": "2026-11-13",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "عادل جورج",
+        "created_at": 1794522311589
+    },
+    {
+        "id": 17,
+        "student_id": 73,
+        "student_code": "255",
+        "student_name": "ندي مجدي سعد",
+        "student_phone": "201208475145",
+        "stage": "سنة أولى",
+        "message_text": "أيوه حضرتك اللي زعلتني وكنت أتمنى إن ده مايحصلش خصوصًا إن ليك عندي كل الاحترام والتقدير و عمري فعلا ما فكرت اتخطي قوانين الخدمه بس هو الأسلوب مكنتش متوقعه الحقيقه خصوصا اني استأذنت كمان قبل ما اخرج يا أستاذ عادي و فعلا مكنتش حبه حته يكون ف سوء تفاهم عشان المكان غالي عليا جدا فعلا و حتي معظم صحابي ف كنائس تانيه بس أنا مش برتاح غير ف كنيستي و مينفعش مكنش فيه 🙏🏻🤍",
+        "reason_category": "اعتذار عام 🕊️",
+        "friday_date": "2026-11-20",
+        "status": "pending",
+        "servant_notes": "استئذان تأخير مسبق عن الحضور",
+        "resolved_by": "prior_submission",
+        "created_at": 1794748214272
+    },
+    {
+        "id": 18,
+        "student_id": 18,
+        "student_code": "",
+        "student_name": "ناهد مُحب ميلاد",
+        "student_phone": "201274029175",
+        "stage": "سنة أولى",
+        "message_text": "انا اسفة حصلت ظروف و مش هعرف اجي يوم الجمعة",
+        "reason_category": "عمل وشفت 💼",
+        "friday_date": "2026-11-20",
+        "status": "accepted",
+        "servant_notes": "عذر مقبول (مراجعة وظروف مثبتة)",
+        "resolved_by": "أستاذ عادل",
+        "created_at": 1794992867688
+    },
+    {
+        "id": 19,
+        "student_id": 40,
+        "student_code": "700",
+        "student_name": "بهجت سعد يوسف",
+        "student_phone": "201096293533",
+        "stage": "سنة أولى",
+        "message_text": "بعتذر لحضرتك مش هقدر احضر اجتماع الجمعة عشان هبقي مسافر 🙏",
+        "reason_category": "سفر وانتقال 🚗",
+        "friday_date": "2026-11-20",
+        "status": "pending",
+        "servant_notes": "اعتذار مسبق",
+        "resolved_by": "prior_submission",
+        "created_at": 1794999929514
     }
 ];
 
@@ -1906,6 +1966,27 @@ async function loadRadarExcuses() {
         }
     }
 
+    // 2b. خط الدفاع السحابي المضمون: جلب الأعذار عبر مسار Vercel Serverless /api/sync
+    if (!loadedExcuses) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch('/api/sync?action=get_excuses', { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+                const sData = await res.json();
+                if (sData && sData.success && Array.isArray(sData.excuses) && sData.excuses.length > 0) {
+                    loadedExcuses = sData.excuses;
+                    try {
+                        localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
+                    } catch(e){}
+                }
+            }
+        } catch(apiErr) {
+            console.warn('[ExcusesRadar] Vercel api/sync excuses fetch:', apiErr.message);
+        }
+    }
+
     // 3. إذا تعذر السيرفر والسحابة، القراءة من كاش التخزين المحلي (Offline-First Cache)
     let cachedList = [];
     try {
@@ -1921,6 +2002,10 @@ async function loadRadarExcuses() {
     // 4. محرك الدمج الذكي الشامل (Smart Merge Engine v8.2):
     // يضمن دمج كافة الأعذار والاستئذانات التأسيسية المعتمدة (مثل استئذان سانتي عوني 802 لجمعة 13 و20 نوفمبر)
     // مع أي كاش سابق موجود في متصفح الخادم دون الحاجة لمسح يدوي للكاش
+    const currentCacheVer = localStorage.getItem('khedmety_excuses_version');
+    if (currentCacheVer !== 'v9.5' && (!loadedExcuses || loadedExcuses.length < 10)) {
+        cachedList = [];
+    }
     const candidateList = (loadedExcuses && loadedExcuses.length > 0) ? loadedExcuses : cachedList;
     const excuseMap = new Map();
 
@@ -1963,7 +2048,7 @@ async function loadRadarExcuses() {
     loadedExcuses = Array.from(excuseMap.values()).filter(e => !String(e.student_name || '').includes('مارسيل') && String(e.id) !== '11' && String(e.student_phone || '') !== '201278054759');
     try {
         localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
-        localStorage.setItem('khedmety_excuses_version', 'v8.2');
+        localStorage.setItem('khedmety_excuses_version', 'v9.5');
     } catch(e){}
 
     // اعتماد القائمة الفعالة وتحديث واجهة المستخدم والنبض الرعوي
