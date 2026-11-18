@@ -1889,8 +1889,13 @@ async function loadRadarExcuses() {
     // 2. إذا لم يتوفر سيرفر البوت (على الموبايل أو فيرسل أو البوت مغلق)، محاولة القراءة من السحابة (Firestore)
     if (!loadedExcuses && typeof isFirebaseActive !== 'undefined' && isFirebaseActive && typeof fsdb !== 'undefined' && fsdb) {
         try {
-            const snap = await fsdb.collection('excuses').orderBy('created_at', 'desc').limit(100).get();
-            if (!snap.empty) {
+            let snap = null;
+            try {
+                snap = await fsdb.collection('excuses').orderBy('created_at', 'desc').limit(100).get();
+            } catch(orderErr) {
+                snap = await fsdb.collection('excuses').limit(100).get();
+            }
+            if (snap && !snap.empty) {
                 loadedExcuses = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 try {
                     localStorage.setItem('khedmety_cached_excuses', JSON.stringify(loadedExcuses));
@@ -2102,8 +2107,11 @@ function renderRadarExcusesTable() {
     }
 
     if (list.length === 0) {
+        const totalAccepted = (window.lastRadarExcusesList || []).filter(e => e.status === 'accepted').length;
         const filterMsg = filter === 'delays' ? 'لا توجد طلبات استئذان تأخير مطابقة حالياً. 🟢' :
                           filter === 'absence' ? 'لا توجد اعتذارات غياب مطابقة حالياً. 🟢' :
+                          (filter === 'pending' && totalAccepted > 0) ?
+                          `نشكر ربنا! لا توجد طلبات معلقة قيد المراجعة حالياً. 🎉<br><span style="font-size:0.82rem; font-weight:normal; color:#047857;">(تم اعتماد ${totalAccepted} عذر رسمي، يمكنك مراجعتها عبر تبويب "📜 السجل بالكامل" أو "🕊️ اعتذارات الغياب")</span>` :
                           'نشكر ربنا! لا توجد اعتذارات مطابقة لحالة الفلتر حالياً. 🟢';
         tbody.innerHTML = `<tr><td colspan="5" style="padding: 24px; color: #166534; font-weight: bold; background: #f0fdf4; border-radius: 8px;">${filterMsg}</td></tr>`;
         return;
